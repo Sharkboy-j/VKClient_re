@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.20506</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{85BDC29E-2E29-41E0-BAC5-6FF314644627}</ProjectGuid>
+    <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VKMessenger</RootNamespace>
+    <AssemblyName>VKMessenger</AssemblyName>
+    <TargetFrameworkIdentifier>WindowsPhone</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
+    <SilverlightVersion>
+    </SilverlightVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <TargetFrameworkProfile />
+    <DefaultLanguage>ru-RU</DefaultLanguage>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\x86\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\x86\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\ARM\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\ARM\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget />
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConversationsViewModelTemp.cs" />
+    <Compile Include="ConversationsPage.cs" />
+    <Compile Include="IMessengerStateManager.cs" />
+    <Compile Include="MessengerStateManagerInstance.cs" />
+    <Compile Include="Views\ChatEditPage.cs" />
+    <Compile Include="Views\ConversationAvatarUC.cs" />
+    <Compile Include="Views\ConversationHeaderShareUC.cs" />
+    <Compile Include="Views\ConversationHeaderUC.cs" />
+    <Compile Include="Views\ConversationHeaderUCEmoji.cs" />
+    <Compile Include="Views\ConversationMaterialsPage.cs" />
+    <Compile Include="Views\IScroll.cs" />
+    <Compile Include="Views\ConversationPage.cs" />
+    <Compile Include="Views\ConversationsSearch.cs" />
+    <Compile Include="Views\ConversationsSearchDataProvider.cs" />
+    <Compile Include="Views\ConversationsUC.cs" />
+    <Compile Include="Views\MapAttachmentPage.cs" />
+    <Compile Include="Views\NavigationParametersNames.cs" />
+    <Compile Include="Views\PickConversationPage.cs" />
+    <Compile Include="Views\ShareExternalContentMessageUC.cs" />
+    <Compile Include="Library\AttachmentTemplateSelector.cs" />
+    <Compile Include="Library\BackendModelsExtensions.cs" />
+    <Compile Include="Library\ChatEditViewModel.cs" />
+    <Compile Include="Library\ChatParticipant.cs" />
+    <Compile Include="Library\ContactHeader.cs" />
+    <None Include="Library\ConversationAvatarViewModel__DEL.cs" />
+    <Compile Include="Library\ConversationHeader.cs" />
+    <Compile Include="Library\ConversationMaterialsViewModel.cs" />
+    <Compile Include="Library\ConversationSearchViewModel.cs" />
+    <Compile Include="Library\ConversationsUCFactory.cs" />
+    <Compile Include="Library\ConversationsViewModelUpdatesListener.cs" />
+    <Compile Include="Library\ConversationsViewModel.cs" />
+    <Compile Include="Library\ConversationViewModel.cs" />
+    <Compile Include="Library\DeviceManager.cs" />
+    <Compile Include="Library\FriendHeader.cs" />
+    <Compile Include="Library\Group`1.cs" />
+    <Compile Include="Library\ConversationViewModelCache.cs" />
+    <Compile Include="Library\LinkHeader.cs" />
+    <Compile Include="Library\MessageTemplateSelector.cs" />
+    <Compile Include="Library\MessageDirectionType.cs" />
+    <Compile Include="Library\MessageViewModel.cs" />
+    <Compile Include="Library\OutboundMessageStatus.cs" />
+    <Compile Include="Library\OutboundMessageViewModel.cs" />
+    <Compile Include="Library\SearchConversationHeader.cs" />
+    <Compile Include="Library\SystemMessageTextHelper.cs" />
+    <Compile Include="Library\Transliteration.cs" />
+    <Compile Include="Library\VirtItems\ConversationItems.cs" />
+    <Compile Include="Library\VirtItems\ForwardedHeaderItem.cs" />
+    <Compile Include="Library\VirtItems\MessageContentItem.cs" />
+    <Compile Include="Library\VirtItems\MessageFooterItem.cs" />
+    <Compile Include="Library\VirtItems\MessageItem.cs" />
+    <Compile Include="Library\VirtItems\SystemMessageItem.cs" />
+    <Compile Include="Library\VirtItems\TapHandlerItem.cs" />
+    <Compile Include="Library\Events\MessageActionType.cs" />
+    <Compile Include="Library\Events\MessageActionEvent.cs" />
+    <Compile Include="Utils\ObservableCollectionExtensions.cs" />
+    <Compile Include="Framework\BoolToStyleConverter.cs" />
+    <Compile Include="Framework\DependencyObjectExtension.cs" />
+    <Compile Include="Framework\CompressionEventArgs.cs" />
+    <Compile Include="Framework\ScrollStateChangedEventArgs.cs" />
+    <Compile Include="Framework\CompressionType.cs" />
+    <Compile Include="Framework\ExtendedListBox.cs" />
+    <Compile Include="Framework\ExtendedItemsControl.cs" />
+    <Compile Include="Framework\InAppToastNotification.cs" />
+    <Compile Include="Framework\UserSearchDataTemplateSelector.cs" />
+    <Compile Include="Framework\ContentEventArgs.cs" />
+    <Compile Include="Framework\Convertors\BoolToMarginConverter.cs" />
+    <Compile Include="Framework\Convertors\BoolToSwitchConverter.cs" />
+    <Compile Include="Framework\Convertors\BoolToVisibilityConverter.cs" />
+    <Compile Include="Framework\Convertors\BoolToVisibilityInveterterConverter.cs" />
+    <Compile Include="Framework\Convertors\StringToTextBlockConverter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="conversationspage.xaml" />
+    <Resource Include="Resources\deleteattachment.png" />
+    <Resource Include="Resources\map_pin.png" />
+    <Resource Include="Resources\play.png" />
+    <Resource Include="themes\generic.xaml" />
+    <Resource Include="views\chateditpage.xaml" />
+    <Resource Include="views\conversationavataruc.xaml" />
+    <Resource Include="views\conversationheadershareuc.xaml" />
+    <Resource Include="views\conversationheaderuc.xaml" />
+    <Resource Include="views\conversationheaderucemoji.xaml" />
+    <Resource Include="views\conversationmaterialspage.xaml" />
+    <Resource Include="views\conversationpage.xaml" />
+    <Resource Include="views\conversationssearch.xaml" />
+    <Resource Include="views\conversationsuc.xaml" />
+    <Resource Include="views\mapattachmentpage.xaml" />
+    <Resource Include="views\pickconversationpage.xaml" />
+    <Resource Include="views\shareexternalcontentmessageuc.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VKClient.Audio.Base\VKClient.Audio.Base.csproj">
+      <Project>{3f61632e-1f7a-42c4-bf38-ae07d3e9f383}</Project>
+      <Name>VKClient.Audio.Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VKClient.Audio\VKClient.Audio.csproj">
+      <Project>{72c5dee2-1dcf-467d-8525-27c8da1f57cc}</Project>
+      <Name>VKClient.Audio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VKClient.Common\VKClient.Common.csproj">
+      <Project>{e174760f-e91e-4bdc-bd36-4f9d54607104}</Project>
+      <Name>VKClient.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Phone.Controls.Maps, Version=8.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Phone.Controls.Toolkit, Version=8.0.1.0, Culture=neutral, PublicKeyToken=b772ad94eb9ca604, processorArchitecture=MSIL">
+      <HintPath>..\VKClient\packages\WPtoolkit.4.2013.08.16\lib\wp8\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="README_FIRST.txt" />
+    <Content Include="Toolkit.Content\ApplicationBar.Add.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Select.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\v8.0\Microsoft.$(TargetFrameworkIdentifier).v8.0.Overrides.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
+  <ProjectExtensions />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
