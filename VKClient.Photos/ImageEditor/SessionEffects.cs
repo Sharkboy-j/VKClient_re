@@ -4,33 +4,33 @@ using System.Linq;
 
 namespace VKClient.Photos.ImageEditor
 {
-  public class SessionEffects
-  {
-    private List<ImageEffectsInfo> _effectsList = new List<ImageEffectsInfo>();
-
-    public ImageEffectsInfo GetImageEffectsInfo(string albumId, int seqNo)
+    public class SessionEffects
     {
-      ImageEffectsInfo imageEffectsInfo = this._effectsList.FirstOrDefault<ImageEffectsInfo>((Func<ImageEffectsInfo, bool>) (e =>
-      {
-        if (e.AlbumId == albumId)
-          return e.SeqNo == seqNo;
-        return false;
-      }));
-      if (imageEffectsInfo == null)
-      {
-        imageEffectsInfo = new ImageEffectsInfo()
+        private List<ImageEffectsInfo> _effectsList = new List<ImageEffectsInfo>();
+
+        public ImageEffectsInfo GetImageEffectsInfo(string albumId, int seqNo)
         {
-          AlbumId = albumId,
-          SeqNo = seqNo
-        };
-        this._effectsList.Add(imageEffectsInfo);
-      }
-      return imageEffectsInfo;
-    }
+            ImageEffectsInfo imageEffectsInfo = this._effectsList.FirstOrDefault<ImageEffectsInfo>((Func<ImageEffectsInfo, bool>)(e =>
+            {
+                if (e.AlbumId == albumId)
+                    return e.SeqNo == seqNo;
+                return false;
+            }));
+            if (imageEffectsInfo == null)
+            {
+                imageEffectsInfo = new ImageEffectsInfo()
+                {
+                    AlbumId = albumId,
+                    SeqNo = seqNo
+                };
+                this._effectsList.Add(imageEffectsInfo);
+            }
+            return imageEffectsInfo;
+        }
 
-    public List<ImageEffectsInfo> GetApplied()
-    {
-      return this._effectsList.Where<ImageEffectsInfo>((Func<ImageEffectsInfo, bool>) (e => e.AppliedAny)).ToList<ImageEffectsInfo>();
+        public List<ImageEffectsInfo> GetApplied()
+        {
+            return this._effectsList.Where<ImageEffectsInfo>((Func<ImageEffectsInfo, bool>)(e => e.AppliedAny)).ToList<ImageEffectsInfo>();
+        }
     }
-  }
 }

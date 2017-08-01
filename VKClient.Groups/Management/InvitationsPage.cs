@@ -14,24 +14,28 @@ using VKClient.Groups.Management.Library;
 
 namespace VKClient.Groups.Management
 {
-    public partial class InvitationsPage : PageBase
+  public class InvitationsPage : PageBase
   {
     private bool _isInitialized;
+    internal GenericHeaderUC Header;
+    internal ExtendedLongListSelector List;
+    internal PullToRefreshUC PullToRefresh;
+    private bool _contentLoaded;
 
     private InvitationsViewModel ViewModel
     {
       get
       {
-        return this.DataContext as InvitationsViewModel;
+        return base.DataContext as InvitationsViewModel;
       }
     }
 
     public InvitationsPage()
     {
-      this.InitializeComponent();
-      this.Header.OnHeaderTap += (Action) (() => this.List.ScrollToTop());
-      this.PullToRefresh.TrackListBox((ISupportPullToRefresh) this.List);
-      this.List.OnRefresh = (Action) (() => this.ViewModel.Invitations.LoadData(true, false, (Action<BackendResult<VKList<User>, ResultCode>>) null, false));
+        this.InitializeComponent();
+        this.Header.OnHeaderTap += (Action)(() => this.List.ScrollToTop());
+        this.PullToRefresh.TrackListBox((ISupportPullToRefresh)this.List);
+        this.List.OnRefresh = (Action)(() => this.ViewModel.Invitations.LoadData(true, false, (Action<BackendResult<VKList<User>, ResultCode>>)null, false));
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -39,9 +43,9 @@ namespace VKClient.Groups.Management
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      InvitationsViewModel invitationsViewModel = new InvitationsViewModel(long.Parse(this.NavigationContext.QueryString["CommunityId"]));
-      this.DataContext = (object) invitationsViewModel;
-      invitationsViewModel.Invitations.LoadData(true, false, (Action<BackendResult<VKList<User>, ResultCode>>) null, false);
+      InvitationsViewModel invitationsViewModel = new InvitationsViewModel(long.Parse(((Page) this).NavigationContext.QueryString["CommunityId"]));
+      base.DataContext = invitationsViewModel;
+      invitationsViewModel.Invitations.LoadData(true, false,  null, false);
       this._isInitialized = true;
     }
 
@@ -53,11 +57,23 @@ namespace VKClient.Groups.Management
     private void List_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       ExtendedLongListSelector longListSelector = (ExtendedLongListSelector) sender;
-      LinkHeader linkHeader = longListSelector.SelectedItem as LinkHeader;
-      if (linkHeader == null)
+      LinkHeader selectedItem = longListSelector.SelectedItem as LinkHeader;
+      if (selectedItem == null)
         return;
       longListSelector.SelectedItem = null;
-      Navigator.Current.NavigateToUserProfile(linkHeader.Id, "", "", false);
+      Navigator.Current.NavigateToUserProfile(selectedItem.Id, "", "", false);
+    }
+
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Groups;component/Management/InvitationsPage.xaml", UriKind.Relative));
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.List = (ExtendedLongListSelector) base.FindName("List");
+      this.PullToRefresh = (PullToRefreshUC) base.FindName("PullToRefresh");
     }
   }
 }

@@ -141,7 +141,7 @@ namespace Mp3MediaStreamSource.Phone
         if (this._fileDownloader != null)
           this._fileDownloader.SetStopFlag();
         this._fileDownloader = new ChunkDownloader(this._fileId, this._uri, notDownloadedSpot);
-        this._initialResponse = (HttpWebResponse) null;
+        this._initialResponse =  null;
         this._fileDownloader.StartDownloading();
       }
       else
@@ -149,7 +149,7 @@ namespace Mp3MediaStreamSource.Phone
         if (this._initialResponse == null)
           return;
         this._initialResponse.Close();
-        this._initialResponse = (HttpWebResponse) null;
+        this._initialResponse =  null;
       }
     }
 
@@ -158,8 +158,8 @@ namespace Mp3MediaStreamSource.Phone
       if (this._fileStream == null)
         return;
       this._fileStream.Close();
-      this._fileDescription = (FileDescription) null;
-      this._fileStream = (Stream) null;
+      this._fileDescription =  null;
+      this._fileStream =  null;
     }
 
     private void AlignFileStream()
@@ -200,8 +200,8 @@ namespace Mp3MediaStreamSource.Phone
         if (this._iso != null)
           this._iso.Dispose();
       }
-      this._fileStream = (Stream) null;
-      this._iso = (IsolatedStorageFile) null;
+      this._fileStream =  null;
+      this._iso =  null;
       this._disposed = true;
     }
   }

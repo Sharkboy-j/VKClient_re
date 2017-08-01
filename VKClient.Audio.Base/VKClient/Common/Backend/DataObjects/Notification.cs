@@ -36,26 +36,26 @@ namespace VKClient.Common.Backend.DataObjects
           return this._parsedParent;
         if (this.parent == null)
           return null;
-        string @string = this.parent.ToString();
+        string str = this.parent.ToString();
         switch (this.NotType)
         {
           case NotificationType.mention_comments:
           case NotificationType.comment_post:
           case NotificationType.like_post:
           case NotificationType.copy_post:
-            this._parsedParent = (object) JsonConvert.DeserializeObject<WallPost>(@string);
+            this._parsedParent = JsonConvert.DeserializeObject<WallPost>(str);
             break;
           case NotificationType.comment_photo:
           case NotificationType.like_photo:
           case NotificationType.copy_photo:
           case NotificationType.mention_comment_photo:
-            this._parsedParent = (object) JsonConvert.DeserializeObject<Photo>(@string);
+            this._parsedParent = JsonConvert.DeserializeObject<Photo>(str);
             break;
           case NotificationType.comment_video:
           case NotificationType.like_video:
           case NotificationType.copy_video:
           case NotificationType.mention_comment_video:
-            this._parsedParent = (object) JsonConvert.DeserializeObject<VKClient.Common.Backend.DataObjects.Video>(@string);
+            this._parsedParent = JsonConvert.DeserializeObject<Video>(str);
             break;
           case NotificationType.reply_comment:
           case NotificationType.like_comment:
@@ -65,12 +65,12 @@ namespace VKClient.Common.Backend.DataObjects
           case NotificationType.like_comment_video:
           case NotificationType.like_comment_topic:
           case NotificationType.reply_comment_market:
-            this._parsedParent = (object) JsonConvert.DeserializeObject<Comment>(@string);
+            this._parsedParent = JsonConvert.DeserializeObject<Comment>(str);
             break;
           case NotificationType.reply_topic:
-            Topic topic = JsonConvert.DeserializeObject<Topic>(@string);
+            Topic topic = JsonConvert.DeserializeObject<Topic>(str);
             topic.tid = topic.id;
-            this._parsedParent = (object) topic;
+            this._parsedParent = topic;
             break;
         }
         return this._parsedParent;
@@ -83,7 +83,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this._parsedFeedback != null)
           return this._parsedFeedback;
-        string @string = this.feedback.ToString();
+        string str = this.feedback.ToString();
         switch (this.NotType)
         {
           case NotificationType.follow:
@@ -95,12 +95,12 @@ namespace VKClient.Common.Backend.DataObjects
           case NotificationType.like_comment_photo:
           case NotificationType.like_comment_video:
           case NotificationType.like_comment_topic:
-            this._parsedFeedback = (object) JsonConvert.DeserializeObject<VKList<FeedbackUser>>(@string).items;
+            this._parsedFeedback = JsonConvert.DeserializeObject<VKList<FeedbackUser>>(str).items;
             break;
           case NotificationType.mention:
           case NotificationType.wall:
           case NotificationType.wall_publish:
-            this._parsedFeedback = (object) JsonConvert.DeserializeObject<WallPost>(@string);
+            this._parsedFeedback = JsonConvert.DeserializeObject<WallPost>(str);
             break;
           case NotificationType.mention_comments:
           case NotificationType.comment_post:
@@ -113,19 +113,24 @@ namespace VKClient.Common.Backend.DataObjects
           case NotificationType.mention_comment_photo:
           case NotificationType.mention_comment_video:
           case NotificationType.reply_comment_market:
-            this._parsedFeedback = (object) JsonConvert.DeserializeObject<Comment>(@string);
+            this._parsedFeedback = JsonConvert.DeserializeObject<Comment>(str);
             break;
           case NotificationType.copy_post:
           case NotificationType.copy_photo:
           case NotificationType.copy_video:
-            this._parsedFeedback = (object) JsonConvert.DeserializeObject<VKList<FeedbackCopyInfo>>(@string).items;
+            this._parsedFeedback = JsonConvert.DeserializeObject<VKList<FeedbackCopyInfo>>(str).items;
+            break;
+          case NotificationType.money_transfer_received:
+          case NotificationType.money_transfer_accepted:
+          case NotificationType.money_transfer_declined:
+            this._parsedFeedback = JsonConvert.DeserializeObject<MoneyTransfer>(str);
             break;
         }
         if (this._parsedFeedback != null)
           return this._parsedFeedback;
         if (this.parent == null)
-          return (object) "";
-        return (object) this.parent.ToString();
+          return "";
+        return this.parent.ToString();
       }
     }
 

@@ -21,7 +21,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.AllPhotos != null)
           return this.AllPhotos.items;
-        return (List<Photo>) null;
+        return  null;
       }
     }
 
@@ -43,7 +43,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.ProfilePhotos != null)
           return this.ProfilePhotos.items;
-        return (List<Photo>) null;
+        return  null;
       }
     }
 
@@ -65,7 +65,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.UserPhotos != null)
           return this.UserPhotos.items;
-        return (List<Photo>) null;
+        return  null;
       }
     }
 
@@ -87,7 +87,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.WallPhotos != null)
           return this.WallPhotos.items;
-        return (List<Photo>) null;
+        return  null;
       }
     }
 
@@ -109,7 +109,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.SavedPhotos != null)
           return this.SavedPhotos.items;
-        return (List<Photo>) null;
+        return  null;
       }
     }
 
@@ -121,7 +121,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.Albums != null)
           return this.Albums.items;
-        return (List<Album>) null;
+        return  null;
       }
     }
 

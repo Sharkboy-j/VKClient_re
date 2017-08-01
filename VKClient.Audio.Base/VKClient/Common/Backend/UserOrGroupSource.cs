@@ -37,7 +37,7 @@ namespace VKClient.Common.Backend
     public User GetUser()
     {
       if (!(this.type == "profile"))
-        return (User) null;
+        return  null;
       return new User()
       {
         id = this.id,
@@ -55,7 +55,7 @@ namespace VKClient.Common.Backend
     public Group GetGroup()
     {
       if (!(this.type != "profile"))
-        return (Group) null;
+        return  null;
       return new Group()
       {
         id = this.id,

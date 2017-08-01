@@ -32,5 +32,7 @@ namespace VKClient.Common.Backend.DataObjects
         this._lName = (value ?? "").ForUI();
       }
     }
+
+    public string lang { get; set; }
   }
 }

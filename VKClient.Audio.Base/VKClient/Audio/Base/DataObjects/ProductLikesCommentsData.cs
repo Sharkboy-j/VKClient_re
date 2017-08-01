@@ -9,7 +9,7 @@ namespace VKClient.Audio.Base.DataObjects
 
     public List<long> likesAllIds { get; set; }
 
-    public int likesAllCount { get; set; }
+    public int? likesAllCount { get; set; }
 
     public UserLikedInfo userLiked { get; set; }
 

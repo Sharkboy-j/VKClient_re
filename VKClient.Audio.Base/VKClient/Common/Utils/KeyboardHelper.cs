@@ -29,7 +29,6 @@ namespace VKClient.Common.Utils
 
         static KeyboardHelper()
         {
-            // Note: this type is marked as 'beforefieldinit'.
             KeyboardHelper.PortraitHeight = (double)KeyboardHelper.PortraitDefaultHeight;
             KeyboardHelper.LandscapeHeight = (double)KeyboardHelper.LandscapeDefaultHeight;
         }

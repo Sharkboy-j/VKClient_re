@@ -34,12 +34,12 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      string query = this.NavigationContext.QueryString["Query"];
+      string query = ((Page) this).NavigationContext.QueryString["Query"];
       this._viewModel = new UsersSearchResultsViewModel(query);
       this._viewModel.ReloadData();
       this.textBoxSearch.Text = query;
-      this.textBlockWatermarkText.Opacity = string.IsNullOrEmpty(this.textBoxSearch.Text) ? 1.0 : 0.0;
-      this.DataContext = (object) this._viewModel;
+      ((UIElement) this.textBlockWatermarkText).Opacity = (string.IsNullOrEmpty(this.textBoxSearch.Text) ? 1.0 : 0.0);
+      base.DataContext = this._viewModel;
       this._isInitialized = true;
     }
 
@@ -47,12 +47,12 @@ namespace VKClient.Common
     {
       if (e.Key != Key.Enter)
         return;
-      this.Focus();
+      ((Control) this).Focus();
     }
 
     private void TextBoxSearch_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-      this.textBlockWatermarkText.Opacity = string.IsNullOrEmpty(this.textBoxSearch.Text) ? 1.0 : 0.0;
+      ((UIElement) this.textBlockWatermarkText).Opacity = (string.IsNullOrEmpty(this.textBoxSearch.Text) ? 1.0 : 0.0);
       this._viewModel.SearchName = this.textBoxSearch.Text;
     }
 
@@ -70,7 +70,7 @@ namespace VKClient.Common
 
     private void ListBoxUsers_OnManipulationStarted(object sender, ManipulationStartedEventArgs e)
     {
-      this.listBoxUsers.Focus();
+      ((Control) this.listBoxUsers).Focus();
     }
 
     [DebuggerNonUserCode]
@@ -79,11 +79,11 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UsersSearchResultsPage.xaml", UriKind.Relative));
-      this.textBoxSearch = (TextBox) this.FindName("textBoxSearch");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
-      this.listBoxUsers = (ExtendedLongListSelector) this.FindName("listBoxUsers");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UsersSearchResultsPage.xaml", UriKind.Relative));
+      this.textBoxSearch = (TextBox) base.FindName("textBoxSearch");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
+      this.listBoxUsers = (ExtendedLongListSelector) base.FindName("listBoxUsers");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
     }
   }
 }

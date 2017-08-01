@@ -4,8 +4,6 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using VKClient.Common.Framework.CodeForFun;
 using XamlAnimatedGif;
 
 namespace VKClient.Common.UC
@@ -19,7 +17,6 @@ namespace VKClient.Common.UC
     private string _url;
     private long _size;
     private bool _isLoaded;
-    private static bool _isShown;
     internal Image imageGif;
     private bool _contentLoaded;
 
@@ -31,6 +28,7 @@ namespace VKClient.Common.UC
 
     public GifViewerUC()
     {
+      //base.\u002Ector();
       ++GifViewerUC._instancesCount;
       this.InitializeComponent();
       this._loadedHandler = (EventHandler) ((o, eventArgs) =>
@@ -43,7 +41,7 @@ namespace VKClient.Common.UC
       this._progressChangedHandler = (EventHandler<DownloadProgressChangedArgs>) ((sender, args) =>
       {
         Uri uri = args.Uri;
-        if ((uri != null ? uri.ToString() : null) != this._url)
+        if ((uri != null ? uri.ToString() :  null) != this._url)
           return;
         Action<double> progressChangedHandler = this.LoadingProgressChangedHandler;
         if (progressChangedHandler == null)
@@ -58,13 +56,24 @@ namespace VKClient.Common.UC
           return;
         loadingFailedHandler();
       });
-      this.Loaded += new RoutedEventHandler(this.OnLoaded);
-      this.Unloaded += new RoutedEventHandler(this.OnUnloaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.OnLoaded));
+      // ISSUE: method pointer
+      base.Unloaded += (new RoutedEventHandler( this.OnUnloaded));
     }
 
     ~GifViewerUC()
     {
-      --GifViewerUC._instancesCount;
+      //try
+      //{
+        --GifViewerUC._instancesCount;
+      //}
+      //finally
+      //{
+      //  // ISSUE: explicit finalizer call
+      //  // ISSUE: explicit non-virtual call
+      //  this.Finalize();
+      //}
     }
 
     private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -109,32 +118,12 @@ namespace VKClient.Common.UC
           using (IsolatedStorageFile storeForApplication = IsolatedStorageFile.GetUserStoreForApplication())
             AnimationBehavior.SetSourceStream((DependencyObject) this.imageGif, (Stream) storeForApplication.OpenFile(this._url, FileMode.Open));
         }
-        catch
+        catch (Exception )
         {
         }
       }
       else
-        AnimationBehavior.SetSourceUri(this.imageGif, null);
-    }
-
-    public static void Show(Uri uri, long size)
-    {
-      if (GifViewerUC._isShown)
-        return;
-      GifViewerUC._isShown = true;
-      DialogService dialogService = new DialogService();
-      dialogService.AnimationType = DialogService.AnimationTypes.None;
-      dialogService.AnimationTypeChild = DialogService.AnimationTypes.None;
-      SolidColorBrush solidColorBrush = new SolidColorBrush(Colors.Black);
-      double num = 0.5;
-      solidColorBrush.Opacity = num;
-      dialogService.BackgroundBrush = (Brush) solidColorBrush;
-      GifViewerUC gifViewerUC = new GifViewerUC();
-      GifViewerUC gifViewerUc = gifViewerUC;
-      dialogService.Child = (FrameworkElement) gifViewerUc;
-      EventHandler eventHandler = (EventHandler) ((sender, args) => gifViewerUC.Init(uri.ToString(), size));
-      dialogService.Opened += eventHandler;
-      dialogService.Show(null);
+        AnimationBehavior.SetSourceUri(this.imageGif,  null);
     }
 
     [DebuggerNonUserCode]
@@ -143,8 +132,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GifViewerUC.xaml", UriKind.Relative));
-      this.imageGif = (Image) this.FindName("imageGif");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GifViewerUC.xaml", UriKind.Relative));
+      this.imageGif = (Image) base.FindName("imageGif");
     }
   }
 }

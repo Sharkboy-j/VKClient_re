@@ -34,16 +34,16 @@ namespace VKClient.Common.Backend
           response = genericRoot.response.items,
           photosCount = genericRoot.response.count
         };
-      }), false, true, new CancellationToken?());
+      }), false, true, new CancellationToken?(),  null);
     }
 
-    public void GetFaveVideos(int offset, int count, Action<BackendResult<VKList<VKClient.Common.Backend.DataObjects.Video>, ResultCode>> callback)
+    public void GetFaveVideos(int offset, int count, Action<BackendResult<VKList<Video>, ResultCode>> callback)
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["offset"] = offset.ToString();
       parameters["count"] = count.ToString();
       parameters["extended"] = "1";
-      VKRequestsDispatcher.DispatchRequestToVK<VKList<VKClient.Common.Backend.DataObjects.Video>>("fave.getVideos", parameters, callback, (Func<string, VKList<VKClient.Common.Backend.DataObjects.Video>>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<VKList<Video>>("fave.getVideos", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetFavePosts(int offset, int count, Action<BackendResult<WallData, ResultCode>> callback)
@@ -61,13 +61,13 @@ namespace VKClient.Common.Backend
           wall = genericRoot.response.items,
           TotalCount = genericRoot.response.count
         };
-      }), false, true, new CancellationToken?());
+      }), false, true, new CancellationToken?(),  null);
     }
 
     public void GetFaveUsers(int offset, int count, Action<BackendResult<UsersListWithCount, ResultCode>> callback)
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
-      string str = string.Format("  var us = API.fave.getUsers({{\"offset\":{0}, \"count\":{1}}});\r\nvar users = API.users.get({{user_ids: us.items@.id, \"fields\": \"online, online_mobile, photo_max\"}});\r\nif (users)\r\n{{\r\n\r\nreturn users;\r\n}}\r\nreturn [];", (object) offset, (object) count);
+      string str = string.Format("  var us = API.fave.getUsers({{\"offset\":{0}, \"count\":{1}}});\r\nvar users = API.users.get({{user_ids: us.items@.id, \"fields\": \"online, online_mobile, photo_max\"}});\r\nif (users)\r\n{{\r\n\r\nreturn users;\r\n}}\r\nreturn [];", offset, count);
       parameters["code"] = str;
       VKRequestsDispatcher.DispatchRequestToVK<UsersListWithCount>("execute", parameters, callback, (Func<string, UsersListWithCount>) (jsonStr =>
       {
@@ -76,19 +76,22 @@ namespace VKClient.Common.Backend
         {
           users = genericRoot.response
         };
-      }), false, true, new CancellationToken?());
+      }), false, true, new CancellationToken?(),  null);
     }
 
-    public void GetFaveLinks(Action<BackendResult<List<Link>, ResultCode>> callback)
+    public void GetFaveLinks(int offset, int count, Action<BackendResult<VKList<Link>, ResultCode>> callback)
     {
-      Dictionary<string, string> dictionary = new Dictionary<string, string>();
-      string methodName = "fave.getLinks";
-      Dictionary<string, string> parameters = dictionary;
-      Action<BackendResult<List<Link>, ResultCode>> callback1 = callback;
-      int num1 = 0;
-      int num2 = 1;
-      CancellationToken? cancellationToken = new CancellationToken?();
-      VKRequestsDispatcher.DispatchRequestToVK<List<Link>>(methodName, parameters, callback1, (Func<string, List<Link>>) (jsonStr => JsonConvert.DeserializeObject<GenericRoot<VKList<Link>>>(jsonStr).response.items), num1 != 0, num2 != 0, cancellationToken);
+      VKRequestsDispatcher.DispatchRequestToVK<VKList<Link>>("fave.getLinks", new Dictionary<string, string>()
+      {
+        {
+          "offset",
+          offset.ToString()
+        },
+        {
+          "count",
+          count.ToString()
+        }
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetFaveProducts(int offset, int count, Action<BackendResult<VKList<Product>, ResultCode>> callback)
@@ -107,21 +110,21 @@ namespace VKClient.Common.Backend
           "extended",
           "1"
         }
-      }, callback, (Func<string, VKList<Product>>) null, false, true, new CancellationToken?());
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void FaveAddRemoveUser(long userId, bool add, Action<BackendResult<ResponseWithId, ResultCode>> callback)
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["user_id"] = userId.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>(add ? "fave.addUser" : "fave.removeUser", parameters, callback, (Func<string, ResponseWithId>) (jsonStr => new ResponseWithId()), false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>(add ? "fave.addUser" : "fave.removeUser", parameters, callback, (Func<string, ResponseWithId>) (jsonStr => new ResponseWithId()), false, true, new CancellationToken?(),  null);
     }
 
     public void FaveAddRemoveGroup(long groupId, bool add, Action<BackendResult<ResponseWithId, ResultCode>> callback)
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["group_id"] = groupId.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>(add ? "fave.addGroup" : "fave.removeGroup", parameters, callback, (Func<string, ResponseWithId>) (jsonStr => new ResponseWithId()), false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>(add ? "fave.addGroup" : "fave.removeGroup", parameters, callback, (Func<string, ResponseWithId>) (jsonStr => new ResponseWithId()), false, true, new CancellationToken?(),  null);
     }
   }
 }

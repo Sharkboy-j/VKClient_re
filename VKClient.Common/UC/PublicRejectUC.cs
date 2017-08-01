@@ -23,9 +23,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/PublicRejectUC.xaml", UriKind.Relative));
-      this.buttonPublish = (Button) this.FindName("buttonPublish");
-      this.buttonDelete = (Button) this.FindName("buttonDelete");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/PublicRejectUC.xaml", UriKind.Relative));
+      this.buttonPublish = (Button) base.FindName("buttonPublish");
+      this.buttonDelete = (Button) base.FindName("buttonDelete");
     }
   }
 }

@@ -14,8 +14,6 @@ using XamlAnimatedGif.Decoding;
 using XamlAnimatedGif.Decompression;
 using XamlAnimatedGif.Extensions;
 
-//https://github.com/XamlAnimatedGif/XamlAnimatedGif/blob/master/XamlAnimatedGif.Shared/Animator.cs
-
 namespace XamlAnimatedGif
 {
     public class Animator : DependencyObject, IDisposable
@@ -93,6 +91,7 @@ namespace XamlAnimatedGif
 
         private Animator(Stream sourceStream, Uri sourceUri, GifDataStream metadata, RepeatBehavior repeatBehavior, Image image)
         {
+            //this.\u002Ector();
             this._sourceStream = sourceStream;
             this._sourceUri = sourceUri;
             this._metadata = metadata;
@@ -108,12 +107,22 @@ namespace XamlAnimatedGif
 
         ~Animator()
         {
-            this.Dispose(false);
+            //try
+            //{
+                this.Dispose(false);
+            //}
+            //finally
+            //{
+                // ISSUE: explicit finalizer call
+                // ISSUE: explicit non-virtual call
+            //    this.Finalize();
+            //}
         }
 
-        internal static async Task<Animator> CreateAsync(Image image, Uri sourceUri, CancellationToken cancellationToken, RepeatBehavior repeatBehavior)
+        internal static async Task<Animator> CreateAsync(Image image, Uri sourceUri, CancellationToken cancellationToken, RepeatBehavior repeatBehavior = default(RepeatBehavior))
         {
             UriLoader loader = new UriLoader();
+            // ISSUE: reference to a compiler-generated field
             loader.DownloadProgressChanged += Animator.DownloadProgressChanged;
             try
             {
@@ -127,19 +136,21 @@ namespace XamlAnimatedGif
                     Stream stream1 = stream;
                     if (stream1 != null)
                     {
+                        // ISSUE: explicit non-virtual call
                         stream1.Dispose();
                     }
                     throw;
                 }
             }
-            catch
+            catch (TaskCanceledException )
             {
             }
+            // ISSUE: reference to a compiler-generated field
             loader.DownloadProgressChanged -= Animator.DownloadProgressChanged;
             return null;
         }
 
-        internal static Task<Animator> CreateAsync(Image image, Stream sourceStream, RepeatBehavior repeatBehavior)
+        internal static Task<Animator> CreateAsync(Image image, Stream sourceStream, RepeatBehavior repeatBehavior = default(RepeatBehavior))
         {
             return Animator.CreateAsync(sourceStream, null, repeatBehavior, image);
         }
@@ -170,7 +181,7 @@ namespace XamlAnimatedGif
                     this._timingManager.Resume();
                 }
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException )
             {
             }
             catch (Exception ex)
@@ -206,20 +217,22 @@ namespace XamlAnimatedGif
 
         protected virtual void OnCurrentFrameChanged()
         {
-            EventHandler eventHandler = this.CurrentFrameChanged;
-            if (eventHandler == null)
+            // ISSUE: reference to a compiler-generated field
+            EventHandler currentFrameChanged = this.CurrentFrameChanged;
+            if (currentFrameChanged == null)
                 return;
-            EventArgs e = EventArgs.Empty;
-            eventHandler((object)this, e);
+            EventArgs empty = EventArgs.Empty;
+            currentFrameChanged(this, empty);
         }
 
         protected virtual void OnAnimationCompleted()
         {
-            EventHandler eventHandler = this.AnimationCompleted;
-            if (eventHandler == null)
+            // ISSUE: reference to a compiler-generated field
+            EventHandler animationCompleted = this.AnimationCompleted;
+            if (animationCompleted == null)
                 return;
-            EventArgs e = EventArgs.Empty;
-            eventHandler((object)this, e);
+            EventArgs empty = EventArgs.Empty;
+            animationCompleted(this, empty);
         }
 
         private TimingManager CreateTimingManager(GifDataStream metadata, RepeatBehavior repeatBehavior)
@@ -247,15 +260,15 @@ namespace XamlAnimatedGif
             Dictionary<int, Animator.GifPalette> dictionary = new Dictionary<int, Animator.GifPalette>();
             Color[] colorArray = (Color[])null;
             if (metadata.Header.LogicalScreenDescriptor.HasGlobalColorTable)
-                colorArray = ((IEnumerable<GifColor>)metadata.GlobalColorTable).Select<GifColor, Color>((Func<GifColor, Color>)(gc => Color.FromArgb(byte.MaxValue, gc.R, gc.G, gc.B))).ToArray<Color>();
+                colorArray = (Color[])Enumerable.ToArray<Color>(Enumerable.Select<GifColor, Color>(metadata.GlobalColorTable, (Func<GifColor, Color>)(gc => Color.FromArgb(byte.MaxValue, gc.R, gc.G, gc.B))));
             for (int index = 0; index < metadata.Frames.Count; ++index)
             {
-                GifFrame gifFrame = metadata.Frames[index];
+                GifFrame frame = metadata.Frames[index];
                 Color[] colors = colorArray;
-                if (gifFrame.Descriptor.HasLocalColorTable)
-                    colors = ((IEnumerable<GifColor>)gifFrame.LocalColorTable).Select<GifColor, Color>((Func<GifColor, Color>)(gc => Color.FromArgb(byte.MaxValue, gc.R, gc.G, gc.B))).ToArray<Color>();
+                if (frame.Descriptor.HasLocalColorTable)
+                    colors = (Color[])Enumerable.ToArray<Color>(Enumerable.Select<GifColor, Color>(frame.LocalColorTable, (Func<GifColor, Color>)(gc => Color.FromArgb(byte.MaxValue, gc.R, gc.G, gc.B))));
                 int? transparencyIndex = new int?();
-                GifGraphicControlExtension graphicControl = gifFrame.GraphicControl;
+                GifGraphicControlExtension graphicControl = frame.GraphicControl;
                 if (graphicControl != null && graphicControl.HasTransparency)
                     transparencyIndex = new int?(graphicControl.TransparencyIndex);
                 dictionary[index] = new Animator.GifPalette(transparencyIndex, colors);
@@ -265,12 +278,13 @@ namespace XamlAnimatedGif
 
         private static byte[] CreateIndexStreamBuffer(GifDataStream metadata, Stream stream)
         {
-            long val2 = stream.Length - metadata.Frames.Last<GifFrame>().ImageData.CompressedDataStartOffset;
+            long val2 = stream.Length - ((GifFrame)Enumerable.Last<GifFrame>(metadata.Frames)).ImageData.CompressedDataStartOffset;
             long num = val2;
             if (metadata.Frames.Count > 1)
-                num = Math.Max(metadata.Frames.Zip<GifFrame, GifFrame, long>(metadata.Frames.Skip<GifFrame>(1), (Func<GifFrame, GifFrame, long>)((f1, f2) => f2.ImageData.CompressedDataStartOffset - f1.ImageData.CompressedDataStartOffset)).Max(), val2);
+                num = Math.Max(Enumerable.Max((IEnumerable<long>)Enumerable.Zip<GifFrame, GifFrame, long>((IEnumerable<GifFrame>)metadata.Frames, (IEnumerable<GifFrame>)Enumerable.Skip<GifFrame>((IEnumerable<GifFrame>)metadata.Frames, 1), (Func<GifFrame, GifFrame, long>)((f1, f2) => f2.ImageData.CompressedDataStartOffset - f1.ImageData.CompressedDataStartOffset))), val2);
             return new byte[num + 4L];
         }
+
 
         private async Task RenderFrameAsync(int frameIndex, CancellationToken cancellationToken)
         {
@@ -287,8 +301,8 @@ namespace XamlAnimatedGif
                 int length = 4 * desc.Width;
                 byte[] buffer = new byte[desc.Width];
                 byte[] numArray = new byte[length];
-                Animator.GifPalette gifPalette = this._palettes[frameIndex];
-                int num1 = gifPalette.TransparencyIndex ?? -1;
+                Animator.GifPalette palette = this._palettes[frameIndex];
+                int num1 = palette.TransparencyIndex ?? -1;
                 foreach (int num2 in frame.Descriptor.Interlace ? Animator.InterlacedRows(frame.Descriptor.Height) : Animator.NormalRows(frame.Descriptor.Height))
                 {
                     if (indexStreamAsync.Read(buffer, 0, desc.Width) != desc.Width)
@@ -301,7 +315,7 @@ namespace XamlAnimatedGif
                         byte num3 = buffer[index];
                         int startIndex = 4 * index;
                         if ((int)num3 != num1)
-                            Animator.WriteColor(numArray, gifPalette[(int)num3], startIndex);
+                            Animator.WriteColor(numArray, palette[(int)num3], startIndex);
                     }
                     Animator.CopyToBitmap(numArray, this._bitmap, offset, length);
                 }
@@ -382,8 +396,8 @@ namespace XamlAnimatedGif
 
         private void DisposePreviousFrame(GifFrame currentFrame)
         {
-            GifFrame gifFrame = this._previousFrame;
-            GifGraphicControlExtension controlExtension = gifFrame != null ? gifFrame.GraphicControl : (GifGraphicControlExtension)null;
+            GifFrame previousFrame = this._previousFrame;
+            GifGraphicControlExtension controlExtension = previousFrame != null ? previousFrame.GraphicControl : null;
             if (controlExtension != null)
             {
                 switch (controlExtension.DisposalMethod)
@@ -426,9 +440,9 @@ namespace XamlAnimatedGif
             finally
             {
                 if (ms != null)
-                    ms.Dispose();
+                    ((IDisposable)ms).Dispose();
             }
-            ms = (MemoryStream)null;
+            ms = null;
             return (Stream)new LzwDecompressStream(this._indexStreamBuffer, (int)data.LzwMinimumCodeSize);
         }
 
@@ -450,7 +464,7 @@ namespace XamlAnimatedGif
         public void Dispose()
         {
             this.Dispose(true);
-            GC.SuppressFinalize((object)this);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -464,10 +478,11 @@ namespace XamlAnimatedGif
                 cancellationTokenSource.Cancel();
             try
             {
-                Stream stream = this._sourceStream;
-                if (stream != null)
+                Stream sourceStream = this._sourceStream;
+                if (sourceStream != null)
                 {
-                    stream.Dispose();
+                    // ISSUE: explicit non-virtual call
+                    sourceStream.Dispose();
                 }
             }
             catch
@@ -478,8 +493,8 @@ namespace XamlAnimatedGif
 
         public override string ToString()
         {
-            Uri uri = this._sourceUri;
-            return "GIF: " + ((uri != null ? uri.ToString() : (string)null) ?? this._sourceStream.ToString());
+            Uri sourceUri = this._sourceUri;
+            return string.Concat("GIF: ", (sourceUri != null ? sourceUri.ToString() : null) ?? this._sourceStream.ToString());
         }
 
         internal async void ShowFirstFrame()

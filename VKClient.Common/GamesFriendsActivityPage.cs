@@ -2,6 +2,7 @@ using Microsoft.Phone.Controls;
 using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Navigation;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.Backend;
@@ -25,16 +26,16 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as GamesFriendsActivityViewModel;
+        return base.DataContext as GamesFriendsActivityViewModel;
       }
     }
 
     public GamesFriendsActivityPage()
     {
       this.InitializeComponent();
-      this.HeaderUC.textBlockTitle.Text = CommonResources.PageTitle_Games_FriendsActivity.ToUpperInvariant();
+      this.HeaderUC.textBlockTitle.Text = (CommonResources.PageTitle_Games_FriendsActivity.ToUpperInvariant());
       this.PullToRefreshUC.TrackListBox((ISupportPullToRefresh) this.FriendsActivityListBox);
-      this.FriendsActivityListBox.OnRefresh = (Action) (() => this.VM.FriendsActivityVM.LoadData(true, false, (Action<BackendResult<GamesFriendsActivityResponse, ResultCode>>) null, false));
+      this.FriendsActivityListBox.OnRefresh = (Action) (() => this.VM.FriendsActivityVM.LoadData(true, false,  null, false));
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -43,21 +44,21 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       long result = 0;
-      if (this.NavigationContext.QueryString.ContainsKey("GameId"))
+      if (((Page) this).NavigationContext.QueryString.ContainsKey("GameId"))
       {
-        long.TryParse(this.NavigationContext.QueryString["GameId"], out result);
+        long.TryParse(((Page) this).NavigationContext.QueryString["GameId"], out result);
         if (result != 0L)
-          this.FriendsActivityListBox.ItemTemplate = (DataTemplate) this.Resources["ShortItemTemplate"];
+          this.FriendsActivityListBox.ItemTemplate = ((DataTemplate) base.Resources["ShortItemTemplate"]);
       }
-      if (this.NavigationContext.QueryString.ContainsKey("GameName"))
+      if (((Page) this).NavigationContext.QueryString.ContainsKey("GameName"))
       {
-        string str = this.NavigationContext.QueryString["GameName"];
+        string str = ((Page) this).NavigationContext.QueryString["GameName"];
         if (!string.IsNullOrEmpty(str))
-          this.HeaderUC.textBlockTitle.Text = str.ToUpperInvariant();
+          this.HeaderUC.textBlockTitle.Text = (str.ToUpperInvariant());
       }
       GamesFriendsActivityViewModel activityViewModel = new GamesFriendsActivityViewModel(result);
-      activityViewModel.FriendsActivityVM.LoadData(false, false, (Action<BackendResult<GamesFriendsActivityResponse, ResultCode>>) null, false);
-      this.DataContext = (object) activityViewModel;
+      activityViewModel.FriendsActivityVM.LoadData(false, false,  null, false);
+      base.DataContext = activityViewModel;
       this._isInitialized = true;
     }
 
@@ -72,10 +73,10 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/GamesFriendsActivityPage.xaml", UriKind.Relative));
-      this.HeaderUC = (GenericHeaderUC) this.FindName("HeaderUC");
-      this.PullToRefreshUC = (PullToRefreshUC) this.FindName("PullToRefreshUC");
-      this.FriendsActivityListBox = (ExtendedLongListSelector) this.FindName("FriendsActivityListBox");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/GamesFriendsActivityPage.xaml", UriKind.Relative));
+      this.HeaderUC = (GenericHeaderUC) base.FindName("HeaderUC");
+      this.PullToRefreshUC = (PullToRefreshUC) base.FindName("PullToRefreshUC");
+      this.FriendsActivityListBox = (ExtendedLongListSelector) base.FindName("FriendsActivityListBox");
     }
   }
 }

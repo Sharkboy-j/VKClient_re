@@ -40,24 +40,28 @@ namespace VKClient.Common.UC.MapAttachments
 
     public override void OnReady()
     {
-      double mapHeight = MapAttachmentUCBase.GetMapHeight(this.Width);
-      double totalHeight = MapPlaceFullAttachmentUC.CalculateTotalHeight(this.Width);
+      double mapHeight = MapAttachmentUCBase.GetMapHeight(base.Width);
+      double totalHeight = MapPlaceFullAttachmentUC.CalculateTotalHeight(base.Width);
       this._mapUri = this.GetMapUri();
-      this.canvas.Width = this.Width;
-      this.canvas.Height = mapHeight + 80.0;
-      this.rectBorder.Width = this.Width;
-      this.rectBorder.Height = totalHeight;
-      this.rectanglePlaceholder.Width = this.Width;
-      this.rectanglePlaceholder.Height = mapHeight;
-      this.imageMap.Width = this.Width;
-      this.imageMap.Height = mapHeight;
-      Canvas.SetLeft((UIElement) this.imageMapIcon, this.Width / 2.0 - this.imageMapIcon.Width / 2.0);
-      Canvas.SetTop((UIElement) this.imageMapIcon, mapHeight / 2.0 - this.imageMapIcon.Height);
-      this.rectMapBorderBottom.Width = this.Width - 2.0;
+      ((FrameworkElement) this.canvas).Width=(base.Width);
+      ((FrameworkElement) this.canvas).Height=(mapHeight + 80.0);
+      ((FrameworkElement) this.rectBorder).Width=(base.Width);
+      ((FrameworkElement) this.rectBorder).Height = totalHeight;
+      ((FrameworkElement) this.rectanglePlaceholder).Width=(base.Width);
+      ((FrameworkElement) this.rectanglePlaceholder).Height = mapHeight;
+      ((FrameworkElement) this.imageMap).Width=(base.Width);
+      ((FrameworkElement) this.imageMap).Height = mapHeight;
+      Canvas.SetLeft((UIElement) this.imageMapIcon, base.Width / 2.0 - ((FrameworkElement) this.imageMapIcon).Width / 2.0);
+      Canvas.SetTop((UIElement) this.imageMapIcon, mapHeight / 2.0 - ((FrameworkElement) this.imageMapIcon).Height);
+      ((FrameworkElement) this.rectMapBorderBottom).Width=(base.Width - 2.0);
       Canvas.SetTop((UIElement) this.rectMapBorderBottom, mapHeight - 1.0);
       Canvas.SetTop((UIElement) this.gridPlace, mapHeight);
       this.UpdateTitleSubtitle();
-      double val2 = this.Width - this.textBlockTitle.Margin.Left;
+      double width = base.Width;
+      Thickness margin = ((FrameworkElement) this.textBlockTitle).Margin;
+      // ISSUE: explicit reference operation
+      double left = ((Thickness) @margin).Left;
+      double val2 = width - left;
       this.textBlockTitle.CorrectText(Math.Max(0.0, val2));
       this.textBlockSubtitle.CorrectText(Math.Max(0.0, val2));
     }
@@ -65,7 +69,7 @@ namespace VKClient.Common.UC.MapAttachments
     private void UpdateTitleSubtitle()
     {
       Place place = this.Geo.place;
-      if (!string.IsNullOrEmpty(place != null ? place.group_photo : null))
+      if (!string.IsNullOrEmpty(place != null ? place.group_photo :  null))
         this._groupPhotoUri = new Uri(place.group_photo);
       if (!string.IsNullOrEmpty(this.Geo.AttachmentTitle) && !string.IsNullOrEmpty(this.Geo.AttachmentSubtitle))
       {
@@ -91,8 +95,8 @@ namespace VKClient.Common.UC.MapAttachments
             return;
           }
         }
-        this.textBlockTitle.Text = "...";
-        this.textBlockSubtitle.Text = "...";
+        this.textBlockTitle.Text = ("...");
+        this.textBlockSubtitle.Text = ("...");
         this.ReverseGeocode((Action<string, string>) ((title, subtitle) => Execute.ExecuteOnUIThread((Action) (() =>
         {
           if (string.IsNullOrEmpty(title))
@@ -113,21 +117,21 @@ namespace VKClient.Common.UC.MapAttachments
 
     public override void ReleaseResources()
     {
-      VeryLowProfileImageLoader.SetUriSource(this.imageMap, (Uri) null);
-      VeryLowProfileImageLoader.SetUriSource(this.imageGroupPhoto, (Uri) null);
+      VeryLowProfileImageLoader.SetUriSource(this.imageMap,  null);
+      VeryLowProfileImageLoader.SetUriSource(this.imageGroupPhoto,  null);
     }
 
     public override void ShownOnScreen()
     {
       DateTime now;
-      if (this._groupPhotoUri != (Uri) null && this._groupPhotoUri.IsAbsoluteUri)
+      if (this._groupPhotoUri !=  null && this._groupPhotoUri.IsAbsoluteUri)
       {
         string originalString = this._groupPhotoUri.OriginalString;
         now = DateTime.Now;
         long ticks = now.Ticks;
         VeryLowProfileImageLoader.SetPriority(originalString, ticks);
       }
-      if (!(this._mapUri != (Uri) null) || !this._mapUri.IsAbsoluteUri)
+      if (!(this._mapUri !=  null) || !this._mapUri.IsAbsoluteUri)
         return;
       string originalString1 = this._mapUri.OriginalString;
       now = DateTime.Now;
@@ -135,7 +139,7 @@ namespace VKClient.Common.UC.MapAttachments
       VeryLowProfileImageLoader.SetPriority(originalString1, ticks1);
     }
 
-    private void GridPlace_OnTap(object sender, GestureEventArgs e)
+    private void GridPlace_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       e.Handled = true;
       Place place = this.Geo.place;
@@ -151,17 +155,17 @@ namespace VKClient.Common.UC.MapAttachments
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPlaceFullAttachmentUC.xaml", UriKind.Relative));
-      this.canvas = (Canvas) this.FindName("canvas");
-      this.rectanglePlaceholder = (Rectangle) this.FindName("rectanglePlaceholder");
-      this.imageMap = (Image) this.FindName("imageMap");
-      this.imageMapIcon = (Image) this.FindName("imageMapIcon");
-      this.rectMapBorderBottom = (Rectangle) this.FindName("rectMapBorderBottom");
-      this.gridPlace = (Grid) this.FindName("gridPlace");
-      this.imageGroupPhoto = (Image) this.FindName("imageGroupPhoto");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.textBlockSubtitle = (TextBlock) this.FindName("textBlockSubtitle");
-      this.rectBorder = (Rectangle) this.FindName("rectBorder");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPlaceFullAttachmentUC.xaml", UriKind.Relative));
+      this.canvas = (Canvas) base.FindName("canvas");
+      this.rectanglePlaceholder = (Rectangle) base.FindName("rectanglePlaceholder");
+      this.imageMap = (Image) base.FindName("imageMap");
+      this.imageMapIcon = (Image) base.FindName("imageMapIcon");
+      this.rectMapBorderBottom = (Rectangle) base.FindName("rectMapBorderBottom");
+      this.gridPlace = (Grid) base.FindName("gridPlace");
+      this.imageGroupPhoto = (Image) base.FindName("imageGroupPhoto");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
+      this.textBlockSubtitle = (TextBlock) base.FindName("textBlockSubtitle");
+      this.rectBorder = (Rectangle) base.FindName("rectBorder");
     }
   }
 }

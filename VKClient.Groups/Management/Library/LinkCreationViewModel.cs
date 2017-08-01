@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Media;
 using VKClient.Audio.Base.DataObjects;
@@ -40,8 +41,8 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._isFormEnabled = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormEnabled));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsAddressEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsAddressEnabled));
       }
     }
 
@@ -54,8 +55,8 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._address = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Address));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<string>((() => this.Address));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -68,7 +69,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._description = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Description));
+        this.NotifyPropertyChanged<string>((() => this.Description));
       }
     }
 
@@ -81,7 +82,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._pageTitle = value.ToUpper();
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.PageTitle));
+        this.NotifyPropertyChanged<string>((() => this.PageTitle));
       }
     }
 
@@ -94,8 +95,8 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._isAddressReadOnly = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsAddressReadOnly));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsAddressEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsAddressReadOnly));
+        this.NotifyPropertyChanged<bool>((() => this.IsAddressEnabled));
       }
     }
 
@@ -108,7 +109,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._addressForeground = value;
-        this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>) (() => this.AddressForeground));
+        this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>) (() => this.AddressForeground));
       }
     }
 
@@ -162,48 +163,48 @@ namespace VKClient.Groups.Management.Library
         GroupsService.Current.AddLink(this._communityId, url, this.Description, (Action<BackendResult<GroupLink, ResultCode>>) (result => this.AddEditCallback(result.ResultCode, result.Error, result.ResultData)));
       }
       else
-        GroupsService.Current.EditLink(this._communityId, this._link.id, this.Description, (Action<BackendResult<int, ResultCode>>) (result => this.AddEditCallback(result.ResultCode, result.Error, (GroupLink) null)));
+        GroupsService.Current.EditLink(this._communityId, this._link.id, this.Description, (Action<BackendResult<int, ResultCode>>) (result => this.AddEditCallback(result.ResultCode, result.Error,  null)));
     }
 
     private void AddEditCallback(ResultCode resultCode, VKRequestsDispatcher.Error error, GroupLink resultData)
     {
-      Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        if (resultCode == ResultCode.Succeeded)
+        Execute.ExecuteOnUIThread((Action)(() =>
         {
-          if (this._link != null)
-          {
-            if (this._link.edit_title == 1)
-              this._link.name = this.Description;
+            if (resultCode == ResultCode.Succeeded)
+            {
+                if (this._link != null)
+                {
+                    if (this._link.edit_title == 1)
+                        this._link.name = this.Description;
+                    else
+                        this._link.desc = this.Description;
+                }
+                EventAggregator current = EventAggregator.Current;
+                CommunityLinkAddedOrEdited linkAddedOrEdited = new CommunityLinkAddedOrEdited();
+                linkAddedOrEdited.CommunityId = this._communityId;
+                int num = this._link != null ? 1 : 0;
+                linkAddedOrEdited.IsEditing = num != 0;
+                GroupLink groupLink = this._link ?? resultData;
+                linkAddedOrEdited.Link = groupLink;
+                current.Publish((object)linkAddedOrEdited);
+                Navigator.Current.GoBack();
+            }
             else
-              this._link.desc = this.Description;
-          }
-          EventAggregator current = EventAggregator.Current;
-          CommunityLinkAddedOrEdited linkAddedOrEdited = new CommunityLinkAddedOrEdited();
-          linkAddedOrEdited.CommunityId = this._communityId;
-          int num = this._link != null ? 1 : 0;
-          linkAddedOrEdited.IsEditing = num != 0;
-          GroupLink groupLink = this._link ?? resultData;
-          linkAddedOrEdited.Link = groupLink;
-          current.Publish((object) linkAddedOrEdited);
-          Navigator.Current.GoBack();
-        }
-        else
-        {
-          this.SetInProgress(false, "");
-          this.IsFormEnabled = true;
-          VKRequestsDispatcher.Error error1 = error;
-          switch (error1 != null ? error1.error_text : null)
-          {
-            case null:
-              GenericInfoUC.ShowBasedOnResult((int) resultCode, "", error);
-              break;
-            default:
-              error.error_text += ".";
-              goto case null;
-          }
-        }
-      }));
+            {
+                this.SetInProgress(false, "");
+                this.IsFormEnabled = true;
+                VKRequestsDispatcher.Error error1 = error;
+                switch (error1 != null ? error1.error_text : (string)null)
+                {
+                    case null:
+                        GenericInfoUC.ShowBasedOnResult((int)resultCode, "", error);
+                        break;
+                    default:
+                        error.error_text += ".";
+                        goto case null;
+                }
+            }
+        }));
     }
   }
 }

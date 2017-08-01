@@ -15,15 +15,15 @@ namespace VKClient.Common.UC
 
     public NewsSourceListItemUC()
     {
-      this.InitializeComponent();
-      this.borderFadeOut.Opacity = 0.0;
-      this.Loaded += (RoutedEventHandler) ((sender, args) =>
-      {
-        PickableNewsfeedSourceItemViewModel sourceItemViewModel = this.DataContext as PickableNewsfeedSourceItemViewModel;
-        if (sourceItemViewModel == null || !sourceItemViewModel.FadeOutEnabled)
-          return;
-        this.borderFadeOut.Animate(1.0, 0.0, (object) UIElement.OpacityProperty, 2000, new int?(), null, null, false);
-      });
+        this.InitializeComponent();
+        this.borderFadeOut.Opacity = 0.0;
+        this.Loaded += (RoutedEventHandler)((sender, args) =>
+        {
+            PickableNewsfeedSourceItemViewModel sourceItemViewModel = this.DataContext as PickableNewsfeedSourceItemViewModel;
+            if (sourceItemViewModel == null || !sourceItemViewModel.FadeOutEnabled)
+                return;
+            this.borderFadeOut.Animate(1.0, 0.0, (object)UIElement.OpacityProperty, 2000, new int?(), null, null, false);
+        });
     }
 
     [DebuggerNonUserCode]
@@ -32,8 +32,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/NewsSourceListItemUC.xaml", UriKind.Relative));
-      this.borderFadeOut = (Border) this.FindName("borderFadeOut");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/NewsSourceListItemUC.xaml", UriKind.Relative));
+      this.borderFadeOut = (Border) base.FindName("borderFadeOut");
     }
   }
 }

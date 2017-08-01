@@ -29,7 +29,7 @@ namespace VKClient.Common.Backend
       parameters["owner_id"] = owner_id.ToString();
       parameters["poll_id"] = poll_id.ToString();
       parameters["is_board"] = is_board.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<Poll>("polls.getById", parameters, callback, (Func<string, Poll>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<Poll>("polls.getById", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void AddRemoveVote(bool add, long owner_id, long poll_id, long answer_id, Action<BackendResult<long, ResultCode>> callback, long topicId = 0)
@@ -40,7 +40,7 @@ namespace VKClient.Common.Backend
       parameters["answer_id"] = answer_id.ToString();
       if (topicId != 0L)
         parameters["board"] = topicId.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<long>(add ? "polls.addVote" : "polls.deleteVote", parameters, callback, (Func<string, long>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<long>(add ? "polls.addVote" : "polls.deleteVote", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void CreatePoll(string question, bool isAnonymous, long ownerId, List<string> answers, Action<BackendResult<Poll, ResultCode>> callback)
@@ -51,12 +51,12 @@ namespace VKClient.Common.Backend
       if (ownerId != 0L)
         parameters["owner_id"] = ownerId.ToString();
       parameters["add_answers"] = "[" + answers.Select<string, string>((Func<string, string>) (a => "\"" + a + "\"")).ToList<string>().GetCommaSeparated(",") + "]";
-      VKRequestsDispatcher.DispatchRequestToVK<Poll>("polls.create", parameters, callback, (Func<string, Poll>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<Poll>("polls.create", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void EditPoll(long ownerId, long pollId, string question, List<string> addAnswers, Dictionary<string, string> editAnswers, List<long> deleteAnswers, Action<BackendResult<Poll, ResultCode>> callback)
     {
-      VKRequestsDispatcher.Execute<Poll>(string.Format("API.polls.edit({{\"owner_id\":{0}, \"poll_id\":{1}, \"question\":\"{2}\" {3} {4} {5}}});\r\nreturn API.polls.getById({{\"owner_id\":{0}, \"poll_id\":{1}}});", (object) ownerId, (object) pollId, (object) question, (object) (addAnswers.Any<string>() ? ", \"add_answers\":\"[" + addAnswers.Select<string, string>((Func<string, string>) (a => "\\\"" + a + "\\\"")).ToList<string>().GetCommaSeparated(",") + "]\"" : ""), (object) (editAnswers.Any<KeyValuePair<string, string>>() ? ", \"edit_answers\":\"" + JsonConvert.SerializeObject((object) editAnswers).Replace("\"", "\\\"") + "\"" : ""), (object) (deleteAnswers.Any<long>() ? ", \"delete_answers\":\"[" + deleteAnswers.GetCommaSeparated() + "]\"" : "")), callback, (Func<string, Poll>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.Execute<Poll>(string.Format("API.polls.edit({{\"owner_id\":{0}, \"poll_id\":{1}, \"question\":\"{2}\" {3} {4} {5}}});\r\nreturn API.polls.getById({{\"owner_id\":{0}, \"poll_id\":{1}}});", ownerId, pollId, question, (addAnswers.Any<string>() ? ", \"add_answers\":\"[" + addAnswers.Select<string, string>((Func<string, string>) (a => "\\\"" + a + "\\\"")).ToList<string>().GetCommaSeparated(",") + "]\"" : ""), (editAnswers.Any<KeyValuePair<string, string>>() ? ", \"edit_answers\":\"" + JsonConvert.SerializeObject(editAnswers).Replace("\"", "\\\"") + "\"" : ""), (deleteAnswers.Any<long>() ? ", \"delete_answers\":\"[" + deleteAnswers.GetCommaSeparated() + "]\"" : "")), callback,  null, false, true, new CancellationToken?());
     }
 
     public void GetVoters(long ownerId, long pollId, long answerId, int offset, int count, Action<BackendResult<UsersListWithCount, ResultCode>> callback)
@@ -76,7 +76,7 @@ namespace VKClient.Common.Backend
           count = response[0].users.count,
           users = response[0].users.items
         };
-      }), false, true, new CancellationToken?());
+      }), false, true, new CancellationToken?(),  null);
     }
   }
 }

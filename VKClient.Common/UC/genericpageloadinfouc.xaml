@@ -12,7 +12,8 @@
              d:DesignWidth="480"
              Visibility="{Binding PageLoadInfoViewModel.LoadingStatesVisibility, FallbackValue=Collapsed}">
 
-    <Grid Background="{StaticResource PhoneBackgroundBrush}">
+    <Grid x:Name="gridRoot"
+          Background="{StaticResource PhoneBackgroundBrush}">
         <Grid Margin="0 -48 0 0"
               VerticalAlignment="Center">
             <StackPanel Visibility="{Binding PageLoadInfoViewModel.LoadingStateVisibility}">
@@ -38,10 +39,11 @@
                            Margin="16 12 16 0"
                            TextWrapping="Wrap"
                            TextAlignment="Center"
-                           Text="{Binding LocalizedResources.FailedToConnectError, Source={StaticResource LocalizedStrings}}"
+                           Text="{Binding PageLoadInfoViewModel.Error}"
                            FontSize="22.67"
                            FontFamily="{StaticResource PhoneFontFamilySemiLight}" />
-                <Button Content="{Binding LocalizedResources.Conversation_Retry, Source={StaticResource LocalizedStrings}}"
+                <Button x:Name="buttonRetry"
+                        Content="{Binding LocalizedResources.Conversation_Retry, Source={StaticResource LocalizedStrings}}"
                         HorizontalAlignment="Center"
                         Style="{StaticResource VKButtonSecondaryStyle}"
                         Margin="4 8 0 0"

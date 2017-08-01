@@ -32,7 +32,7 @@ namespace MediaParsers
 
     public override string ToString()
     {
-      return "MPEGLAYER3 " + this.WaveFormatExtensible.ToString() + string.Format((IFormatProvider) CultureInfo.InvariantCulture, "ID: {0}, Flags: {1}, BlockSize: {2}, FramesPerBlock {3}, CodecDelay {4}", (object) this.Id, (object) this.BitratePaddingMode, (object) this.BlockSize, (object) this.FramesPerBlock, (object) this.CodecDelay);
+      return "MPEGLAYER3 " + this.WaveFormatExtensible.ToString() + string.Format((IFormatProvider) CultureInfo.InvariantCulture, "ID: {0}, Flags: {1}, BlockSize: {2}, FramesPerBlock {3}, CodecDelay {4}", this.Id, this.BitratePaddingMode, this.BlockSize, this.FramesPerBlock, this.CodecDelay);
     }
   }
 }

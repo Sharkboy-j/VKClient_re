@@ -21,14 +21,14 @@ namespace VKClient.Common.UC.MapAttachments
     public MapPointSmallAttachmentUC()
     {
       this.InitializeComponent();
-      this.textBlockTitle.Text = "";
+      this.textBlockTitle.Text = ("");
     }
 
     public override void OnReady()
     {
-      this.canvas.Width = this.Width;
+      ((FrameworkElement) this.canvas).Width=(base.Width);
       this.UpdateTitle();
-      this.textBlockTitle.CorrectText(this.Width - 48.0);
+      this.textBlockTitle.CorrectText(base.Width - 48.0);
     }
 
     private void UpdateTitle()
@@ -68,13 +68,13 @@ namespace VKClient.Common.UC.MapAttachments
             return;
           }
         }
-        this.textBlockTitle.Text = "...";
+        this.textBlockTitle.Text = ("...");
         this.ReverseGeocode((Action<string, string>) ((title, subtitle) => Execute.ExecuteOnUIThread((Action) (() =>
         {
           if (string.IsNullOrEmpty(title))
             title = CommonResources.MapAttachment_Point;
           else if (!string.IsNullOrEmpty(subtitle))
-            this.textBlockTitle.Text = string.Format("{0}, {1}", (object) title, (object) subtitle);
+            this.textBlockTitle.Text = (string.Format("{0}, {1}", title, subtitle));
           this.Geo.AttachmentTitle = title;
           this.textBlockTitle.Text = title;
         }))));
@@ -87,9 +87,9 @@ namespace VKClient.Common.UC.MapAttachments
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPointSmallAttachmentUC.xaml", UriKind.Relative));
-      this.canvas = (Canvas) this.FindName("canvas");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPointSmallAttachmentUC.xaml", UriKind.Relative));
+      this.canvas = (Canvas) base.FindName("canvas");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
     }
   }
 }

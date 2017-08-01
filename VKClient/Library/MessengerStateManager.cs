@@ -1,6 +1,7 @@
 using Microsoft.Phone.Controls;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
@@ -54,30 +55,44 @@ namespace VKClient.Library
     }
 
     public long HandleInAppNotification(string title, string message, long lUid, string isChat, string imageSrc)
-    {
-      Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        ConversationPage conversationPage = ((App) Application.Current).RootFrame.Content as ConversationPage;
-        long num = 0;
-        if (conversationPage != null)
-          num = conversationPage.ConversationVM.UserOrCharId;
-        if (num == lUid)
-          return;
-        if (AppGlobalStateManager.Current.GlobalState.NotificationsEnabled)
-        {
-          string title1 = title;
-          string message1 = message;
-          string imageSrc1 = imageSrc;
-          InAppToastNotification.Show(title1, message1, (Action) (() => Navigator.Current.NavigateToConversation(lUid, isChat == bool.TrueString, false, "", 0, false)), imageSrc1);
-        }
-        if (AppGlobalStateManager.Current.GlobalState.VibrationsEnabled)
-          DeviceManager.Vibrate();
-        if (!AppGlobalStateManager.Current.GlobalState.SoundEnabled)
-          return;
-        DeviceManager.PlaySound();
-      }));
-      return lUid;
-    }
+{
+	Action _9__1=null;
+	Execute.ExecuteOnUIThread(delegate
+	{
+		ConversationPage conversationPage = ((App)Application.Current).RootFrame.Content as ConversationPage;
+		long num = 0L;
+		if (conversationPage != null)
+		{
+			num = conversationPage.ConversationVM.UserOrCharId;
+		}
+		if (num != lUid)
+		{
+			if (AppGlobalStateManager.Current.GlobalState.NotificationsEnabled)
+			{
+				string arg_77_0 = title;
+				string arg_77_1 = message;
+				Action arg_77_2;
+				if ((arg_77_2 = _9__1) == null)
+				{
+                    arg_77_2 = (_9__1 = delegate
+					{
+						Navigator.Current.NavigateToConversation(lUid, isChat == bool.TrueString, false, "", 0, false);
+					});
+				}
+				InAppToastNotification.Show(arg_77_0, arg_77_1, arg_77_2, imageSrc);
+			}
+			if (AppGlobalStateManager.Current.GlobalState.VibrationsEnabled)
+			{
+				DeviceManager.Vibrate();
+			}
+			if (AppGlobalStateManager.Current.GlobalState.SoundEnabled)
+			{
+				DeviceManager.PlaySound();
+			}
+		}
+	});
+	return lUid;
+}
 
     public void EnsureOnlineStatusIsSet(bool force)
     {

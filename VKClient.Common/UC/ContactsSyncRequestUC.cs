@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -30,6 +29,7 @@ namespace VKClient.Common.UC
 
     public ContactsSyncRequestUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
       this.ucHeader.HideSandwitchButton = true;
       this.ucHeader.SupportMenu = false;
@@ -40,53 +40,56 @@ namespace VKClient.Common.UC
     {
       UsersService.Instance.GetFeatureUsers(10, (Action<BackendResult<VKList<User>, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
       {
-        this.progressRing.Visibility = Visibility.Collapsed;
+        ((UIElement) this.progressRing).Visibility = Visibility.Collapsed;
         if (result.ResultCode == ResultCode.Succeeded)
         {
           List<User> items = result.ResultData.items;
           if (items.Count > 0)
           {
-            this.itemsControl.ItemsSource = (IEnumerable) items.Take<User>(5);
-            this.textBlockFriendsCount.Text = UIStringFormatterHelper.FormatNumberOfSomething(items.Count, CommonResources.OneFriendContactsSyncFrm, CommonResources.TwoFourFriendsContactsSyncFrm, CommonResources.FiveFriendsContactsSyncFrm, true, null, false);
+            this.itemsControl.ItemsSource = Enumerable.Take<User>(items, 5);
+            this.textBlockFriendsCount.Text = (UIStringFormatterHelper.FormatNumberOfSomething(items.Count, CommonResources.OneFriendContactsSyncFrm, CommonResources.TwoFourFriendsContactsSyncFrm, CommonResources.FiveFriendsContactsSyncFrm, true,  null, false));
           }
           else
-            this.gridFriends.Visibility = Visibility.Collapsed;
+            ((UIElement) this.gridFriends).Visibility = Visibility.Collapsed;
         }
         else
-          this.gridFriends.Visibility = Visibility.Collapsed;
+          ((UIElement) this.gridFriends).Visibility = Visibility.Collapsed;
       }))));
     }
 
     public static void OpenFriendsImportContacts(Action continueClickCallback)
     {
-      if (AppGlobalStateManager.Current.GlobalState.AllowSendContacts)
-      {
-        if (continueClickCallback == null)
-          return;
-        continueClickCallback();
-      }
-      else
-      {
-        DialogService dialogService = new DialogService();
-        dialogService.AnimationType = DialogService.AnimationTypes.None;
-        dialogService.AnimationTypeChild = DialogService.AnimationTypes.SlideInversed;
-        SolidColorBrush solidColorBrush = new SolidColorBrush(Colors.Transparent);
-        dialogService.BackgroundBrush = (Brush) solidColorBrush;
-        DialogService popup = dialogService;
-        ContactsSyncRequestUC child = new ContactsSyncRequestUC();
-        child.buttonContinue.Click += (RoutedEventHandler) ((sender, args) =>
+        if (AppGlobalStateManager.Current.GlobalState.AllowSendContacts)
         {
-          AppGlobalStateManager.Current.GlobalState.AllowSendContacts = true;
-          EventAggregator.Current.Publish((object) new ContactsSyncEnabled());
-          popup.Hide();
-          if (continueClickCallback == null)
+            if (continueClickCallback != null)
+            {
+                continueClickCallback.Invoke();
+            }
             return;
-          continueClickCallback();
+        }
+        DialogService popup = new DialogService
+        {
+            AnimationType = DialogService.AnimationTypes.None,
+            AnimationTypeChild = DialogService.AnimationTypes.SlideInversed,
+            BackgroundBrush = new SolidColorBrush(Colors.Transparent)
+        };
+        ContactsSyncRequestUC child = new ContactsSyncRequestUC();
+        child.buttonContinue.Click+=(delegate(object sender, RoutedEventArgs args)
+        {
+            AppGlobalStateManager.Current.GlobalState.AllowSendContacts = true;
+            EventAggregator.Current.Publish(new ContactsSyncEnabled());
+            popup.Hide();
+            if (continueClickCallback != null)
+            {
+                continueClickCallback.Invoke();
+            }
         });
-        popup.Child = (FrameworkElement) child;
-        popup.Opened += (EventHandler) ((sender, args) => child.LoadFriends());
+        popup.Child = child;
+        popup.Opened += delegate(object sender, EventArgs args)
+        {
+            child.LoadFriends();
+        };
         popup.Show(null);
-      }
     }
 
     [DebuggerNonUserCode]
@@ -95,13 +98,13 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/ContactsSyncRequestUC.xaml", UriKind.Relative));
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.gridFriends = (Grid) this.FindName("gridFriends");
-      this.progressRing = (ProgressRing) this.FindName("progressRing");
-      this.itemsControl = (ItemsControl) this.FindName("itemsControl");
-      this.textBlockFriendsCount = (TextBlock) this.FindName("textBlockFriendsCount");
-      this.buttonContinue = (Button) this.FindName("buttonContinue");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/ContactsSyncRequestUC.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.gridFriends = (Grid) base.FindName("gridFriends");
+      this.progressRing = (ProgressRing) base.FindName("progressRing");
+      this.itemsControl = (ItemsControl) base.FindName("itemsControl");
+      this.textBlockFriendsCount = (TextBlock) base.FindName("textBlockFriendsCount");
+      this.buttonContinue = (Button) base.FindName("buttonContinue");
     }
   }
 }

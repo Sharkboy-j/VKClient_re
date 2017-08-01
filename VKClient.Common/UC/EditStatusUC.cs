@@ -29,13 +29,15 @@ namespace VKClient.Common.UC
 
     public EditStatusUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.Loaded += new RoutedEventHandler(this.EditStatusUC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.EditStatusUC_Loaded));
     }
 
     private void EditStatusUC_Loaded(object sender, RoutedEventArgs e)
     {
-      this.textBoxText.Focus();
+      ((Control) this.textBoxText).Focus();
     }
 
     [DebuggerNonUserCode]
@@ -44,9 +46,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/EditStatusUC.xaml", UriKind.Relative));
-      this.textBoxText = (TextBox) this.FindName("textBoxText");
-      this.buttonSave = (Button) this.FindName("buttonSave");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/EditStatusUC.xaml", UriKind.Relative));
+      this.textBoxText = (TextBox) base.FindName("textBoxText");
+      this.buttonSave = (Button) base.FindName("buttonSave");
     }
   }
 }

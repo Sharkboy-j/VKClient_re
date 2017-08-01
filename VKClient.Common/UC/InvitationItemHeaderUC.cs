@@ -12,15 +12,16 @@ namespace VKClient.Common.UC
 
     public InvitationItemHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private void Invite_OnClick(object sender, RoutedEventArgs routedEventArgs)
     {
-      InvitationItemHeader invitationItemHeader = ((FrameworkElement) sender).DataContext as InvitationItemHeader;
-      if (invitationItemHeader == null || invitationItemHeader.InviteTapFunc == null)
+      InvitationItemHeader dataContext = ((FrameworkElement) sender).DataContext as InvitationItemHeader;
+      if (dataContext == null || dataContext.InviteTapFunc == null)
         return;
-      invitationItemHeader.InviteTapFunc();
+      dataContext.InviteTapFunc();
     }
 
     [DebuggerNonUserCode]
@@ -29,7 +30,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/InvitationItemHeaderUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/InvitationItemHeaderUC.xaml", UriKind.Relative));
     }
   }
 }

@@ -9,27 +9,28 @@ namespace VKClient.Common.UC
 {
   public class GameNotificationsSettingsUC : UserControl
   {
-    public static readonly DependencyProperty GameIdProperty = DependencyProperty.Register("GameId", typeof (long), typeof (GameNotificationsSettingsUC), new PropertyMetadata((object) 0L));
+    public static readonly DependencyProperty GameIdProperty = DependencyProperty.Register("GameId", typeof (long), typeof (GameNotificationsSettingsUC), new PropertyMetadata(0L));
     private bool _contentLoaded;
 
     public long GameId
     {
       get
       {
-        return (long) this.GetValue(GameNotificationsSettingsUC.GameIdProperty);
+        return (long) base.GetValue(GameNotificationsSettingsUC.GameIdProperty);
       }
       set
       {
-        this.SetValue(GameNotificationsSettingsUC.GameIdProperty, (object) value);
+        base.SetValue(GameNotificationsSettingsUC.GameIdProperty, value);
       }
     }
 
     public GameNotificationsSettingsUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
-    private void GameNotificationsSettings_OnTapped(object sender, GestureEventArgs e)
+    private void GameNotificationsSettings_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.GameId < 1L)
         return;
@@ -42,7 +43,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GameNotificationsSettingsUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GameNotificationsSettingsUC.xaml", UriKind.Relative));
     }
   }
 }

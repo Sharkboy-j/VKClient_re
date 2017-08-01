@@ -20,7 +20,7 @@ namespace VKClient.Common.UC.InplaceGifViewer
       this.InitializeComponent();
     }
 
-    private void Grid_Tap(object sender, GestureEventArgs e)
+    private void Grid_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.OnTap == null)
         return;
@@ -34,9 +34,9 @@ namespace VKClient.Common.UC.InplaceGifViewer
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/InplaceGifViewer/GifOverlayUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.gridText = (Grid) this.FindName("gridText");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/InplaceGifViewer/GifOverlayUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.gridText = (Grid) base.FindName("gridText");
     }
   }
 }

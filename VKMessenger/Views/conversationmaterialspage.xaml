@@ -1,27 +1,24 @@
-﻿<framework:PageBase x:Class="VKMessenger.Views.ConversationMaterialsPage"
-                    
-                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                    mc:Ignorable="d"
-                    
-                    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
-                    xmlns:framework="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
-                    xmlns:localization="clr-namespace:VKClient.Common.Localization;assembly=VKClient.Common"
-                    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
-                    xmlns:videoCatalog="clr-namespace:VKClient.Common.VideoCatalog;assembly=VKClient.Common"
-                    xmlns:uc="clr-namespace:VKClient.Common.UC;assembly=VKClient.Common"
-                    
-                    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-                    FontSize="{StaticResource PhoneFontSizeNormal}"
-                    Foreground="{StaticResource PhoneForegroundBrush}"
-                    
-                    SupportedOrientations="Portrait"
-                    Orientation="Portrait"
-                    
-                    shell:SystemTray.IsVisible="True"
-                    shell:SystemTray.Opacity="0">
+﻿<framework:PageBase 
+    x:Class="VKMessenger.Views.ConversationMaterialsPage"                    
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"                    
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:framework="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
+    xmlns:localization="clr-namespace:VKClient.Common.Localization;assembly=VKClient.Common"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:videoCatalog="clr-namespace:VKClient.Common.VideoCatalog;assembly=VKClient.Common"
+    xmlns:uc="clr-namespace:VKClient.Common.UC;assembly=VKClient.Common"                    
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"                    
+    SupportedOrientations="Portrait"
+    Orientation="Portrait"                    
+    shell:SystemTray.IsVisible="True"
+    shell:SystemTray.Opacity="0">
 
     <framework:PageBase.Resources>
         <localization:CommonLocalizedStrings x:Key="LocalizedStrings"/>
@@ -57,6 +54,7 @@
                             <StackPanel Orientation="Horizontal">
                                 
                                 <Canvas Visibility="{Binding Photo1IsSet}"
+                                        Background="Transparent"
                                         framework:MetroInMotion.Tilt="1"
                                         VerticalAlignment="Center"
                                         Margin="0,2,2,2"
@@ -75,11 +73,21 @@
                                            Height="117"
                                            Width="117"
                                            Tag="1"/>
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                             Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                             IsZoomEnabled="False">
+                                            <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                              DataContext="{Binding Photo1}"
+                                                              Click="GoToMessage_OnClicked"/>
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
                                 </Canvas>
 
                                 <Canvas Visibility="{Binding Photo2IsSet}"
                                         framework:MetroInMotion.Tilt="1"
                                         VerticalAlignment="Center"
+                                        Background="Transparent"
                                         Margin="2,2,2,2"
                                         Height="117"
                                         Width="117">
@@ -96,11 +104,21 @@
                                            Height="117"
                                            Width="117"
                                            Tag="2"/>
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                             Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                             IsZoomEnabled="False">
+                                            <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                              DataContext="{Binding Photo2}"
+                                                              Click="GoToMessage_OnClicked"/>
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
                                 </Canvas>
 
                                 <Canvas Visibility="{Binding Photo3IsSet}"
                                         framework:MetroInMotion.Tilt="1"
                                         VerticalAlignment="Center"
+                                        Background="Transparent"
                                         Margin="2,2,2,2"
                                         Height="117"
                                         Width="117">
@@ -117,11 +135,21 @@
                                            Height="117"
                                            Width="117"
                                            Tag="3"/>
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                             Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                             IsZoomEnabled="False">
+                                            <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                              DataContext="{Binding Photo3}"
+                                                              Click="GoToMessage_OnClicked"/>
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
                                 </Canvas>
 
                                 <Canvas Visibility="{Binding Photo4IsSet}"
                                         framework:MetroInMotion.Tilt="1"
                                         VerticalAlignment="Center"
+                                        Background="Transparent"
                                         Margin="2,2,0,2"
                                         Height="117"
                                         Width="117">
@@ -138,6 +166,15 @@
                                            Height="117"
                                            Width="117"
                                            Tag="4"/>
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                             Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                             IsZoomEnabled="False">
+                                            <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                              DataContext="{Binding Photo4}"
+                                                              Click="GoToMessage_OnClicked"/>
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
                                 </Canvas>
 
                             </StackPanel>
@@ -165,7 +202,18 @@
                     </framework:ExtendedLongListSelector.ListHeader>
                     <framework:ExtendedLongListSelector.ItemTemplate>
                         <DataTemplate>
-                            <videoCatalog:CatalogItemUC/>
+                            <videoCatalog:CatalogItemUC Background="Transparent">
+
+                                <toolkit:ContextMenuService.ContextMenu>
+                                    <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                         Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                         IsZoomEnabled="False">
+                                        <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                          Click="GoToMessage_OnClicked"/>
+                                    </toolkit:ContextMenu>
+                                </toolkit:ContextMenuService.ContextMenu>
+                                
+                            </videoCatalog:CatalogItemUC>
                         </DataTemplate>
                     </framework:ExtendedLongListSelector.ItemTemplate>
                 </framework:ExtendedLongListSelector>
@@ -183,12 +231,31 @@
                                                     Link="audiosList_OnLinked"   
                                                     SelectionChanged="audiosList_OnSelectionChanged"
                                                     ListFooterTemplate="{StaticResource FooterTemplate}"     
-                                                    ItemTemplate="{StaticResource TrackTemplate}"
                                                     ListFooter="{Binding}"
                                                     IsFlatList="True">
                     <framework:ExtendedLongListSelector.ListHeader>
                         <Rectangle Height="8"/>
                     </framework:ExtendedLongListSelector.ListHeader>
+                    <framework:ExtendedLongListSelector.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl ContentTemplate="{StaticResource TrackTemplate}"
+                                            Content="{Binding}" 
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"
+                                            Background="Transparent">
+
+                                <toolkit:ContextMenuService.ContextMenu>
+                                    <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                         Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                         IsZoomEnabled="False">
+                                        <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                          Click="GoToMessage_OnClicked"/>
+                                    </toolkit:ContextMenu>
+                                </toolkit:ContextMenuService.ContextMenu>
+                                
+                            </ContentControl>
+                        </DataTemplate>
+                    </framework:ExtendedLongListSelector.ItemTemplate>
                 </framework:ExtendedLongListSelector>
             </controls:PivotItem>
 
@@ -211,7 +278,19 @@
                     </framework:ExtendedLongListSelector.ListHeader>
                     <framework:ExtendedLongListSelector.ItemTemplate>
                         <DataTemplate>
-                            <ContentControl Template="{StaticResource DocumentTemplate}"/>
+                            <ContentControl Template="{StaticResource DocumentTemplate}"
+                                            Background="Transparent">
+                                
+                                <toolkit:ContextMenuService.ContextMenu>
+                                    <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                         Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                         IsZoomEnabled="False">
+                                        <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                          Click="GoToMessage_OnClicked"/>
+                                    </toolkit:ContextMenu>
+                                </toolkit:ContextMenuService.ContextMenu>
+                                
+                            </ContentControl>
                         </DataTemplate>
                     </framework:ExtendedLongListSelector.ItemTemplate>
                 </framework:ExtendedLongListSelector>
@@ -237,8 +316,18 @@
                     <framework:ExtendedLongListSelector.ItemTemplate>
                         <DataTemplate>
                             <Grid Height="108">
-                                <Grid Background="Transparent" framework:MetroInMotion.Tilt="2.5">
-                                    
+                                <Grid Background="Transparent" 
+                                      framework:MetroInMotion.Tilt="2.5">
+
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                                             Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                                                             IsZoomEnabled="False">
+                                            <toolkit:MenuItem Header="{Binding LocalizedResources.GoToMessage, Source={StaticResource LocalizedStrings}}"
+                                                              Click="GoToMessage_OnClicked"/>
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
+
                                     <Grid HorizontalAlignment="Left"
                                             VerticalAlignment="Top"
                                             Margin="12,6,0,6"

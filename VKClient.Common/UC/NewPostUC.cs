@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -57,25 +58,31 @@ namespace VKClient.Common.UC
 
     public NewPostUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.Loaded += new RoutedEventHandler(this.NewPostUC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.NewPostUC_Loaded));
     }
 
     private void NewPostUC_Loaded(object sender, RoutedEventArgs e)
     {
       if (this._isLoaded)
         return;
-      this._scroll = this.Ancestors<ScrollViewer>().FirstOrDefault<DependencyObject>() as ScrollViewer;
-      this.textBlockWatermarkText.Opacity = this.textBoxPost.Text == "" ? 1.0 : 0.0;
+      this._scroll = Enumerable.FirstOrDefault<DependencyObject>(this.Ancestors<ScrollViewer>()) as ScrollViewer;
+      ((UIElement) this.textBlockWatermarkText).Opacity = (this.textBoxPost.Text == "" ? 1.0 : 0.0);
       this._isLoaded = true;
     }
 
     private void textBoxPost_TextChanged_1(object sender, TextChangedEventArgs e)
     {
-      this.textBlockWatermarkText.Opacity = this.textBoxPost.Text == "" ? 1.0 : 0.0;
-      this.Dispatcher.BeginInvoke((Action) (() =>
+      ((UIElement) this.textBlockWatermarkText).Opacity = (this.textBoxPost.Text == "" ? 1.0 : 0.0);
+      base.Dispatcher.BeginInvoke((Action) (() =>
       {
-        double num = this.textBoxPost.ActualHeight - this.textBoxPost.Padding.Bottom;
+        double actualHeight = ((FrameworkElement) this.textBoxPost).ActualHeight;
+        Thickness padding = ((Control) this.textBoxPost).Padding;
+        // ISSUE: explicit reference operation
+        double bottom = ((Thickness) @padding).Bottom;
+        double num = actualHeight - bottom;
         if (this.savedHeight > 0.0)
         {
           bool flag = false;
@@ -88,7 +95,7 @@ namespace VKClient.Common.UC
       }));
     }
 
-    private void Image_Delete_Tap(object sender, GestureEventArgs e)
+    private void Image_Delete_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.OnImageDeleteTap == null)
         return;
@@ -96,45 +103,45 @@ namespace VKClient.Common.UC
       this.ForceFocusIfNeeded();
     }
 
-    private void AddAttachmentTap(object sender, GestureEventArgs e)
+    private void AddAttachmentTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.OnAddAttachmentTap == null)
         return;
       this.OnAddAttachmentTap();
     }
 
-    private void Image_Tap(object sender, GestureEventArgs e)
+    private void Image_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       this.ForceFocusIfNeeded();
       FrameworkElement frameworkElement = sender as FrameworkElement;
       if (frameworkElement == null)
         return;
-      IOutboundAttachment attachment = frameworkElement.DataContext as IOutboundAttachment;
-      WallPostViewModel wallPostViewModel = this.DataContext as WallPostViewModel;
-      if (wallPostViewModel == null || attachment == null)
+      IOutboundAttachment dataContext1 = frameworkElement.DataContext as IOutboundAttachment;
+      WallPostViewModel dataContext2 = base.DataContext as WallPostViewModel;
+      if (dataContext2 == null || dataContext1 == null)
         return;
-      wallPostViewModel.UploadAttachment(attachment, null);
+      dataContext2.UploadAttachment(dataContext1,  null);
     }
 
-    private void Grid_Tap(object sender, GestureEventArgs e)
+    private void Grid_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       this.ForceFocusIfNeeded();
       FrameworkElement frameworkElement = sender as FrameworkElement;
       if (frameworkElement == null)
         return;
-      IOutboundAttachment attachment = frameworkElement.DataContext as IOutboundAttachment;
-      if (attachment is IHandleTap)
+      IOutboundAttachment dataContext1 = frameworkElement.DataContext as IOutboundAttachment;
+      if (dataContext1 is IHandleTap)
       {
-        (attachment as IHandleTap).OnTap();
+        (dataContext1 as IHandleTap).OnTap();
       }
       else
       {
-        if (attachment == null)
+        if (dataContext1 == null)
           return;
-        WallPostViewModel wallPostViewModel = this.DataContext as WallPostViewModel;
-        if (wallPostViewModel == null || attachment == null)
+        WallPostViewModel dataContext2 = base.DataContext as WallPostViewModel;
+        if (dataContext2 == null || dataContext1 == null)
           return;
-        wallPostViewModel.UploadAttachment(attachment, null);
+        dataContext2.UploadAttachment(dataContext1,  null);
       }
     }
 
@@ -142,8 +149,8 @@ namespace VKClient.Common.UC
     {
       if (!this.IsFocused)
         return;
-      this.textBoxPost.Focus();
-      TextBoxPanelControl textBoxPanelControl = FramePageUtils.CurrentPage.Descendants<TextBoxPanelControl>().FirstOrDefault<DependencyObject>() as TextBoxPanelControl;
+      ((Control) this.textBoxPost).Focus();
+      TextBoxPanelControl textBoxPanelControl = Enumerable.FirstOrDefault<DependencyObject>(((DependencyObject) FramePageUtils.CurrentPage).Descendants<TextBoxPanelControl>()) as TextBoxPanelControl;
       if (textBoxPanelControl == null)
         return;
       textBoxPanelControl.IgnoreNextLostGotFocus();
@@ -154,7 +161,7 @@ namespace VKClient.Common.UC
       Rectangle rectangle = sender as Rectangle;
       if (rectangle == null)
         return;
-      rectangle.Opacity = 0.3;
+      ((UIElement) rectangle).Opacity = 0.3;
     }
 
     private void Rectangle_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
@@ -162,7 +169,7 @@ namespace VKClient.Common.UC
       Rectangle rectangle = sender as Rectangle;
       if (rectangle == null)
         return;
-      rectangle.Opacity = 0.2;
+      ((UIElement) rectangle).Opacity = 0.2;
     }
 
     private void Rectangle_ManipulationStarted2(object sender, ManipulationStartedEventArgs e)
@@ -170,7 +177,7 @@ namespace VKClient.Common.UC
       Rectangle rectangle = sender as Rectangle;
       if (rectangle == null)
         return;
-      rectangle.Opacity = 0.05;
+      ((UIElement) rectangle).Opacity = 0.05;
     }
 
     private void Rectangle_ManipulationCompleted2(object sender, ManipulationCompletedEventArgs e)
@@ -178,26 +185,26 @@ namespace VKClient.Common.UC
       Rectangle rectangle = sender as Rectangle;
       if (rectangle == null)
         return;
-      rectangle.Opacity = 0.0;
+      ((UIElement) rectangle).Opacity = 0.0;
     }
 
     private void itemsControlAttachments_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-      ICollection collection = this.itemsControlAttachments.ItemsSource as ICollection;
-      if (collection == null)
+      ICollection itemsSource = this.itemsControlAttachments.ItemsSource as ICollection;
+      if (itemsSource == null)
         return;
-      bool flag = collection.Count > 0;
-      this.textBoxPost.Padding = flag ? new Thickness(0.0, 0.0, 0.0, 100.0) : new Thickness();
-      this.itemsControlAttachments.Margin = flag ? new Thickness(-6.0, -105.0, -6.0, 6.0) : new Thickness(-6.0, -5.0, -6.0, 6.0);
+      bool flag = itemsSource.Count > 0;
+      ((Control) this.textBoxPost).Padding=(flag ? new Thickness(0.0, 0.0, 0.0, 100.0) :  new Thickness());
+      ((FrameworkElement) this.itemsControlAttachments).Margin=(flag ? new Thickness(-6.0, -105.0, -6.0, 6.0) : new Thickness(-6.0, -5.0, -6.0, 6.0));
     }
 
     private void TextBlock_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
       TextBlock textName = (TextBlock) sender;
-      OutboundAttachmentBase outboundAttachmentBase = textName.DataContext as OutboundAttachmentBase;
-      if (outboundAttachmentBase == null)
+      OutboundAttachmentBase dataContext = ((FrameworkElement) textName).DataContext as OutboundAttachmentBase;
+      if (dataContext == null)
         return;
-      textName.CorrectText(outboundAttachmentBase.Width - 8.0);
+      textName.CorrectText(dataContext.Width - 8.0);
     }
 
     [DebuggerNonUserCode]
@@ -206,11 +213,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/NewPostUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.textBoxPost = (TextBox) this.FindName("textBoxPost");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
-      this.itemsControlAttachments = (ItemsControl) this.FindName("itemsControlAttachments");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/NewPostUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.textBoxPost = (TextBox) base.FindName("textBoxPost");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
+      this.itemsControlAttachments = (ItemsControl) base.FindName("itemsControlAttachments");
     }
   }
 }

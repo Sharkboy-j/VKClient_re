@@ -11,7 +11,7 @@
                          xmlns:client="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
                          xmlns:commonUC="clr-namespace:VKClient.Common.UC;assembly=VKClient.Common"
                          SupportedOrientations="PortraitOrLandscape"
-                         xmlns:local="clr-namespace:VKMessenger.Views"                   
+                         xmlns:local="clr-namespace:VKMessenger.Views"
                          Orientation="Portrait"
                          mc:Ignorable="d"
                          d:DesignHeight="768"
@@ -41,22 +41,27 @@
                         VerticalAlignment="Bottom"
                         Tap="Title_Tap"
                         commonFramewor:MetroInMotion.Tilt="1.2">
-                <Grid Margin="0,0,56,0" HorizontalAlignment="Left">
+                <Grid Margin="0,0,56,0"
+                      HorizontalAlignment="Left">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="textBlockTitle"
-                        Text="{Binding UITitle, FallbackValue=ALEX}"
-                        Margin="7,27,0,0" Foreground="White"
-                        Style="{StaticResource AppTitleText}"/>
+                               Text="{Binding UITitle, FallbackValue=ALEX}"
+                               Margin="7,27,0,0"
+                               Foreground="White"
+                               Style="{StaticResource AppTitleText}" />
                     <Border Visibility="{Binding NotificationsDisabledVisibility}"
                             Background="{StaticResource PhoneBackgroundBrush}"
-                            HorizontalAlignment="Right" Width="15" Height="15"
-                            Margin="8,37,0,0" VerticalAlignment="Top"
+                            HorizontalAlignment="Right"
+                            Width="15"
+                            Height="15"
+                            Margin="8,37,0,0"
+                            VerticalAlignment="Top"
                             Grid.Column="1">
                         <Border.OpacityMask>
-                            <ImageBrush ImageSource="/VKClient.Common;component/Resources/mute-WXGA.png"/>
+                            <ImageBrush ImageSource="/VKClient.Common;component/Resources/mute-WXGA.png" />
                         </Border.OpacityMask>
                     </Border>
                 </Grid>
@@ -68,7 +73,7 @@
                                Foreground="{StaticResource PhoneDialogSubheaderBrush}"
                                Visibility="Visible"
                                x:Name="textBlockSubtitleVertical"
-                               Margin="                            6,-4,0,0"
+                               Margin="6,-4,0,0"
                                Opacity="0.75" />
                     <Border Width="13"
                             Height="20"
@@ -90,10 +95,10 @@
                                         VerticalAlignment="Bottom" />
 
             <Grid Background="Transparent"
-                  Width="40"
+                  Width="64"
+                  Height="80"
+                  Margin="0 32 0 0"
                   HorizontalAlignment="Right"
-                  Height="40"
-                  Margin="0 8 0 32"
                   VerticalAlignment="Bottom"
                   Tap="OptionsButtonTap">
 
@@ -102,6 +107,10 @@
                                           Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}"
                                           Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
                                           IsZoomEnabled="False">
+
+                        <toolkit:MenuItem Name="menuItemAllowDenyMessagesFromGroup"
+                                          Click="MenuItemAllowDenyMessagesFromGroupClick"
+                                          Header="{Binding Path=LocalizedResources.MessagesFromGroupDeny, Source={StaticResource LocalizedStrings}}" />
 
                         <toolkit:MenuItem Name="menuItemRefresh"
                                           Click="MenuRefreshClick"
@@ -115,7 +124,7 @@
                         <toolkit:MenuItem Name="menuItemShowMaterials"
                                           Click="MenuShowMaterialsClick"
                                           Header="{Binding Path=LocalizedResources.Messenger_ShowMaterials, Source={StaticResource LocalizedStrings}}" />
-                        
+
                         <toolkit:MenuItem Name="menuItemDisableEnableNotifications"
                                           Click="MenuDisableEnableNotificationsClick"
                                           Header="{Binding Path=LocalizedResources.TurnOffNotifications, 
@@ -134,13 +143,9 @@
                     </toolkit:ContextMenu>
                 </toolkit:ContextMenuService.ContextMenu>
 
-                <Border Width="4"
-                        Height="20"
-                        Background="{StaticResource PhoneBlueOnBlueIconBrush}">
-                    <Border.OpacityMask>
-                        <ImageBrush commonFramewor:ImageLoader.ImageBrushMultiResSource="/Resources/New/MoreActions.png"></ImageBrush>
-                    </Border.OpacityMask>
-                </Border>
+                <Image Width="32"
+                       Height="32"
+                       commonFramewor:MultiResImageLoader.UriSource="/Resources/MoreHorizontal32px.png" />
             </Grid>
         </Grid>
 
@@ -185,10 +190,14 @@
                    VerticalAlignment="Bottom"
                    HorizontalAlignment="Right" />
             <commonUC:NewMessageUC Grid.Row="1"
-                                   x:Name="ucNewMessage" />
+                                   x:Name="ucNewMessage"
+                                   IsVoiceMessageButtonEnabled="True" />
 
 
         </Grid>
+
+        <ContentControl x:Name="MediaControl"
+                        IsHitTestVisible="False" />
 
     </Grid>
 

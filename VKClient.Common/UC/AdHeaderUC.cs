@@ -24,9 +24,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/AdHeaderUC.xaml", UriKind.Relative));
-      this.textBlock1 = (TextBlock) this.FindName("textBlock1");
-      this.textBlock2 = (TextBlock) this.FindName("textBlock2");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/AdHeaderUC.xaml", UriKind.Relative));
+      this.textBlock1 = (TextBlock) base.FindName("textBlock1");
+      this.textBlock2 = (TextBlock) base.FindName("textBlock2");
     }
   }
 }

@@ -15,7 +15,10 @@ namespace VKClient.Audio.Base.Social
 
     public static long GetItemIdByRemoteId(string remoteId)
     {
-      return long.Parse(remoteId.Split(new string[1]{ "#%^" }, StringSplitOptions.RemoveEmptyEntries)[2]);
+      return long.Parse(remoteId.Split(new string[1]
+      {
+        "#%^"
+      }, StringSplitOptions.RemoveEmptyEntries)[2]);
     }
 
     public static NewsFeedGetParams GetNewsFeedGetParamsBy(string lastNewsFeedItemRemoteId, int itemsCount)
@@ -74,9 +77,12 @@ namespace VKClient.Audio.Base.Social
           from = "";
           if (!this._dict.ContainsKey(remoteId))
             return;
-          string[] local_2 = this._dict[remoteId].Split(new string[1]{ "|||" }, StringSplitOptions.RemoveEmptyEntries);
-          offset = int.Parse(local_2[0]);
-          from = local_2[1];
+          string[] strArray = this._dict[remoteId].Split(new string[1]
+          {
+            "|||"
+          }, StringSplitOptions.RemoveEmptyEntries);
+          offset = int.Parse(strArray[0]);
+          from = strArray[1];
         }
       }
 
@@ -84,8 +90,8 @@ namespace VKClient.Audio.Base.Social
       {
         lock (RemoteIdHelper.NewsFeedNewFromData._lockObj)
         {
-          string local_2 = offset.ToString() + "|||" + from + "|||" + DateTime.UtcNow.ToString();
-          this._dict[remoteId] = local_2;
+          string str = offset.ToString() + "|||" + from + "|||" + DateTime.UtcNow.ToString();
+          this._dict[remoteId] = str;
           this.SaveState();
         }
       }
@@ -101,7 +107,10 @@ namespace VKClient.Audio.Base.Social
         List<string> stringList = new List<string>();
         foreach (KeyValuePair<string, string> keyValuePair in this._dict)
         {
-          string[] strArray = keyValuePair.Value.Split(new string[1]{ "|||" }, StringSplitOptions.RemoveEmptyEntries);
+          string[] strArray = keyValuePair.Value.Split(new string[1]
+          {
+            "|||"
+          }, StringSplitOptions.RemoveEmptyEntries);
           DateTime result = new DateTime();
           int index = 2;
           if (DateTime.TryParse(strArray[index], out result) && (DateTime.UtcNow - result).TotalDays > 14.0)

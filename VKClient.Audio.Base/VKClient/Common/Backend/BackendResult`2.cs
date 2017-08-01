@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace VKClient.Common.Backend
 {
@@ -9,6 +10,8 @@ namespace VKClient.Common.Backend
     public Z ResultCode { get; set; }
 
     public VKRequestsDispatcher.Error Error { get; set; }
+
+    public List<ExecuteError> ExecuteErrors { get; set; }
 
     public BackendResult(Z resultCode, T resultData)
     {

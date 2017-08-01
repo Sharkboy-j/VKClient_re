@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 namespace YoutubeExtractor
 {
-    public class VideoInfo
-    {
-        internal static IEnumerable<VideoInfo> Defaults = (IEnumerable<VideoInfo>)new List<VideoInfo>()
+  public class VideoInfo
+  {
+    internal static IEnumerable<VideoInfo> Defaults = (IEnumerable<VideoInfo>) new List<VideoInfo>()
     {
       new VideoInfo(5, VideoType.Flash, 240, false, AudioType.Mp3, 64, AdaptiveType.None),
       new VideoInfo(6, VideoType.Flash, 270, false, AudioType.Mp3, 64, AdaptiveType.None),
@@ -51,98 +51,98 @@ namespace YoutubeExtractor
       new VideoInfo(172, VideoType.WebM, 0, false, AudioType.Vorbis, 192, AdaptiveType.Audio)
     };
 
-        public AdaptiveType AdaptiveType { get; private set; }
+    public AdaptiveType AdaptiveType { get; private set; }
 
-        public int AudioBitrate { get; private set; }
+    public int AudioBitrate { get; private set; }
 
-        public string AudioExtension
+    public string AudioExtension
+    {
+      get
+      {
+        switch (this.AudioType)
         {
-            get
-            {
-                switch (this.AudioType)
-                {
-                    case AudioType.Aac:
-                        return ".aac";
-                    case AudioType.Mp3:
-                        return ".mp3";
-                    case AudioType.Vorbis:
-                        return ".ogg";
-                    default:
-                        return null;
-                }
-            }
+          case AudioType.Aac:
+            return ".aac";
+          case AudioType.Mp3:
+            return ".mp3";
+          case AudioType.Vorbis:
+            return ".ogg";
+          default:
+            return  null;
         }
-
-        public AudioType AudioType { get; private set; }
-
-        public bool CanExtractAudio
-        {
-            get
-            {
-                return this.VideoType == VideoType.Flash;
-            }
-        }
-
-        public string DownloadUrl { get; internal set; }
-
-        public int FormatCode { get; private set; }
-
-        public bool Is3D { get; private set; }
-
-        public bool RequiresDecryption { get; internal set; }
-
-        public int Resolution { get; private set; }
-
-        public string Title { get; internal set; }
-
-        public string VideoExtension
-        {
-            get
-            {
-                switch (this.VideoType)
-                {
-                    case VideoType.Mobile:
-                        return ".3gp";
-                    case VideoType.Flash:
-                        return ".flv";
-                    case VideoType.Mp4:
-                        return ".mp4";
-                    case VideoType.WebM:
-                        return ".webm";
-                    default:
-                        return (string)null;
-                }
-            }
-        }
-
-        public VideoType VideoType { get; private set; }
-
-        internal string HtmlPlayerVersion { get; set; }
-
-        internal VideoInfo(int formatCode)
-            : this(formatCode, VideoType.Unknown, 0, false, AudioType.Unknown, 0, AdaptiveType.None)
-        {
-        }
-
-        internal VideoInfo(VideoInfo info)
-            : this(info.FormatCode, info.VideoType, info.Resolution, info.Is3D, info.AudioType, info.AudioBitrate, info.AdaptiveType)
-        {
-        }
-
-        private VideoInfo(int formatCode, VideoType videoType, int resolution, bool is3D, AudioType audioType, int audioBitrate, AdaptiveType adaptiveType)
-        {
-            this.FormatCode = formatCode;
-            this.VideoType = videoType;
-            this.Resolution = resolution;
-            this.Is3D = is3D;
-            this.AudioType = audioType;
-            this.AudioBitrate = audioBitrate;
-            this.AdaptiveType = adaptiveType;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("Full Title: {0}, Type: {1}, Resolution: {2}p", (object)(this.Title + this.VideoExtension), (object)this.VideoType, (object)this.Resolution);
-        }
+      }
     }
+
+    public AudioType AudioType { get; private set; }
+
+    public bool CanExtractAudio
+    {
+      get
+      {
+        return this.VideoType == VideoType.Flash;
+      }
+    }
+
+    public string DownloadUrl { get; internal set; }
+
+    public int FormatCode { get; private set; }
+
+    public bool Is3D { get; private set; }
+
+    public bool RequiresDecryption { get; internal set; }
+
+    public int Resolution { get; private set; }
+
+    public string Title { get; internal set; }
+
+    public string VideoExtension
+    {
+      get
+      {
+        switch (this.VideoType)
+        {
+          case VideoType.Mobile:
+            return ".3gp";
+          case VideoType.Flash:
+            return ".flv";
+          case VideoType.Mp4:
+            return ".mp4";
+          case VideoType.WebM:
+            return ".webm";
+          default:
+            return  null;
+        }
+      }
+    }
+
+    public VideoType VideoType { get; private set; }
+
+    internal string HtmlPlayerVersion { get; set; }
+
+    internal VideoInfo(int formatCode)
+      : this(formatCode, VideoType.Unknown, 0, false, AudioType.Unknown, 0, AdaptiveType.None)
+    {
+    }
+
+    internal VideoInfo(VideoInfo info)
+      : this(info.FormatCode, info.VideoType, info.Resolution, info.Is3D, info.AudioType, info.AudioBitrate, info.AdaptiveType)
+    {
+    }
+
+    private VideoInfo(int formatCode, VideoType videoType, int resolution, bool is3D, AudioType audioType, int audioBitrate, AdaptiveType adaptiveType)
+    {
+      this.FormatCode = formatCode;
+      this.VideoType = videoType;
+      this.Resolution = resolution;
+      this.Is3D = is3D;
+      this.AudioType = audioType;
+      this.AudioBitrate = audioBitrate;
+      this.AdaptiveType = adaptiveType;
+    }
+
+    public override string ToString()
+    {
+      return string.Format("Full Title: {0}, Type: {1}, Resolution: {2}p", (this.Title + this.VideoExtension), this.VideoType, this.Resolution);
+    }
+  }
 }

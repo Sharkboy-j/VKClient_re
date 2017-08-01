@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace VKClient.Common.UC
 {
@@ -16,6 +17,7 @@ namespace VKClient.Common.UC
 
     public Picker2UC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -39,9 +41,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/Picker2UC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.listPicker = (LongListSelector) this.FindName("listPicker");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/Picker2UC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.listPicker = (LongListSelector) base.FindName("listPicker");
     }
   }
 }

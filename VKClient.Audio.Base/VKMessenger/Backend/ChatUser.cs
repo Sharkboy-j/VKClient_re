@@ -1,10 +1,12 @@
+using VKClient.Common.Backend.DataObjects;
+
 namespace VKMessenger.Backend
 {
   public class ChatUser
   {
     private string _photo_max;
 
-    public int uid
+    public long uid
     {
       get
       {
@@ -16,7 +18,7 @@ namespace VKMessenger.Backend
       }
     }
 
-    public int id { get; set; }
+    public long id { get; set; }
 
     public string first_name { get; set; }
 
@@ -36,7 +38,7 @@ namespace VKMessenger.Backend
     {
       get
       {
-        if (this.id < -2000000000)
+        if (this.id < -2000000000L)
           return "/VKClient.Common;component/Resources/EmailUser.png";
         return this._photo_max ?? this.photo_200;
       }
@@ -58,8 +60,29 @@ namespace VKMessenger.Backend
 
     public string type { get; set; }
 
-    public string name { get; set; }
+    public long invited_by { get; set; }
 
-    public int invited_by { get; set; }
+    public int sex { get; set; }
+
+    public ChatUser(User user, long invitedById)
+    {
+      this.type = "profile";
+      this.invited_by = invitedById;
+      this.id = user.id;
+      this.first_name = user.first_name;
+      this.last_name = user.last_name;
+      this.first_name_acc = user.first_name_acc;
+      this.last_name_acc = user.last_name_acc;
+      this.online = user.online;
+      this.online_mobile = user.online_mobile;
+      this.photo_rec = user.photo_rec;
+      this.photo_max = user.photo_max;
+      this.photo_200 = user.photo_200;
+      this.sex = user.sex;
+    }
+
+    public ChatUser()
+    {
+    }
   }
 }

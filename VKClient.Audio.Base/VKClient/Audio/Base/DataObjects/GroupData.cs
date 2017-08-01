@@ -26,7 +26,7 @@ namespace VKClient.Audio.Base.DataObjects
       {
         Group group = this.group;
         if (group == null)
-          return (Counters) null;
+          return  null;
         return group.counters;
       }
     }
@@ -41,13 +41,15 @@ namespace VKClient.Audio.Base.DataObjects
 
     public VKList<SubscriptionObj> subscriptions { get; set; }
 
+    public VKList<GiftItemData> gifts { get; set; }
+
     public Album mainAlbum { get; set; }
 
     public Photo lastPhoto { get; set; }
 
     public List<Topic> topics { get; set; }
 
-    public List<VKClient.Common.Backend.DataObjects.Video> videos { get; set; }
+    public List<Video> videos { get; set; }
 
     public List<Product> products { get; set; }
 
@@ -70,7 +72,7 @@ namespace VKClient.Audio.Base.DataObjects
       get
       {
         Group group = this.group;
-        return (group != null ? group.name : null) ?? "";
+        return (group != null ? group.name :  null) ?? "";
       }
     }
 
@@ -79,7 +81,7 @@ namespace VKClient.Audio.Base.DataObjects
       get
       {
         Group group = this.group;
-        return (group != null ? group.name : null) ?? "";
+        return (group != null ? group.name :  null) ?? "";
       }
     }
 
@@ -163,7 +165,7 @@ namespace VKClient.Audio.Base.DataObjects
       get
       {
         Group group = this.group;
-        return !string.IsNullOrEmpty(group != null ? group.deactivated : null);
+        return !string.IsNullOrEmpty(group != null ? group.deactivated :  null);
       }
     }
 
@@ -210,6 +212,20 @@ namespace VKClient.Audio.Base.DataObjects
         if (this.group != null)
           return this.group.verified == 1;
         return false;
+      }
+    }
+
+    public CoverImage CoverImage
+    {
+      get
+      {
+        Group group = this.group;
+        if (group == null)
+          return  null;
+        Cover cover = group.cover;
+        if (cover == null)
+          return  null;
+        return cover.CurrentImage;
       }
     }
 

@@ -8,7 +8,7 @@ namespace VKClient.Common.UC
 {
   public class TextSeparatorUC : UserControlVirtualizable
   {
-    public static readonly DependencyProperty TextProperty = DependencyProperty.Register("Text", typeof (string), typeof (TextSeparatorUC), new PropertyMetadata(new PropertyChangedCallback(TextSeparatorUC.Text_OnChanged)));
+      public static readonly DependencyProperty TextProperty = DependencyProperty.Register("Text", typeof(string), typeof(TextSeparatorUC), new PropertyMetadata(new PropertyChangedCallback(TextSeparatorUC.Text_OnChanged)));
     public const double FIXED_HEIGHT = 56.0;
     internal Grid gridViewedFeedback;
     internal TextBlock textBlockText;
@@ -18,11 +18,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(TextSeparatorUC.TextProperty);
+        return (string) base.GetValue(TextSeparatorUC.TextProperty);
       }
       set
       {
-        this.SetValue(TextSeparatorUC.TextProperty, (object) value);
+        base.SetValue(TextSeparatorUC.TextProperty, value);
       }
     }
 
@@ -33,7 +33,8 @@ namespace VKClient.Common.UC
 
     private static void Text_OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      ((TextSeparatorUC) d).textBlockText.Text = e.NewValue as string;
+      // ISSUE: explicit reference operation
+      ((TextSeparatorUC) d).textBlockText.Text = (e.NewValue as string);
     }
 
     [DebuggerNonUserCode]
@@ -42,9 +43,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/TextSeparatorUC.xaml", UriKind.Relative));
-      this.gridViewedFeedback = (Grid) this.FindName("gridViewedFeedback");
-      this.textBlockText = (TextBlock) this.FindName("textBlockText");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/TextSeparatorUC.xaml", UriKind.Relative));
+      this.gridViewedFeedback = (Grid) base.FindName("gridViewedFeedback");
+      this.textBlockText = (TextBlock) base.FindName("textBlockText");
     }
   }
 }

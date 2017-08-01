@@ -21,7 +21,7 @@ namespace VKClient.Common.UC.Registration
     {
       get
       {
-        return this.DataContext as RegistrationPhoneNumberViewModel;
+        return base.DataContext as RegistrationPhoneNumberViewModel;
       }
     }
 
@@ -29,34 +29,36 @@ namespace VKClient.Common.UC.Registration
 
     public RegistrationStep2UC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.Loaded += new RoutedEventHandler(this.RegistrationStep2UC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.RegistrationStep2UC_Loaded));
     }
 
     private void RegistrationStep2UC_Loaded(object sender, RoutedEventArgs e)
     {
-      this.textBlockPhoneNumberWatermark.Visibility = this.textBoxPhoneNumber.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible;
+      ((UIElement) this.textBlockPhoneNumberWatermark).Visibility = (this.textBoxPhoneNumber.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible);
     }
 
     private void textBoxTextChanged(object sender, TextChangedEventArgs e)
     {
       this.UpdateSource(sender as TextBox);
-      this.textBlockPhoneNumberWatermark.Visibility = this.textBoxPhoneNumber.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible;
+      ((UIElement) this.textBlockPhoneNumberWatermark).Visibility = (this.textBoxPhoneNumber.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible);
     }
 
     private void UpdateSource(TextBox textBox)
     {
-      textBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+      ((FrameworkElement) textBox).GetBindingExpression((DependencyProperty) TextBox.TextProperty).UpdateSource();
     }
 
-    private void textBoxCountry_Tap(object sender, GestureEventArgs e)
+    private void textBoxCountry_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       this.ShowingPopup = true;
       CountryPickerUC.Show(this.RegistrationPhoneNumberVM.Country, false, (Action<Country>) (c =>
       {
         this.ShowingPopup = false;
         this.RegistrationPhoneNumberVM.Country = c;
-        this.textBoxPhoneNumber.Focus();
+        ((Control) this.textBoxPhoneNumber).Focus();
       }), (Action) (() => this.ShowingPopup = false));
     }
 
@@ -64,10 +66,10 @@ namespace VKClient.Common.UC.Registration
     {
       if (e.Key != Key.Enter)
         return;
-      RegistrationPage registrationPage = FramePageUtils.CurrentPage as RegistrationPage;
-      if (registrationPage == null)
+      RegistrationPage currentPage = FramePageUtils.CurrentPage as RegistrationPage;
+      if (currentPage == null)
         return;
-      registrationPage.RegistrationVM.CompleteCurrentStep();
+      currentPage.RegistrationVM.CompleteCurrentStep();
     }
 
     [DebuggerNonUserCode]
@@ -76,11 +78,11 @@ namespace VKClient.Common.UC.Registration
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep2UC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.textBoxCountry = (TextBox) this.FindName("textBoxCountry");
-      this.textBoxPhoneNumber = (TextBox) this.FindName("textBoxPhoneNumber");
-      this.textBlockPhoneNumberWatermark = (TextBlock) this.FindName("textBlockPhoneNumberWatermark");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep2UC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.textBoxCountry = (TextBox) base.FindName("textBoxCountry");
+      this.textBoxPhoneNumber = (TextBox) base.FindName("textBoxPhoneNumber");
+      this.textBlockPhoneNumberWatermark = (TextBlock) base.FindName("textBlockPhoneNumberWatermark");
     }
   }
 }

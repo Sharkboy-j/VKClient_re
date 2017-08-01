@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,12 +32,12 @@ namespace XamlAnimatedGif.Decoding
 
     private async Task ReadInternalAsync(Stream stream)
     {
-      this.Header = await GifHeader.ReadAsync(stream).ConfigureAwait(false);
-      if (this.Header.LogicalScreenDescriptor.HasGlobalColorTable)
-        this.GlobalColorTable = await GifHelpers.ReadColorTableAsync(stream, this.Header.LogicalScreenDescriptor.GlobalColorTableSize).ConfigureAwait(false);
-      await this.ReadFramesAsync(stream).ConfigureAwait(false);
-      GifApplicationExtension ext = this.Extensions.OfType<GifApplicationExtension>().FirstOrDefault<GifApplicationExtension>(new Func<GifApplicationExtension, bool>(GifHelpers.IsNetscapeExtension));
-      this.RepeatCount = ext != null ? GifHelpers.GetRepeatCount(ext) : (ushort) 1;
+        this.Header = await GifHeader.ReadAsync(stream).ConfigureAwait(false);
+        if (this.Header.LogicalScreenDescriptor.HasGlobalColorTable)
+            this.GlobalColorTable = await GifHelpers.ReadColorTableAsync(stream, this.Header.LogicalScreenDescriptor.GlobalColorTableSize).ConfigureAwait(false);
+        await this.ReadFramesAsync(stream).ConfigureAwait(false);
+        GifApplicationExtension ext = this.Extensions.OfType<GifApplicationExtension>().FirstOrDefault<GifApplicationExtension>(new Func<GifApplicationExtension, bool>(GifHelpers.IsNetscapeExtension));
+        this.RepeatCount = ext != null ? GifHelpers.GetRepeatCount(ext) : (ushort)1;
     }
 
     private async Task ReadFramesAsync(Stream stream)

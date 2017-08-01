@@ -24,14 +24,14 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as SettingsNotificationsViewModel;
+        return base.DataContext as SettingsNotificationsViewModel;
       }
     }
 
     public SettingsNotifications()
     {
       this.InitializeComponent();
-      this.Header.textBlockTitle.Text = CommonResources.NewSettings_Notifications.ToUpperInvariant();
+      this.Header.textBlockTitle.Text = (CommonResources.NewSettings_Notifications.ToUpperInvariant());
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -39,16 +39,16 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      this.DataContext = (object) new SettingsNotificationsViewModel();
+      base.DataContext = (new SettingsNotificationsViewModel());
       this._isInitialized = true;
     }
 
     private void DoNotDisturbClick(object sender, RoutedEventArgs e)
     {
-      PickerUC.ShowPickerFor(new ObservableCollection<PickableItem>(SettingsNotificationsViewModel.DoNotDisturbOptions), (PickableItem) null, (Action<PickableItem>) (pi => this.VM.Disable((int) (pi.ID * 3600L))), (Action<PickableItem>) null, null, CommonResources.Settings_Notifications_DoNotDisturb.ToUpperInvariant());
+      PickerUC.ShowPickerFor(new ObservableCollection<PickableItem>(SettingsNotificationsViewModel.DoNotDisturbOptions),  null,  (pi => this.VM.Disable((int) (pi.ID * 3600L))),  null,  null, CommonResources.Settings_Notifications_DoNotDisturb.ToUpperInvariant());
     }
 
-    private void ConfigureNewsSourcesTap(object sender, GestureEventArgs e)
+    private void ConfigureNewsSourcesTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       Navigator.Current.NavigateToManageSources(ManageSourcesMode.ManagePushNotificationsSources);
     }
@@ -64,10 +64,10 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/SettingsNotifications.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.Header = (GenericHeaderUC) this.FindName("Header");
-      this.ContentPanel = (Grid) this.FindName("ContentPanel");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/SettingsNotifications.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.ContentPanel = (Grid) base.FindName("ContentPanel");
     }
   }
 }

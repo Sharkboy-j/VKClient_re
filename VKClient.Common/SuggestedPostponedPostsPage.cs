@@ -28,7 +28,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as SuggestedPostponedPostsViewModel;
+        return base.DataContext as SuggestedPostponedPostsViewModel;
       }
     }
 
@@ -40,7 +40,7 @@ namespace VKClient.Common
       this.panelNews.ScrollPositionChanged += new EventHandler<MyVirtualizingPanel2.ScrollPositionChangedEventAgrs>(this.panelNews_ScrollPositionChanged);
       this.scrollNews.BindViewportBoundsTo((FrameworkElement) this.stackPanel);
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.panelNews);
-      this.panelNews.OnRefresh = (Action) (() => this.VM.WallVM.LoadData(true, false, (Action<BackendResult<WallData, ResultCode>>) null, false));
+      this.panelNews.OnRefresh = (Action) (() => this.VM.WallVM.LoadData(true, false,  null, false));
     }
 
     private void panelNews_ScrollPositionChanged(object sender, MyVirtualizingPanel2.ScrollPositionChangedEventAgrs e)
@@ -52,9 +52,9 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      SuggestedPostponedPostsViewModel postponedPostsViewModel = new SuggestedPostponedPostsViewModel(this.CommonParameters.UserOrGroupId, this.CommonParameters.IsGroup, (SuggestedPostponedMode) int.Parse(this.NavigationContext.QueryString["Mode"]));
-      this.DataContext = (object) postponedPostsViewModel;
-      postponedPostsViewModel.WallVM.LoadData(false, false, (Action<BackendResult<WallData, ResultCode>>) null, false);
+      SuggestedPostponedPostsViewModel postponedPostsViewModel = new SuggestedPostponedPostsViewModel(this.CommonParameters.UserOrGroupId, this.CommonParameters.IsGroup, (SuggestedPostponedMode) int.Parse(((Page) this).NavigationContext.QueryString["Mode"]));
+      base.DataContext = postponedPostsViewModel;
+      postponedPostsViewModel.WallVM.LoadData(false, false,  null, false);
       this._isInitialized = true;
     }
 
@@ -64,14 +64,14 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/SuggestedPostponedPostsPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ContentPanel = (Grid) this.FindName("ContentPanel");
-      this.scrollNews = (ViewportControl) this.FindName("scrollNews");
-      this.stackPanel = (StackPanel) this.FindName("stackPanel");
-      this.panelNews = (MyVirtualizingPanel2) this.FindName("panelNews");
-      this.Header = (GenericHeaderUC) this.FindName("Header");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/SuggestedPostponedPostsPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ContentPanel = (Grid) base.FindName("ContentPanel");
+      this.scrollNews = (ViewportControl) base.FindName("scrollNews");
+      this.stackPanel = (StackPanel) base.FindName("stackPanel");
+      this.panelNews = (MyVirtualizingPanel2) base.FindName("panelNews");
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
     }
   }
 }

@@ -47,7 +47,7 @@ namespace VKClient.Audio.Base.BackendServices
           "offset",
           offset.ToString()
         }
-      }, callback, (Func<string, VKList<Photo>>) null, false, true, new CancellationToken?());
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetPhotos(long ownerId, int offset, long albumId, Action<BackendResult<VKList<Photo>, ResultCode>> callback)
@@ -74,7 +74,7 @@ namespace VKClient.Audio.Base.BackendServices
           "rev",
           "1"
         }
-      }, callback, (Func<string, VKList<Photo>>) null, false, true, new CancellationToken?());
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void DeleteProfilePhoto(long ownerId, Action<BackendResult<string, ResultCode>> callback)
@@ -85,7 +85,7 @@ namespace VKClient.Audio.Base.BackendServices
           "owner_id",
           ownerId.ToString()
         }
-      }, callback, (Func<string, string>) null, false, true, new CancellationToken?());
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void SaveProfilePhoto(long ownerId, Rect thumbnailRect, byte[] photoData, Action<BackendResult<ProfilePhoto, ResultCode>> callback)
@@ -99,9 +99,13 @@ namespace VKClient.Audio.Base.BackendServices
         else
         {
           string uploadUrl = res.ResultData.upload_url;
-          if (thumbnailRect.Width != 0.0)
+          // ISSUE: explicit reference operation
+          if (((Rect) @thumbnailRect).Width != 0.0)
           {
-            string str = string.Format("&_square_crop={0},{1},{2}&_full={0},{1},{2},{2}", (object) (int) thumbnailRect.X, (object) (int) thumbnailRect.Y, (object) (int) thumbnailRect.Width);
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            string str = string.Format("&_square_crop={0},{1},{2}&_full={0},{1},{2},{2}", (int) ((Rect) @thumbnailRect).X, (int) ((Rect) @thumbnailRect).Y, (int) ((Rect) @thumbnailRect).Width);
             uploadUrl += str;
           }
           MemoryStream memoryStream = new MemoryStream(photoData);
@@ -111,7 +115,7 @@ namespace VKClient.Audio.Base.BackendServices
               callback(new BackendResult<ProfilePhoto, ResultCode>(ResultCode.UnknownError));
             else
               ProfilesService.SaveProfilePhoto(JsonConvert.DeserializeObject<UploadPhotoResponseData>(jsonResult.JsonString), ownerId, callback);
-          }), "MyImage.jpg", (Action<double>) null, (Cancellation) null);
+          }), "MyImage.jpg",  null,  null);
         }
       }));
     }
@@ -124,17 +128,16 @@ namespace VKClient.Audio.Base.BackendServices
           "owner_id",
           ownerId.ToString()
         }
-      }, callback, (Func<string, VKClient.Audio.Base.UploadServerAddress>) null, false, true, new CancellationToken?());
+      }, callback, (Func<string, VKClient.Audio.Base.UploadServerAddress>) null, false, true, new CancellationToken?(),  null);
     }
 
     private static void SaveProfilePhoto(UploadPhotoResponseData responseData, long ownerId, Action<BackendResult<ProfilePhoto, ResultCode>> callback)
     {
-      BackendResult<ProfilePhoto, ResultCode> savePhotoResult;
       Action<BackendResult<ProfilePhoto, ResultCode>> callback1 = (Action<BackendResult<ProfilePhoto, ResultCode>>) (result =>
       {
-        if (result.ResultCode == ResultCode.Succeeded)
+        if (result.ResultCode == ResultCode.Succeeded && ownerId < 0L)
         {
-          savePhotoResult = result;
+          BackendResult<ProfilePhoto, ResultCode> savePhotoResult = result;
           Action<BackendResult<Group[], ResultCode>> callback2 = (Action<BackendResult<Group[], ResultCode>>) (getGroupResult =>
           {
             if (getGroupResult.ResultCode == ResultCode.Succeeded)
@@ -154,7 +157,7 @@ namespace VKClient.Audio.Base.BackendServices
               "group_id",
               (-ownerId).ToString()
             }
-          }, callback2, (Func<string, Group[]>) null, false, true, new CancellationToken?());
+          }, callback2, (Func<string, Group[]>) null, false, true, new CancellationToken?(),  null);
         }
         else
           callback(result);
@@ -173,7 +176,7 @@ namespace VKClient.Audio.Base.BackendServices
           "hash",
           responseData.hash
         }
-      }, callback1, (Func<string, ProfilePhoto>) null, false, true, new CancellationToken?());
+      }, callback1,  null, false, true, new CancellationToken?(),  null);
     }
   }
 }

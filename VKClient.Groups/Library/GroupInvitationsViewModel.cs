@@ -29,41 +29,41 @@ namespace VKClient.Groups.Library
 
     public Func<CommunityInvitationsList, ListWithCount<CommunityInvitation>> ConverterFunc
     {
-      get
-      {
-        return (Func<CommunityInvitationsList, ListWithCount<CommunityInvitation>>) (response =>
+        get
         {
-          ListWithCount<CommunityInvitation> listWithCount = new ListWithCount<CommunityInvitation>();
-          foreach (Group invitation1 in response.invitations)
-          {
-            Group invitation = invitation1;
-            CommunityInvitation data = new CommunityInvitation()
+            return (Func<CommunityInvitationsList, ListWithCount<CommunityInvitation>>)(response =>
             {
-              community = invitation,
-              inviter = ((IEnumerable<User>) response.inviters).First<User>((Func<User, bool>) (u => u.id == invitation.invited_by))
-            };
-            data.InvitationHandledAction = (Action<CommunityInvitations>) (i =>
-            {
-              this._invitationsVM.Delete(data);
-              if (this.ParentCommunityInvitationsUC == null)
-                return;
-              ((GroupsListViewModel) this.ParentCommunityInvitationsUC.DataContext).InvitationsViewModel = i;
+                ListWithCount<CommunityInvitation> listWithCount = new ListWithCount<CommunityInvitation>();
+                foreach (Group invitation1 in response.invitations)
+                {
+                    Group invitation = invitation1;
+                    CommunityInvitation data = new CommunityInvitation()
+                    {
+                        community = invitation,
+                        inviter = ((IEnumerable<User>)response.inviters).First<User>((Func<User, bool>)(u => u.id == invitation.invited_by))
+                    };
+                    data.InvitationHandledAction = (Action<CommunityInvitations>)(i =>
+                    {
+                        this._invitationsVM.Delete(data);
+                        if (this.ParentCommunityInvitationsUC == null)
+                            return;
+                        ((GroupsListViewModel)(this.ParentCommunityInvitationsUC).DataContext).InvitationsViewModel = i;
+                    });
+                    listWithCount.List.Add(data);
+                }
+                listWithCount.TotalCount = response.count;
+                CountersManager.Current.Counters.groups = response.count;
+                EventAggregator.Current.Publish((object)new CountersChanged(CountersManager.Current.Counters));
+                if (this.ParentCommunityInvitationsUC != null)
+                    this.ParentCommunityInvitationsUC.UpdateDataView(response);
+                return listWithCount;
             });
-            listWithCount.List.Add(data);
-          }
-          listWithCount.TotalCount = response.count;
-          CountersManager.Current.Counters.groups = response.count;
-          EventAggregator.Current.Publish((object) new CountersChanged(CountersManager.Current.Counters));
-          if (this.ParentCommunityInvitationsUC != null)
-            this.ParentCommunityInvitationsUC.UpdateDataView(response);
-          return listWithCount;
-        });
-      }
+        }
     }
 
     public GroupInvitationsViewModel()
     {
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
       this._invitationsVM = new GenericCollectionViewModel<CommunityInvitationsList, CommunityInvitation>((ICollectionDataProvider<CommunityInvitationsList, CommunityInvitation>) this)
       {
         NeedCollectionCountBeforeFullyLoading = true
@@ -72,18 +72,18 @@ namespace VKClient.Groups.Library
 
     public void LoadInvitations()
     {
-      this._invitationsVM.LoadData(false, false, (Action<BackendResult<CommunityInvitationsList, ResultCode>>) null, false);
+      this._invitationsVM.LoadData(false, false,  null, false);
     }
 
     public void Handle(GroupMembershipStatusUpdated message)
     {
-      Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        CommunityInvitation communityInvitation = this._invitationsVM.Collection.FirstOrDefault<CommunityInvitation>((Func<CommunityInvitation, bool>) (gh => gh.community.id == message.GroupId));
-        if (communityInvitation == null)
-          return;
-        this.InvitationsVM.Delete(communityInvitation);
-      }));
+        Execute.ExecuteOnUIThread((Action)(() =>
+        {
+            CommunityInvitation communityInvitation = this._invitationsVM.Collection.FirstOrDefault<CommunityInvitation>((Func<CommunityInvitation, bool>)(gh => gh.community.id == message.GroupId));
+            if (communityInvitation == null)
+                return;
+            this.InvitationsVM.Delete(communityInvitation);
+        }));
     }
 
     public void GetData(GenericCollectionViewModel<CommunityInvitationsList, CommunityInvitation> caller, int offset, int count, Action<BackendResult<CommunityInvitationsList, ResultCode>> callback)
@@ -94,7 +94,7 @@ namespace VKClient.Groups.Library
     public string GetFooterTextForCount(GenericCollectionViewModel<CommunityInvitationsList, CommunityInvitation> caller, int count)
     {
       if (count > 0)
-        return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.Communities_InvitationOneFrm, CommonResources.Communities_InvitationTwoFrm, CommonResources.Communities_InvitationFiveFrm, true, null, false);
+        return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.Communities_InvitationOneFrm, CommonResources.Communities_InvitationTwoFrm, CommonResources.Communities_InvitationFiveFrm, true,  null, false);
       return GroupResources.NoInvitations;
     }
   }

@@ -11,7 +11,7 @@ namespace VKClient.Common.Framework
 {
   public class ImageCache : IBinarySerializable
   {
-    public static string COMMUNITY_IMAGE = "http://vk.com/images/community";
+    public static string COMMUNITY_IMAGE = "https://vk.com/images/community";
     private Dictionary<string, string> _uriToLocalPathDict = new Dictionary<string, string>();
     private object _lockObj = new object();
     private readonly SHA1 _hasher = (SHA1) new SHA1Managed();
@@ -35,22 +35,22 @@ namespace VKClient.Common.Framework
     public Stream GetCachedImageStream(string uriString)
     {
       if (uriString == null)
-        return (Stream) null;
-      string path = string.Empty;
+        return  null;
+      string empty = string.Empty;
       if (uriString.EndsWith("gif"))
-        return (!uriString.StartsWith(ImageCache.COMMUNITY_IMAGE) ? (!uriString.StartsWith("http://vk.com/images/deactivated") ? (!uriString.StartsWith("http://vk.com/images/contact") ? (!uriString.Contains("_null") ? Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/Photo_Placeholder.png", UriKind.RelativeOrAbsolute)) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/Empty1x1.png", UriKind.RelativeOrAbsolute))) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/EmailUser.png", UriKind.RelativeOrAbsolute))) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/deactivatedUser.png", UriKind.RelativeOrAbsolute))) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/community_100.png", UriKind.RelativeOrAbsolute))).Stream;
+        return (!uriString.StartsWith(ImageCache.COMMUNITY_IMAGE) ? (!uriString.StartsWith("https://vk.com/images/deactivated") ? (!uriString.StartsWith("https://vk.com/images/contact") ? (!uriString.Contains("_null") ? Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/Photo_Placeholder.png", UriKind.RelativeOrAbsolute)) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/Empty1x1.png", UriKind.RelativeOrAbsolute))) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/EmailUser.png", UriKind.RelativeOrAbsolute))) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/deactivatedUser.png", UriKind.RelativeOrAbsolute))) : Application.GetResourceStream(new Uri("/VKClient.Common;component/Resources/community_100.png", UriKind.RelativeOrAbsolute))).Stream;
       lock (this._lockObj)
       {
         if (this._uriToLocalPathDict.ContainsKey(uriString))
-          path = this._uriToLocalPathDict[uriString];
+          empty = this._uriToLocalPathDict[uriString];
       }
-      if (!string.IsNullOrEmpty(path))
+      if (!string.IsNullOrEmpty(empty))
       {
         IsolatedStorageFile storeForApplication = IsolatedStorageFile.GetUserStoreForApplication();
-        if (storeForApplication.FileExists(path))
-          return (Stream) storeForApplication.OpenFile(path, FileMode.Open, FileAccess.Read);
+        if (storeForApplication.FileExists(empty))
+          return (Stream) storeForApplication.OpenFile(empty, FileMode.Open, FileAccess.Read);
       }
-      return (Stream) null;
+      return  null;
     }
 
     public void TryRemoveUri(string uri)

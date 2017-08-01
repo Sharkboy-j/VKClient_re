@@ -26,14 +26,14 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as SettingsPrivacyViewModel;
+        return base.DataContext as SettingsPrivacyViewModel;
       }
     }
 
     public SettingsPrivacyPage()
     {
       this.InitializeComponent();
-      this.Header.textBlockTitle.Text = CommonResources.Privacy_Title.ToUpperInvariant();
+      this.Header.textBlockTitle.Text = (CommonResources.Privacy_Title.ToUpperInvariant());
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -42,17 +42,17 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       SettingsPrivacyViewModel privacyViewModel = new SettingsPrivacyViewModel();
-      this.DataContext = (object) privacyViewModel;
-      privacyViewModel.PrivacyCollection.LoadData(false, false, null, false);
+      base.DataContext = privacyViewModel;
+      privacyViewModel.PrivacyCollection.LoadData(false, false,  null, false);
       this._isInitialized = true;
     }
 
-    private void PrivacyTap(object sender, GestureEventArgs e)
+    private void PrivacyTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      FrameworkElement frameworkElement = e.OriginalSource as FrameworkElement;
-      if (frameworkElement == null)
+      FrameworkElement originalSource = ((RoutedEventArgs) e).OriginalSource as FrameworkElement;
+      if (originalSource == null)
         return;
-      EditPrivacyViewModel vm = frameworkElement.DataContext as EditPrivacyViewModel;
+      EditPrivacyViewModel vm = originalSource.DataContext as EditPrivacyViewModel;
       if (vm == null)
         return;
       Navigator.Current.NavigateToEditPrivacy(new EditPrivacyPageInputData()
@@ -68,10 +68,10 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/SettingsPrivacyPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.Header = (GenericHeaderUC) this.FindName("Header");
-      this.mainList = (ExtendedLongListSelector) this.FindName("mainList");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/SettingsPrivacyPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.mainList = (ExtendedLongListSelector) base.FindName("mainList");
     }
   }
 }

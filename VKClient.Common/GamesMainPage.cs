@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Navigation;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Events;
@@ -29,7 +31,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as GamesMainViewModel;
+        return base.DataContext as GamesMainViewModel;
       }
     }
 
@@ -52,7 +54,7 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      IDictionary<string, string> queryString = this.NavigationContext.QueryString;
+      IDictionary<string, string> queryString = ((Page) this).NavigationContext.QueryString;
       if (queryString.ContainsKey("FromPush"))
       {
         bool result;
@@ -71,7 +73,7 @@ namespace VKClient.Common
           return;
         vm.OpenGame(gameId);
       }), false);
-      this.DataContext = (object) vm;
+      base.DataContext = vm;
       this._isInitialized = true;
     }
 
@@ -87,10 +89,10 @@ namespace VKClient.Common
 
     private void Game_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      GameHeader gameHeader = (sender as GamesCatalogHeaderUC).DataContext as GameHeader;
-      if (gameHeader == null || gameHeader.Game == null)
+      GameHeader dataContext = ((FrameworkElement) (sender as GamesCatalogHeaderUC)).DataContext as GameHeader;
+      if (dataContext == null || dataContext.Game == null)
         return;
-      this.VM.OpenGame(gameHeader.Game.id);
+      this.VM.OpenGame(dataContext.Game.id);
     }
 
     [DebuggerNonUserCode]
@@ -99,10 +101,10 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/GamesMainPage.xaml", UriKind.Relative));
-      this.HeaderUC = (GenericHeaderUC) this.FindName("HeaderUC");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
-      this.listBoxGames = (ExtendedLongListSelector) this.FindName("listBoxGames");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/GamesMainPage.xaml", UriKind.Relative));
+      this.HeaderUC = (GenericHeaderUC) base.FindName("HeaderUC");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
+      this.listBoxGames = (ExtendedLongListSelector) base.FindName("listBoxGames");
     }
   }
 }

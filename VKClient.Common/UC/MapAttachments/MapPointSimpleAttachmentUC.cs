@@ -28,16 +28,16 @@ namespace VKClient.Common.UC.MapAttachments
 
     public override void OnReady()
     {
-      double mapHeight = MapAttachmentUCBase.GetMapHeight(this.Width);
+      double mapHeight = MapAttachmentUCBase.GetMapHeight(base.Width);
       this._mapUri = this.GetMapUri();
-      this.canvas.Width = this.Width;
-      this.canvas.Height = mapHeight;
-      this.rectanglePlaceholder.Width = this.Width;
-      this.rectanglePlaceholder.Height = mapHeight;
-      this.imageMap.Width = this.Width;
-      this.imageMap.Height = mapHeight;
-      Canvas.SetLeft((UIElement) this.imageMapIcon, this.Width / 2.0 - this.imageMapIcon.Width / 2.0);
-      Canvas.SetTop((UIElement) this.imageMapIcon, mapHeight / 2.0 - this.imageMapIcon.Height);
+      ((FrameworkElement) this.canvas).Width=(base.Width);
+      ((FrameworkElement) this.canvas).Height = mapHeight;
+      ((FrameworkElement) this.rectanglePlaceholder).Width=(base.Width);
+      ((FrameworkElement) this.rectanglePlaceholder).Height = mapHeight;
+      ((FrameworkElement) this.imageMap).Width=(base.Width);
+      ((FrameworkElement) this.imageMap).Height = mapHeight;
+      Canvas.SetLeft((UIElement) this.imageMapIcon, base.Width / 2.0 - ((FrameworkElement) this.imageMapIcon).Width / 2.0);
+      Canvas.SetTop((UIElement) this.imageMapIcon, mapHeight / 2.0 - ((FrameworkElement) this.imageMapIcon).Height);
     }
 
     public override void LoadFullyNonVirtualizableItems()
@@ -47,12 +47,12 @@ namespace VKClient.Common.UC.MapAttachments
 
     public override void ReleaseResources()
     {
-      VeryLowProfileImageLoader.SetUriSource(this.imageMap, (Uri) null);
+      VeryLowProfileImageLoader.SetUriSource(this.imageMap,  null);
     }
 
     public override void ShownOnScreen()
     {
-      if (!(this._mapUri != (Uri) null) || !this._mapUri.IsAbsoluteUri)
+      if (!(this._mapUri !=  null) || !this._mapUri.IsAbsoluteUri)
         return;
       VeryLowProfileImageLoader.SetPriority(this._mapUri.OriginalString, DateTime.Now.Ticks);
     }
@@ -63,11 +63,11 @@ namespace VKClient.Common.UC.MapAttachments
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPointSimpleAttachmentUC.xaml", UriKind.Relative));
-      this.canvas = (Canvas) this.FindName("canvas");
-      this.rectanglePlaceholder = (Rectangle) this.FindName("rectanglePlaceholder");
-      this.imageMap = (Image) this.FindName("imageMap");
-      this.imageMapIcon = (Image) this.FindName("imageMapIcon");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPointSimpleAttachmentUC.xaml", UriKind.Relative));
+      this.canvas = (Canvas) base.FindName("canvas");
+      this.rectanglePlaceholder = (Rectangle) base.FindName("rectanglePlaceholder");
+      this.imageMap = (Image) base.FindName("imageMap");
+      this.imageMapIcon = (Image) base.FindName("imageMapIcon");
     }
   }
 }

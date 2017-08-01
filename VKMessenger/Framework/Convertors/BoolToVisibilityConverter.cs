@@ -10,8 +10,8 @@ namespace VKMessenger.Framework.Convertors
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
       if ((bool) value)
-        return (object) Visibility.Visible;
-      return (object) Visibility.Collapsed;
+        return Visibility.Visible;
+      return Visibility.Collapsed;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

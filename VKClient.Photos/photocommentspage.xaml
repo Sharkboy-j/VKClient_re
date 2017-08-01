@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:framework ="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
-    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -41,8 +40,6 @@
                         <commonUC:UserOrGroupHeaderUC VerticalAlignment="Top" Margin="16 16 0 0" x:Name="UserHeader"/>
 
 
-                        <Rectangle Margin="0 94 0 0" Style="{StaticResource PhotoPlaceholderRectangle}"
-                           Width="480" Height="360" />
                         <Image
                      Width="480" Height="360" 
                     Margin="0 94 0 0"

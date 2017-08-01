@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base;
 using VKClient.Audio.Base.DataObjects;
@@ -37,7 +38,7 @@ namespace VKMessenger.Library
             set
             {
                 this._conversations = value;
-                this.NotifyPropertyChanged<ObservableCollection<SearchConversationHeader>>((System.Linq.Expressions.Expression<Func<ObservableCollection<SearchConversationHeader>>>)(() => this.Conversations));
+                this.NotifyPropertyChanged<ObservableCollection<SearchConversationHeader>>((Expression<Func<ObservableCollection<SearchConversationHeader>>>)(() => this.Conversations));
             }
         }
 
@@ -50,7 +51,7 @@ namespace VKMessenger.Library
             set
             {
                 this._messages = value;
-                this.NotifyPropertyChanged<ObservableCollection<ConversationHeader>>((System.Linq.Expressions.Expression<Func<ObservableCollection<ConversationHeader>>>)(() => this.Messages));
+                this.NotifyPropertyChanged<ObservableCollection<ConversationHeader>>((Expression<Func<ObservableCollection<ConversationHeader>>>)(() => this.Messages));
             }
         }
 
@@ -90,28 +91,18 @@ namespace VKMessenger.Library
                 if (this.CachedMessages.ContainsKey(index))
                     this.Messages = new ObservableCollection<ConversationHeader>(this.CachedMessages[index]);
                 else
-                    this.SearchMessages(index, 0, null);
+                    this.SearchMessages(index, 0, (Action)null);
             }
         }
 
         private void UpdateSearchStrings(string query)
         {
-            List<string> list = Enumerable.ToList<string>(Enumerable.Distinct<string>(query.Split(' ')));
-            List<string> list2 = new List<string>();
-            Func<char, bool> arg_42_1 = new Func<char, bool>(c => Transliteration.IsCyrillic(c));
-            if (Enumerable.Any<char>(query, arg_42_1))
-            {
-                IEnumerable<string> arg_69_0 = list;
-                Func<string, string> arg_69_1 = new Func<string, string>(l => Transliteration.CyrillicToLatin(l));
-                list2 = Enumerable.ToList<string>(Enumerable.Select<string, string>(arg_69_0, arg_69_1));
-            }
-            else
-            {
-                IEnumerable<string> arg_96_0 = list;
-                Func<string, string> arg_96_1 = new Func<string, string>(l => Transliteration.CyrillicToLatin(l));
-                list2 = Enumerable.ToList<string>(Enumerable.Select<string, string>(arg_96_0, arg_96_1));
-            }
-            this.AllSearchStrings = Enumerable.ToList<string>(Enumerable.Distinct<string>(Enumerable.Concat<string>(list, list2)));
+            List<string> list = ((IEnumerable<string>)query.Split(' ')).Distinct<string>().ToList<string>();
+            List<string> stringList1 = new List<string>();
+            string source = query;
+            Func<char, bool> func = (Func<char, bool>)(c => Transliteration.IsCyrillic(c));
+            List<string> stringList2 = !source.Any<char>(func) ? list.Select<string, string>((Func<string, string>)(l => Transliteration.LatinToCyrillic(l))).ToList<string>() : list.Select<string, string>((Func<string, string>)(l => Transliteration.CyrillicToLatin(l))).ToList<string>();
+            this.AllSearchStrings = list.Concat<string>((IEnumerable<string>)stringList2).Distinct<string>().ToList<string>();
         }
 
         private void SearchConversationsOnline(string query)
@@ -194,7 +185,7 @@ namespace VKMessenger.Library
                     {
                         this._availableMessages = res.ResultData.TotalCount;
                         this._loadedMessages = this._loadedMessages + VKConstants.DefaultSearchMessagesCount;
-                        Deployment.Current.Dispatcher.BeginInvoke((Action)(() =>
+                        ((DependencyObject)Deployment.Current).Dispatcher.BeginInvoke((Action)(() =>
                         {
                             foreach (ConversationHeader conversationHeader in ConversationsViewModel.GetConversationHeaders(res.ResultData.DialogHeaders, res.ResultData.Users))
                                 this.Messages.Add(conversationHeader);
@@ -234,7 +225,7 @@ namespace VKMessenger.Library
                         }
                         IntermediateStorage.ForEach((Action<SearchConversationHeader>)(i => i.RefreshUIProperties(false)));
                         this.CachedConversations.Add(query, IntermediateStorage);
-                        Deployment.Current.Dispatcher.BeginInvoke((Action)(() => this.Conversations = new ObservableCollection<SearchConversationHeader>(IntermediateStorage)));
+                        ((DependencyObject)Deployment.Current).Dispatcher.BeginInvoke((Action)(() => this.Conversations = new ObservableCollection<SearchConversationHeader>(IntermediateStorage)));
                     }
                     else
                         Logger.Instance.Error("Failed to get user profiles");

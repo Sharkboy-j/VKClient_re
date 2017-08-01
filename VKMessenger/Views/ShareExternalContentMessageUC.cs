@@ -16,15 +16,20 @@ namespace VKMessenger.Views
 
     public ShareExternalContentMessageUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private void TextBoxMessage_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-      this.textBlockWatermarkText.Opacity = this.textBoxMessage.Text == "" ? 1.0 : 0.0;
-      this.Dispatcher.BeginInvoke((Action) (() =>
+      ((UIElement) this.textBlockWatermarkText).Opacity = (this.textBoxMessage.Text == "" ? 1.0 : 0.0);
+      base.Dispatcher.BeginInvoke((Action) (() =>
       {
-        double num = this.textBoxMessage.ActualHeight - this.textBoxMessage.Padding.Bottom;
+        double actualHeight = ((FrameworkElement) this.textBoxMessage).ActualHeight;
+        Thickness padding = ((Control) this.textBoxMessage).Padding;
+        // ISSUE: explicit reference operation
+        double bottom = ((Thickness) @padding).Bottom;
+        double num = actualHeight - bottom;
         if (this._savedHeight > 0.0)
         {
           bool flag = false;
@@ -43,10 +48,10 @@ namespace VKMessenger.Views
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKMessenger;component/Views/ShareExternalContentMessageUC.xaml", UriKind.Relative));
-      this.scrollViewerMessage = (ScrollViewer) this.FindName("scrollViewerMessage");
-      this.textBoxMessage = (TextBox) this.FindName("textBoxMessage");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
+      Application.LoadComponent(this, new Uri("/VKMessenger;component/Views/ShareExternalContentMessageUC.xaml", UriKind.Relative));
+      this.scrollViewerMessage = (ScrollViewer) base.FindName("scrollViewerMessage");
+      this.textBoxMessage = (TextBox) base.FindName("textBoxMessage");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
     }
   }
 }

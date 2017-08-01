@@ -33,17 +33,23 @@ namespace VKClient.Common.UC
         ImageLoader.SetUriSource(this.imageUserOrGroup, configuration.Pic);
         this.textBlockUserOrGroupName.Text = configuration.Name;
         this.textBlockDate.Text = configuration.Subtitle;
-        this.textBlockUserOrGroupName.CorrectText(configuration.Width - this.textBlockUserOrGroupName.Margin.Left);
+        TextBlock blockUserOrGroupName = this.textBlockUserOrGroupName;
+        double width = configuration.Width;
+        Thickness margin = ((FrameworkElement) this.textBlockUserOrGroupName).Margin;
+        // ISSUE: explicit reference operation
+        double left = ((Thickness) @margin).Left;
+        double maxWidth = width - left;
+        blockUserOrGroupName.CorrectText(maxWidth);
         string iconUri = configuration.PostSourcePlatform.GetIconUri();
         if (!string.IsNullOrEmpty(iconUri))
         {
-          this.postSourceBorder.Visibility = Visibility.Visible;
+          ((UIElement) this.postSourceBorder).Visibility = Visibility.Visible;
           ImageBrush imageBrush = new ImageBrush();
           ImageLoader.SetImageBrushMultiResSource(imageBrush, iconUri);
-          this.postSourceBorder.OpacityMask = (Brush) imageBrush;
+          ((UIElement) this.postSourceBorder).OpacityMask=((Brush) imageBrush);
         }
         else
-          this.postSourceBorder.Visibility = Visibility.Collapsed;
+          ((UIElement) this.postSourceBorder).Visibility = Visibility.Collapsed;
       }
       this._callbackTap = callbackTap;
       if (this._callbackTap == null)
@@ -51,7 +57,7 @@ namespace VKClient.Common.UC
       MetroInMotion.SetTilt((DependencyObject) this.gridRoot, 2.1);
     }
 
-    private void LayoutRoot_Tap(object sender, GestureEventArgs e)
+    private void LayoutRoot_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       e.Handled = true;
       if (this._callbackTap == null)
@@ -65,12 +71,12 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/RepostHeaderUC.xaml", UriKind.Relative));
-      this.gridRoot = (Grid) this.FindName("gridRoot");
-      this.imageUserOrGroup = (Image) this.FindName("imageUserOrGroup");
-      this.textBlockUserOrGroupName = (TextBlock) this.FindName("textBlockUserOrGroupName");
-      this.textBlockDate = (TextBlock) this.FindName("textBlockDate");
-      this.postSourceBorder = (Border) this.FindName("postSourceBorder");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/RepostHeaderUC.xaml", UriKind.Relative));
+      this.gridRoot = (Grid) base.FindName("gridRoot");
+      this.imageUserOrGroup = (Image) base.FindName("imageUserOrGroup");
+      this.textBlockUserOrGroupName = (TextBlock) base.FindName("textBlockUserOrGroupName");
+      this.textBlockDate = (TextBlock) base.FindName("textBlockDate");
+      this.postSourceBorder = (Border) base.FindName("postSourceBorder");
     }
   }
 }

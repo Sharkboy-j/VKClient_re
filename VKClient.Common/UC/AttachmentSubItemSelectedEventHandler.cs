@@ -1,4 +1,4 @@
 namespace VKClient.Common.UC
 {
-  public delegate void AttachmentSubItemSelectedEventHandler(AttachmentPickerItem picketItem);
+  public delegate void AttachmentSubItemSelectedEventHandler(AttachmentPickerItemViewModel picketItem);
 }

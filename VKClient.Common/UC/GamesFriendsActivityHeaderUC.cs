@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -19,8 +20,8 @@ namespace VKClient.Common.UC
 {
   public class GamesFriendsActivityHeaderUC : UserControl, INotifyPropertyChanged
   {
-    public static readonly DependencyProperty DataProviderProperty = DependencyProperty.Register("DataProvider", typeof (GameActivityHeader), typeof (GamesFriendsActivityHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivityHeaderUC.OnDataProviderChanged)));
-    public static readonly DependencyProperty IsSeparatorVisibleProperty = DependencyProperty.Register("IsSeparatorVisible", typeof (bool), typeof (GamesFriendsActivityHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivityHeaderUC.OnIsSeparatorVisibleChanged)));
+      public static readonly DependencyProperty DataProviderProperty = DependencyProperty.Register("DataProvider", typeof(GameActivityHeader), typeof(GamesFriendsActivityHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivityHeaderUC.OnDataProviderChanged)));
+      public static readonly DependencyProperty IsSeparatorVisibleProperty = DependencyProperty.Register("IsSeparatorVisible", typeof(bool), typeof(GamesFriendsActivityHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivityHeaderUC.OnIsSeparatorVisibleChanged)));
     internal Image imageUser;
     internal TextBlock textBlockDescription;
     internal Image imageGame;
@@ -32,11 +33,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (GameActivityHeader) this.GetValue(GamesFriendsActivityHeaderUC.DataProviderProperty);
+        return (GameActivityHeader) base.GetValue(GamesFriendsActivityHeaderUC.DataProviderProperty);
       }
       set
       {
-        this.SetDPValue(GamesFriendsActivityHeaderUC.DataProviderProperty, (object) value, "DataProvider");
+        this.SetDPValue(GamesFriendsActivityHeaderUC.DataProviderProperty, value, "DataProvider");
       }
     }
 
@@ -44,11 +45,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (bool) this.GetValue(GamesFriendsActivityHeaderUC.IsSeparatorVisibleProperty);
+        return (bool) base.GetValue(GamesFriendsActivityHeaderUC.IsSeparatorVisibleProperty);
       }
       set
       {
-        this.SetDPValue(GamesFriendsActivityHeaderUC.IsSeparatorVisibleProperty, (object) value, "IsSeparatorVisible");
+        this.SetDPValue(GamesFriendsActivityHeaderUC.IsSeparatorVisibleProperty, value, "IsSeparatorVisible");
       }
     }
 
@@ -56,8 +57,9 @@ namespace VKClient.Common.UC
 
     public GamesFriendsActivityHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      ((FrameworkElement) this.Content).DataContext = (object) this;
+      ((FrameworkElement) this.Content).DataContext = this;
     }
 
     private static void OnDataProviderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -65,27 +67,32 @@ namespace VKClient.Common.UC
       GamesFriendsActivityHeaderUC activityHeaderUc = d as GamesFriendsActivityHeaderUC;
       if (activityHeaderUc == null)
         return;
-      GameActivityHeader gameActivityHeader = e.NewValue as GameActivityHeader;
-      if (gameActivityHeader == null)
+      // ISSUE: explicit reference operation
+      GameActivityHeader newValue = e.NewValue as GameActivityHeader;
+      if (newValue == null)
         return;
-      ImageLoader.SetUriSource(activityHeaderUc.imageUser, gameActivityHeader.User.photo_max);
-      ImageLoader.SetUriSource(activityHeaderUc.imageGame, gameActivityHeader.Game.icon_100);
-      activityHeaderUc.textBlockDescription.Inlines.Clear();
-      List<Inline> list = gameActivityHeader.ComposeActivityText(true);
-      if (!list.IsNullOrEmpty())
+      ImageLoader.SetUriSource(activityHeaderUc.imageUser, newValue.User.photo_max);
+      ImageLoader.SetUriSource(activityHeaderUc.imageGame, newValue.Game.icon_150);
+      ((PresentationFrameworkCollection<Inline>) activityHeaderUc.textBlockDescription.Inlines).Clear();
+      List<Inline> inlineList = newValue.ComposeActivityText(true);
+      if (!((IList) inlineList).IsNullOrEmpty())
       {
-        for (int index = 0; index < list.Count; ++index)
+        for (int index = 0; index < inlineList.Count; ++index)
         {
-          Run run = list[index] as Run;
-          if (run != null)
+          Run run1 = inlineList[index] as Run;
+          if (run1 != null)
           {
-            activityHeaderUc.textBlockDescription.Inlines.Add((Inline) run);
-            if (index < list.Count - 1)
-              run.Text += " ";
+            ((PresentationFrameworkCollection<Inline>) activityHeaderUc.textBlockDescription.Inlines).Add((Inline) run1);
+            if (index < inlineList.Count - 1)
+            {
+              Run run2 = run1;
+              string str = run2.Text + " ";
+              run2.Text = str;
+            }
           }
         }
       }
-      activityHeaderUc.textBlockDate.Text = UIStringFormatterHelper.FormatDateTimeForUI(gameActivityHeader.GameActivity.date);
+      activityHeaderUc.textBlockDate.Text = (UIStringFormatterHelper.FormatDateTimeForUI(newValue.GameActivity.date));
     }
 
     private static void OnIsSeparatorVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -93,21 +100,23 @@ namespace VKClient.Common.UC
       GamesFriendsActivityHeaderUC activityHeaderUc = d as GamesFriendsActivityHeaderUC;
       if (activityHeaderUc == null)
         return;
-      bool flag = (bool) e.NewValue;
-      activityHeaderUc.rectSeparator.Visibility = flag ? Visibility.Visible : Visibility.Collapsed;
+      // ISSUE: explicit reference operation
+      bool newValue = (bool) e.NewValue;
+      ((UIElement) activityHeaderUc.rectSeparator).Visibility = (newValue ? Visibility.Visible : Visibility.Collapsed);
     }
 
     private void SetDPValue(DependencyProperty property, object value, [CallerMemberName] string propertyName = null)
     {
-      this.SetValue(property, value);
-      PropertyChangedEventHandler changedEventHandler = this.PropertyChanged;
-      if (changedEventHandler == null)
+      base.SetValue(property, value);
+      // ISSUE: reference to a compiler-generated field
+      PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+      if (propertyChanged == null)
         return;
       PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
-      changedEventHandler((object) this, e);
+      propertyChanged(this, e);
     }
 
-    private void User_OnTap(object sender, GestureEventArgs e)
+    private void User_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       User user = this.DataProvider.User;
       if (user == null)
@@ -115,12 +124,12 @@ namespace VKClient.Common.UC
       Navigator.Current.NavigateToUserProfile(user.uid, user.Name, "", false);
     }
 
-    private void Game_OnTap(object sender, GestureEventArgs e)
+    private void Game_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       GamesFriendsActivityHeaderUC.OpenGame(this.DataProvider.Game);
     }
 
-    private void Description_OnTap(object sender, GestureEventArgs e)
+    private void Description_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       GamesFriendsActivityHeaderUC.OpenGame(this.DataProvider.Game);
     }
@@ -131,8 +140,8 @@ namespace VKClient.Common.UC
         return;
       FramePageUtils.CurrentPage.OpenGamesPopup(new List<object>()
       {
-        (object) new GameHeader(game)
-      }, GamesClickSource.activity, "", 0, null);
+        new GameHeader(game)
+      }, GamesClickSource.activity, "", 0,  null);
     }
 
     [DebuggerNonUserCode]
@@ -141,12 +150,12 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GamesFriendsActivityHeaderUC.xaml", UriKind.Relative));
-      this.imageUser = (Image) this.FindName("imageUser");
-      this.textBlockDescription = (TextBlock) this.FindName("textBlockDescription");
-      this.imageGame = (Image) this.FindName("imageGame");
-      this.textBlockDate = (TextBlock) this.FindName("textBlockDate");
-      this.rectSeparator = (Rectangle) this.FindName("rectSeparator");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GamesFriendsActivityHeaderUC.xaml", UriKind.Relative));
+      this.imageUser = (Image) base.FindName("imageUser");
+      this.textBlockDescription = (TextBlock) base.FindName("textBlockDescription");
+      this.imageGame = (Image) base.FindName("imageGame");
+      this.textBlockDate = (TextBlock) base.FindName("textBlockDate");
+      this.rectSeparator = (Rectangle) base.FindName("rectSeparator");
     }
   }
 }

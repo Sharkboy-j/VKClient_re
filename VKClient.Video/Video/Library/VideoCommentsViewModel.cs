@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Events;
@@ -38,11 +39,11 @@ namespace VKClient.Video.Library
         private bool _isAddingRemoving;
         private bool _isDescriptionExpanded;
 
-        public List<VideoResolution> Resolutions { get; set; }
+        public List<VideoResolution> Resolutions { get; private set; }
 
-        public long OwnerId { get; set; }
+        public long OwnerId { get; private set; }
 
-        public long VideoId { get; set; }
+        public long VideoId { get; private set; }
 
         public VKClient.Common.Backend.DataObjects.Video Video { get; private set; }
 
@@ -58,10 +59,10 @@ namespace VKClient.Video.Library
         {
             get
             {
-                CatalogItemViewModel catalogItemViewModel = this._catItemVM;
-                if (catalogItemViewModel == null)
-                    return Visibility.Collapsed;
-                return catalogItemViewModel.IsLiveVisibility;
+                CatalogItemViewModel catItemVm = this._catItemVM;
+                if (catItemVm == null)
+                    return (Visibility)1;
+                return catItemVm.IsLiveVisibility;
             }
         }
 
@@ -69,7 +70,7 @@ namespace VKClient.Video.Library
         {
             get
             {
-                return Visibility.Collapsed;
+                return (Visibility)1;
             }
         }
 
@@ -422,7 +423,7 @@ namespace VKClient.Video.Library
             get
             {
                 VideoLikesCommentsData likesCommentsData = this._likesCommentsData;
-                if ((likesCommentsData != null ? likesCommentsData.Albums : (List<long>)null) != null && !this._likesCommentsData.Albums.Contains(VideoAlbum.ADDED_ALBUM_ID))
+                if ((likesCommentsData != null ? likesCommentsData.Albums : null) != null && !this._likesCommentsData.Albums.Contains(VideoAlbum.ADDED_ALBUM_ID))
                     return this.Video.can_add == 1;
                 return false;
             }
@@ -433,7 +434,7 @@ namespace VKClient.Video.Library
             get
             {
                 VideoLikesCommentsData likesCommentsData = this._likesCommentsData;
-                if ((likesCommentsData != null ? likesCommentsData.Albums : (List<long>)null) != null)
+                if ((likesCommentsData != null ? likesCommentsData.Albums : null) != null)
                     return this._likesCommentsData.Albums.Contains(VideoAlbum.ADDED_ALBUM_ID);
                 return false;
             }
@@ -443,14 +444,16 @@ namespace VKClient.Video.Library
         {
             get
             {
-                return string.Format("http://vk.com/video{0}_{1}", (object)this.OwnerId, (object)this.VideoId);
+                return string.Format("https://vk.com/video{0}_{1}", this.OwnerId, this.VideoId);
             }
         }
 
         public VideoCommentsViewModel(long ownerId, long videoId, string accessKey, VKClient.Common.Backend.DataObjects.Video video = null, StatisticsActionSource actionSource = StatisticsActionSource.news, string videoContext = "")
         {
-            Resolutions = new List<VideoResolution>();
+            this.Resolutions = new List<VideoResolution>();
+            this._knownCommentsCount = -1;
             this._lastTimeCompletedPlayRequest = DateTime.MinValue;
+
             this.OwnerId = ownerId;
             this.VideoId = videoId;
             this._accessKey = accessKey;
@@ -465,59 +468,71 @@ namespace VKClient.Video.Library
             this.UpdateOwnerInfo();
             this.UpdateDescription();
             this.InitResolutionsCollection();
-            EventAggregator.Current.Subscribe((object)this);
+            EventAggregator.Current.Subscribe(this);
         }
 
         private void UpdateOwnerInfo()
         {
-            if (this._likesCommentsData == null)
-                return;
-            if (this.OwnerId < 0L)
+            if (this._likesCommentsData != null)
             {
-                Group group = this._likesCommentsData.Groups.FirstOrDefault<Group>((Func<Group, bool>)(g => g.id == -this.OwnerId));
-                if (group == null)
-                    return;
-                this.OwnerHeaderViewModel = new OwnerFullHeaderWithSubscribeViewModel(group);
-            }
-            else
-            {
-                User user = this._likesCommentsData.Users.FirstOrDefault<User>((Func<User, bool>)(u => u.uid == this.OwnerId));
-                if (user == null)
-                    return;
-                this.OwnerHeaderViewModel = new OwnerFullHeaderWithSubscribeViewModel(user);
+                if (this.OwnerId < 0L)
+                {
+                    Group group = Enumerable.FirstOrDefault<Group>(this._likesCommentsData.Groups, (Group g) => g.id == -this.OwnerId);
+                    if (group != null)
+                    {
+                        this.OwnerHeaderViewModel = new OwnerFullHeaderWithSubscribeViewModel(group);
+                        return;
+                    }
+                }
+                else
+                {
+                    User user = Enumerable.FirstOrDefault<User>(this._likesCommentsData.Users, (User u) => u.uid == this.OwnerId);
+                    if (user != null)
+                    {
+                        this.OwnerHeaderViewModel = new OwnerFullHeaderWithSubscribeViewModel(user);
+                    }
+                }
             }
         }
 
-        public override void Load(Action<bool> callback)
+        public override void Load(Action<ResultCode> callback)
         {
             VKClient.Common.Backend.DataObjects.Video video = this.Video;
-            if ((video != null ? video.files : (Dictionary<string, string>)null) != null && this.Video.files.Count > 0)
-                callback(true);
+            if ((video != null ? video.files : null) != null && this.Video.files.Count > 0)
+                callback(ResultCode.Succeeded);
             else
                 VideoService.Instance.GetVideoById(this.OwnerId, this.VideoId, this._accessKey, (Action<BackendResult<List<VKClient.Common.Backend.DataObjects.Video>, ResultCode>>)(res =>
                 {
-                    if (res.ResultCode == ResultCode.Succeeded && res.ResultData.Count > 0)
+                    ResultCode resultCode = res.ResultCode;
+                    if (resultCode == ResultCode.Succeeded)
                     {
-                        int num = this.Video == null ? 1 : 0;
-                        this.Video = res.ResultData[0];
-                        this._catItemVM = new CatalogItemViewModel(new VideoCatalogItem(this.Video), new List<User>(), new List<Group>(), false);
-                        this.NotifyVideoDurationPropertiesChanged();
-                        if (num != 0)
-                            this.PublishOpenVideoEvent();
-                        this.UpdateOwnerInfo();
-                        this.UpdateDescription();
-                        this.InitResolutionsCollection();
-                        this.NotifyPropertiesChanged();
-                        callback(true);
+                        if (res.ResultData.Any<VKClient.Common.Backend.DataObjects.Video>())
+                        {
+                            int num = this.Video == null ? 1 : 0;
+                            this.Video = res.ResultData[0];
+                            this._catItemVM = new CatalogItemViewModel(new VideoCatalogItem(this.Video), new List<User>(), new List<Group>(), false);
+                            this.NotifyVideoDurationPropertiesChanged();
+                            if (num != 0)
+                                this.PublishOpenVideoEvent();
+                            this.UpdateOwnerInfo();
+                            this.UpdateDescription();
+                            this.InitResolutionsCollection();
+                            this.NotifyPropertiesChanged();
+                        }
+                        else
+                            resultCode = ResultCode.VideoNotFound;
                     }
-                    else
-                        callback(false);
+                    Action<ResultCode> action = callback;
+                    if (action == null)
+                        return;
+                    int num1 = (int)resultCode;
+                    action((ResultCode)num1);
                 }));
         }
 
         private void PublishOpenVideoEvent()
         {
-            EventAggregator.Current.Publish((object)new OpenVideoEvent()
+            EventAggregator.Current.Publish(new OpenVideoEvent()
             {
                 id = this.Video.GloballyUniqueId,
                 Source = this._actionSource,
@@ -527,27 +542,27 @@ namespace VKClient.Video.Library
 
         private void NotifyVideoDurationPropertiesChanged()
         {
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.IsLiveVisibility));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.ShowDurationVisibility));
-            this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.UIDuration));
+            this.NotifyPropertyChanged<Visibility>((() => this.IsLiveVisibility));
+            this.NotifyPropertyChanged<Visibility>((() => this.ShowDurationVisibility));
+            this.NotifyPropertyChanged<string>((() => this.UIDuration));
         }
 
         private void NotifyPropertiesChanged()
         {
-            Execute.ExecuteOnUIThread((Action)(() =>
+            Execute.ExecuteOnUIThread(delegate
             {
-                this.NotifyPropertyChanged<List<VideoResolution>>((System.Linq.Expressions.Expression<Func<List<VideoResolution>>>)(() => this.Resolutions));
-                this.NotifyPropertyChanged<VideoResolution>((System.Linq.Expressions.Expression<Func<VideoResolution>>)(() => this.Resolution));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.HaveManyResolutionsVisibility));
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.VideoTitle));
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.MediaDuration));
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.ImageSrc));
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.MetaDataStr));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.DescriptionVisibility));
-                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.CanPlay));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.CanPlayVisibility));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.CannotPlayVisibility));
-            }));
+                base.NotifyPropertyChanged<List<VideoResolution>>(() => this.Resolutions);
+                base.NotifyPropertyChanged<VideoResolution>(() => this.Resolution);
+                base.NotifyPropertyChanged<Visibility>(() => this.HaveManyResolutionsVisibility);
+                base.NotifyPropertyChanged<string>(() => this.VideoTitle);
+                base.NotifyPropertyChanged<string>(() => this.MediaDuration);
+                base.NotifyPropertyChanged<string>(() => this.ImageSrc);
+                base.NotifyPropertyChanged<string>(() => this.MetaDataStr);
+                base.NotifyPropertyChanged<Visibility>(() => this.DescriptionVisibility);
+                base.NotifyPropertyChanged<bool>(() => this.CanPlay);
+                base.NotifyPropertyChanged<Visibility>(() => this.CanPlayVisibility);
+                base.NotifyPropertyChanged<Visibility>(() => this.CannotPlayVisibility);
+            });
         }
 
         private void UpdateDescription()
@@ -565,40 +580,52 @@ namespace VKClient.Video.Library
                 this.VideoDescription = str.Substring(0, 300) + "...";
                 this._isDescriptionExpanded = false;
             }
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.ExpandDescriptionVisibility));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.DescriptionVisibility));
+            this.NotifyPropertyChanged<Visibility>((() => this.ExpandDescriptionVisibility));
+            this.NotifyPropertyChanged<Visibility>((() => this.DescriptionVisibility));
         }
 
         private void InitResolutionsCollection()
         {
-            Execute.ExecuteOnUIThread((Action)(() =>
+            Execute.ExecuteOnUIThread(delegate
             {
-                VKClient.Common.Backend.DataObjects.Video video = this.Video;
-                if ((video != null ? video.files : (Dictionary<string, string>)null) == null)
-                    return;
-                foreach (string key in this.Video.files.Keys)
+                VKClient.Common.Backend.DataObjects.Video expr_06 = this.Video;
+                if (((expr_06 != null) ? expr_06.files : null) != null)
                 {
-                    this.AddIfNeeded(key, 240);
-                    this.AddIfNeeded(key, 360);
-                    this.AddIfNeeded(key, 480);
-                    this.AddIfNeeded(key, 720);
-                    this.AddIfNeeded(key, 1080);
+                    using (Dictionary<string, string>.KeyCollection.Enumerator enumerator = this.Video.files.Keys.GetEnumerator())
+                    {
+                        while (enumerator.MoveNext())
+                        {
+                            string current = enumerator.Current;
+                            this.AddIfNeeded(current, 240);
+                            this.AddIfNeeded(current, 360);
+                            this.AddIfNeeded(current, 480);
+                            this.AddIfNeeded(current, 720);
+                            this.AddIfNeeded(current, 1080);
+                        }
+                    }
+                    if (this.Resolutions.Count > 0)
+                    {
+                        IEnumerable<VideoResolution> arg_C0_0 = this.Resolutions;
+                        Func<VideoResolution, int> arg_C0_1 = new Func<VideoResolution, int>((r) => { return r.Resolution; });
+
+                        this._resolution = (Enumerable.FirstOrDefault<VideoResolution>(Enumerable.OrderByDescending<VideoResolution, int>(arg_C0_0, arg_C0_1), (VideoResolution r) => r.Resolution <= this.DesiredResolution) ?? this.Resolutions[0]);
+                    }
                 }
-                if (this.Resolutions.Count <= 0)
-                    return;
-                this._resolution = this.Resolutions.OrderByDescending<VideoResolution, int>((Func<VideoResolution, int>)(r => r.Resolution)).FirstOrDefault<VideoResolution>((Func<VideoResolution, bool>)(r => r.Resolution <= this.DesiredResolution)) ?? this.Resolutions[0];
-            }));
+            });
         }
+
 
         private void AddIfNeeded(string resolutionRaw, int resolution)
         {
-            if (!resolutionRaw.Contains(resolution.ToString()) || !this.Resolutions.All<VideoResolution>((Func<VideoResolution, bool>)(r => r.Resolution != resolution)))
-                return;
-            this.Resolutions.Add(new VideoResolution()
+            if (resolutionRaw.Contains(resolution.ToString()) && Enumerable.All<VideoResolution>(this.Resolutions, (VideoResolution r) => r.Resolution != resolution))
             {
-                Resolution = resolution
-            });
+                this.Resolutions.Add(new VideoResolution
+                {
+                    Resolution = resolution
+                });
+            }
         }
+
 
         public void LoadMoreComments(int countToLoad, Action<bool> callback)
         {
@@ -625,7 +652,7 @@ namespace VKClient.Video.Library
                         this._likesCommentsData.Groups.AddRange((IEnumerable<Group>)res.ResultData.Groups);
                     }
                     if (this._likesCommentsData != null)
-                        EventAggregator.Current.Publish((object)new VideoCommentsLikesUpdated()
+                        EventAggregator.Current.Publish(new VideoCommentsLikesUpdated()
                         {
                             CommentsCount = this._likesCommentsData.TotalCommentsCount,
                             LikesCount = (this._likesCommentsData.LikesAllCount ?? 0),
@@ -644,64 +671,78 @@ namespace VKClient.Video.Library
         {
             if (this._isAdding)
             {
-                callback(false, (Comment)null);
+                callback.Invoke(false, null);
+                return;
             }
-            else
+            this._isAdding = true;
+            VideoService.Instance.CreateComment(this.OwnerId, this.VideoId, comment.text, comment.reply_to_cid, attachmentIds, delegate(BackendResult<Comment, ResultCode> res)
             {
-                this._isAdding = true;
-                VideoService.Instance.CreateComment(this.OwnerId, this.VideoId, comment.text, comment.reply_to_cid, attachmentIds, (Action<BackendResult<Comment, ResultCode>>)(res =>
+                if (res.ResultCode == ResultCode.Succeeded)
                 {
-                    if (res.ResultCode == ResultCode.Succeeded)
+                    Execute.ExecuteOnUIThread(delegate
                     {
-                        Execute.ExecuteOnUIThread((Action)(() =>
+                        if (this.Comments != null)
                         {
-                            if (this.Comments == null)
-                                return;
                             this.Comments.Add(res.ResultData);
-                        }));
-                        EventAggregator current = EventAggregator.Current;
-                        VideoCommentIsAddedDeleted commentIsAddedDeleted = new VideoCommentIsAddedDeleted();
-                        commentIsAddedDeleted.IsAdded = true;
-                        long ownerId = this.OwnerId;
-                        commentIsAddedDeleted.OwnerId = ownerId;
-                        long videoId = this.VideoId;
-                        commentIsAddedDeleted.VideoId = videoId;
-                        current.Publish((object)commentIsAddedDeleted);
-                        callback(true, res.ResultData);
-                    }
-                    else
-                        callback(false, (Comment)null);
-                    this._isAdding = false;
-                }), comment.sticker_id, stickerReferrer);
-            }
+                        }
+                    });
+                    EventAggregator.Current.Publish(new VideoCommentIsAddedDeleted
+                    {
+                        IsAdded = true,
+                        OwnerId = this.OwnerId,
+                        VideoId = this.VideoId
+                    });
+                    callback.Invoke(true, res.ResultData);
+                }
+                else
+                {
+                    callback.Invoke(false, null);
+                }
+                this._isAdding = false;
+            }, comment.sticker_id, stickerReferrer);
         }
+
 
         public void DeleteComment(long cid)
         {
-            VideoService.Instance.DeleteComment(this.OwnerId, this.VideoId, cid, (Action<BackendResult<ResponseWithId, ResultCode>>)(res =>
+            Func<Comment, bool> _9__2 = null;
+            Action _9__1 = null;
+            VideoService.Instance.DeleteComment(this.OwnerId, this.VideoId, cid, delegate(BackendResult<ResponseWithId, ResultCode> res)
             {
-                if (res.ResultCode != ResultCode.Succeeded)
-                    return;
-                EventAggregator current = EventAggregator.Current;
-                VideoCommentIsAddedDeleted commentIsAddedDeleted = new VideoCommentIsAddedDeleted();
-                commentIsAddedDeleted.IsAdded = false;
-                long ownerId = this.OwnerId;
-                commentIsAddedDeleted.OwnerId = ownerId;
-                long videoId = this.VideoId;
-                commentIsAddedDeleted.VideoId = videoId;
-                current.Publish((object)commentIsAddedDeleted);
-                Execute.ExecuteOnUIThread((Action)(() =>
+                if (res.ResultCode == ResultCode.Succeeded)
                 {
-                    if (this.Comments == null)
-                        return;
-
-                    Comment comment = this.Comments.FirstOrDefault<Comment>((Func<Comment, bool>)(c => c.cid == cid));
-                    if (comment == null)
-                        return;
-                    this.Comments.Remove(comment);
-                }));
-            }));
+                    EventAggregator.Current.Publish(new VideoCommentIsAddedDeleted
+                    {
+                        IsAdded = false,
+                        OwnerId = this.OwnerId,
+                        VideoId = this.VideoId
+                    });
+                    Action arg_5F_0;
+                    if ((arg_5F_0 = _9__1) == null)
+                    {
+                        arg_5F_0 = (_9__1 = delegate
+                        {
+                            if (this.Comments != null)
+                            {
+                                IEnumerable<Comment> arg_37_0 = this.Comments;
+                                Func<Comment, bool> arg_37_1;
+                                if ((arg_37_1 = _9__2) == null)
+                                {
+                                    arg_37_1 = (_9__2 = ((Comment c) => c.cid == cid));
+                                }
+                                Comment comment = Enumerable.FirstOrDefault<Comment>(arg_37_0, arg_37_1);
+                                if (comment != null)
+                                {
+                                    this.Comments.Remove(comment);
+                                }
+                            }
+                        });
+                    }
+                    Execute.ExecuteOnUIThread(arg_5F_0);
+                }
+            });
         }
+
 
         internal void LikeUnlike()
         {
@@ -730,17 +771,23 @@ namespace VKClient.Video.Library
         internal void PlayVideo()
         {
             if (this._inPlayRequest || (DateTime.Now - this._lastTimeCompletedPlayRequest).TotalSeconds < 3.5)
+            {
                 return;
+            }
             this._inPlayRequest = true;
             int selectedResolution = this.GetSelectedResolution();
-            this.SetInProgress(true, CommonResources.Loading);
-            VideoPlayerHelper.PlayVideo(this.Video, (Action)(() => Execute.ExecuteOnUIThread((Action)(() =>
+            base.SetInProgress(true, CommonResources.Loading);
+            VideoPlayerHelper.PlayVideo(this.Video, delegate
             {
-                this.SetInProgress(false, "");
-                this._inPlayRequest = false;
-                this._lastTimeCompletedPlayRequest = DateTime.Now;
-            }))), selectedResolution, this._actionSource, this._videoContext);
+                Execute.ExecuteOnUIThread(delegate
+                {
+                    base.SetInProgress(false, "");
+                    this._inPlayRequest = false;
+                    this._lastTimeCompletedPlayRequest = DateTime.Now;
+                });
+            }, selectedResolution, this._actionSource, this._videoContext);
         }
+
 
         private int GetSelectedResolution()
         {
@@ -756,21 +803,27 @@ namespace VKClient.Video.Library
                 Action<ResultCode> action = resultCallback;
                 if (action == null)
                     return;
-                int num = (int)res.ResultCode;
-                action((ResultCode)num);
+                int resultCode = (int)res.ResultCode;
+                action((ResultCode)resultCode);
             }));
         }
 
         internal void Share(string text, long gid = 0, string groupName = "")
         {
-            WallService.Current.Repost(this.Video.owner_id, this.Video.vid, text, RepostObject.video, gid, (Action<BackendResult<RepostResult, ResultCode>>)(res => Execute.ExecuteOnUIThread((Action)(() =>
+            WallService.Current.Repost(this.Video.owner_id, this.Video.vid, text, RepostObject.video, gid, delegate(BackendResult<RepostResult, ResultCode> res)
             {
-                if (res.ResultCode == ResultCode.Succeeded)
-                    GenericInfoUC.ShowPublishResult(GenericInfoUC.PublishedObj.Video, gid, groupName);
-                else
-                    new GenericInfoUC().ShowAndHideLater(CommonResources.Error, (FrameworkElement)null);
-            }))));
+                Execute.ExecuteOnUIThread(delegate
+                {
+                    if (res.ResultCode == ResultCode.Succeeded)
+                    {
+                        GenericInfoUC.ShowPublishResult(GenericInfoUC.PublishedObj.Video, gid, groupName);
+                        return;
+                    }
+                    new GenericInfoUC().ShowAndHideLater(CommonResources.Error, null);
+                });
+            });
         }
+
 
         public void Handle(VideoEdited message)
         {
@@ -798,7 +851,7 @@ namespace VKClient.Video.Library
             {
                 this._isAddingRemoving = false;
                 string successString = add ? CommonResources.VideoNew_VideoHasBeenAddedToMyVideos : CommonResources.VideoNew_VideoHasBeenRemovedFromMyVideos;
-                GenericInfoUC.ShowBasedOnResult((int)res.ResultCode, successString, (VKRequestsDispatcher.Error)null);
+                GenericInfoUC.ShowBasedOnResult((int)res.ResultCode, successString, null);
                 if (res.ResultCode != ResultCode.Succeeded || this._likesCommentsData == null || this._likesCommentsData.Albums == null)
                     return;
                 if (add)
@@ -814,7 +867,7 @@ namespace VKClient.Video.Library
                 return;
             this._isDescriptionExpanded = true;
             this.VideoDescription = this.Video.description;
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.ExpandDescriptionVisibility));
+            this.NotifyPropertyChanged<Visibility>((() => this.ExpandDescriptionVisibility));
         }
     }
 }

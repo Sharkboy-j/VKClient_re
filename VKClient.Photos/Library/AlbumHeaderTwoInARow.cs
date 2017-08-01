@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Common.Framework;
 using VKClient.Common.Library;
@@ -19,8 +20,8 @@ namespace VKClient.Photos.Library
       set
       {
         this._albumHeader1 = value;
-        this.NotifyPropertyChanged<AlbumHeader>((System.Linq.Expressions.Expression<Func<AlbumHeader>>) (() => this.AlbumHeader1));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.HaveFirstHeader));
+        this.NotifyPropertyChanged<AlbumHeader>((Expression<Func<AlbumHeader>>) (() => this.AlbumHeader1));
+        this.NotifyPropertyChanged<Visibility>((() => this.HaveFirstHeader));
       }
     }
 
@@ -33,8 +34,8 @@ namespace VKClient.Photos.Library
       set
       {
         this._albumHeader2 = value;
-        this.NotifyPropertyChanged<AlbumHeader>((System.Linq.Expressions.Expression<Func<AlbumHeader>>) (() => this.AlbumHeader2));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.HaveSecondHeader));
+        this.NotifyPropertyChanged<AlbumHeader>((Expression<Func<AlbumHeader>>) (() => this.AlbumHeader2));
+        this.NotifyPropertyChanged<Visibility>((() => this.HaveSecondHeader));
       }
     }
 
@@ -42,7 +43,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this.AlbumHeader2 == null ? Visibility.Collapsed : Visibility.Visible;
+        if (this.AlbumHeader2 == null)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -50,7 +53,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this.AlbumHeader1 == null ? Visibility.Collapsed : Visibility.Visible;
+        if (this.AlbumHeader1 == null)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -78,13 +83,13 @@ namespace VKClient.Photos.Library
     {
       if (album == this.AlbumHeader1)
       {
-        this.AlbumHeader1 = (AlbumHeader) null;
+        this.AlbumHeader1 =  null;
       }
       else
       {
         if (album != this.AlbumHeader2)
           return;
-        this.AlbumHeader2 = (AlbumHeader) null;
+        this.AlbumHeader2 =  null;
       }
     }
 

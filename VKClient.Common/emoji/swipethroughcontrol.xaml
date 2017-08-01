@@ -37,7 +37,7 @@
                             VerticalAlignment="Top"
                             Margin="36 8 0 0"
                             CornerRadius="12"
-                            Background="{StaticResource PhoneNewStoreItemsFillBrush}"
+                            Background="{StaticResource PhoneAccentRedBrush}"
                             Visibility="{Binding CounterVisibility}">
                         <TextBlock VerticalAlignment="Top"
                                    Margin="6 1 6 0"

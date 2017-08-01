@@ -1,6 +1,8 @@
 using Microsoft.Phone.Controls;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -27,17 +29,17 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as GamesInvitesViewModel;
+        return base.DataContext as GamesInvitesViewModel;
       }
     }
 
     public GamesInvitesPage()
     {
       this.InitializeComponent();
-      this.HeaderUC.textBlockTitle.Text = CommonResources.PageTitle_Games_Invites.ToUpperInvariant();
+      this.HeaderUC.textBlockTitle.Text = (CommonResources.PageTitle_Games_Invites.ToUpperInvariant());
       this.PullToRefreshUC.TrackListBox((ISupportPullToRefresh) this.GamesInvitesListBox);
-      this.GamesInvitesListBox.OnRefresh = (Action) (() => this.VM.GamesInvitesVM.LoadData(true, false, (Action<BackendResult<GamesRequestsResponse, ResultCode>>) null, false));
-      EventAggregator.Current.Subscribe((object) this);
+      this.GamesInvitesListBox.OnRefresh = (Action) (() => this.VM.GamesInvitesVM.LoadData(true, false,  null, false));
+      EventAggregator.Current.Subscribe(this);
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -46,8 +48,8 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       GamesInvitesViewModel invitesViewModel = new GamesInvitesViewModel();
-      invitesViewModel.GamesInvitesVM.LoadData(false, false, (Action<BackendResult<GamesRequestsResponse, ResultCode>>) null, false);
-      this.DataContext = (object) invitesViewModel;
+      invitesViewModel.GamesInvitesVM.LoadData(false, false,  null, false);
+      base.DataContext = invitesViewModel;
       this._isInitialized = true;
     }
 
@@ -59,12 +61,18 @@ namespace VKClient.Common
     public void Handle(GameInvitationHiddenEvent message)
     {
       long invitationId = message.Invitation.GameRequest.id;
-      using (IEnumerator<GameRequestHeader> enumerator = this.VM.GamesInvitesVM.Collection.Where<GameRequestHeader>((Func<GameRequestHeader, bool>) (invitation => invitation.GameRequest.id == invitationId)).GetEnumerator())
+      IEnumerator<GameRequestHeader> enumerator = ((IEnumerable<GameRequestHeader>)Enumerable.Where<GameRequestHeader>(this.VM.GamesInvitesVM.Collection, (Func<GameRequestHeader, bool>)(invitation => invitation.GameRequest.id == invitationId))).GetEnumerator();
+      try
       {
-        if (enumerator.MoveNext())
+        if (((IEnumerator) enumerator).MoveNext())
           this.VM.GamesInvitesVM.Delete(enumerator.Current);
       }
-      if (this.VM.GamesInvitesVM.Collection.Count != 0)
+      finally
+      {
+        if (enumerator != null)
+          ((IDisposable) enumerator).Dispose();
+      }
+      if (((Collection<GameRequestHeader>) this.VM.GamesInvitesVM.Collection).Count != 0)
         return;
       Navigator.Current.GoBack();
     }
@@ -75,10 +83,10 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/GamesInvitesPage.xaml", UriKind.Relative));
-      this.HeaderUC = (GenericHeaderUC) this.FindName("HeaderUC");
-      this.PullToRefreshUC = (PullToRefreshUC) this.FindName("PullToRefreshUC");
-      this.GamesInvitesListBox = (ExtendedLongListSelector) this.FindName("GamesInvitesListBox");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/GamesInvitesPage.xaml", UriKind.Relative));
+      this.HeaderUC = (GenericHeaderUC) base.FindName("HeaderUC");
+      this.PullToRefreshUC = (PullToRefreshUC) base.FindName("PullToRefreshUC");
+      this.GamesInvitesListBox = (ExtendedLongListSelector) base.FindName("GamesInvitesListBox");
     }
   }
 }

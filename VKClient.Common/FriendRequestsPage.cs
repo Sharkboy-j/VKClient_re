@@ -26,7 +26,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as FriendRequestsViewModel;
+        return base.DataContext as FriendRequestsViewModel;
       }
     }
 
@@ -35,7 +35,7 @@ namespace VKClient.Common
       this.InitializeComponent();
       this.ucHeader.OnHeaderTap = (Action) (() => this.listBoxFriendRequests.ScrollToTop());
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.listBoxFriendRequests);
-      this.listBoxFriendRequests.OnRefresh = (Action) (() => this.FriendRequestsVM.FriendRequestsVM.LoadData(true, false, (Action<BackendResult<FriendRequests, ResultCode>>) null, false));
+      this.listBoxFriendRequests.OnRefresh = (Action) (() => this.FriendRequestsVM.FriendRequestsVM.LoadData(true, false,  null, false));
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -43,10 +43,10 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      FriendRequestsViewModel requestsViewModel = new FriendRequestsViewModel(this.NavigationContext.QueryString.ContainsKey("AreSuggestedFriends") && bool.Parse(this.NavigationContext.QueryString["AreSuggestedFriends"]));
+      FriendRequestsViewModel requestsViewModel = new FriendRequestsViewModel(((Page) this).NavigationContext.QueryString.ContainsKey("AreSuggestedFriends") && bool.Parse(((Page) this).NavigationContext.QueryString["AreSuggestedFriends"]));
       requestsViewModel.ParentFriendRequestsUC = (FriendRequestsUC) ParametersRepository.GetParameterForIdAndReset("FriendRequestsUC");
-      this.DataContext = (object) requestsViewModel;
-      requestsViewModel.FriendRequestsVM.LoadData(false, false, (Action<BackendResult<FriendRequests, ResultCode>>) null, false);
+      base.DataContext = requestsViewModel;
+      requestsViewModel.FriendRequestsVM.LoadData(false, false,  null, false);
       this._isInitialized = true;
     }
 
@@ -68,11 +68,11 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/FriendRequestsPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.listBoxFriendRequests = (ExtendedLongListSelector) this.FindName("listBoxFriendRequests");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/FriendRequestsPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.listBoxFriendRequests = (ExtendedLongListSelector) base.FindName("listBoxFriendRequests");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
     }
   }
 }

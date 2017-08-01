@@ -28,7 +28,7 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       FriendsSuggestionsViewModel suggestionsViewModel = new FriendsSuggestionsViewModel();
-      this.DataContext = (object) suggestionsViewModel;
+      base.DataContext = suggestionsViewModel;
       suggestionsViewModel.FriendsSearchVM.LoadData();
       this._isInitialized = true;
     }
@@ -39,9 +39,9 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/FriendsSuggestionsPage.xaml", UriKind.Relative));
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.ucFriendsSearch = (FriendsSearchUC) this.FindName("ucFriendsSearch");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/FriendsSuggestionsPage.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.ucFriendsSearch = (FriendsSearchUC) base.FindName("ucFriendsSearch");
     }
   }
 }

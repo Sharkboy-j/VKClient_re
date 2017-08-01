@@ -15,6 +15,7 @@ namespace VKClient.Common.UC
 
     public AppTipBubbleUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -24,11 +25,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/AppTipBubbleUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.imageTip = (Image) this.FindName("imageTip");
-      this.textBlockTip = (TextBlock) this.FindName("textBlockTip");
-      this.textBlockOK = (TextBlock) this.FindName("textBlockOK");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/AppTipBubbleUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.imageTip = (Image) base.FindName("imageTip");
+      this.textBlockTip = (TextBlock) base.FindName("textBlockTip");
+      this.textBlockOK = (TextBlock) base.FindName("textBlockOK");
     }
   }
 }

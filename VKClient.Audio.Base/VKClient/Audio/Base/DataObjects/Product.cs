@@ -84,7 +84,7 @@ namespace VKClient.Audio.Base.DataObjects
 
     public override string ToString()
     {
-      return string.Format("market{0}_{1}", (object) this.owner_id, (object) this.id);
+      return string.Format("market{0}_{1}", this.owner_id, this.id);
     }
 
     public string GetKey()

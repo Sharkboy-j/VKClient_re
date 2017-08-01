@@ -36,13 +36,13 @@ namespace VKClient.Common
     {
       base.HandleOnNavigatedTo(e);
       this._viewModel = new UsersSearchNearbyViewModel();
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
       this._viewModel.LoadGeoposition(new Action<GeoPositionStatus>(this.HandlePositionStatus));
     }
 
     private void HandlePositionStatus(GeoPositionStatus status)
     {
-      if (status == GeoPositionStatus.Disabled)
+      if (status == GeoPositionStatus.Ready)
       {
         this._viewModel.StopLoading();
         VisualStateManager.GoToState((Control) this, "Disabled", false);
@@ -50,7 +50,7 @@ namespace VKClient.Common
       else
       {
         VisualStateManager.GoToState((Control) this, "Normal", false);
-        if (status != GeoPositionStatus.Ready)
+        if (status != GeoPositionStatus.Initializing)
           return;
         this._viewModel.StartLoading();
       }
@@ -67,16 +67,16 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UsersSearchNearbyPage.xaml", UriKind.Relative));
-      this.CommonStates = (VisualStateGroup) this.FindName("CommonStates");
-      this.Normal = (VisualState) this.FindName("Normal");
-      this.Disabled = (VisualState) this.FindName("Disabled");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.progressRing = (ProgressRing) this.FindName("progressRing");
-      this.textBlockDescription = (TextBlock) this.FindName("textBlockDescription");
-      this.textBlockDisabled = (TextBlock) this.FindName("textBlockDisabled");
-      this.buttonOpenSettings = (Button) this.FindName("buttonOpenSettings");
-      this.listUsers = (ExtendedLongListSelector) this.FindName("listUsers");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UsersSearchNearbyPage.xaml", UriKind.Relative));
+      this.CommonStates = (VisualStateGroup) base.FindName("CommonStates");
+      this.Normal = (VisualState) base.FindName("Normal");
+      this.Disabled = (VisualState) base.FindName("Disabled");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.progressRing = (ProgressRing) base.FindName("progressRing");
+      this.textBlockDescription = (TextBlock) base.FindName("textBlockDescription");
+      this.textBlockDisabled = (TextBlock) base.FindName("textBlockDisabled");
+      this.buttonOpenSettings = (Button) base.FindName("buttonOpenSettings");
+      this.listUsers = (ExtendedLongListSelector) base.FindName("listUsers");
     }
   }
 }

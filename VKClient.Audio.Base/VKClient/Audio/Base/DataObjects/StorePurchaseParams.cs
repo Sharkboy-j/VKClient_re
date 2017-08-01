@@ -5,13 +5,13 @@ namespace VKClient.Audio.Base.DataObjects
 {
   public class StorePurchaseParams
   {
-      public int ProductId { get; set; }
+      public int ProductId { get; private set; }
 
-      public string MerchantProductId { get; set; }
+      public string MerchantProductId { get; private set; }
 
-      public Guid MerchantTransactionId { get; set; }
+      public Guid MerchantTransactionId { get; private set; }
 
-      public string ReceiptBase64 { get; set; }
+      public string ReceiptBase64 { get; private set; }
 
     public StorePurchaseReferrer? referrer { get; set; }
 

@@ -31,7 +31,7 @@ namespace VKClient.Groups.Library
     {
       get
       {
-        return UIStringFormatterHelper.FormatNumberOfSomething(this._topic.comments, GroupResources.OneMessageFrm, GroupResources.TwoFourMessagesFrm, GroupResources.FiveMessagesFrm, true, null, false);
+        return UIStringFormatterHelper.FormatNumberOfSomething(this._topic.comments, GroupResources.OneMessageFrm, GroupResources.TwoFourMessagesFrm, GroupResources.FiveMessagesFrm, true,  null, false);
       }
     }
 

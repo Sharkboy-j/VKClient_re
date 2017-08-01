@@ -133,9 +133,12 @@
                        framework:ImageLoader.UriSource="{Binding ImageUrl, Mode=OneWay}"
                        VerticalAlignment="Center">
                     <Image.Clip>
-                        <EllipseGeometry Center="31 31"
+                        <!--<EllipseGeometry Center="31 31"
                                          RadiusX="31"
-                                         RadiusY="31" />
+                                         RadiusY="31" />-->
+                        <RectangleGeometry Rect="0 0 62 62"
+							RadiusX="31"
+							RadiusY="31"/>
                     </Image.Clip>
                 </Image>
 

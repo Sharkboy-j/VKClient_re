@@ -14,7 +14,7 @@ namespace VKClient.Audio.Base
         {
             get
             {
-                return AppInfo.GetVersion();// UPDATE: 4.8.0
+                return AppInfo.GetVersion();
             }
         }
 
@@ -39,7 +39,7 @@ namespace VKClient.Audio.Base
         {
             get
             {
-                return string.Format("WindowsPhone_{0}", Environment.OSVersion.Version);// UPDATE: 4.8.0
+                return string.Format("WindowsPhone_{0}", Environment.OSVersion.Version);
             }
         }
 
@@ -75,14 +75,14 @@ namespace VKClient.Audio.Base
             }
         }
 
-        private static string GetVersion()// NEW: 4.8.0
+        private static string GetVersion()
         {
             if (!string.IsNullOrEmpty(AppInfo._version))
                 return AppInfo._version;
             PackageVersion version = Package.Current.Id.Version;
-            AppInfo._version = string.Format("{0}.{1}", (object)version.Major, (object)version.Minor);
+            AppInfo._version = string.Format("{0}.{1}", version.Major, version.Minor);
             if ((int)version.Build > 0)
-                AppInfo._version += string.Format(".{0}", (object)version.Build);
+                AppInfo._version += string.Format(".{0}", version.Build);
             return AppInfo._version;
         }
 

@@ -1,7 +1,9 @@
 using Microsoft.Phone.Controls;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -80,7 +82,7 @@ namespace VKMessenger.Library.VirtItems
     }
 
     public MessageItem(MessageViewModel mvm, bool isHorizontalOrientation = false)
-      : base(MessageItem.VERTICAL_WIDTH, new Thickness(0.0, 0.0, 0.0, 14.0), new Thickness())
+      : base(MessageItem.VERTICAL_WIDTH, new Thickness(0.0, 0.0, 0.0, 14.0),  new Thickness())
     {
       this._mvm = mvm;
       this._isHorizontalOrientation = isHorizontalOrientation;
@@ -102,23 +104,31 @@ namespace VKMessenger.Library.VirtItems
       if (!this.IsSystemMessage)
       {
         this._messageContentItem.IsHorizontalOrientation = this.IsHorizontalOrientation;
-        this._bubbleRect.Width = this._messageContentItem.Width;
-        this._bubbleRect.Height = this._messageContentItem.FixedHeight;
+        ((FrameworkElement) this._bubbleRect).Width = this._messageContentItem.Width;
+        ((FrameworkElement) this._bubbleRect).Height = this._messageContentItem.FixedHeight;
         double width = this._messageContentItem.Width;
         switch (this._mvm.MessageDirectionType)
         {
           case MessageDirectionType.InFromUser:
-            this._selectionPath.Margin = new Thickness(this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0);
+            ((FrameworkElement) this._selectionPath).Margin=(new Thickness(this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0));
             break;
           case MessageDirectionType.InFromUserInChat:
-            this._selectionPath.Margin = new Thickness(this._messageContentItem.Margin.Left + this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0);
+            Path selectionPath1 = this._selectionPath;
+            Thickness margin1 = this._messageContentItem.Margin;
+            // ISSUE: explicit reference operation
+            Thickness thickness1 = new Thickness(margin1.Left + this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0);
+            ((FrameworkElement) selectionPath1).Margin = thickness1;
             break;
           case MessageDirectionType.OutToUser:
           case MessageDirectionType.OutToChat:
             this._messageContentItem.Margin = new Thickness(this.Width - width, 0.0, 0.0, 0.0);
-            this._selectionPath.Margin = new Thickness(this._messageContentItem.Margin.Left - 10.0 - this._selectionPath.Width, 10.0, 0.0, 0.0);
-            this._calloutPath.Margin = new Thickness(this.Width - 1.0, 16.0, 0.0, 0.0);
-            this._bubbleRect.Margin = new Thickness(this.Width - width, 0.0, 0.0, 0.0);
+            Path selectionPath2 = this._selectionPath;
+            Thickness margin2 = this._messageContentItem.Margin;
+            // ISSUE: explicit reference operation
+            Thickness thickness2 = new Thickness(((Thickness) @margin2).Left - 10.0 - ((FrameworkElement) this._selectionPath).Width, 10.0, 0.0, 0.0);
+            ((FrameworkElement) selectionPath2).Margin = thickness2;
+            ((FrameworkElement) this._calloutPath).Margin=(new Thickness(this.Width - 1.0, 16.0, 0.0, 0.0));
+            ((FrameworkElement) this._bubbleRect).Margin=(new Thickness(this.Width - width, 0.0, 0.0, 0.0));
             break;
         }
         this._height = this._messageContentItem.FixedHeight;
@@ -140,37 +150,42 @@ namespace VKMessenger.Library.VirtItems
       {
         MenuItem menuItem1 = new MenuItem();
         string conversationAppBarChoose = CommonResources.Conversation_AppBar_Choose;
-        menuItem1.Header = (object) conversationAppBarChoose;
+        menuItem1.Header = conversationAppBarChoose;
         MenuItem menuItem2 = menuItem1;
-        menuItem2.Click += new RoutedEventHandler(this.miSelect_Click);
+        // ISSUE: method pointer
+        menuItem2.Click += new RoutedEventHandler( this.miSelect_Click);
         menuItems.Add(menuItem2);
         MenuItem menuItem3 = new MenuItem();
         string conversationQuote = CommonResources.Conversation_Quote;
-        menuItem3.Header = (object) conversationQuote;
+        menuItem3.Header = conversationQuote;
         MenuItem menuItem4 = menuItem3;
-        menuItem4.Click += new RoutedEventHandler(this.miQuote_Click);
+        // ISSUE: method pointer
+        menuItem4.Click += new RoutedEventHandler( this.miQuote_Click);
         menuItems.Add(menuItem4);
         MenuItem menuItem5 = new MenuItem();
         string conversationForward = CommonResources.Conversation_Forward;
-        menuItem5.Header = (object) conversationForward;
+        menuItem5.Header = conversationForward;
         MenuItem menuItem6 = menuItem5;
-        menuItem6.Click += new RoutedEventHandler(this.miForward_Click);
+        // ISSUE: method pointer
+        menuItem6.Click += new RoutedEventHandler( this.miForward_Click);
         menuItems.Add(menuItem6);
         if (!string.IsNullOrWhiteSpace(this._mvm.Message.body))
         {
           MenuItem menuItem7 = new MenuItem();
           string conversationCopy = CommonResources.Conversation_Copy;
-          menuItem7.Header = (object) conversationCopy;
+          menuItem7.Header = conversationCopy;
           MenuItem menuItem8 = menuItem7;
-          menuItem8.Click += new RoutedEventHandler(this.miCopy_Click);
+          // ISSUE: method pointer
+          menuItem8.Click += new RoutedEventHandler( this.miCopy_Click);
           menuItems.Add(menuItem8);
         }
       }
       MenuItem menuItem9 = new MenuItem();
       string conversationDelete = CommonResources.Conversation_Delete;
-      menuItem9.Header = (object) conversationDelete;
+      menuItem9.Header = conversationDelete;
       MenuItem menuItem10 = menuItem9;
-      menuItem10.Click += new RoutedEventHandler(this.miDelete_Click);
+      // ISSUE: method pointer
+      menuItem10.Click += new RoutedEventHandler( this.miDelete_Click);
       menuItems.Add(menuItem10);
       this.SetMenu(menuItems);
     }
@@ -180,9 +195,9 @@ namespace VKMessenger.Library.VirtItems
       EventAggregator current = EventAggregator.Current;
       MessageActionEvent messageActionEvent = new MessageActionEvent();
       messageActionEvent.MessageActionType = MessageActionType.EnterSelectMode;
-      MessageViewModel messageViewModel = this._mvm;
-      messageActionEvent.Message = messageViewModel;
-      current.Publish((object) messageActionEvent);
+      MessageViewModel mvm = this._mvm;
+      messageActionEvent.Message = mvm;
+      current.Publish(messageActionEvent);
     }
 
     private void miDelete_Click(object sender, RoutedEventArgs e)
@@ -192,9 +207,9 @@ namespace VKMessenger.Library.VirtItems
       EventAggregator current = EventAggregator.Current;
       MessageActionEvent messageActionEvent = new MessageActionEvent();
       messageActionEvent.MessageActionType = MessageActionType.Delete;
-      MessageViewModel messageViewModel = this._mvm;
-      messageActionEvent.Message = messageViewModel;
-      current.Publish((object) messageActionEvent);
+      MessageViewModel mvm = this._mvm;
+      messageActionEvent.Message = mvm;
+      current.Publish(messageActionEvent);
     }
 
     private void miCopy_Click(object sender, RoutedEventArgs e)
@@ -209,9 +224,9 @@ namespace VKMessenger.Library.VirtItems
       EventAggregator current = EventAggregator.Current;
       MessageActionEvent messageActionEvent = new MessageActionEvent();
       messageActionEvent.MessageActionType = MessageActionType.Forward;
-      MessageViewModel messageViewModel = this._mvm;
-      messageActionEvent.Message = messageViewModel;
-      current.Publish((object) messageActionEvent);
+      MessageViewModel mvm = this._mvm;
+      messageActionEvent.Message = mvm;
+      current.Publish(messageActionEvent);
     }
 
     private void miQuote_Click(object sender, RoutedEventArgs e)
@@ -219,9 +234,9 @@ namespace VKMessenger.Library.VirtItems
       EventAggregator current = EventAggregator.Current;
       MessageActionEvent messageActionEvent = new MessageActionEvent();
       messageActionEvent.MessageActionType = MessageActionType.Quote;
-      MessageViewModel messageViewModel = this._mvm;
-      messageActionEvent.Message = messageViewModel;
-      current.Publish((object) messageActionEvent);
+      MessageViewModel mvm = this._mvm;
+      messageActionEvent.Message = mvm;
+      current.Publish(messageActionEvent);
     }
 
     private void CreateLayout()
@@ -232,95 +247,111 @@ namespace VKMessenger.Library.VirtItems
         {
           if (!this._isTypingItem)
           {
-            this._messageContentItem = new MessageContentItem(345.0, new Thickness(), this._mvm, 512.0, this._isHorizontalOrientation, 0);
+            bool flag = !string.IsNullOrWhiteSpace(this._mvm.Message.body);
+            int num1 = this._mvm.Attachments == null ? 0 : (Enumerable.Any<AttachmentViewModel>(this._mvm.Attachments, (Func<AttachmentViewModel, bool>)(a => a.AttachmentType == AttachmentType.Gift)) ? 1 : 0);
+            double verticalWidth = 356.0;
+            double horizontalWidth = 512.0;
+            if (num1 != 0 && !flag)
+              verticalWidth = horizontalWidth = 256.0;
+            this._messageContentItem = new MessageContentItem(verticalWidth,  new Thickness(), this._mvm, horizontalWidth, this._isHorizontalOrientation, 0);
             MessageDirectionType messageDirectionType = this._mvm.MessageDirectionType;
             double width = this._messageContentItem.Width;
             SolidColorBrush bgBrush1 = this._mvm.BGBrush;
             Rectangle rectangle = new Rectangle();
             SolidColorBrush solidColorBrush = bgBrush1;
-            rectangle.Fill = (Brush) solidColorBrush;
-            double num1 = width;
-            rectangle.Width = num1;
+            ((Shape) rectangle).Fill = ((Brush) solidColorBrush);
+            double num2 = width;
+            ((FrameworkElement) rectangle).Width = num2;
             double fixedHeight = this._messageContentItem.FixedHeight;
-            rectangle.Height = fixedHeight;
+            ((FrameworkElement) rectangle).Height = fixedHeight;
             this._bubbleRect = rectangle;
             this._selectionPath = new Path();
             PathGeometry pathGeometry = new PathGeometry();
             PathFigure pathFigure1 = new PathFigure();
             PathFigure pathFigure2 = pathFigure1;
-            Point p1 = new Point();
-            p1.X = 361.0;
-            p1.Y = 239.0;
-            Point point1 = p1;
-            pathFigure2.StartPoint = point1;
+            Point point1 =  new Point();
+            // ISSUE: explicit reference operation
+            point1.X = 361.0;
+            // ISSUE: explicit reference operation
+            point1.Y = 239.0;
+            Point point2 = point1;
+            pathFigure2.StartPoint = point2;
             LineSegment lineSegment1 = new LineSegment();
-            p1 = new Point();
+            Point p1 = new Point();
+            // ISSUE: explicit reference operation
             p1.X = 371.0;
+            // ISSUE: explicit reference operation
             p1.Y = 250.0;
-            Point point2 = p1;
-            lineSegment1.Point = point2;
+            Point point3 = p1;
+            lineSegment1.Point = point3;
             LineSegment lineSegment2 = lineSegment1;
             LineSegment lineSegment3 = new LineSegment();
-            p1 = new Point();
+            p1 = new Point(); 
+            // ISSUE: explicit reference operation
             p1.X = 387.0;
+            // ISSUE: explicit reference operation
             p1.Y = 230.0;
-            Point point3 = p1;
-            lineSegment3.Point = point3;
+            Point point4 = p1;
+            lineSegment3.Point = point4;
             LineSegment lineSegment4 = lineSegment3;
-            pathFigure1.Segments.Add((PathSegment) lineSegment2);
-            pathFigure1.Segments.Add((PathSegment) lineSegment4);
-            pathGeometry.Figures.Add(pathFigure1);
-            this._selectionPath.Data = (Geometry) pathGeometry;
-            this._selectionPath.Stretch = Stretch.Fill;
-            this._selectionPath.Height = 20.5;
-            this._selectionPath.Width = 25.667;
-            this._selectionPath.StrokeThickness = 5.0;
-            this._selectionPath.Stroke = Application.Current.Resources["PhoneVKSubtleBrush"] as Brush;
-            this._selectionPath.Visibility = this._mvm.SelectionMarkVisibility;
+            ((PresentationFrameworkCollection<PathSegment>) pathFigure1.Segments).Add((PathSegment) lineSegment2);
+            ((PresentationFrameworkCollection<PathSegment>) pathFigure1.Segments).Add((PathSegment) lineSegment4);
+            ((PresentationFrameworkCollection<PathFigure>) pathGeometry.Figures).Add(pathFigure1);
+            this._selectionPath.Data=((Geometry) pathGeometry);
+            ((Shape) this._selectionPath).Stretch=((Stretch) 1);
+            ((FrameworkElement) this._selectionPath).Height = 20.5;
+            ((FrameworkElement) this._selectionPath).Width = 25.667;
+            ((Shape) this._selectionPath).StrokeThickness = 5.0;
+            ((Shape) this._selectionPath).Stroke=(Application.Current.Resources["PhoneVKSubtleBrush"] as Brush);
+            ((UIElement) this._selectionPath).Visibility = this._mvm.SelectionMarkVisibility;
             switch (messageDirectionType)
             {
               case MessageDirectionType.InFromUser:
                 this._messageContentItem.Margin = MessageItem.UserIncomingMessageMargin;
-                this._selectionPath.Margin = new Thickness(this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0);
+                ((FrameworkElement) this._selectionPath).Margin=(new Thickness(this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0));
                 Path path1 = new Path();
                 SolidColorBrush bgBrush2 = this._mvm.BGBrush;
-                path1.Fill = (Brush) bgBrush2;
-                double num2 = 16.0;
-                path1.Height = num2;
-                double num3 = 13.0;
-                path1.Width = num3;
+                ((Shape) path1).Fill = ((Brush) bgBrush2);
+                double num3 = 16.0;
+                ((FrameworkElement) path1).Height = num3;
+                double num4 = 13.0;
+                ((FrameworkElement) path1).Width = num4;
                 Thickness thickness1 = new Thickness(-12.0, 16.0, 0.0, 0.0);
-                path1.Margin = thickness1;
-                int num4 = 1;
-                path1.Stretch = (Stretch) num4;
-                p1 = new Point();
+                ((FrameworkElement) path1).Margin = thickness1;
+                int num5 = 1;
+                ((Shape) path1).Stretch=((Stretch) num5);
+                p1 =  new Point();
                 Geometry triangleGeometry1 = PathHelper.CreateTriangleGeometry(p1, new Point(100.0, 0.0), new Point(100.0, 100.0));
                 path1.Data = triangleGeometry1;
                 this._calloutPath = path1;
                 break;
               case MessageDirectionType.InFromUserInChat:
                 this._messageContentItem.Margin = MessageItem.ChatIncomingMessageMargin;
-                this._selectionPath.Margin = new Thickness(this._messageContentItem.Margin.Left + this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0);
+                Path selectionPath1 = this._selectionPath;
+                Thickness margin1 = this._messageContentItem.Margin;
+                // ISSUE: explicit reference operation
+                Thickness thickness2 = new Thickness(margin1.Left + this._messageContentItem.Width + 10.0, 10.0, 0.0, 0.0);
+                ((FrameworkElement) selectionPath1).Margin = thickness2;
                 if (this._mvm.UIImageUrl != null)
-                  this.VirtualizableChildren.Add((IVirtualizable) new VirtualizableImage(48.0, 48.0, new Thickness(), this._mvm.UIImageUrl, (Action<VirtualizableImage>) (vi =>
+                  base.VirtualizableChildren.Add((IVirtualizable) new VirtualizableImage(48.0, 48.0,  new Thickness(), this._mvm.UIImageUrl, (Action<VirtualizableImage>) (vi =>
                   {
                     if (this._mvm.AssociatedUser == null)
                       return;
                     Navigator.Current.NavigateToUserProfile(this._mvm.AssociatedUser.uid, "", "", false);
-                  }), "", true, true, Stretch.UniformToFill, (Brush) null, -1.0, false, true));
-                this._bubbleRect.Margin = MessageItem.ChatIncomingMessageMargin;
+                  }), "", true, true, (Stretch) 3,  null, -1.0, false, true));
+                ((FrameworkElement) this._bubbleRect).Margin = MessageItem.ChatIncomingMessageMargin;
                 Path path2 = new Path();
                 SolidColorBrush bgBrush3 = this._mvm.BGBrush;
-                path2.Fill = (Brush) bgBrush3;
-                double num5 = 16.0;
-                path2.Height = num5;
-                double num6 = 13.0;
-                path2.Width = num6;
-                Thickness thickness2 = new Thickness(56.0, 16.0, 0.0, 0.0);
-                path2.Margin = thickness2;
-                int num7 = 1;
-                path2.Stretch = (Stretch) num7;
-                p1 = new Point();
+                ((Shape) path2).Fill = ((Brush) bgBrush3);
+                double num6 = 16.0;
+                ((FrameworkElement) path2).Height = num6;
+                double num7 = 13.0;
+                ((FrameworkElement) path2).Width = num7;
+                Thickness thickness3 = new Thickness(56.0, 16.0, 0.0, 0.0);
+                ((FrameworkElement) path2).Margin = thickness3;
+                int num8 = 1;
+                ((Shape) path2).Stretch=((Stretch) num8);
+                p1 =  new Point();
                 Geometry triangleGeometry2 = PathHelper.CreateTriangleGeometry(p1, new Point(100.0, 0.0), new Point(100.0, 100.0));
                 path2.Data = triangleGeometry2;
                 this._calloutPath = path2;
@@ -328,31 +359,35 @@ namespace VKMessenger.Library.VirtItems
               case MessageDirectionType.OutToUser:
               case MessageDirectionType.OutToChat:
                 this._messageContentItem.Margin = new Thickness(this.Width - width, 0.0, 0.0, 0.0);
-                this._selectionPath.Margin = new Thickness(this._messageContentItem.Margin.Left - 10.0 - this._selectionPath.Width, 10.0, 0.0, 0.0);
+                Path selectionPath2 = this._selectionPath;
+                Thickness margin2 = this._messageContentItem.Margin;
+                // ISSUE: explicit reference operation
+                Thickness thickness4 = new Thickness(((Thickness) @margin2).Left - 10.0 - ((FrameworkElement) this._selectionPath).Width, 10.0, 0.0, 0.0);
+                ((FrameworkElement) selectionPath2).Margin = thickness4;
                 Path path3 = new Path();
                 SolidColorBrush bgBrush4 = this._mvm.BGBrush;
-                path3.Fill = (Brush) bgBrush4;
-                double num8 = 16.0;
-                path3.Height = num8;
-                double num9 = 13.0;
-                path3.Width = num9;
-                Thickness thickness3 = new Thickness(this.Width - 1.0, 16.0, 0.0, 0.0);
-                path3.Margin = thickness3;
-                int num10 = 1;
-                path3.Stretch = (Stretch) num10;
+                ((Shape) path3).Fill = ((Brush) bgBrush4);
+                double num9 = 16.0;
+                ((FrameworkElement) path3).Height = num9;
+                double num10 = 13.0;
+                ((FrameworkElement) path3).Width = num10;
+                Thickness thickness5 = new Thickness(this.Width - 1.0, 16.0, 0.0, 0.0);
+                ((FrameworkElement) path3).Margin = thickness5;
+                int num11 = 1;
+                ((Shape) path3).Stretch=((Stretch) num11);
                 p1 = new Point();
                 Geometry triangleGeometry3 = PathHelper.CreateTriangleGeometry(p1, new Point(100.0, 0.0), new Point(0.0, 100.0));
                 path3.Data = triangleGeometry3;
                 this._calloutPath = path3;
-                this._bubbleRect.Margin = new Thickness(this.Width - width, 0.0, 0.0, 0.0);
+                ((FrameworkElement) this._bubbleRect).Margin=(new Thickness(this.Width - width, 0.0, 0.0, 0.0));
                 break;
               case MessageDirectionType.Undefined:
                 return;
             }
-            this.VirtualizableChildren.Add((IVirtualizable) this._messageContentItem);
+            base.VirtualizableChildren.Add((IVirtualizable) this._messageContentItem);
             this._height = this._messageContentItem.FixedHeight;
             this._tapHandlerItem = new TapHandlerItem(this.Width, this._height, this._mvm);
-            this.VirtualizableChildren.Add((IVirtualizable) this._tapHandlerItem);
+            base.VirtualizableChildren.Add((IVirtualizable) this._tapHandlerItem);
           }
           else
           {
@@ -361,47 +396,56 @@ namespace VKMessenger.Library.VirtItems
             this._selectionPath = new Path();
             Rectangle rectangle = new Rectangle();
             SolidColorBrush solidColorBrush = bgBrush1;
-            rectangle.Fill = (Brush) solidColorBrush;
+            ((Shape) rectangle).Fill = ((Brush) solidColorBrush);
             double num1 = 80.0;
-            rectangle.Width = num1;
+            ((FrameworkElement) rectangle).Width = num1;
             double num2 = 52.0;
-            rectangle.Height = num2;
+            ((FrameworkElement) rectangle).Height = num2;
             this._bubbleRect = rectangle;
-            VirtualizableImage virtualizableImage1 = new VirtualizableImage(48.0, 12.0, new Thickness(16.0, 22.0, 0.0, 0.0), MultiResolutionHelper.Instance.AppendResolutionSuffix("/Resources/New/TypingBubbleDots.png", true, ""), (Action<VirtualizableImage>) null, null, false, false, Stretch.UniformToFill, (Brush) null, -1.0, false, false);
-            this.VirtualizableChildren.Add((IVirtualizable) virtualizableImage1);
+            VirtualizableImage virtualizableImage1 = new VirtualizableImage(48.0, 12.0, new Thickness(16.0, 22.0, 0.0, 0.0), MultiResolutionHelper.Instance.AppendResolutionSuffix("/Resources/New/TypingBubbleDots.png", true, ""),  null,  null, false, false, (Stretch) 3,  null, -1.0, false, false);
+            base.VirtualizableChildren.Add((IVirtualizable) virtualizableImage1);
             if (this._isTypingInChat)
             {
-              this._bubbleRect.Margin = MessageItem.ChatIncomingMessageMargin;
+              ((FrameworkElement) this._bubbleRect).Margin = MessageItem.ChatIncomingMessageMargin;
               VirtualizableImage virtualizableImage2 = virtualizableImage1;
-              double left = virtualizableImage1.Margin.Left + this._bubbleRect.Margin.Left;
-              double top1 = virtualizableImage1.Margin.Top;
-              Thickness thickness1 = this._bubbleRect.Margin;
-              double top2 = thickness1.Top;
-              double top3 = top1 + top2;
-              double right = 0.0;
-              double bottom = 0.0;
-              Thickness thickness2 = new Thickness(left, top3, right, bottom);
+              Thickness margin1 = virtualizableImage1.Margin;
+              // ISSUE: explicit reference operation
+              double left1 = margin1.Left;
+              margin1 = ((FrameworkElement) this._bubbleRect).Margin;
+              // ISSUE: explicit reference operation
+              double left2 = margin1.Left;
+              double num3 = left1 + left2;
+              Thickness thickness1 = virtualizableImage1.Margin;
+              // ISSUE: explicit reference operation
+              double top1 = ((Thickness) @thickness1).Top;
+              thickness1 = ((FrameworkElement) this._bubbleRect).Margin;
+              // ISSUE: explicit reference operation
+              double top2 = ((Thickness) @thickness1).Top;
+              double num4 = top1 + top2;
+              double num5 = 0.0;
+              double num6 = 0.0;
+              Thickness thickness2 = new Thickness(num3, num4, num5, num6);
               virtualizableImage2.Margin = thickness2;
               Path path = new Path();
               SolidColorBrush bgBrush2 = this._mvm.BGBrush;
-              path.Fill = (Brush) bgBrush2;
-              double num3 = 16.0;
-              path.Height = num3;
-              double num4 = 13.0;
-              path.Width = num4;
+              ((Shape) path).Fill = ((Brush) bgBrush2);
+              double num7 = 16.0;
+              ((FrameworkElement) path).Height = num7;
+              double num8 = 13.0;
+              ((FrameworkElement) path).Width = num8;
               Thickness thickness3 = new Thickness(56.0, 16.0, 0.0, 0.0);
-              path.Margin = thickness3;
-              int num5 = 1;
-              path.Stretch = (Stretch) num5;
-              Geometry triangleGeometry = PathHelper.CreateTriangleGeometry(new Point(), new Point(100.0, 0.0), new Point(100.0, 100.0));
+              ((FrameworkElement) path).Margin = thickness3;
+              int num9 = 1;
+              ((Shape) path).Stretch=((Stretch) num9);
+              Geometry triangleGeometry = PathHelper.CreateTriangleGeometry( new Point(), new Point(100.0, 0.0), new Point(100.0, 100.0));
               path.Data = triangleGeometry;
               this._calloutPath = path;
               if (this._userTyping == null || this._userTyping.photo_max == null)
                 return;
               double width = 52.0;
               double height = 52.0;
-              thickness1 = new Thickness();
-              Thickness margin = thickness1;
+              thickness1 =  new Thickness();
+              Thickness margin2 = thickness1;
               string photoMax = this._userTyping.photo_max;
               Action<VirtualizableImage> callbackOnTap = (Action<VirtualizableImage>) (vi =>
               {
@@ -410,27 +454,29 @@ namespace VKMessenger.Library.VirtItems
                 Navigator.Current.NavigateToUserProfile(this._mvm.AssociatedUser.uid, "", "", false);
               });
               string tag = "";
-              int num6 = 1;
-              int num7 = 1;
-              int num8 = 3;
-              double placeholderOpacity = -1.0;
-              int num9 = 0;
               int num10 = 1;
-              this.VirtualizableChildren.Add((IVirtualizable)new VirtualizableImage(width, height, margin, photoMax, callbackOnTap, tag, num6 != 0, num7 != 0, (Stretch)num8, null, placeholderOpacity, num9 != 0, num10 != 0));
+              int num11 = 1;
+              int num12 = 3;
+              // ISSUE: variable of the null type
+              
+              double placeholderOpacity = -1.0;
+              int num13 = 0;
+              int num14 = 1;
+              base.VirtualizableChildren.Add((IVirtualizable) new VirtualizableImage(width, height, margin2, photoMax, callbackOnTap, tag, num10 != 0, num11 != 0, (Stretch) num12, null, placeholderOpacity, num13 != 0, num14 != 0));
             }
             else
             {
               Path path = new Path();
               SolidColorBrush bgBrush2 = this._mvm.BGBrush;
-              path.Fill = (Brush) bgBrush2;
+              ((Shape) path).Fill = ((Brush) bgBrush2);
               double num3 = 16.0;
-              path.Height = num3;
+              ((FrameworkElement) path).Height = num3;
               double num4 = 13.0;
-              path.Width = num4;
+              ((FrameworkElement) path).Width = num4;
               Thickness thickness = new Thickness(-12.0, 16.0, 0.0, 0.0);
-              path.Margin = thickness;
+              ((FrameworkElement) path).Margin = thickness;
               int num5 = 1;
-              path.Stretch = (Stretch) num5;
+              ((Shape) path).Stretch=((Stretch) num5);
               Geometry triangleGeometry = PathHelper.CreateTriangleGeometry(new Point(), new Point(100.0, 0.0), new Point(100.0, 100.0));
               path.Data = triangleGeometry;
               this._calloutPath = path;
@@ -439,12 +485,12 @@ namespace VKMessenger.Library.VirtItems
         }
         else
         {
-          this._systemMessageItem = new SystemMessageItem(MessageItem.VERTICAL_WIDTH, new Thickness(), this._mvm, MessageItem.HORIZONTAL_WIDTH, this._isHorizontalOrientation);
+          this._systemMessageItem = new SystemMessageItem(MessageItem.VERTICAL_WIDTH,  new Thickness(), this._mvm, MessageItem.HORIZONTAL_WIDTH, this._isHorizontalOrientation);
           this._height = this._systemMessageItem.FixedHeight;
-          this.VirtualizableChildren.Add((IVirtualizable) this._systemMessageItem);
+          base.VirtualizableChildren.Add((IVirtualizable) this._systemMessageItem);
         }
       }
-      catch
+      catch (Exception )
       {
         Logger.Instance.Error("Failed to create message layout!!");
       }
@@ -458,11 +504,19 @@ namespace VKMessenger.Library.VirtItems
       if (this._calloutPath == null)
         return;
       this.UpdateFill();
-      this._selectionPath.Visibility = this._mvm.SelectionMarkVisibility;
+      ((UIElement) this._selectionPath).Visibility = this._mvm.SelectionMarkVisibility;
       this.Children.Add((FrameworkElement) this._selectionPath);
       this.Children.Add((FrameworkElement) this._calloutPath);
-      foreach (FrameworkElement coverByRectangle in RectangleHelper.CoverByRectangles(this._bubbleRect))
-        this.Children.Add(coverByRectangle);
+      List<Rectangle>.Enumerator enumerator = RectangleHelper.CoverByRectangles(this._bubbleRect).GetEnumerator();
+      try
+      {
+        while (enumerator.MoveNext())
+          this.Children.Add((FrameworkElement) enumerator.Current);
+      }
+      finally
+      {
+        enumerator.Dispose();
+      }
     }
 
     protected override void ReleaseResourcesOnUnload()
@@ -473,7 +527,7 @@ namespace VKMessenger.Library.VirtItems
 
     private void _mvm_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-      if (e.PropertyName == "UIStatusDelivered" && this._mvm.UIStatusDelivered == Visibility.Visible && !this._handledDelivered)
+        if (e.PropertyName == "UIStatusDelivered" && this._mvm.UIStatusDelivered == Visibility.Visible && !this._handledDelivered)
       {
         VirtualizableState currentState = this.CurrentState;
         if (currentState != VirtualizableState.Unloaded && this._mvm.StickerAttachment == null)
@@ -487,15 +541,15 @@ namespace VKMessenger.Library.VirtItems
         this.UpdateFill();
       if (!(e.PropertyName == "SelectionMarkVisibility"))
         return;
-      this._selectionPath.Visibility = this._mvm.SelectionMarkVisibility;
+      ((UIElement) this._selectionPath).Visibility = this._mvm.SelectionMarkVisibility;
     }
 
     private void UpdateFill()
     {
       if (this._calloutPath == null || this._bubbleRect == null)
         return;
-      this._calloutPath.Fill = (Brush) this._mvm.BGBrush;
-      this._bubbleRect.Fill = (Brush) this._mvm.BGBrush;
+      ((Shape) this._calloutPath).Fill = ((Brush) this._mvm.BGBrush);
+      ((Shape) this._bubbleRect).Fill = ((Brush) this._mvm.BGBrush);
     }
 
     public void SetIsHorizontal(bool isHorizontal)

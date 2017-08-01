@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
@@ -41,8 +42,9 @@ namespace VKClient.Common.UC
 
     public AppNotificationUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.DataContext = (object) AppNotificationViewModel.Instance;
+      base.DataContext = AppNotificationViewModel.Instance;
       AppNotificationUC._instance = this;
       this._de = new DelayedExecutor(4000);
     }
@@ -51,7 +53,7 @@ namespace VKClient.Common.UC
     {
       if (FramePageUtils.Frame != null && !this._subscribedOrientationChange)
       {
-        FramePageUtils.Frame.OrientationChanged += new EventHandler<OrientationChangedEventArgs>(this.Frame_OrientationChanged);
+        FramePageUtils.Frame.OrientationChanged += (new EventHandler<OrientationChangedEventArgs>(this.Frame_OrientationChanged));
         this._subscribedOrientationChange = true;
       }
       this._tapCallback = tapCallback;
@@ -68,7 +70,7 @@ namespace VKClient.Common.UC
 
     private void UpdateHeight()
     {
-      this.LayoutRoot.Height = FramePageUtils.IsHorizontal ? AppNotificationUC.HORIZONTAL_HEIGHT : AppNotificationUC.VERTICAL_HEIGHT;
+      ((FrameworkElement) this.LayoutRoot).Height=(FramePageUtils.IsHorizontal ? AppNotificationUC.HORIZONTAL_HEIGHT : AppNotificationUC.VERTICAL_HEIGHT);
     }
 
     private void Hide(bool animate = true, Action autohideCallback = null)
@@ -81,7 +83,7 @@ namespace VKClient.Common.UC
       {
         if (this._isAnimating)
           return;
-        this.Visibility = Visibility.Collapsed;
+        base.Visibility = Visibility.Collapsed;
         this._isShown = false;
         if (autohideCallback == null)
           return;
@@ -93,7 +95,7 @@ namespace VKClient.Common.UC
     {
       if (this._isShown)
         return;
-      this.AnimateShowHide(true, null);
+      this.AnimateShowHide(true,  null);
     }
 
     private void AnimateShowHide(bool show, Action callback = null)
@@ -101,19 +103,19 @@ namespace VKClient.Common.UC
       if (this._isAnimating)
         return;
       this._isAnimating = true;
-      TranslateTransform translateTransform = this.LayoutRoot.RenderTransform as TranslateTransform;
+      TranslateTransform renderTransform = ((UIElement) this.LayoutRoot).RenderTransform as TranslateTransform;
       if (show)
       {
-        this.Visibility = Visibility.Visible;
-        TranslateTransform target = translateTransform;
+        base.Visibility = Visibility.Visible;
+        TranslateTransform translateTransform = renderTransform;
         double from = -AppNotificationUC.VERTICAL_HEIGHT;
         double to = 0.0;
-        DependencyProperty dependencyProperty = TranslateTransform.YProperty;
+        // ISSUE: variable of the null type
         int duration = 250;
         int? startTime = new int?(0);
         ExponentialEase exponentialEase = new ExponentialEase();
         int num1 = 1;
-        exponentialEase.EasingMode = (EasingMode) num1;
+        ((EasingFunctionBase) exponentialEase).EasingMode = ((EasingMode) num1);
         double num2 = 6.0;
         exponentialEase.Exponent = num2;
         Action completed = (Action) (() =>
@@ -125,38 +127,38 @@ namespace VKClient.Common.UC
           callback();
         });
         int num3 = 0;
-        target.Animate(from, to, (object) dependencyProperty, duration, startTime, (IEasingFunction) exponentialEase, completed, num3 != 0);
+        ((DependencyObject)translateTransform).Animate(from, to, TranslateTransform.YProperty, duration, startTime, (IEasingFunction)exponentialEase, completed, num3 != 0);
       }
       else
       {
-        TranslateTransform target = translateTransform;
+        TranslateTransform translateTransform = renderTransform;
         double from = 0.0;
         double to = -AppNotificationUC.VERTICAL_HEIGHT;
-        DependencyProperty dependencyProperty = TranslateTransform.YProperty;
+        // ISSUE: variable of the null type
         int duration = 250;
         int? startTime = new int?(0);
         ExponentialEase exponentialEase = new ExponentialEase();
         int num1 = 0;
-        exponentialEase.EasingMode = (EasingMode) num1;
+        ((EasingFunctionBase) exponentialEase).EasingMode = ((EasingMode) num1);
         double num2 = 6.0;
         exponentialEase.Exponent = num2;
         Action completed = (Action) (() =>
         {
           this._isShown = false;
           this._isAnimating = false;
-          this.Visibility = Visibility.Collapsed;
+          base.Visibility = Visibility.Collapsed;
           if (callback == null)
             return;
           callback();
         });
         int num3 = 0;
-        target.Animate(from, to, (object) dependencyProperty, duration, startTime, (IEasingFunction) exponentialEase, completed, num3 != 0);
+        ((DependencyObject)translateTransform).Animate(from, to, TranslateTransform.YProperty, duration, startTime, (IEasingFunction)exponentialEase, completed, num3 != 0);
       }
     }
 
     private void GridTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      this.Hide(false, null);
+      this.Hide(false,  null);
       PageBase currentPage = FramePageUtils.CurrentPage;
       if (currentPage != null && currentPage.IsMenuOpen)
         currentPage.OpenCloseMenu(false, this._tapCallback, false);
@@ -166,7 +168,7 @@ namespace VKClient.Common.UC
 
     private void CloseTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      this.Hide(true, null);
+      this.Hide(true,  null);
     }
 
     [DebuggerNonUserCode]
@@ -175,14 +177,14 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/AppNotificationUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.push_notification = (Grid) this.FindName("push_notification");
-      this.close = (Canvas) this.FindName("close");
-      this.Ellipse_8_copy_2 = (Path) this.FindName("Ellipse_8_copy_2");
-      this.Group_9 = (Canvas) this.FindName("Group_9");
-      this.Rounded_Rectangle_11 = (Path) this.FindName("Rounded_Rectangle_11");
-      this.Rounded_Rectangle_1 = (Path) this.FindName("Rounded_Rectangle_1");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/AppNotificationUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.push_notification = (Grid) base.FindName("push_notification");
+      this.close = (Canvas) base.FindName("close");
+      this.Ellipse_8_copy_2 = (Path) base.FindName("Ellipse_8_copy_2");
+      this.Group_9 = (Canvas) base.FindName("Group_9");
+      this.Rounded_Rectangle_11 = (Path) base.FindName("Rounded_Rectangle_11");
+      this.Rounded_Rectangle_1 = (Path) base.FindName("Rounded_Rectangle_1");
     }
   }
 }

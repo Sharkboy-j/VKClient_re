@@ -15,13 +15,15 @@ namespace VKClient.Audio.Base.DataObjects
 
     VKList<SubscriptionObj> subscriptions { get; set; }
 
+    VKList<GiftItemData> gifts { get; set; }
+
     Album mainAlbum { get; }
 
     Photo lastPhoto { get; }
 
     List<Topic> topics { get; }
 
-    List<VKClient.Common.Backend.DataObjects.Video> videos { get; }
+    List<Video> videos { get; }
 
     List<Product> products { get; }
 

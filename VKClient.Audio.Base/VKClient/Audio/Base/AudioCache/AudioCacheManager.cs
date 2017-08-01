@@ -21,7 +21,7 @@ namespace VKClient.Audio.Base.AudioCache
         private List<AudioObj> _downloadedList = new List<AudioObj>();
         private static AudioCacheManager _instance;
         private bool _isDownloading;
-        private bool _clearingCache;
+        private bool _cacheChanging;
 
         public static AudioCacheManager Instance
         {
@@ -42,7 +42,9 @@ namespace VKClient.Audio.Base.AudioCache
             {
                 if (!AppGlobalStateManager.Current.GlobalState.IsMusicCachingEnabled)
                     return new List<AudioObj>();
-                return this._downloadedList.Where<AudioObj>((Func<AudioObj, bool>)(a => a.owner_id == AppGlobalStateManager.Current.LoggedInUserId)).ToList<AudioObj>();
+                List<AudioObj> list = this._downloadedList.Where<AudioObj>((Func<AudioObj, bool>)(a => a.owner_id == AppGlobalStateManager.Current.LoggedInUserId)).ToList<AudioObj>();
+                list.Reverse();
+                return list;
             }
         }
 
@@ -50,12 +52,12 @@ namespace VKClient.Audio.Base.AudioCache
 
         public AudioCacheManager()
         {
-            EventAggregator.Current.Subscribe((object)this);
+            EventAggregator.Current.Subscribe(this);
         }
 
         public void Save()
         {
-            CacheManager.TrySerialize((IBinarySerializable)this, "AudioCacheManager", false, CacheManager.DataType.CachedData);
+            CacheManager.TrySerialize(this, "AudioCacheManager", false, CacheManager.DataType.CachedData);
         }
 
         public string GetLocalFileForUniqueId(string uniqueId)
@@ -72,24 +74,27 @@ namespace VKClient.Audio.Base.AudioCache
             this.DownloadNextOneIfNeeded();
         }
 
-        public async Task ClearCache()
+        public async Task ClearCache(IEnumerable<string> idsForRemoving = null)
         {
-            if (this._clearingCache)
+            if (this._cacheChanging)
                 return;
-            this._clearingCache = true;
+            this._cacheChanging = true;
             foreach (KeyValuePair<string, string> keyValuePair in new Dictionary<string, string>((IDictionary<string, string>)this._downloadedDict))
             {
                 KeyValuePair<string, string> kvp = keyValuePair;
-                if (await CacheManager.TryDeleteAsync(kvp.Value))
+                if (idsForRemoving == null || idsForRemoving.Contains<string>(kvp.Key))
                 {
-                    this._downloadedDict.Remove(kvp.Key);
-                    AudioObj audioObj = this._downloadedList.FirstOrDefault<AudioObj>((Func<AudioObj, bool>)(a => a.UniqueId == kvp.Key));
-                    if (audioObj != null)
-                        this._downloadedList.Remove(audioObj);
+                    if (await CacheManager.TryDeleteAsync(kvp.Value))
+                    {
+                        this._downloadedDict.Remove(kvp.Key);
+                        AudioObj audioObj = this._downloadedList.FirstOrDefault<AudioObj>((Func<AudioObj, bool>)(a => a.UniqueId == kvp.Key));
+                        if (audioObj != null)
+                            this._downloadedList.Remove(audioObj);
+                    }
                 }
             }
             //Dictionary<string, string>.Enumerator enumerator = new Dictionary<string, string>.Enumerator();
-            this._clearingCache = false;
+            this._cacheChanging = false;
         }
 
         public void AddFileToDownload(List<RemoteFileInfo> remoteFileInfoList)
@@ -126,7 +131,7 @@ namespace VKClient.Audio.Base.AudioCache
             {
                 if (this._isDownloading)
                     return;
-                Logger.Instance.Info("AudioCacheManager.DownloadNextOneIfNeeded starting: InProgressDownload.Count == " + (object)this._inProgressDownloads.Count);
+                Logger.Instance.Info("AudioCacheManager.DownloadNextOneIfNeeded starting: InProgressDownload.Count == " + this._inProgressDownloads.Count);
                 InProgressDownloadInfo currentDownload = this._inProgressDownloads.LastOrDefault<InProgressDownloadInfo>((Func<InProgressDownloadInfo, bool>)(ipd => ipd.LastDownloadResult != DownloadResult.UriNoLongerValid));
                 if (currentDownload == null)
                 {
@@ -139,7 +144,7 @@ namespace VKClient.Audio.Base.AudioCache
                     this.PerformChunkDownload(currentDownload, (Action)(() =>
                     {
                         DownloadResult lastDownloadResult = currentDownload.LastDownloadResult;
-                        Logger.Instance.Info("AudioCacheManager.DownloadNextOneIfNeeded: download completed with result " + (object)lastDownloadResult);
+                        Logger.Instance.Info("AudioCacheManager.DownloadNextOneIfNeeded: download completed with result " + lastDownloadResult);
                         if (lastDownloadResult != DownloadResult.OK)
                             Execute.ExecuteOnUIThread((Action)(() =>
                             {
@@ -198,8 +203,8 @@ namespace VKClient.Audio.Base.AudioCache
         public void Write(BinaryWriter writer)
         {
             writer.Write(1);
-            writer.WriteList<InProgressDownloadInfo>((IList<InProgressDownloadInfo>)this._inProgressDownloads, 10000);
-            writer.WriteList<AudioObj>((IList<AudioObj>)this._downloadedList, 10000);
+            writer.WriteList<InProgressDownloadInfo>(this._inProgressDownloads, 10000);
+            writer.WriteList<AudioObj>(this._downloadedList, 10000);
         }
 
         public void Read(BinaryReader reader)

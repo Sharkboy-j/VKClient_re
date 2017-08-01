@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using VKClient.Common.Framework;
@@ -10,14 +11,16 @@ using VKClient.Groups.Management.Library;
 
 namespace VKClient.Groups.Management
 {
-    public partial class BlockDurationPicker : PageBase
+  public class BlockDurationPicker : PageBase
   {
+    internal GenericHeaderUC Header;
+    private bool _contentLoaded;
 
     public BlockDurationPickerViewModel ViewModel
     {
       get
       {
-        return this.DataContext as BlockDurationPickerViewModel;
+        return base.DataContext as BlockDurationPickerViewModel;
       }
     }
 
@@ -30,69 +33,63 @@ namespace VKClient.Groups.Management
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
     {
       base.HandleOnNavigatedTo(e);
-      this.DataContext = (object) new BlockDurationPickerViewModel(int.Parse(this.NavigationContext.QueryString["DurationUnixTime"]));
+      base.DataContext = (new BlockDurationPickerViewModel(int.Parse(((Page) this).NavigationContext.QueryString["DurationUnixTime"])));
     }
 
-    private void CurrentDuration_OnClicked(object sender, GestureEventArgs e)
+    private void CurrentDuration_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
       Navigator.Current.GoBack();
     }
 
-    private void Forever_OnClicked(object sender, GestureEventArgs e)
+    private void Forever_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      ParametersRepository.SetParameterForId("BlockDurationUnixTime", (object) 0);
+      ParametersRepository.SetParameterForId("BlockDurationUnixTime", 0);
       Navigator.Current.GoBack();
     }
 
-    private void ForYear_OnClicked(object sender, GestureEventArgs e)
+    private void ForYear_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      string paramId = "BlockDurationUnixTime";
-      DateTime dateTime = this.ViewModel.TimeNow;
-      dateTime = dateTime.AddYears(1);
-      int local = Extensions.DateTimeToUnixTimestamp(dateTime.ToUniversalTime(), true);
-      ParametersRepository.SetParameterForId(paramId, (object) local);
-      Navigator.Current.GoBack();
+        ParametersRepository.SetParameterForId("BlockDurationUnixTime", Extensions.DateTimeToUnixTimestamp(this.ViewModel.TimeNow.AddYears(1).ToUniversalTime(), true));
+        Navigator.Current.GoBack();
     }
 
-    private void ForMonth_OnClicked(object sender, GestureEventArgs e)
+
+    private void ForMonth_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      string paramId = "BlockDurationUnixTime";
-      DateTime dateTime = this.ViewModel.TimeNow;
-      dateTime = dateTime.AddMonths(1);
-      int local = Extensions.DateTimeToUnixTimestamp(dateTime.ToUniversalTime(), true);
-      ParametersRepository.SetParameterForId(paramId, (object) local);
-      Navigator.Current.GoBack();
+        ParametersRepository.SetParameterForId("BlockDurationUnixTime", Extensions.DateTimeToUnixTimestamp(this.ViewModel.TimeNow.AddMonths(1).ToUniversalTime(), true));
+        Navigator.Current.GoBack();
     }
 
-    private void ForWeek_OnClicked(object sender, GestureEventArgs e)
+
+    private void ForWeek_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      string paramId = "BlockDurationUnixTime";
-      DateTime dateTime = this.ViewModel.TimeNow;
-      dateTime = dateTime.AddDays(7.0);
-      int local = Extensions.DateTimeToUnixTimestamp(dateTime.ToUniversalTime(), true);
-      ParametersRepository.SetParameterForId(paramId, (object) local);
-      Navigator.Current.GoBack();
+        ParametersRepository.SetParameterForId("BlockDurationUnixTime", Extensions.DateTimeToUnixTimestamp(this.ViewModel.TimeNow.AddDays(7.0).ToUniversalTime(), true));
+        Navigator.Current.GoBack();
     }
 
-    private void ForDay_OnClicked(object sender, GestureEventArgs e)
+
+    private void ForDay_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      string paramId = "BlockDurationUnixTime";
-      DateTime dateTime = this.ViewModel.TimeNow;
-      dateTime = dateTime.AddDays(1.0);
-      int local = Extensions.DateTimeToUnixTimestamp(dateTime.ToUniversalTime(), true);
-      ParametersRepository.SetParameterForId(paramId, (object) local);
-      Navigator.Current.GoBack();
+        ParametersRepository.SetParameterForId("BlockDurationUnixTime", Extensions.DateTimeToUnixTimestamp(this.ViewModel.TimeNow.AddDays(1.0).ToUniversalTime(), true));
+        Navigator.Current.GoBack();
     }
 
-    private void ForHour_OnClicked(object sender, GestureEventArgs e)
+
+    private void ForHour_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      string paramId = "BlockDurationUnixTime";
-      DateTime dateTime = this.ViewModel.TimeNow;
-      dateTime = dateTime.AddHours(1.0);
-      int local = Extensions.DateTimeToUnixTimestamp(dateTime.ToUniversalTime(), true);
-      ParametersRepository.SetParameterForId(paramId, (object) local);
-      Navigator.Current.GoBack();
+        ParametersRepository.SetParameterForId("BlockDurationUnixTime", Extensions.DateTimeToUnixTimestamp(this.ViewModel.TimeNow.AddHours(1.0).ToUniversalTime(), true));
+        Navigator.Current.GoBack();
     }
 
+
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Groups;component/Management/BlockDurationPicker.xaml", UriKind.Relative));
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+    }
   }
 }

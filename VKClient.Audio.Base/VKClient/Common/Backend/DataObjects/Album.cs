@@ -64,6 +64,8 @@ namespace VKClient.Common.Backend.DataObjects
 
     public Photo thumb { get; set; }
 
+    public int can_upload { get; set; }
+
     public PrivacyInfo PrivacyViewInfo
     {
       get
@@ -95,18 +97,19 @@ namespace VKClient.Common.Backend.DataObjects
         size = this.size,
         thumb_src = this.thumb_src,
         privacy_view = new List<string>((IEnumerable<string>) this.privacy_view),
-        comment_privacy = this.comment_privacy
+        comment_privacy = this.comment_privacy,
+        can_upload = this.can_upload
       };
     }
 
     public override string ToString()
     {
-      return string.Format("album{0}_{1}", (object) this.owner_id, (object) this.id);
+      return string.Format("album{0}_{1}", this.owner_id, this.id);
     }
 
     public void Write(BinaryWriter writer)
     {
-      writer.Write(1);
+      writer.Write(2);
       writer.WriteString(this.aid);
       writer.WriteString(this.thumb_id);
       writer.WriteString(this.owner_id);
@@ -120,11 +123,12 @@ namespace VKClient.Common.Backend.DataObjects
       writer.Write<Photo>(this.thumb, false);
       writer.WriteList(this.privacy_view);
       writer.Write(this.comment_privacy);
+      writer.Write(this.can_upload);
     }
 
     public void Read(BinaryReader reader)
     {
-      reader.ReadInt32();
+      int num1 = reader.ReadInt32();
       this.aid = reader.ReadString();
       this.thumb_id = reader.ReadString();
       this.owner_id = reader.ReadString();
@@ -138,6 +142,10 @@ namespace VKClient.Common.Backend.DataObjects
       this.thumb = reader.ReadGeneric<Photo>();
       this.privacy_view = reader.ReadList();
       this.comment_privacy = reader.ReadInt32();
+      int num2 = 2;
+      if (num1 < num2)
+        return;
+      this.can_upload = reader.ReadInt32();
     }
   }
 }

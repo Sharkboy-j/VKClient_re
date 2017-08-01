@@ -8,7 +8,7 @@ namespace VKClient.Common.UC
 {
   public class GroupFooterUC : UserControl
   {
-    public static readonly DependencyProperty FooterTextProperty = DependencyProperty.Register("FooterText", typeof (string), typeof (GroupFooterUC), new PropertyMetadata(new PropertyChangedCallback(GroupFooterUC.OnFooterTextChanged)));
+      public static readonly DependencyProperty FooterTextProperty = DependencyProperty.Register("FooterText", typeof(string), typeof(GroupFooterUC), new PropertyMetadata(new PropertyChangedCallback(GroupFooterUC.OnFooterTextChanged)));
     internal TextBlock textBlockFooter;
     private bool _contentLoaded;
 
@@ -16,11 +16,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(GroupFooterUC.FooterTextProperty);
+        return (string) base.GetValue(GroupFooterUC.FooterTextProperty);
       }
       set
       {
-        this.SetValue(GroupFooterUC.FooterTextProperty, (object) value);
+        base.SetValue(GroupFooterUC.FooterTextProperty, value);
       }
     }
 
@@ -28,6 +28,7 @@ namespace VKClient.Common.UC
 
     public GroupFooterUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -36,15 +37,18 @@ namespace VKClient.Common.UC
       GroupFooterUC groupFooterUc = d as GroupFooterUC;
       if (groupFooterUc == null)
         return;
-      string str = e.NewValue as string;
-      groupFooterUc.textBlockFooter.Text = !string.IsNullOrEmpty(str) ? str : "";
+      // ISSUE: explicit reference operation
+      string newValue = e.NewValue as string;
+      groupFooterUc.textBlockFooter.Text = (!string.IsNullOrEmpty(newValue) ? newValue : "");
     }
 
-    private void More_OnTapped(object sender, GestureEventArgs e)
+    private void More_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.MoreTapped == null)
         return;
-      this.MoreTapped((object) this, EventArgs.Empty);
+      // ISSUE: reference to a compiler-generated field
+      this.MoreTapped(this, EventArgs.Empty);
     }
 
     [DebuggerNonUserCode]
@@ -53,8 +57,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GroupFooterUC.xaml", UriKind.Relative));
-      this.textBlockFooter = (TextBlock) this.FindName("textBlockFooter");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GroupFooterUC.xaml", UriKind.Relative));
+      this.textBlockFooter = (TextBlock) base.FindName("textBlockFooter");
     }
   }
 }

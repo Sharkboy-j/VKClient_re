@@ -12,6 +12,8 @@ namespace VKClient.Common.Backend.DataObjects
 
     public int groups { get; set; }
 
+    public int gifts { get; set; }
+
     public int photos { get; set; }
 
     public int friends { get; set; }

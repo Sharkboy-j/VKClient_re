@@ -29,7 +29,7 @@ namespace VKClient.Audio.Base.Core
     {
       if (response == null)
         throw new ArgumentNullException("response");
-      Stream responseStream = response.GetResponseStream();
+      Stream responseStream = ((WebResponse) response).GetResponseStream();
       if (!string.Equals(response.Headers[HttpRequestHeader.ContentEncoding], GzipExtensions.GZIP, StringComparison.OrdinalIgnoreCase))
         return responseStream;
       if (31 != responseStream.ReadByte() || 139 != responseStream.ReadByte() || 8 != responseStream.ReadByte())
@@ -183,9 +183,9 @@ namespace VKClient.Audio.Base.Core
       binaryWriter.Write((uint) num46);
       int num47 = 0;
       binaryWriter.Write((ushort) num47);
-      memoryStream.Seek(0L, SeekOrigin.Begin);
+      memoryStream.Seek(0, SeekOrigin.Begin);
       Stopwatch stopwatch = Stopwatch.StartNew();
-      Stream stream = Application.GetResourceStream(new StreamResourceInfo((Stream) memoryStream, null), new Uri("f", UriKind.Relative)).Stream;
+      Stream stream = Application.GetResourceStream(new StreamResourceInfo((Stream) memoryStream,  null), new Uri("f", UriKind.Relative)).Stream;
       stopwatch.Stop();
       GzipExtensions.LogCompression(memoryStream.Length, stream.Length);
       return stream;

@@ -10,5 +10,6 @@ namespace VKClient.Audio.Base.Events
     gifts,
     docs,
     subscriptions,
+    discussions,
   }
 }

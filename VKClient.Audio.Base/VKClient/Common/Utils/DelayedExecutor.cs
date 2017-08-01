@@ -38,7 +38,7 @@ namespace VKClient.Common.Utils
 
     private void TimerCallback(object state)
     {
-      Action action = null;
+      Action action =  null;
       lock (this.m_lockObj)
       {
         if (this.m_executionInfo != null)

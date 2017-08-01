@@ -14,8 +14,8 @@ namespace VKMessenger.Framework
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
       if (!(bool) value)
-        return (object) this.FalseStyle;
-      return (object) this.TrueStyle;
+        return this.FalseStyle;
+      return this.TrueStyle;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

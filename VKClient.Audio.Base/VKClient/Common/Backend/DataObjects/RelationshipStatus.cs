@@ -9,5 +9,6 @@ namespace VKClient.Common.Backend.DataObjects
     ItIsComplicated = 5,
     ActivelySearching = 6,
     InLove = 7,
+    InCivilUnion = 8,
   }
 }

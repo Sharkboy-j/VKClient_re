@@ -14,26 +14,27 @@ namespace VKClient.Common.UC
 
     public FooterUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
-    private void OnFriendsSearchTapped(object sender, GestureEventArgs e)
+    private void OnFriendsSearchTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       Navigator.Current.NavigateToFriendsSuggestions();
     }
 
-    private void OnNoteworthyPagesSearchTapped(object sender, GestureEventArgs e)
+    private void OnNoteworthyPagesSearchTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       Navigator.Current.NavigateToGroupRecommendations(0, "");
     }
 
-    private void ButtonTryAgain_OnTap(object sender, GestureEventArgs e)
+    private void ButtonTryAgain_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       e.Handled = true;
-      ISupportReload supportReload = ((FrameworkElement) sender).DataContext as ISupportReload;
-      if (supportReload == null)
+      ISupportReload dataContext = ((FrameworkElement) sender).DataContext as ISupportReload;
+      if (dataContext == null)
         return;
-      supportReload.Reload();
+      dataContext.Reload();
     }
 
     [DebuggerNonUserCode]
@@ -42,7 +43,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/FooterUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/FooterUC.xaml", UriKind.Relative));
     }
   }
 }

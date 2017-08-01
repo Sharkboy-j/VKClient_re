@@ -1,5 +1,6 @@
 using Microsoft.Phone.Shell;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,129 +12,128 @@ using VKClient.Common.Utils;
 
 namespace Microsoft.Phone.Controls
 {
-    public static class ThemeManager
+  public static class ThemeManager
+  {
+    private static readonly Color AlmostWhite = Color.FromArgb(byte.MaxValue, (byte) 254, (byte) 254, (byte) 254);
+    private static Color _chrome;
+    private static Color _background;
+    private static Color _foreground;
+    private static bool _applied;
+    private static Theme _themeAtStartup;
+
+    public static ThemeManagerOverrideOptions OverrideOptions { get; set; }
+
+    static ThemeManager()
     {
-        private static readonly Color AlmostWhite = Color.FromArgb(byte.MaxValue, (byte)254, (byte)254, (byte)254);
-        private static Color _chrome;
-        private static Color _background;
-        private static Color _foreground;
-        private static bool _applied;
-        private static Theme _themeAtStartup;
+      ThemeManager.OverrideOptions = ThemeManagerOverrideOptions.SystemTrayAndApplicationBars;
+    }
 
-        public static ThemeManagerOverrideOptions OverrideOptions { get; set; }
+    public static void MatchOverriddenTheme(this IApplicationBar bar)
+    {
+      if (bar == null || !ThemeManager._applied)
+        return;
+      bar.BackgroundColor = ThemeManager._chrome;
+      bar.ForegroundColor = ThemeManager._foreground;
+    }
 
-        static ThemeManager()
+    public static ApplicationBar CreateApplicationBar()
+    {
+      ApplicationBar applicationBar = new ApplicationBar();
+      ((IApplicationBar) applicationBar).MatchOverriddenTheme();
+      return applicationBar;
+    }
+
+    public static void OverrideTheme(Theme theme)
+    {
+      bool flag = ThemeManager.IsThemeAlready(theme);
+      if (flag)
+      {
+        ThemeManager._themeAtStartup = theme;
+      }
+      else
+      {
+        ThemeManager._themeAtStartup = theme == Theme.Dark ? Theme.Light : Theme.Dark;
+        ThemeManager._applied = true;
+      }
+      new ThemeManager.RuntimeThemeResources().Apply(theme, !flag);
+    }
+
+    private static bool IsThemeAlready(Theme theme)
+    {
+      return (double) Application.Current.Resources["PhoneDarkThemeOpacity"] == (theme == Theme.Dark ? 1.0 : 0.0);
+    }
+
+    public static void ToLightTheme()
+    {
+      ThemeManager.OverrideTheme(Theme.Light);
+    }
+
+    public static void ToDarkTheme()
+    {
+      ThemeManager.OverrideTheme(Theme.Dark);
+    }
+
+    public static void SetAccentColor(uint color)
+    {
+      ThemeManager.SetAccentColor(ThemeManager.RuntimeThemeResources.DualColorValue.ToColor(color));
+    }
+
+    public static void SetAccentColor(Color color)
+    {
+      ThemeManager.RuntimeThemeResources.DualColorValue.SetColorAndBrush("PhoneAccent", color);
+      if (Environment.OSVersion.Version.Major != 8)
+        return;
+      ThemeManager.RuntimeThemeResources.DualColorValue.SetColorAndBrush("PhoneTextBoxEditBorder", color);
+    }
+
+    public static void SetAccentColor(AccentColor accentColor)
+    {
+      ThemeManager.SetAccentColor(ThemeManager.AccentColorEnumToColorValue(accentColor));
+    }
+
+    private static uint AccentColorEnumToColorValue(AccentColor accent)
+    {
+      switch (accent)
+      {
+        case AccentColor.Brown:
+          return 4288696320;
+        case AccentColor.Green:
+          return 4281571635;
+        case AccentColor.Pink:
+          return 4293292472;
+        case AccentColor.Purple:
+          return 4288807167;
+        case AccentColor.Red:
+          return 4293202944;
+        case AccentColor.Teal:
+          return 4278234025;
+        case AccentColor.Lime:
+          return 4288856377;
+        case AccentColor.Magenta:
+          return 4292345971;
+        case AccentColor.Mango:
+          return 4293957129;
+        case AccentColor.NokiaBlue:
+          return 4279271645;
+        case AccentColor.Gray:
+          return 4283124555;
+        case AccentColor.OrangeUK:
+          return 4294402314;
+        case AccentColor.O2Blue:
+          return 4281446369;
+        default:
+          return 4280000994;
+      }
+    }
+
+    private class RuntimeThemeResources
+    {
+      private List<ThemeManager.RuntimeThemeResources.ThemeValue> _values;
+
+      public RuntimeThemeResources()
+      {
+        this._values = new List<ThemeManager.RuntimeThemeResources.ThemeValue>()
         {
-            ThemeManager.OverrideOptions = ThemeManagerOverrideOptions.SystemTrayAndApplicationBars;
-        }
-
-        public static void MatchOverriddenTheme(this IApplicationBar bar)
-        {
-            if (bar == null || !ThemeManager._applied)
-                return;
-            bar.BackgroundColor = ThemeManager._chrome;
-            bar.ForegroundColor = ThemeManager._foreground;
-        }
-
-        public static ApplicationBar CreateApplicationBar()
-        {
-            ApplicationBar bar = new ApplicationBar();
-            bar.MatchOverriddenTheme();
-            return bar;
-        }
-
-        public static void OverrideTheme(Theme theme)
-        {
-            bool flag = ThemeManager.IsThemeAlready(theme);
-            if (flag)
-            {
-                ThemeManager._themeAtStartup = theme;
-            }
-            else
-            {
-                ThemeManager._themeAtStartup = theme == Theme.Dark ? Theme.Light : Theme.Dark;
-                ThemeManager._applied = true;
-            }
-            new ThemeManager.RuntimeThemeResources().Apply(theme, !flag);
-        }
-
-        private static bool IsThemeAlready(Theme theme)
-        {
-            return (double)Application.Current.Resources["PhoneDarkThemeOpacity"] == (theme == Theme.Dark ? 1.0 : 0.0);
-        }
-
-        public static void ToLightTheme()
-        {
-            ThemeManager.OverrideTheme(Theme.Light);
-        }
-
-        public static void ToDarkTheme()
-        {
-            ThemeManager.OverrideTheme(Theme.Dark);
-        }
-
-        public static void SetAccentColor(uint color)
-        {
-            ThemeManager.SetAccentColor(ThemeManager.RuntimeThemeResources.DualColorValue.ToColor(color));
-        }
-
-        public static void SetAccentColor(Color color)
-        {
-            ThemeManager.RuntimeThemeResources.DualColorValue.SetColorAndBrush("PhoneAccent", color);
-            if (Environment.OSVersion.Version.Major != 8)
-                return;
-            ThemeManager.RuntimeThemeResources.DualColorValue.SetColorAndBrush("PhoneTextBoxEditBorder", color);
-        }
-
-        public static void SetAccentColor(AccentColor accentColor)
-        {
-            ThemeManager.SetAccentColor(ThemeManager.AccentColorEnumToColorValue(accentColor));
-        }
-
-        private static uint AccentColorEnumToColorValue(AccentColor accent)
-        {
-            switch (accent)
-            {
-                case AccentColor.Brown:
-                    return 4288696320;
-                case AccentColor.Green:
-                    return 4281571635;
-                case AccentColor.Pink:
-                    return 4293292472;
-                case AccentColor.Purple:
-                    return 4288807167;
-                case AccentColor.Red:
-                    return 4293202944;
-                case AccentColor.Teal:
-                    return 4278234025;
-                case AccentColor.Lime:
-                    return 4288856377;
-                case AccentColor.Magenta:
-                    return 4292345971;
-                case AccentColor.Mango:
-                    return 4293957129;
-                case AccentColor.NokiaBlue:
-                    return 4279271645;
-                case AccentColor.Gray:
-                    return 4283124555;
-                case AccentColor.OrangeUK:
-                    return 4294402314;
-                case AccentColor.O2Blue:
-                    return 4281446369;
-                default:
-                    return 4280000994;
-            }
-        }
-
-        private class RuntimeThemeResources
-        {
-            private List<ThemeManager.RuntimeThemeResources.ThemeValue> _values;
-            #region
-            public RuntimeThemeResources()
-            {
-                this._values = new List<ThemeManager.RuntimeThemeResources.ThemeValue>()
-        {
-
           new ThemeManager.RuntimeThemeResources.ThemeValue("Background", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4278190080U, uint.MaxValue)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("Foreground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4278190080U.WithOpacity(87))),
           new ThemeManager.RuntimeThemeResources.ThemeValue("Chrome", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, 4292862694U)),
@@ -195,8 +195,13 @@ namespace Microsoft.Phone.Controls
           new ThemeManager.RuntimeThemeResources.ThemeValue("NewsBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4279966748U, uint.MaxValue)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("RequestOrInvitationBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4278190080U, uint.MaxValue)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("TableSeparator", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4278190080U, 4294111986U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("DialogOutMessageBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281747033U, 4292535277U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("DialogOutMessageBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281747033U, 4292207602U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("DialogInMessageBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4280888883U, 4293454315U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("DialogGiftMessageBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4283583809U, 4294306771U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("DialogGiftMessageForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4286213200U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("DialogGiftCaptionIconBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue.WithOpacity(40), 4290951071U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("DialogGiftCaptionForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue.WithOpacity(40), 4288581490U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("DialogGiftForwardedCaptionForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(1728053247U, 1711276032U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("WatermarkTextForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4283453778U, 4289836989U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("MenuBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4280559145U, 4292994536U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("MenuForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4281217075U)),
@@ -206,7 +211,7 @@ namespace Microsoft.Phone.Controls
           new ThemeManager.RuntimeThemeResources.ThemeValue("AudioPlayerForeground2", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4285694095U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("AudioPlayerBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4279966748U, 4292994536U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("AudioPlayerSliderBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281677624U, 4290823628U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("MiniPlayerBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4279966748U, 4281350983U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MiniPlayerBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4279966492U, 4281350983U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("SidebarSelectedIconBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4284314767U, 4283991480U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("SidebarIconBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4287995302U, 4291152593U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("PollSliderBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4280756008U, 4293520882U)),
@@ -288,11 +293,13 @@ namespace Microsoft.Phone.Controls
           new ThemeManager.RuntimeThemeResources.ThemeValue("GenericBorder", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4290033336U, 4291086540U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("CardOverlay", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, 4294309623U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("AttachmentBorder", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue.WithOpacity(25), 4278193178U.WithOpacity(16))),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconBackgroundInactive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4284835947U, 4290823628U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconCounterForegroundInactive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4286086016U, 4288849579U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconBackgroundActive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4284713912U, 4285833942U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconCounterForegroundActive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4283532994U, 4283532994U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconBackgroundInactive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4284112225U, 4290823628U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconCounterForegroundInactive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4285625722U, 4287534750U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconBackgroundActive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4285769958U, 4284257233U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostIconCounterForegroundActive", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4287280614U, 4283136947U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostLikesSeparator", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue.WithOpacity(10), 4278190080U.WithOpacity(10))),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostActivityBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, 4294309623U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("WallPostActivityCaptionForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4289375923U, 4284968565U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("PollBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281414195U, 4293520882U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("PollForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4282600793U, 4291747826U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("GenericAttachmentIcon", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4290954700U, uint.MaxValue)),
@@ -308,6 +315,8 @@ namespace Microsoft.Phone.Controls
           new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonPrimaryForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, uint.MaxValue)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonPrimaryDisabledBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281414195U, 4283531704U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonPrimaryDisabledForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4286217600U, uint.MaxValue)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonPrimaryAccentBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4284050304U, 4283531704U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonPrimaryAccentBackgroundHover", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4284050304U, 4282938019U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonSecondaryBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281414195U, 4293323760U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonSecondaryBackgroundHover", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4282730055U, 4292403174U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonSecondaryForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4282873000U)),
@@ -324,7 +333,7 @@ namespace Microsoft.Phone.Controls
           new ThemeManager.RuntimeThemeResources.ThemeValue("ButtonAppBarNoFillBackgroundHover", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(1940109004U, 4283524218U.WithOpacity(20))),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ConversationNewMessagesCountBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4283002777U, 4284650444U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("MutedConversationNewMessagesCountBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4282863705U, 4290299089U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("ToggleControlInactiveBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue.WithOpacity(10), 4291086540U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("ToggleControlInactiveBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4284112225U, 4291086540U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ToggleControlActiveBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4289513445U.WithOpacity(90), 4283531704U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("ToggleControlThumbFill", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, 4294309623U.WithOpacity(90))),
           new ThemeManager.RuntimeThemeResources.ThemeValue("FreshNewsPanelBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281019438U, 4283531704U)),
@@ -334,10 +343,23 @@ namespace Microsoft.Phone.Controls
           new ThemeManager.RuntimeThemeResources.ThemeValue("NewsfeedPromoToggleFadeOut", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4282664263U, 4290171378U)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("NotificationBubbleMessageBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281019438U, uint.MaxValue)),
           new ThemeManager.RuntimeThemeResources.ThemeValue("NotificationBubbleButtonForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4282873000U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("NewStoreItemsFill", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4293289308U, 4293281350U)),
-          new ThemeManager.RuntimeThemeResources.ThemeValue("GraffitiPageBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, 4293980658U))// NEW: 4.8.0
+          new ThemeManager.RuntimeThemeResources.ThemeValue("AccentRed", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4293289308U, 4293281350U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("GraffitiPageBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, 4293980658U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("AttachmentPickerBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, uint.MaxValue)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MessageSnippetButtonBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(652603647U, 436222323U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MessageSnippetButtonBackgroundHover", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(870707455U, 637548915U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("AudioRecorderVolumeBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4283332259U, 4283531704U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MoreActions", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4285625722U, 4291349196U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("PlaceholderBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4282598727U, 4293520882U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("PlaceholderForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4279966748U, 4289706695U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MainMenuBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4278190080U, 4281877844U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MainMenuIcons", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4285625722U, 4287930024U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MainMenuCountersBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4281085230U, 4282996582U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MainMenuSearchBoxBackground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4279966492U, 4282996582U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("MainMenuStatusForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4285625722U, 4287666595U)),
+          new ThemeManager.RuntimeThemeResources.ThemeValue("GiftsDescriptionForeground", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(4285625722U, 4285297530U))
         };
-                this._values.AddRange(ThemeManager.RuntimeThemeResources.AddResources((IEnumerable<string>)new List<string>()
+        this._values.AddRange(ThemeManager.RuntimeThemeResources.AddResources((IEnumerable<string>) new List<string>()
         {
           "Gray000_Gray800",
           "Gray000_Gray900",
@@ -345,253 +367,310 @@ namespace Microsoft.Phone.Controls
           "Gray050_Gray800",
           "Gray100_Gray700",
           "Gray200_Gray500",
+          "Gray200_Gray700",
           "Gray300_Gray400",
           "Gray300_Gray500",
+          "Gray300_Gray600",
           "Gray400_Gray500",
           "Gray500_Gray000",
+          "Gray600_Gray100",
           "Gray800_Gray000",
           "Blue200_GrayBlue100",
           "Blue300_GrayBlue200",
           "Blue300_GrayBlue100",
+          "Blue300_GrayBlue400",
           "Blue300_GrayBlue500",
           "GrayBlue500_GrayBlue400",
           "GrayBlue600_GrayBlue100"
         }));
-                if (Environment.OSVersion.Version.Major != 7)
-                    return;
-                this._values.Add(new ThemeManager.RuntimeThemeResources.ThemeValue("RadioCheckBoxPressed", (ThemeManager.RuntimeThemeResources.IDualValue)new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4278190080U.WithOpacity(0))));
-                this._values.Add(new ThemeManager.RuntimeThemeResources.ThemeValue("TextBoxEditBorder", (ThemeManager.RuntimeThemeResources.IDualValue)new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4278190080U.WithOpacity(87))));
-            }
-            #endregion
-            private static IEnumerable<ThemeManager.RuntimeThemeResources.ThemeValue> AddResources(IEnumerable<string> resourceNames)
+        if (Environment.OSVersion.Version.Major != 7)
+          return;
+        this._values.Add(new ThemeManager.RuntimeThemeResources.ThemeValue("RadioCheckBoxPressed", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4278190080U.WithOpacity(0))));
+        this._values.Add(new ThemeManager.RuntimeThemeResources.ThemeValue("TextBoxEditBorder", (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(uint.MaxValue, 4278190080U.WithOpacity(87))));
+      }
+
+      private static IEnumerable<ThemeManager.RuntimeThemeResources.ThemeValue> AddResources(IEnumerable<string> resourceNames)
+      {
+        List<ThemeManager.RuntimeThemeResources.ThemeValue> themeValueList = new List<ThemeManager.RuntimeThemeResources.ThemeValue>();
+        FieldInfo[] fields = typeof (VKColors).GetFields();
+        Func<FieldInfo, string> func1 = (Func<FieldInfo, string>) (info => ((MemberInfo) info).Name);
+        Dictionary<string, uint> dictionary = (Dictionary<string, uint>)Enumerable.ToDictionary<FieldInfo, string, uint>(fields, func1, (Func<FieldInfo, uint>)(info => (uint)info.GetValue(null)));
+        IEnumerator<string> enumerator1 = resourceNames.GetEnumerator();
+        try
+        {
+          while (((IEnumerator) enumerator1).MoveNext())
+          {
+            string current1 = enumerator1.Current;
+            string[] strArray1 = ((string) current1).Split((char[]) new char[1]
             {
-                List<ThemeManager.RuntimeThemeResources.ThemeValue> themeValueList = new List<ThemeManager.RuntimeThemeResources.ThemeValue>();
-                FieldInfo[] fields = typeof(VKColors).GetFields();
-
-                Func<FieldInfo, string> keySelector = new Func<FieldInfo, string>(info => { return info.Name; });//Func<FieldInfo, string> func = (Func<FieldInfo, string>)(info => info.Name);
-
-                Dictionary<string, uint> dictionary = ((IEnumerable<FieldInfo>)fields).ToDictionary<FieldInfo, string, uint>(keySelector, (Func<FieldInfo, uint>)(info => (uint)info.GetValue((object)null)));
-                foreach (string resourceName in resourceNames)
-                {
-                    string[] strArray1 = resourceName.Split('_');
-                    if (strArray1.Length >= 2)
-                    {
-                        string[] strArray2 = strArray1[0].Split('.');
-                        string[] strArray3 = strArray1[1].Split('.');
-                        uint? nullable1 = new uint?();
-                        uint? nullable2 = new uint?();
-                        bool flag = false;
-                        foreach (string key in dictionary.Keys)
-                        {
-                            uint color = dictionary[key];
-                            if (key == strArray2[0])
-                            {
-                                int result;
-                                nullable1 = strArray2.Length <= 1 || !int.TryParse(strArray2[1], out result) ? new uint?(color) : new uint?(color.WithOpacity(result));
-                            }
-                            if (key == strArray3[0])
-                            {
-                                int result;
-                                nullable2 = strArray3.Length <= 1 || !int.TryParse(strArray3[1], out result) ? new uint?(color) : new uint?(color.WithOpacity(result));
-                            }
-                            if (nullable1.HasValue && nullable2.HasValue)
-                            {
-                                flag = true;
-                                break;
-                            }
-                        }
-                        if (flag)
-                            themeValueList.Add(new ThemeManager.RuntimeThemeResources.ThemeValue(resourceName, (ThemeManager.RuntimeThemeResources.IDualValue)new ThemeManager.RuntimeThemeResources.DualColorValue(nullable2.Value, nullable1.Value)));
-                    }
-                }
-                return (IEnumerable<ThemeManager.RuntimeThemeResources.ThemeValue>)themeValueList;
-            }
-
-            private void PrintValues()
+              '_'
+            });
+            if (strArray1.Length >= 2)
             {
-                foreach (ThemeManager.RuntimeThemeResources.ThemeValue themeValue in this._values.Where<ThemeManager.RuntimeThemeResources.ThemeValue>((Func<ThemeManager.RuntimeThemeResources.ThemeValue, bool>)(item => item._value is ThemeManager.RuntimeThemeResources.DualColorValue)))
+              string[] strArray2 = ((string) strArray1[0]).Split((char[]) new char[1]
+              {
+                '.'
+              });
+              string[] strArray3 = ((string) strArray1[1]).Split((char[]) new char[1]
+              {
+                '.'
+              });
+              uint? nullable1 = new uint?();
+              uint? nullable2 = new uint?();
+              bool flag = false;
+              Dictionary<string, uint>.KeyCollection.Enumerator enumerator2 = dictionary.Keys.GetEnumerator();
+              try
+              {
+                while (enumerator2.MoveNext())
                 {
-                    ThemeManager.RuntimeThemeResources.DualColorValue dualColorValue = (ThemeManager.RuntimeThemeResources.DualColorValue)themeValue._value;
+                  string current2 = enumerator2.Current;
+                  uint color = dictionary[current2];
+                  if (current2 == strArray2[0])
+                  {
+                    int result;
+                    nullable1 = strArray2.Length <= 1 || !int.TryParse(strArray2[1], out result) ? new uint?(color) : new uint?(color.WithOpacity(result));
+                  }
+                  if (current2 == strArray3[0])
+                  {
+                    int result;
+                    nullable2 = strArray3.Length <= 1 || !int.TryParse(strArray3[1], out result) ? new uint?(color) : new uint?(color.WithOpacity(result));
+                  }
+                  if (nullable1.HasValue && nullable2.HasValue)
+                  {
+                    flag = true;
+                    break;
+                  }
                 }
+              }
+              finally
+              {
+                enumerator2.Dispose();
+              }
+              if (flag)
+                themeValueList.Add(new ThemeManager.RuntimeThemeResources.ThemeValue(current1, (ThemeManager.RuntimeThemeResources.IDualValue) new ThemeManager.RuntimeThemeResources.DualColorValue(nullable2.Value, nullable1.Value)));
             }
-
-            public void Apply(Theme theme, bool affectRootFrame)
-            {
-                foreach (ThemeManager.RuntimeThemeResources.ThemeValue themeValue in this._values)
-                    themeValue.Apply(theme);
-                ThemeManager.RuntimeThemeResources.IDualValue dualValue1 = this._values[0]._value;
-                ThemeManager.RuntimeThemeResources.IDualValue dualValue2 = this._values[1]._value;
-                ThemeManager.RuntimeThemeResources.IDualValue dualValue3 = this._values[2]._value;
-                if (affectRootFrame)
-                    this.AttachRootFrameNavigationEvents((Color)dualValue1.Value(theme), (Color)dualValue2.Value(theme), (Color)dualValue3.Value(theme));
-                this._values = (List<ThemeManager.RuntimeThemeResources.ThemeValue>)null;
-            }
-
-            private void AttachOnRootFrameReady(PhoneApplicationFrame frame, Color background, Color foreground, Color chrome)
-            {
-                frame.Navigated += (NavigatedEventHandler)((x, xe) =>
-                {
-                    PhoneApplicationPage page = xe.Content as PhoneApplicationPage;
-                    if (page == null)
-                        return;
-                    this.SetSystemComponentColors(page, background, foreground, chrome);
-                });
-                this.SetSystemComponentColors(frame.Content as PhoneApplicationPage, background, foreground, chrome);
-            }
-
-            private void SetSystemComponentColors(PhoneApplicationPage page, Color background, Color foreground, Color chrome)
-            {
-                if (page == null)
-                    return;
-                Color color = foreground;
-                if (Colors.White == foreground && ThemeManager._themeAtStartup == Theme.Light)
-                    color = ThemeManager.AlmostWhite;
-                SystemTray.SetBackgroundColor((DependencyObject)page, background);
-                SystemTray.SetForegroundColor((DependencyObject)page, color);
-                if (ThemeManager.OverrideOptions != ThemeManagerOverrideOptions.SystemTrayAndApplicationBars)
-                    return;
-                IApplicationBar applicationBar = page.ApplicationBar;
-                if (applicationBar == null)
-                    return;
-                applicationBar.MatchOverriddenTheme();
-            }
-
-            private void AttachRootFrameNavigationEvents(Color background, Color foreground, Color chrome)
-            {
-                ThemeManager._chrome = chrome;
-                ThemeManager._background = background;
-                ThemeManager._foreground = foreground;
-                UIElement rootVisual = Application.Current.RootVisual;
-                if (rootVisual != null && !(rootVisual is Canvas))
-                {
-                    Control control = rootVisual as Control;
-                    if (control != null)
-                    {
-                        control.Background = (Brush)new SolidColorBrush(background);
-                        control.CacheMode = (CacheMode)new BitmapCache();
-                        if (ScaleFactor.GetScaleFactor() == 150)
-                            control.Margin = new Thickness(0.0, 0.0, 0.0, -1.0);
-                    }
-                    if (ThemeManager.OverrideOptions != ThemeManagerOverrideOptions.SystemTrayAndApplicationBars && ThemeManager.OverrideOptions != ThemeManagerOverrideOptions.SystemTrayColors)
-                        return;
-                    PhoneApplicationFrame frame = rootVisual as PhoneApplicationFrame;
-                    if (frame == null)
-                        return;
-                    this.AttachOnRootFrameReady(frame, background, foreground, chrome);
-                }
-                else
-                    Deployment.Current.Dispatcher.BeginInvoke((Action)(() => this.AttachRootFrameNavigationEvents(background, foreground, chrome)));
-            }
-
-            private uint ColorToUInt(Color color)
-            {
-                return (uint)((int)color.A << 24 | (int)color.R << 16 | (int)color.G << 8) | (uint)color.B;
-            }
-
-            internal class DualColorValue : ThemeManager.RuntimeThemeResources.IDualValue
-            {
-                public uint _dark;
-                public uint _light;
-
-                public DualColorValue(uint dark, uint light)
-                {
-                    this._dark = dark;
-                    this._light = light;
-                }
-
-                internal static void SetColorAndBrush(string prefix, Color color)
-                {
-                    Color color2 = new Color();
-                    if (Application.Current.Resources.Contains((object)(prefix + "Color")))
-                    {
-                        color2 = (Color)Application.Current.Resources[(object)(prefix + "Color")];
-                        color2.A = color.A;
-                        color2.B = color.B;
-                        color2.G = color.G;
-                        color2.R = color.R;
-                    }
-                    else
-                    {
-                        color2 = color;
-                        Application.Current.Resources.Add(prefix + "Color", (object)color2);
-                    }
-                    if (Application.Current.Resources.Contains((object)(prefix + "Brush")))
-                    {
-                        ((SolidColorBrush)Application.Current.Resources[(object)(prefix + "Brush")]).Color = color2;
-                    }
-                    else
-                    {
-                        SolidColorBrush solidColorBrush = new SolidColorBrush()
-                        {
-                            Color = color2
-                        };
-                        Application.Current.Resources.Add(prefix + "Brush", (object)solidColorBrush);
-                    }
-                }
-
-                public object Value(Theme theme)
-                {
-                    return (object)ThemeManager.RuntimeThemeResources.DualColorValue.ToColor(theme == Theme.Dark ? this._dark : this._light);
-                }
-
-                internal static Color ToColor(uint argb)
-                {
-                    return Color.FromArgb((byte)(((long)argb & -16777216L) >> 24), (byte)((argb & 16711680U) >> 16), (byte)((argb & 65280U) >> 8), (byte)(argb & (uint)byte.MaxValue));
-                }
-
-                public void Apply(Theme theme, string prefix)
-                {
-                    ThemeManager.RuntimeThemeResources.DualColorValue.SetColorAndBrush("Phone" + prefix, (Color)this.Value(theme));
-                }
-            }
-
-            private class DualValue<T> : ThemeManager.RuntimeThemeResources.IDualValue
-            {
-                private T _dark;
-                private T _light;
-
-                public DualValue(T dark, T light)
-                {
-                    this._dark = dark;
-                    this._light = light;
-                }
-
-                public object Value(Theme theme)
-                {
-                    return (object)(theme == Theme.Dark ? this._dark : this._light);
-                }
-
-                public void Apply(Theme theme, string prefix)
-                {
-                    string key = "Phone" + prefix;
-                    Application.Current.Resources.Remove(key);
-                    Application.Current.Resources.Add(key, this.Value(theme));
-                }
-            }
-
-            private interface IDualValue
-            {
-                object Value(Theme theme);
-
-                void Apply(Theme theme, string prefix);
-            }
-
-            private class ThemeValue
-            {
-                public string _prefix;
-                public ThemeManager.RuntimeThemeResources.IDualValue _value;
-
-                public ThemeValue(string prefix, ThemeManager.RuntimeThemeResources.IDualValue val)
-                {
-                    this._prefix = prefix;
-                    this._value = val;
-                }
-
-                public void Apply(Theme theme)
-                {
-                    this._value.Apply(theme, this._prefix);
-                }
-            }
+          }
         }
+        finally
+        {
+          if (enumerator1 != null)
+            ((IDisposable) enumerator1).Dispose();
+        }
+        return (IEnumerable<ThemeManager.RuntimeThemeResources.ThemeValue>) themeValueList;
+      }
+
+      private void PrintValues()
+      {
+          foreach (ThemeManager.RuntimeThemeResources.ThemeValue themeValue in this._values.Where<ThemeManager.RuntimeThemeResources.ThemeValue>((Func<ThemeManager.RuntimeThemeResources.ThemeValue, bool>)(item => item._value is ThemeManager.RuntimeThemeResources.DualColorValue)))
+          {
+              ThemeManager.RuntimeThemeResources.DualColorValue dualColorValue = (ThemeManager.RuntimeThemeResources.DualColorValue)themeValue._value;
+          }
+      }
+
+      public void Apply(Theme theme, bool affectRootFrame)
+      {
+        List<ThemeManager.RuntimeThemeResources.ThemeValue>.Enumerator enumerator = this._values.GetEnumerator();
+        try
+        {
+          while (enumerator.MoveNext())
+            enumerator.Current.Apply(theme);
+        }
+        finally
+        {
+          enumerator.Dispose();
+        }
+        ThemeManager.RuntimeThemeResources.IDualValue dualValue1 = this._values[0]._value;
+        ThemeManager.RuntimeThemeResources.IDualValue dualValue2 = this._values[1]._value;
+        ThemeManager.RuntimeThemeResources.IDualValue dualValue3 = this._values[2]._value;
+        if (affectRootFrame)
+          this.AttachRootFrameNavigationEvents((Color) dualValue1.Value(theme), (Color) dualValue2.Value(theme), (Color) dualValue3.Value(theme));
+        this._values = (List<ThemeManager.RuntimeThemeResources.ThemeValue>) null;
+      }
+
+      private void AttachOnRootFrameReady(PhoneApplicationFrame frame, Color background, Color foreground, Color chrome)
+      {
+          frame.Navigated += (NavigatedEventHandler)((x, xe) =>
+          {
+              PhoneApplicationPage page = xe.Content as PhoneApplicationPage;
+              if (page == null)
+                  return;
+              this.SetSystemComponentColors(page, background, foreground, chrome);
+          });
+          this.SetSystemComponentColors(frame.Content as PhoneApplicationPage, background, foreground, chrome);
+      }
+
+      private void SetSystemComponentColors(PhoneApplicationPage page, Color background, Color foreground, Color chrome)
+      {
+        if (page == null)
+          return;
+        Color color = foreground;
+        if ((Colors.White== foreground) && ThemeManager._themeAtStartup == Theme.Light)
+          color = ThemeManager.AlmostWhite;
+        SystemTray.SetBackgroundColor((DependencyObject) page, background);
+        SystemTray.SetForegroundColor((DependencyObject) page, color);
+        if (ThemeManager.OverrideOptions != ThemeManagerOverrideOptions.SystemTrayAndApplicationBars)
+          return;
+        IApplicationBar applicationBar = page.ApplicationBar;
+        if (applicationBar == null)
+          return;
+        applicationBar.MatchOverriddenTheme();
+      }
+
+      private void AttachRootFrameNavigationEvents(Color background, Color foreground, Color chrome)
+      {
+          ThemeManager._chrome = chrome;
+          ThemeManager._background = background;
+          ThemeManager._foreground = foreground;
+          UIElement rootVisual = Application.Current.RootVisual;
+          if (rootVisual != null && !(rootVisual is Canvas))
+          {
+              Control control = rootVisual as Control;
+              if (control != null)
+              {
+                  control.Background=(new SolidColorBrush(background));
+                  control.CacheMode=(new BitmapCache());
+                  if (ScaleFactor.GetScaleFactor() == 150)
+                  {
+                      control.Margin=(new Thickness(0.0, 0.0, 0.0, -1.0));
+                  }
+              }
+              if (ThemeManager.OverrideOptions == ThemeManagerOverrideOptions.SystemTrayAndApplicationBars || ThemeManager.OverrideOptions == ThemeManagerOverrideOptions.SystemTrayColors)
+              {
+                  PhoneApplicationFrame phoneApplicationFrame = rootVisual as PhoneApplicationFrame;
+                  if (phoneApplicationFrame != null)
+                  {
+                      this.AttachOnRootFrameReady(phoneApplicationFrame, background, foreground, chrome);
+                  }
+              }
+              return;
+          }
+          Deployment.Current.Dispatcher.BeginInvoke(delegate
+          {
+              this.AttachRootFrameNavigationEvents(background, foreground, chrome);
+          });
+      }
+
+      private uint ColorToUInt(Color color)
+      {
+        // ISSUE: explicit reference operation
+        // ISSUE: explicit reference operation
+        // ISSUE: explicit reference operation
+        // ISSUE: explicit reference operation
+        return (uint) ((int) ((Color) @color).A << 24 | (int) ((Color) @color).R << 16 | (int) ((Color) @color).G << 8) | (uint) ((Color) @color).B;
+      }
+
+      internal class DualColorValue : ThemeManager.RuntimeThemeResources.IDualValue
+      {
+        public uint _dark;
+        public uint _light;
+
+        public DualColorValue(uint dark, uint light)
+        {
+          this._dark = dark;
+          this._light = light;
+        }
+
+        internal static void SetColorAndBrush(string prefix, Color color)
+        {
+          Color color1;
+          if (Application.Current.Resources.Contains(string.Concat(prefix, "Color")))
+          {
+            color1 = (Color) Application.Current.Resources[string.Concat(prefix, "Color")];
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            color1.A = (((Color)@color).A);
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            color1.B = (((Color)@color).B);
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            color1.G = (((Color)@color).G);
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            color1.R = (((Color)@color).R);
+          }
+          else
+          {
+            color1 = color;
+            Application.Current.Resources.Add(string.Concat(prefix, "Color"), color1);
+          }
+          if (Application.Current.Resources.Contains(string.Concat(prefix, "Brush")))
+          {
+            ((SolidColorBrush) Application.Current.Resources[string.Concat(prefix, "Brush")]).Color = color1;
+          }
+          else
+          {
+            SolidColorBrush solidColorBrush1 = new SolidColorBrush();
+            Color color2 = color1;
+            solidColorBrush1.Color = color2;
+            SolidColorBrush solidColorBrush2 = solidColorBrush1;
+            Application.Current.Resources.Add(string.Concat(prefix, "Brush"), solidColorBrush2);
+          }
+        }
+
+        public object Value(Theme theme)
+        {
+          return ThemeManager.RuntimeThemeResources.DualColorValue.ToColor(theme == Theme.Dark ? this._dark : this._light);
+        }
+
+        internal static Color ToColor(uint argb)
+        {
+          return Color.FromArgb((byte) (((long) argb & -16777216L) >> 24), (byte) ((argb & 16711680U) >> 16), (byte) ((argb & 65280U) >> 8), (byte) (argb & (uint) byte.MaxValue));
+        }
+
+        public void Apply(Theme theme, string prefix)
+        {
+          ThemeManager.RuntimeThemeResources.DualColorValue.SetColorAndBrush(string.Concat("Phone", prefix), (Color) this.Value(theme));
+        }
+      }
+
+      private class DualValue<T> : ThemeManager.RuntimeThemeResources.IDualValue
+      {
+        private T _dark;
+        private T _light;
+
+        public DualValue(T dark, T light)
+        {
+          this._dark = dark;
+          this._light = light;
+        }
+
+        public object Value(Theme theme)
+        {
+          return (theme == Theme.Dark ? this._dark : this._light);
+        }
+
+        public void Apply(Theme theme, string prefix)
+        {
+          string str = string.Concat("Phone", prefix);
+          Application.Current.Resources.Remove(str);
+          Application.Current.Resources.Add(str, this.Value(theme));
+        }
+      }
+
+      private interface IDualValue
+      {
+        object Value(Theme theme);
+
+        void Apply(Theme theme, string prefix);
+      }
+
+      private class ThemeValue
+      {
+        public string _prefix;
+        public ThemeManager.RuntimeThemeResources.IDualValue _value;
+
+        public ThemeValue(string prefix, ThemeManager.RuntimeThemeResources.IDualValue val)
+        {
+          this._prefix = prefix;
+          this._value = val;
+        }
+
+        public void Apply(Theme theme)
+        {
+          this._value.Apply(theme, this._prefix);
+        }
+      }
     }
+  }
 }

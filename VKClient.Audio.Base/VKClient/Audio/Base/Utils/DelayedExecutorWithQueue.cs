@@ -62,9 +62,9 @@ namespace VKClient.Audio.Base.Utils
           {
             this._currentExecution.Action((Action) (() => this._currentExecution.TimestampCompleted = DateTime.Now));
           }
-          catch (Exception exception_0)
+          catch (Exception ex)
           {
-            Logger.Instance.Error("DelayedExecutorWithQueue failed to execute" + (object) exception_0);
+            Logger.Instance.Error("DelayedExecutorWithQueue failed to execute" + ex);
           }
         }
       }

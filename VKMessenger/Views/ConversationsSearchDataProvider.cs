@@ -5,6 +5,7 @@ using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Library;
+using VKClient.Common.Utils;
 
 namespace VKMessenger.Views
 {
@@ -30,7 +31,7 @@ namespace VKMessenger.Views
     {
       get
       {
-        return (IEnumerable<FriendHeader>) null;
+        return  null;
       }
     }
 
@@ -40,10 +41,7 @@ namespace VKMessenger.Views
       {
         return (Func<VKList<User>, ListWithCount<FriendHeader>>) (res =>
         {
-          ListWithCount<FriendHeader> listWithCount = new ListWithCount<FriendHeader>()
-          {
-            TotalCount = res.count
-          };
+          ListWithCount<FriendHeader> listWithCount = new ListWithCount<FriendHeader>() { TotalCount = res.count };
           foreach (User user in res.items)
             listWithCount.List.Add(new FriendHeader(user, false));
           return listWithCount;
@@ -62,7 +60,7 @@ namespace VKMessenger.Views
       {
         if (res.ResultCode != ResultCode.Succeeded)
         {
-          callback(new BackendResult<VKList<User>, ResultCode>(res.ResultCode, (VKList<User>) null));
+          callback(new BackendResult<VKList<User>, ResultCode>(res.ResultCode,  null));
         }
         else
         {
@@ -77,13 +75,9 @@ namespace VKMessenger.Views
             else if (obj is Chat)
             {
               Chat chat = obj as Chat;
-              User user = new User()
-              {
-                first_name = chat.title,
-                photo_max = chat.photo_200,
-                last_name = "",
-                uid = -chat.chat_id
-              };
+              if (chat.photo_200 == null)
+                chat.photo_200 = MultiResolutionHelper.Instance.AppendResolutionSuffix("/Resources/New/PlaceholderGroup62Light.png", true, "");
+              User user = new User() { first_name = chat.title, photo_max = chat.photo_200, last_name = "", uid = -chat.chat_id };
               userList.Add(user);
             }
           }

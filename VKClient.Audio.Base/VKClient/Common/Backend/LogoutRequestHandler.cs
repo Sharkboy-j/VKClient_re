@@ -16,7 +16,7 @@ namespace VKClient.Common.Backend
         if (LogoutRequestHandler.LogoutRequest == null)
           return;
         Execute.ExecuteOnUIThread(LogoutRequestHandler.LogoutRequest);
-        LogoutRequestHandler.LogoutRequest = null;
+        LogoutRequestHandler.LogoutRequest =  null;
       }
     }
   }

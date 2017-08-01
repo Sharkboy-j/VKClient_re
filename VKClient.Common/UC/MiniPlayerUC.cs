@@ -7,53 +7,49 @@ using VKClient.Audio.ViewModels;
 
 namespace VKClient.Common.UC
 {
-    public class MiniPlayerUC : UserControl
+  public class MiniPlayerUC : UserControl
+  {
+    internal Grid trackPanel;
+    private bool _contentLoaded;
+
+    private AudioPlayerViewModel ViewModel
     {
-        //private bool _loaded;
-        internal Grid LayoutRoot;
-        internal StackPanel stackPanelTrackTitle;
-        private bool _contentLoaded;
-
-        private AudioPlayerViewModel VM
-        {
-            get
-            {
-                return this.DataContext as AudioPlayerViewModel;
-            }
-        }
-
-        public MiniPlayerUC()
-        {
-            this.InitializeComponent();
-            this.DataContext = (object)new AudioPlayerViewModel();
-            this.Loaded += new RoutedEventHandler(this.MiniPlayerUC_Loaded);
-        }
-
-        private void MiniPlayerUC_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.VM.Activate(true);
-            //this._loaded = true;
-        }
-
-        private void playImage_Tap(object sender, GestureEventArgs e)
-        {
-            this.VM.Play();
-        }
-
-        private void pauseImage_Tap(object sender, GestureEventArgs e)
-        {
-            this.VM.Pause();
-        }
-
-        [DebuggerNonUserCode]
-        public void InitializeComponent()
-        {
-            if (this._contentLoaded)
-                return;
-            this._contentLoaded = true;
-            Application.LoadComponent((object)this, new Uri("/VKClient.Common;component/UC/MiniPlayerUC.xaml", UriKind.Relative));
-            this.LayoutRoot = (Grid)this.FindName("LayoutRoot");
-            this.stackPanelTrackTitle = (StackPanel)this.FindName("stackPanelTrackTitle");
-        }
+      get
+      {
+        return base.DataContext as AudioPlayerViewModel;
+      }
     }
+
+    public MiniPlayerUC()
+    {
+      //base.\u002Ector();
+      this.InitializeComponent();
+      base.DataContext = (new AudioPlayerViewModel());
+      // ISSUE: method pointer
+      base.Loaded+=(delegate(object o, RoutedEventArgs e)
+      {
+          this.ViewModel.Activate(true);
+      });
+    }
+
+    private void PlayButton_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      this.ViewModel.Play();
+    }
+
+    private void PauseButton_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      this.ViewModel.Pause();
+    }
+
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/MiniPlayerUC.xaml", UriKind.Relative));
+      this.trackPanel = (Grid) base.FindName("trackPanel");
+    }
+  }
 }

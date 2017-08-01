@@ -2,11 +2,11 @@ namespace VKClient.Audio.Base.Events
 {
   public class GifPlayEvent : StatEventBase
   {
-      public string GifId { get; set; }
+      public string GifId { get; private set; }
 
-      public GifPlayStartType StartType { get; set; }
+      public GifPlayStartType StartType { get; private set; }
 
-      public StatisticsActionSource Source { get; set; }
+      public StatisticsActionSource Source { get; private set; }
 
     public GifPlayEvent(string gifId, GifPlayStartType startType, StatisticsActionSource source)
     {

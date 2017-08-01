@@ -212,6 +212,39 @@
                                    TextWrapping="Wrap"
                                    Text="Stickers pack description" />
 
+                        <Grid x:Name="gridSendAsAGift"
+                              Margin="0 -8 0 0"
+                              Height="64">
+
+                            <Rectangle Height="1"
+                                       VerticalAlignment="Top"
+                                       Margin="24 0"
+                                       Opacity="0.1"
+                                       Fill="{StaticResource PhoneForegroundBrush}" />
+                            
+                            <Border Background="Transparent"
+                                    framework:MetroInMotion.Tilt="1.5"
+                                    Tap="SendAsAGift_OnTap">
+                                <StackPanel Orientation="Horizontal"
+                                            VerticalAlignment="Top"
+                                            HorizontalAlignment="Center">
+                                    <Rectangle Width="32"
+                                               Height="32"
+                                               Margin="0 16 12 0"
+                                               Fill="{StaticResource PhoneBlue300_GrayBlue100Brush}">
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Gift32px.png" />
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+
+                                    <TextBlock FontSize="21.33"
+                                               Foreground="{StaticResource PhoneBlue300_GrayBlue100Brush}"
+                                               Margin="0 17 0 0"
+                                               Text="{Binding LocalizedResources.SendAsAGift, Source={StaticResource LocalizedStrings}}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
                     </StackPanel>
 
                 </ScrollViewer>

@@ -7,20 +7,20 @@ namespace VKClient.Audio.Base.Utils
   {
     public static CultureName GetCurrent()
     {
-      string str = ThemeSettingsManager.GetThemeSettings().LanguageCultureString;
-      if (str == "")
-        str = Thread.CurrentThread.CurrentUICulture.ToString();
-      if (str.StartsWith("en"))
+      string languageCultureString = ThemeSettingsManager.GetThemeSettings().LanguageCultureString;
+      if (languageCultureString == "")
+        languageCultureString = Thread.CurrentThread.CurrentUICulture.ToString();
+      if (languageCultureString.StartsWith("en"))
         return CultureName.EN;
-      if (str.StartsWith("ru"))
+      if (languageCultureString.StartsWith("ru"))
         return CultureName.RU;
-      if (str.StartsWith("uk"))
+      if (languageCultureString.StartsWith("uk"))
         return CultureName.UK;
-      if (str.StartsWith("be"))
+      if (languageCultureString.StartsWith("be"))
         return CultureName.BE;
-      if (str.StartsWith("pt"))
+      if (languageCultureString.StartsWith("pt"))
         return CultureName.PT;
-      return str.StartsWith("kk") ? CultureName.KZ : CultureName.NONE;
+      return languageCultureString.StartsWith("kk") ? CultureName.KZ : CultureName.NONE;
     }
   }
 }

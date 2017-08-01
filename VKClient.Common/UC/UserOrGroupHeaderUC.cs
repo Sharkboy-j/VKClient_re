@@ -17,6 +17,7 @@ namespace VKClient.Common.UC
 
     public UserOrGroupHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -28,7 +29,7 @@ namespace VKClient.Common.UC
       this._ownerId = ownerId;
     }
 
-    private void Grid_Tap(object sender, GestureEventArgs e)
+    private void Grid_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this._ownerId < 0L)
       {
@@ -48,10 +49,10 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/UserOrGroupHeaderUC.xaml", UriKind.Relative));
-      this.imageUserOrGroup = (Image) this.FindName("imageUserOrGroup");
-      this.textBlockName = (TextBlock) this.FindName("textBlockName");
-      this.textBlockDate = (TextBlock) this.FindName("textBlockDate");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/UserOrGroupHeaderUC.xaml", UriKind.Relative));
+      this.imageUserOrGroup = (Image) base.FindName("imageUserOrGroup");
+      this.textBlockName = (TextBlock) base.FindName("textBlockName");
+      this.textBlockDate = (TextBlock) base.FindName("textBlockDate");
     }
   }
 }

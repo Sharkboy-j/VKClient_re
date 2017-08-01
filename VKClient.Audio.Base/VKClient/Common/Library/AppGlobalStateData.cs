@@ -23,8 +23,11 @@ namespace VKClient.Common.Library
         private Dictionary<string, List<long>> _uidToListDisabledUidsParsed = new Dictionary<string, List<long>>();
         private Dictionary<string, List<long>> _uidToListDisabledChatIdsParsed = new Dictionary<string, List<long>>();
         private long _maxMessageId;
-        //private string _accessToken;
+        private bool _canSendMoneyTransfers;
+        private bool _canSendMoneyTransfersToGroups;
+        private string _accessToken;
         private bool _gifAutoplayAvailable;
+        private bool _isPhotoViewerOrientationLocked;
 
         public GifAutoplayMode GifAutoplayType { get; set; }
 
@@ -57,6 +60,40 @@ namespace VKClient.Common.Library
         }
 
         public bool GamesSectionEnabled { get; set; }
+
+        public bool MoneyTransfersEnabled { get; set; }
+
+        public int MoneyTransferMinAmount { get; set; }
+
+        public int MoneyTransferMaxAmount { get; set; }
+
+        public bool CanSendMoneyTransfers
+        {
+            get
+            {
+                if (this._canSendMoneyTransfers)
+                    return this.MoneyTransfersEnabled;
+                return false;
+            }
+            set
+            {
+                this._canSendMoneyTransfers = value;
+            }
+        }
+
+        public bool CanSendMoneyTransfersToGroups
+        {
+            get
+            {
+                if (this._canSendMoneyTransfersToGroups)
+                    return this.MoneyTransfersEnabled;
+                return false;
+            }
+            set
+            {
+                this._canSendMoneyTransfersToGroups = value;
+            }
+        }
 
         public string AccessToken { get; set; }
 
@@ -179,6 +216,8 @@ namespace VKClient.Common.Library
 
         public bool NewsfeedTopEnabled { get; set; }
 
+        public bool AudioRecordingMaxDemo { get; set; }
+
         private bool CanUseInApps { get; set; }
 
         public bool StickersAutoSuggestEnabled { get; set; }
@@ -219,12 +258,34 @@ namespace VKClient.Common.Library
 
         public bool? GifAutoplayManualSetting { get; set; }
 
+        public bool? AdsDemoManualSetting { get; set; }
+
         public bool PhotoFeedMoveHintShown { get; set; }
 
+        public bool IsPhotoViewerOrientationLocked
+        {
+            get
+            {
+                return this._isPhotoViewerOrientationLocked;
+            }
+            set
+            {
+                this._isPhotoViewerOrientationLocked = value;
+                EventAggregator.Current.Publish(new PhotoViewerOrientationLockedModeChanged());
+            }
+        }
+
+        public bool DebugDisabled { get; set; }
+        //
+        public bool IsLogsEnabled { get; set; }
+        public int UserAvatarRadius { get; set; }
+        public int NotifyRadius { get; set; }
+        public bool HideSystemTray { get; set; }
+        public bool HideADs { get; set; }
+        public bool HideFriendsRecommended { get; set; }
+        //
         public AppGlobalStateData()
         {
-            this.GifAutoplayType = GifAutoplayMode.Always;
-
             this.LoggedInUser = new User();
             this.SoundEnabled = true;
             this.VibrationsEnabled = true;
@@ -234,17 +295,26 @@ namespace VKClient.Common.Library
             this.CompressPhotosOnUpload = true;
             this.SaveEditedPhotos = false;
             this.LoadBigPhotosOverMobile = true;
-            this.IsMusicCachingEnabled = true;
+            this.IsMusicCachingEnabled = true;//mod:false
             this.SaveLocationDataOnUpload = true;
             this.PushSettings = new PushSettings();
             this.FavoritesDefaultSection = 0;
             this.DefaultVideoResolution = "360";
             this.StickersAutoSuggestEnabled = true;
+
+            this.GifAutoplayType = GifAutoplayMode.Always;
+
+            this.IsLogsEnabled = false;
+            this.UserAvatarRadius = 1;
+            this.NotifyRadius = 3;
+            this.HideSystemTray = false;
+            this.HideADs = true;
+            this.HideFriendsRecommended = true;
         }
 
         public void Write(BinaryWriter writer)
         {
-            writer.Write(29);
+            writer.Write(38);
             writer.WriteString(this.AccessToken);
             writer.Write(this.LoggedInUserId);
             writer.Write(this.MaxMessageId);
@@ -305,11 +375,27 @@ namespace VKClient.Common.Library
             writer.Write(this.NewStoreItemsCount);
             writer.Write(this.HasStickersUpdates);
             writer.Write(this.PhotoFeedMoveHintShown);
+            writer.Write(this.MoneyTransfersEnabled);
+            writer.Write(this._canSendMoneyTransfers);
+            writer.Write(this.MoneyTransferMinAmount);
+            writer.Write(this.MoneyTransferMaxAmount);
+            writer.Write(this.IsPhotoViewerOrientationLocked);
+            writer.Write(this.DebugDisabled);
+            writer.WriteBoolNullable(this.AdsDemoManualSetting);
+            writer.Write(this.CanSendMoneyTransfersToGroups);
+            writer.Write(this.AudioRecordingMaxDemo);
+            //
+            writer.Write(this.IsLogsEnabled);
+            writer.Write(this.UserAvatarRadius);
+            writer.Write(this.NotifyRadius);
+            writer.Write(this.HideSystemTray);
+            writer.Write(this.HideADs);
+            writer.Write(this.HideFriendsRecommended);
         }
 
         public void Read(BinaryReader reader)
         {
-            int num1 = reader.ReadInt32();
+            int num = reader.ReadInt32();
             this.AccessToken = reader.ReadString();
             this.LoggedInUserId = reader.ReadInt64();
             this.MaxMessageId = reader.ReadInt64();
@@ -331,51 +417,41 @@ namespace VKClient.Common.Library
             this.MessageTextInNotification = reader.ReadBoolean();
             this.ServerMinusLocalTimeDelta = reader.ReadInt32();
             this.LastDeactivatedTime = reader.ReadDateTime();
-            int num2 = 2;
-            if (num1 >= num2)
+            if (num >= 2)
             {
                 this._uidToListDisabledUidsParsed = this.ConvertToDictStringListLong(reader.ReadDictionary());
                 this._uidToListDisabledChatIdsParsed = this.ConvertToDictStringListLong(reader.ReadDictionary());
             }
-            int num3 = 3;
-            if (num1 >= num3)
+            if (num >= 3)
                 this.SelectedNewsSource = reader.ReadGeneric<PickableItem>();
-            int num4 = 4;
-            if (num1 >= num4)
+            if (num >= 4)
                 this.SyncContacts = reader.ReadBoolean();
-            int num5 = 5;
-            if (num1 >= num5)
+            if (num >= 5)
                 this.PendingStatisticsEvents = reader.ReadList<PendingStatisticsEvent>();
-            int num6 = 6;
-            if (num1 >= num6)
+            if (num >= 6)
                 this.Stickers = reader.ReadList<StoreProduct>();
-            int num7 = 7;
-            if (num1 >= num7)
+            if (num >= 7)
             {
                 this.LastTimeShownBSNotification = reader.ReadDateTime();
                 this.ShowBirthdaysNotifications = reader.ReadBoolean();
             }
-            int num8 = 8;
-            if (num1 >= num8)
+            if (num >= 8)
                 this.SupportUri = reader.ReadString();
-            int num9 = 9;
-            if (num1 >= num9)
+            if (num >= 9)
                 this.TipsShownCount = reader.ReadInt32();
-            int num10 = 10;
-            if (num1 >= num10)
+            if (num >= 10)
             {
                 this.FriendListOrder = reader.ReadInt32();
                 this.CompressPhotosOnUpload = reader.ReadBoolean();
                 this.SaveEditedPhotos = reader.ReadBoolean();
                 this.LoadBigPhotosOverMobile = reader.ReadBoolean();
                 this.IsMusicCachingEnabled = reader.ReadBoolean();
+                //this.IsMusicCachingEnabled = false;//mod
             }
-            int num11 = 11;
-            if (num1 >= num11)
+            if (num >= 11)
                 this.SaveLocationDataOnUpload = reader.ReadBoolean();
             bool flag = false;
-            int num12 = 12;
-            if (num1 >= num12)
+            if (num >= 12)
             {
                 flag = true;
                 this.PushSettings = reader.ReadGeneric<PushSettings>();
@@ -384,67 +460,87 @@ namespace VKClient.Common.Library
             }
             if (!flag)
                 this.MigratePushSettingsFromOldSettings();
-            int num13 = 13;
-            if (num1 >= num13)
+            if (num >= 13)
             {
                 this.GamesVisitSource = (GamesVisitSource)reader.ReadInt32();
                 this.MyGamesIds = reader.ReadListLong();
             }
-            int num14 = 14;
-            if (num1 >= num14)
+            if (num >= 14)
                 this.FavoritesDefaultSection = reader.ReadInt32();
-            int num15 = 15;
-            if (num1 >= num15)
+            if (num >= 15)
                 this.AllowSendContacts = reader.ReadBoolean();
-            int num16 = 16;
-            if (num1 >= num16)
+            if (num >= 16)
                 this.GamesSectionEnabled = reader.ReadBoolean();
-            int num17 = 17;
-            if (num1 >= num17)
+            if (num >= 17)
                 this.DefaultVideoResolution = reader.ReadString();
-            int num18 = 18;
-            if (num1 >= num18)
+            if (num >= 18)
             {
                 this.BaseDomain = reader.ReadString();
                 this.BaseLoginDomain = reader.ReadString();
             }
-            int num19 = 19;
-            if (num1 >= num19)
+            if (num >= 19)
                 this.ForceStatsSend = reader.ReadBoolean();
-            int num20 = 20;
-            if (num1 >= num20)
+            if (num >= 20)
                 this.NewsfeedTopEnabled = reader.ReadBoolean();
-            int num21 = 21;
-            if (num1 >= num21)
+            if (num >= 21)
                 this.GifAutoplayType = (GifAutoplayMode)reader.ReadInt32();
-            int num22 = 22;
-            if (num1 >= num22)
+            if (num >= 22)
                 this._gifAutoplayAvailable = reader.ReadBoolean();
-            int num23 = 23;
-            if (num1 >= num23)
+            if (num >= 23)
                 this.GifAutoplayManualSetting = reader.ReadBoolNullable();
-            int num24 = 24;
-            if (num1 >= num24)
+            if (num >= 24)
                 this.CanUseInApps = reader.ReadBoolean();
-            int num25 = 25;
-            if (num1 >= num25)
+            if (num >= 25)
                 this.StickersAutoSuggestEnabled = reader.ReadBoolean();
-            int num26 = 26;
-            if (num1 >= num26)
+            if (num >= 26)
             {
                 this.StickersStockItems = reader.ReadList<StockItem>();
                 this.PaymentType = (AccountPaymentType)reader.ReadInt32();
             }
-            int num27 = 27;
-            if (num1 >= num27)
+            if (num >= 27)
             {
                 this.NewStoreItemsCount = reader.ReadInt32();
                 this.HasStickersUpdates = reader.ReadBoolean();
             }
-            int num28 = 29;
-            if (num1 < num28)
-                return;
-            this.PhotoFeedMoveHintShown = reader.ReadBoolean();
+            if (num >= 29)
+                this.PhotoFeedMoveHintShown = reader.ReadBoolean();
+            if (num >= 30)
+                this.MoneyTransfersEnabled = reader.ReadBoolean();
+            if (num >= 31)
+            {
+                if (num < 34)
+                    reader.ReadBoolean();
+                this._canSendMoneyTransfers = reader.ReadBoolean();
+            }
+            if (num >= 32)
+            {
+                this.MoneyTransferMinAmount = reader.ReadInt32();
+                this.MoneyTransferMaxAmount = reader.ReadInt32();
+            }
+            if (num >= 33)
+                this.IsPhotoViewerOrientationLocked = reader.ReadBoolean();
+            if (num >= 35)
+                this.DebugDisabled = reader.ReadBoolean();
+            if (num >= 36)
+                this.AdsDemoManualSetting = reader.ReadBoolNullable();
+            if (num >= 37)
+                this.CanSendMoneyTransfersToGroups = reader.ReadBoolean();
+            if (num >= 38)
+                this.AudioRecordingMaxDemo = reader.ReadBoolean();
+            //
+            try
+            {
+                this.IsLogsEnabled = reader.ReadBoolean();
+                this.UserAvatarRadius = reader.ReadInt32();
+                this.NotifyRadius = reader.ReadInt32();
+                this.HideSystemTray = reader.ReadBoolean();
+                this.HideADs = reader.ReadBoolean();
+                this.HideFriendsRecommended = reader.ReadBoolean();
+            }
+            catch
+            {
+
+            }
         }
 
         private void MigratePushSettingsFromOldSettings()
@@ -500,7 +596,7 @@ namespace VKClient.Common.Library
             this.PushNotificationsBlockedUntil = DateTime.MinValue;
             this.Secret = "";
             this.LoggedInUser = new User();
-            this.SelectedNewsSource = (PickableItem)null;
+            this.SelectedNewsSource = null;
             this.LastTimeShownBSNotification = DateTime.MinValue;
             this.PendingStatisticsEvents.Clear();
             this.SupportUri = "";

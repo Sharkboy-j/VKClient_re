@@ -12,7 +12,7 @@ namespace VKClient.Common.UC
 {
   public class GameLeaderboardUC : UserControl
   {
-    public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof (List<GameLeaderboardItemHeader>), typeof (GameLeaderboardUC), new PropertyMetadata(new PropertyChangedCallback(GameLeaderboardUC.OnItemsSourceChanged)));
+      public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(List<GameLeaderboardItemHeader>), typeof(GameLeaderboardUC), new PropertyMetadata(new PropertyChangedCallback(GameLeaderboardUC.OnItemsSourceChanged)));
     internal ItemsControl itemsControl;
     private bool _contentLoaded;
 
@@ -20,33 +20,35 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (List<GameLeaderboardItemHeader>) this.GetValue(GameLeaderboardUC.ItemsSourceProperty);
+        return (List<GameLeaderboardItemHeader>) base.GetValue(GameLeaderboardUC.ItemsSourceProperty);
       }
       set
       {
-        this.SetValue(GameLeaderboardUC.ItemsSourceProperty, (object) value);
+        base.SetValue(GameLeaderboardUC.ItemsSourceProperty, value);
       }
     }
 
     public GameLeaderboardUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       GameLeaderboardUC gameLeaderboardUc = (GameLeaderboardUC) d;
-      List<GameLeaderboardItemHeader> leaderboardItemHeaderList = e.NewValue as List<GameLeaderboardItemHeader>;
-      gameLeaderboardUc.itemsControl.ItemsSource = null;
-      gameLeaderboardUc.itemsControl.ItemsSource = (IEnumerable) leaderboardItemHeaderList;
+      // ISSUE: explicit reference operation
+      List<GameLeaderboardItemHeader> newValue = e.NewValue as List<GameLeaderboardItemHeader>;
+      gameLeaderboardUc.itemsControl.ItemsSource = ( null);
+      gameLeaderboardUc.itemsControl.ItemsSource = ((IEnumerable) newValue);
     }
 
-    private void LeaderboardItem_OnTap(object sender, GestureEventArgs e)
+    private void LeaderboardItem_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      GameLeaderboardItemHeader leaderboardItemHeader = ((FrameworkElement) sender).DataContext as GameLeaderboardItemHeader;
-      if (leaderboardItemHeader == null || leaderboardItemHeader.UserId <= 0L)
+      GameLeaderboardItemHeader dataContext = ((FrameworkElement) sender).DataContext as GameLeaderboardItemHeader;
+      if (dataContext == null || dataContext.UserId <= 0L)
         return;
-      Navigator.Current.NavigateToUserProfile(leaderboardItemHeader.UserId, leaderboardItemHeader.UserName, "", false);
+      Navigator.Current.NavigateToUserProfile(dataContext.UserId, dataContext.UserName, "", false);
     }
 
     [DebuggerNonUserCode]
@@ -55,8 +57,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GameLeaderboardUC.xaml", UriKind.Relative));
-      this.itemsControl = (ItemsControl) this.FindName("itemsControl");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GameLeaderboardUC.xaml", UriKind.Relative));
+      this.itemsControl = (ItemsControl) base.FindName("itemsControl");
     }
   }
 }

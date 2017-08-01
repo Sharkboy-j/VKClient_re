@@ -40,9 +40,12 @@
                                                framework:ImageLoader.UriSource="{Binding ImageUrl}"
                                                HorizontalAlignment="Left">
                                             <Image.Clip>
-                                                <EllipseGeometry Center="48 48"
+                                                <!--<EllipseGeometry Center="48 48"
                                                                  RadiusX="48"
-                                                                 RadiusY="48" />
+                                                                 RadiusY="48" />-->
+                                                <RectangleGeometry Rect="0 0 96 96"
+							RadiusX="{Binding UserAvatarRadius}"
+							RadiusY="{Binding UserAvatarRadius}"/>
                                             </Image.Clip>
                                         </Image>
                                         <StackPanel VerticalAlignment="Center"

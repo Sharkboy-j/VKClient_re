@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using VKClient.Common.Framework;
 using VKClient.Common.Library;
 
@@ -10,26 +11,27 @@ namespace VKClient.Common.UC
 {
   public class FriendsSearchUC : UserControl
   {
-    //private bool _isInitialized;
+    private bool _isInitialized;
     internal ExtendedLongListSelector listBoxUsers;
     private bool _contentLoaded;
 
     public FriendsSearchUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private void UsersList_OnLink(object sender, LinkUnlinkEventArgs e)
     {
-      (this.DataContext as FriendsSearchViewModel).SearchVM.LoadMoreIfNeeded(e.ContentPresenter.Content);
+      (base.DataContext as FriendsSearchViewModel).SearchVM.LoadMoreIfNeeded(e.ContentPresenter.Content);
     }
 
     private void FriendsProvider_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      SubscriptionItemHeader subscriptionItemHeader = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
-      if (subscriptionItemHeader == null || subscriptionItemHeader.TapAction == null)
+      SubscriptionItemHeader dataContext = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
+      if (dataContext == null || dataContext.TapAction == null)
         return;
-      subscriptionItemHeader.TapAction();
+      dataContext.TapAction();
     }
 
     public void ScrollToTop()
@@ -43,8 +45,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/FriendsSearchUC.xaml", UriKind.Relative));
-      this.listBoxUsers = (ExtendedLongListSelector) this.FindName("listBoxUsers");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/FriendsSearchUC.xaml", UriKind.Relative));
+      this.listBoxUsers = (ExtendedLongListSelector) base.FindName("listBoxUsers");
     }
   }
 }

@@ -6,6 +6,6 @@ namespace VKClient.Common.Backend.DataObjects
   {
     public int VideosCount { get; set; }
 
-    public List<VKClient.Common.Backend.DataObjects.Video> response { get; set; }
+    public List<Video> response { get; set; }
   }
 }

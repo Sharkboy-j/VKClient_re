@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base;
 using VKClient.Audio.Base.BackendServices;
@@ -46,7 +47,7 @@ namespace VKMessenger.Library
             set
             {
                 this._convGenCol = value;
-                this.NotifyPropertyChanged<GenericCollectionViewModel<MessageListResponse, ConversationHeader>>((System.Linq.Expressions.Expression<Func<GenericCollectionViewModel<MessageListResponse, ConversationHeader>>>)(() => this.ConversationsGenCol));
+                this.NotifyPropertyChanged<GenericCollectionViewModel<MessageListResponse, ConversationHeader>>((Expression<Func<GenericCollectionViewModel<MessageListResponse, ConversationHeader>>>)(() => this.ConversationsGenCol));
             }
         }
 
@@ -59,8 +60,8 @@ namespace VKMessenger.Library
             set
             {
                 this._numberOfUnreadMessages = value;
-                this.NotifyPropertyChanged<int>((System.Linq.Expressions.Expression<Func<int>>)(() => this.NumberOfUnreadMessages));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.UnreadMessagesCountVisibility));
+                this.NotifyPropertyChanged<int>((Expression<Func<int>>)(() => this.NumberOfUnreadMessages));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.UnreadMessagesCountVisibility));
             }
         }
 
@@ -68,7 +69,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.NumberOfUnreadMessages == 0 ? Visibility.Collapsed : Visibility.Visible;
+                if (this.NumberOfUnreadMessages == 0)
+                    return Visibility.Collapsed;
+                return Visibility.Visible;
             }
         }
 
@@ -90,11 +93,11 @@ namespace VKMessenger.Library
                 {
                     lock (ConversationsViewModel._instLock)
                     {
-                        ConversationsViewModel local_2 = new ConversationsViewModel();
-                        CacheManager.TryDeserialize((IBinarySerializable)local_2, "CNVRS2" + (object)AppGlobalStateManager.Current.LoggedInUserId, CacheManager.DataType.CachedData);
-                        local_2.NeedRefresh = true;
+                        ConversationsViewModel conversationsViewModel = new ConversationsViewModel();
+                        CacheManager.TryDeserialize((IBinarySerializable)conversationsViewModel, "CNVRS2" + (object)AppGlobalStateManager.Current.LoggedInUserId, CacheManager.DataType.CachedData);
+                        conversationsViewModel.NeedRefresh = true;
                         if (ConversationsViewModel._instance == null)
-                            ConversationsViewModel._instance = local_2;
+                            ConversationsViewModel._instance = conversationsViewModel;
                     }
                 }
                 return ConversationsViewModel._instance;
@@ -211,6 +214,23 @@ namespace VKMessenger.Library
                     LongPollServerUpdateData longPollServerUpdateData = update;
                     if (longPollServerUpdateData.UpdateType == LongPollServerUpdateType.NewCounter)
                         CountersManager.Current.SetUnreadMessages(longPollServerUpdateData.Counter);
+                    if (longPollServerUpdateData.UpdateType == LongPollServerUpdateType.UserIsTyping || longPollServerUpdateData.UpdateType == LongPollServerUpdateType.UserIsTypingInChat)
+                    {
+                        long chatId = longPollServerUpdateData.chat_id;
+                        long userId = longPollServerUpdateData.user_id;
+                        bool isChat = longPollServerUpdateData.UpdateType == LongPollServerUpdateType.UserIsTypingInChat;
+                        ConversationHeader conversationHeader = this.Conversations.FirstOrDefault<ConversationHeader>((Func<ConversationHeader, bool>)(c =>
+                        {
+                            if (c.IsChat == isChat)
+                                return c.UserOrChatId == (isChat ? chatId : userId);
+                            return false;
+                        }));
+                        if (conversationHeader != null)
+                        {
+                            long userId1 = userId;
+                            conversationHeader.SetUserIsTypingWithDelayedReset(userId1);
+                        }
+                    }
                     if (longPollServerUpdateData.UpdateType == LongPollServerUpdateType.UserBecameOnline)
                     {
                         dictionary1[longPollServerUpdateData.user_id] = true;
@@ -259,17 +279,37 @@ namespace VKMessenger.Library
                                     instance.GetUsers(userIds, callback);
                                 }
                             }
-                            else if (!longPollServerUpdateData.message.push_settings.AreDisabledNow)
+                            else
                             {
-                                string imageSrc = longPollServerUpdateData.user.photo_max ?? "";
-                                MessengerStateManagerInstance.Current.HandleInAppNotification(longPollServerUpdateData.message.title, ConversationHeader.GetMessageHeaderText(longPollServerUpdateData.message, longPollServerUpdateData.user, (User)null), (long)id, isChat.ToString(), imageSrc);
+                                bool flag = !longPollServerUpdateData.message.push_settings.AreDisabledNow;
+                                if (!flag)
+                                {
+                                    string body = longPollServerUpdateData.message.body;
+                                    if (!string.IsNullOrWhiteSpace(body))
+                                    {
+                                        foreach (object match in BrowserNavigationService.Regex_Mention.Matches(body))
+                                        {
+                                            if (match.ToString().ToLower().Contains(string.Format("[id{0}|", (object)AppGlobalStateManager.Current.LoggedInUserId)))
+                                            {
+                                                flag = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (flag)
+                                {
+                                    string imageSrc = longPollServerUpdateData.user.photo_max ?? "";
+                                    string messageHeaderText = ConversationHeader.GetMessageHeaderText(longPollServerUpdateData.message, longPollServerUpdateData.user, (User)null);
+                                    MessengerStateManagerInstance.Current.HandleInAppNotification(longPollServerUpdateData.message.title, messageHeaderText, (long)id, true.ToString(), imageSrc);
+                                }
                             }
                         }
                     }
                     if (longPollServerUpdateData.UpdateType == LongPollServerUpdateType.ChatParamsWereChanged)
                     {
                         long chatId = longPollServerUpdateData.chat_id;
-                        //Func<ConversationHeader, bool> func = null;//нет реализаии в коде
+                        Func<ConversationHeader, bool> func;
                         VKMessenger.Backend.BackendServices.ChatService.GetChatInfo(chatId, (Action<BackendResult<ChatInfo, ResultCode>>)(res =>
                         {
                             if (res.ResultCode != ResultCode.Succeeded)
@@ -277,7 +317,7 @@ namespace VKMessenger.Library
                             ChatInfo chatInfo = res.ResultData;
                             Execute.ExecuteOnUIThread((Action)(() =>
                             {
-                                ConversationHeader conversationHeader = this.Conversations.FirstOrDefault<ConversationHeader>(/*func ??*/ (/*func =*/ (Func<ConversationHeader, bool>)(ch =>
+                                ConversationHeader conversationHeader = this.Conversations.FirstOrDefault<ConversationHeader>( (func = (Func<ConversationHeader, bool>)(ch =>
                                 {
                                     if (ch.IsChat)
                                         return ch.UserOrChatId == chatId;
@@ -288,17 +328,20 @@ namespace VKMessenger.Library
                                 conversationHeader._message.title = chatInfo.chat.title;
                                 conversationHeader._associatedUsers.Clear();
                                 foreach (ChatUser chatParticipant in chatInfo.chat_participants)
-                                    conversationHeader._associatedUsers.Add(new User()
+                                {
+                                    User user = new User()
                                     {
-                                        uid = (long)chatParticipant.uid,
+                                        uid = chatParticipant.uid,
                                         online = chatParticipant.online,
                                         photo_max = chatParticipant.photo_max,
                                         first_name = chatParticipant.first_name,
                                         last_name = chatParticipant.last_name,
                                         first_name_acc = chatParticipant.first_name_acc,
                                         last_name_acc = chatParticipant.last_name_acc
-                                    });
-                                conversationHeader._message.chat_active_str = chatInfo.chat_participants.Select<ChatUser, int>((Func<ChatUser, int>)(c => c.uid)).ToList<int>().GetCommaSeparated();
+                                    };
+                                    conversationHeader._associatedUsers.Add(user);
+                                }
+                                conversationHeader._message.chat_active_str = chatInfo.chat_participants.Select<ChatUser, long>((Func<ChatUser, long>)(c => c.uid)).ToList<long>().GetCommaSeparated();
                                 conversationHeader.RefreshUIProperties(true);
                             }));
                         }));
@@ -340,7 +383,7 @@ namespace VKMessenger.Library
                             updatedHeaders.Add(conversation);
                     }
                     if (updatedHeaders.Count > 0)
-                        Deployment.Current.Dispatcher.BeginInvoke((Action)(() => updatedHeaders.ForEach((Action<ConversationHeader>)(h => h.RefreshUIProperties(false)))));
+                        ((DependencyObject)Deployment.Current).Dispatcher.BeginInvoke((Action)(() => updatedHeaders.ForEach((Action<ConversationHeader>)(h => h.RefreshUIProperties(false)))));
                 }
                 if (newMessages.Count <= 0)
                     return;
@@ -396,6 +439,24 @@ namespace VKMessenger.Library
                 }
                 List<ConversationHeader> conversationHeaders = ConversationsViewModel.GetConversationHeaders(dialogHeaderInfoList, usersResult.ResultData);
                 Logger.Instance.Info("Applying new messages. Found {0} headers to remove, {1} to add.", (object)source1.Count, (object)conversationHeaders.Count);
+                foreach (ConversationHeader conversationHeader1 in source1)
+                {
+                    UsersTypingHelper usersTypingHelper1 = conversationHeader1.UsersTypingHelper;
+                    if ((usersTypingHelper1 != null ? (usersTypingHelper1.AnyTypingNow ? 1 : 0) : 0) != 0)
+                    {
+                        foreach (ConversationHeader conversationHeader2 in conversationHeaders)
+                        {
+                            if (conversationHeader1.IsChat == conversationHeader2.IsChat && conversationHeader1.UserOrChatId == conversationHeader2.UserOrChatId)
+                            {
+                                UsersTypingHelper usersTypingHelper2 = conversationHeader1.UsersTypingHelper;
+                                usersTypingHelper2.SetUserIsNotTyping((long)conversationHeader2._message.user_id);
+                                conversationHeader2.UsersTypingHelper = usersTypingHelper2;
+                                usersTypingHelper2.Reinitialize(conversationHeader2);
+                                break;
+                            }
+                        }
+                    }
+                }
                 foreach (ConversationHeader conversationHeader in source1.Distinct<ConversationHeader>())
                     this.ConversationsGenCol.Delete(conversationHeader);
                 int num = 0;
@@ -406,9 +467,9 @@ namespace VKMessenger.Library
 
         private static void CheckNewMessagesForStickersPack(List<Message> newMessages)
         {
-            foreach (Message newMessage in newMessages)
+            foreach (Message message in newMessages.Where<Message>((Func<Message, bool>)(m => m.@out == 0)))
             {
-                List<Attachment> attachments = newMessage.attachments;
+                List<Attachment> attachments = message.attachments;
                 if (attachments == null || attachments.Count == 0)
                     break;
                 Attachment attachment = attachments.FirstOrDefault<Attachment>((Func<Attachment, bool>)(attach =>
@@ -424,6 +485,7 @@ namespace VKMessenger.Library
                     int num2 = 0;
                     List<long> productIds = new List<long>();
                     productIds.Add(num1);
+                    // ISSUE: variable of the null type
                     long purchaseForId = 0;
                     instance.GetStockItems((StoreProductType)num2, productIds, null, purchaseForId, (Action<BackendResult<VKList<StockItem>, ResultCode>>)(result =>
                     {
@@ -443,7 +505,7 @@ namespace VKMessenger.Library
                         StockItem stockItem2 = stockItem1;
                         if (stockItem2 == null)
                             return;
-                        EventAggregator.Current.Publish((object)new StickersPackPurchasedEvent(new StockItemHeader(stockItem2, false))
+                        EventAggregator.Current.Publish((object)new StickersPackPurchasedEvent(new StockItemHeader(stockItem2, false, 0, false))
                         {
                             IsGift = true
                         });
@@ -485,7 +547,7 @@ namespace VKMessenger.Library
         {
             if (count <= 0)
                 return CommonResources.Conversations_NoDialogs;
-            return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.Conversations_OneDialogFrm, CommonResources.Conversations_TwoFourDialogsFrm, CommonResources.Conversations_FiveDialogsFrm, true, null, false);
+            return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.Conversations_OneDialogFrm, CommonResources.Conversations_TwoFourDialogsFrm, CommonResources.Conversations_FiveDialogsFrm, true, (string)null, false);
         }
     }
 }

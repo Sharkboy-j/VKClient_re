@@ -38,7 +38,7 @@ namespace VKClient.Audio.Base.BLExtensions
     {
       if (wallPost.from_id == wallPost.to_id)
         return "";
-      return string.Format("{0} ▶ {1}", (object) WallPostExtensions.GetUserOrGroupName(wallPost.from_id, groups, users), (object) WallPostExtensions.GetUserOrGroupName(wallPost.to_id, groups, users));
+      return string.Format("{0} ▶ {1}", WallPostExtensions.GetUserOrGroupName(wallPost.from_id, groups, users), WallPostExtensions.GetUserOrGroupName(wallPost.to_id, groups, users));
     }
 
     public static bool GetIsMale(this WallPost wallPost, List<User> users)

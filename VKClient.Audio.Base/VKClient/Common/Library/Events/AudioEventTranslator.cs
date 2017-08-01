@@ -26,7 +26,7 @@ namespace VKClient.Common.Library.Events
             AudioEventTranslator._havePreviousState = true;
             AudioEventTranslator._previousTrack = track;
             AudioEventTranslator._previousPlayState = playerState;
-            EventAggregator.Current.Publish((object)new AudioPlayerStateChanged());
+            EventAggregator.Current.Publish(new AudioPlayerStateChanged(playerState));
         }
 
         private static bool AreDifferentTracks(AudioTrack track, AudioTrack previousTrack)

@@ -23,7 +23,7 @@ namespace VKClient.Audio.Base.Library
         case CommunityOpenSource.Recommendations:
           return "recommend";
         default:
-          return null;
+          return  null;
       }
     }
   }

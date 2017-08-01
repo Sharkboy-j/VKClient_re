@@ -18,7 +18,8 @@
 
     <Canvas Height="72"
             Tap="LayoutRoot_OnTap"
-            framework:MetroInMotion.Tilt="1.5">
+            framework:MetroInMotion.Tilt="1.5"
+            Opacity="{Binding TrackOpacity}">
 
         <toolkit:ContextMenuService.ContextMenu>
             <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}"

@@ -22,7 +22,7 @@ namespace VKMessenger.Views
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKMessenger;component/Views/ConversationHeaderShareUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKMessenger;component/Views/ConversationHeaderShareUC.xaml", UriKind.Relative));
     }
   }
 }

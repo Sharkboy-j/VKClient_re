@@ -169,7 +169,7 @@ namespace VKMessenger.Library
 
         public void AddPictureAttachment(Stream stream, Stream previewStream)
         {
-            this.Attachments.Add((IOutboundAttachment)OutboundPhotoAttachment.CreateForUploadNewPhoto(stream, 0L, false, previewStream, PostType.Message));
+            this.Attachments.Add((IOutboundAttachment)OutboundPhotoAttachment.CreateForUploadNewPhoto(stream, 0, false, previewStream, PostType.Message));
         }
 
         public void AddUploadDocAttachment(StorageFile file)
@@ -182,6 +182,11 @@ namespace VKMessenger.Library
             this.Attachments.Add((IOutboundAttachment)new OutboundUploadVideoAttachment(file, true, 0L));
         }
 
+        public void AddVoiceMessageAttachment(StorageFile file, int duration, List<int> waveform)
+        {
+            this.Attachments.Add((IOutboundAttachment)new OutboundVoiceMessageAttachment(file, duration, waveform));
+        }
+
         public void AddGeoAttachment(double latitude, double longitude)
         {
             this.Attachments.Add((IOutboundAttachment)new OutboundGeoAttachment(latitude, longitude));
@@ -191,8 +196,10 @@ namespace VKMessenger.Library
         {
             if (this._outboundMessageStatus == OutboundMessageStatus.Delivered || this._outboundMessageStatus == OutboundMessageStatus.SendingNow)
             {
+                // ISSUE: reference to a compiler-generated field
                 if (this.UploadFinished == null)
                     return;
+                // ISSUE: reference to a compiler-generated field
                 this.UploadFinished((object)this, EventArgs.Empty);
             }
             else
@@ -217,7 +224,7 @@ namespace VKMessenger.Library
             this.UploadProgress = this.UploadProgress + deltaProgress / (double)this.CountUploadableAttachments;
         }
 
-        private void StartSendingByAttachmentInd(int attachmentInd, Guid jobId)// UPDATE: 4.8.0
+        private void StartSendingByAttachmentInd(int attachmentInd, Guid jobId)
         {
             if (jobId != this._uploadJobId)
                 return;
@@ -232,11 +239,12 @@ namespace VKMessenger.Library
                         return;
                     if (!this.GraffitiAttachmentItem.IsUploaded)
                     {
-                        EventHandler eventHandler = this.UploadFinished;
-                        if (eventHandler != null)
+                        // ISSUE: reference to a compiler-generated field
+                        EventHandler uploadFinished = this.UploadFinished;
+                        if (uploadFinished != null)
                         {
-                            EventArgs e = EventArgs.Empty;
-                            eventHandler((object)this, e);
+                            EventArgs empty = EventArgs.Empty;
+                            uploadFinished((object)this, empty);
                         }
                         this.OutboundMessageStatus = OutboundMessageStatus.Failed;
                     }
@@ -260,8 +268,10 @@ namespace VKMessenger.Library
                             return;
                         if (currentAttachment.UploadState != OutboundAttachmentUploadState.Completed)
                         {
+                            // ISSUE: reference to a compiler-generated field
                             if (this.UploadFinished != null)
                             {
+                                // ISSUE: reference to a compiler-generated field
                                 this.UploadFinished((object)this, EventArgs.Empty);
                             }
                             this.OutboundMessageStatus = OutboundMessageStatus.Failed;
@@ -284,13 +294,13 @@ namespace VKMessenger.Library
             SendMessageRequest sendMessageRequest = new SendMessageRequest();
             int num1 = this._isChat ? 1 : 0;
             sendMessageRequest.IsChat = num1 != 0;
-            long num2 = this._userOrChatId;
-            sendMessageRequest.UserOrCharId = num2;
-            string str = this._messageText;
-            sendMessageRequest.MessageBody = str;
+            long userOrChatId = this._userOrChatId;
+            sendMessageRequest.UserOrCharId = userOrChatId;
+            string messageText = this._messageText;
+            sendMessageRequest.MessageBody = messageText;
             StickerItemData stickerItem = this.StickerItem;
-            int num3 = stickerItem != null ? stickerItem.StickerId : 0;
-            sendMessageRequest.StickerId = num3;
+            int num2 = stickerItem != null ? stickerItem.StickerId : 0;
+            sendMessageRequest.StickerId = num2;
             string stickerReferrer = this.StickerReferrer;
             sendMessageRequest.StickerReferrer = stickerReferrer;
             SendMessageRequest request = sendMessageRequest;
@@ -315,8 +325,10 @@ namespace VKMessenger.Library
             OutboundForwardedMessages forwardedMessages = this.Attachments.FirstOrDefault<IOutboundAttachment>((Func<IOutboundAttachment, bool>)(a => a is OutboundForwardedMessages)) as OutboundForwardedMessages;
             if (forwardedMessages != null)
                 request.ForwardedMessagesIds = new List<int>(forwardedMessages.Messages.Select<Message, int>((Func<Message, int>)(m => m.mid)));
+            // ISSUE: reference to a compiler-generated field
             if (this.UploadFinished != null)
             {
+                // ISSUE: reference to a compiler-generated field
                 this.UploadFinished((object)this, EventArgs.Empty);
             }
             MessagesService.Instance.SendMessage(request, (Action<BackendResult<VKClient.Audio.Base.ResponseWithId, ResultCode>>)(res =>
@@ -330,8 +342,10 @@ namespace VKMessenger.Library
                 }
                 else
                     this.OutboundMessageStatus = OutboundMessageStatus.Failed;
+                // ISSUE: reference to a compiler-generated field
                 if (this.MessageSent == null)
                     return;
+                // ISSUE: reference to a compiler-generated field
                 this.MessageSent((object)this, EventArgs.Empty);
             }));
         }
@@ -387,10 +401,10 @@ namespace VKMessenger.Library
 
         internal void AddExistingPhotoAttachment(Photo pickedPhoto)
         {
-            this.Attachments.Add((IOutboundAttachment)OutboundPhotoAttachment.CreateForChoosingExistingPhoto(pickedPhoto, 0L, false, PostType.Message));
+            this.Attachments.Add((IOutboundAttachment)OutboundPhotoAttachment.CreateForChoosingExistingPhoto(pickedPhoto, 0, false, PostType.Message));
         }
 
-        internal void AddExistingVideoAttachment(VKClient.Common.Backend.DataObjects.Video pickedVideo)
+        internal void AddExistingVideoAttachment(Video pickedVideo)
         {
             this.Attachments.Add((IOutboundAttachment)new OutboundVideoAttachment(pickedVideo));
         }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Events;
@@ -19,7 +20,7 @@ namespace VKClient.Common.UC
 {
   public class GamesMySectionItemUC : UserControl, INotifyPropertyChanged, IHandle<GameRequestReadEvent>, IHandle, IHandle<GameDisconnectedEvent>
   {
-    public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof (ObservableCollection<GameHeader>), typeof (GamesMySectionItemUC), new PropertyMetadata(new PropertyChangedCallback(GamesMySectionItemUC.OnItemsSourceChanged)));
+      public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(ObservableCollection<GameHeader>), typeof(GamesMySectionItemUC), new PropertyMetadata(new PropertyChangedCallback(GamesMySectionItemUC.OnItemsSourceChanged)));
     public static readonly DependencyProperty RootProperty = DependencyProperty.Register("Root", typeof (FrameworkElement), typeof (GamesMySectionItemUC), new PropertyMetadata(null));
     private ObservableCollection<GameHeader> _actualItemsSource;
     internal ListBox listBoxGames;
@@ -29,11 +30,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (ObservableCollection<GameHeader>) this.GetValue(GamesMySectionItemUC.ItemsSourceProperty);
+        return (ObservableCollection<GameHeader>) base.GetValue(GamesMySectionItemUC.ItemsSourceProperty);
       }
       set
       {
-        this.SetDPValue(GamesMySectionItemUC.ItemsSourceProperty, (object) value, "ItemsSource");
+        this.SetDPValue(GamesMySectionItemUC.ItemsSourceProperty, value, "ItemsSource");
       }
     }
 
@@ -41,11 +42,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (FrameworkElement) this.GetValue(GamesMySectionItemUC.RootProperty);
+        return (FrameworkElement) base.GetValue(GamesMySectionItemUC.RootProperty);
       }
       set
       {
-        this.SetValue(GamesMySectionItemUC.RootProperty, (object) value);
+        base.SetValue(GamesMySectionItemUC.RootProperty, value);
       }
     }
 
@@ -53,9 +54,10 @@ namespace VKClient.Common.UC
 
     public GamesMySectionItemUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      ((FrameworkElement) this.Content).DataContext = (object) this;
-      EventAggregator.Current.Subscribe((object) this);
+      ((FrameworkElement) this.Content).DataContext = this;
+      EventAggregator.Current.Subscribe(this);
     }
 
     private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -63,26 +65,29 @@ namespace VKClient.Common.UC
       GamesMySectionItemUC gamesMySectionItemUc = d as GamesMySectionItemUC;
       if (gamesMySectionItemUc == null)
         return;
-      IEnumerable<GameHeader> source = e.NewValue as IEnumerable<GameHeader>;
-      gamesMySectionItemUc.listBoxGames.ItemsSource = null;
-      gamesMySectionItemUc._actualItemsSource = (ObservableCollection<GameHeader>) null;
-      if (source == null)
+      // ISSUE: explicit reference operation
+      IEnumerable<GameHeader> newValue = e.NewValue as IEnumerable<GameHeader>;
+      ((ItemsControl) gamesMySectionItemUc.listBoxGames).ItemsSource = ( null);
+      gamesMySectionItemUc._actualItemsSource =  null;
+      if (newValue == null)
         return;
-      gamesMySectionItemUc._actualItemsSource = new ObservableCollection<GameHeader>((IEnumerable<GameHeader>) source.OrderByDescending<GameHeader, long>((Func<GameHeader, long>) (game => game.LastRequestDate)));
-      gamesMySectionItemUc.listBoxGames.ItemsSource = (IEnumerable) gamesMySectionItemUc._actualItemsSource;
+      gamesMySectionItemUc._actualItemsSource = new ObservableCollection<GameHeader>((IEnumerable<GameHeader>)Enumerable.OrderByDescending<GameHeader, long>(newValue, (Func<GameHeader, long>)(game => game.LastRequestDate)));
+      ((ItemsControl) gamesMySectionItemUc.listBoxGames).ItemsSource = ((IEnumerable) gamesMySectionItemUc._actualItemsSource);
     }
 
     private void SetDPValue(DependencyProperty property, object value, [CallerMemberName] string propertyName = null)
     {
-      this.SetValue(property, value);
+      base.SetValue(property, value);
+      // ISSUE: reference to a compiler-generated field
       if (this.PropertyChanged == null)
         return;
-      this.PropertyChanged((object) this, new PropertyChangedEventArgs(propertyName));
+      // ISSUE: reference to a compiler-generated field
+      this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    private void Game_OnTapped(object sender, GestureEventArgs e)
+    private void Game_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      this.OpenGame(this.listBoxGames.SelectedIndex);
+      this.OpenGame(((Selector) this.listBoxGames).SelectedIndex);
     }
 
     private void OpenGame(int gameIndex)
@@ -101,31 +106,43 @@ namespace VKClient.Common.UC
     {
       if (this.ItemsSource == null)
         return;
-      using (IEnumerator<GameHeader> enumerator = this.ItemsSource.Where<GameHeader>((Func<GameHeader, bool>) (game =>
+      IEnumerator<GameHeader> enumerator = ((IEnumerable<GameHeader>)Enumerable.Where<GameHeader>(this.ItemsSource, (Func<GameHeader, bool>)(game =>
       {
         if (game.Game.id == data.GameRequestHeader.Game.id)
           return game.Requests != null;
         return false;
-      })).GetEnumerator())
+      }))).GetEnumerator();
+      try
       {
         if (enumerator.MoveNext())
           enumerator.Current.Requests.Clear();
       }
-      this._actualItemsSource = new ObservableCollection<GameHeader>((IEnumerable<GameHeader>) this._actualItemsSource.OrderByDescending<GameHeader, long>((Func<GameHeader, long>) (game => game.LastRequestDate)));
-      this.listBoxGames.ItemsSource = (IEnumerable) this._actualItemsSource;
+      finally
+      {
+        if (enumerator != null)
+          enumerator.Dispose();
+      }
+      this._actualItemsSource = new ObservableCollection<GameHeader>((IEnumerable<GameHeader>)Enumerable.OrderByDescending<GameHeader, long>(this._actualItemsSource, (Func<GameHeader, long>)(game => game.LastRequestDate)));
+      ((ItemsControl) this.listBoxGames).ItemsSource = ((IEnumerable) this._actualItemsSource);
     }
 
     public void Handle(GameDisconnectedEvent data)
     {
       if (this.ItemsSource == null)
         return;
-      using (IEnumerator<GameHeader> enumerator = this.ItemsSource.Where<GameHeader>((Func<GameHeader, bool>) (game => game.Game.id == data.GameId)).GetEnumerator())
+      IEnumerator<GameHeader> enumerator = ((IEnumerable<GameHeader>)Enumerable.Where<GameHeader>(this.ItemsSource, (Func<GameHeader, bool>)(game => game.Game.id == data.GameId))).GetEnumerator();
+      try
       {
         if (enumerator.MoveNext())
-          this.ItemsSource.Remove(enumerator.Current);
+          ((Collection<GameHeader>) this.ItemsSource).Remove(enumerator.Current);
       }
-      this.listBoxGames.ItemsSource = null;
-      this.listBoxGames.ItemsSource = (IEnumerable) this.ItemsSource;
+      finally
+      {
+        if (enumerator != null)
+          enumerator.Dispose();
+      }
+      ((ItemsControl) this.listBoxGames).ItemsSource = ( null);
+      ((ItemsControl) this.listBoxGames).ItemsSource = ((IEnumerable) this.ItemsSource);
     }
 
     [DebuggerNonUserCode]
@@ -134,8 +151,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GamesMySectionItemUC.xaml", UriKind.Relative));
-      this.listBoxGames = (ListBox) this.FindName("listBoxGames");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GamesMySectionItemUC.xaml", UriKind.Relative));
+      this.listBoxGames = (ListBox) base.FindName("listBoxGames");
     }
   }
 }

@@ -49,10 +49,9 @@
                      FontSize="21.33"
                      Name="textBoxName"
                      Text="{Binding Name, Mode=TwoWay}">
-                <!--<i:Interaction.Behaviors>
+                <i:Interaction.Behaviors>
                     <behaviors:TextBoxTextChangedUpdateBehavior />
-                </i:Interaction.Behaviors>-->
-                <!-- OMG!not original -->
+                </i:Interaction.Behaviors>
             </TextBox>
 
             <Border              Visibility="{Binding AllowEditPrivacyVisibility}">

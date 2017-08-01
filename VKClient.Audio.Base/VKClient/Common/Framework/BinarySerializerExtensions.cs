@@ -113,11 +113,11 @@ namespace VKClient.Common.Framework
 
     public static void Write<T>(this BinaryWriter writer, T value, bool trim = false) where T : IBinarySerializable
     {
-      if ((object) value != null)
+      if (value != null)
       {
         writer.Write(true);
-        if (trim && (object) value is IBinarySerializableWithTrimSupport)
-          ((object) value as IBinarySerializableWithTrimSupport).WriteTrimmed(writer);
+        if (trim && value is IBinarySerializableWithTrimSupport)
+          (value as IBinarySerializableWithTrimSupport).WriteTrimmed(writer);
         else
           value.Write(writer);
       }

@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Media;
+using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Framework;
@@ -14,268 +17,260 @@ using VKClient.Groups.Localization;
 
 namespace VKClient.Groups.Library
 {
-    public class GroupsListViewModel : ViewModelBase, IHandle<GroupMembershipStatusUpdated>, IHandle, IHandle<CountersChanged>, ICollectionDataProvider<List<Group>, GroupHeader>, ICollectionDataProvider<List<Group>, Group<GroupHeader>>
+  public class GroupsListViewModel : ViewModelBase, ICollectionDataProvider<VKList<Group>, GroupHeader>, ICollectionDataProvider<VKList<Group>, Group<GroupHeader>>, IHandle<GroupMembershipStatusUpdated>, IHandle, IHandle<CountersChanged>
+  {
+    private long _userId;
+    private long _excludedId;
+    private bool _pickManaged;
+    private string _userName;
+    private CommunityInvitations _invitationsViewModel;
+
+    public GenericCollectionViewModel<VKList<Group>, GroupHeader> AllVM { get;private set; }
+
+    public GenericCollectionViewModel<VKList<Group>, Group<GroupHeader>> EventsVM { get; private set; }
+
+    public GenericCollectionViewModel<VKList<Group>, GroupHeader> ManagedVM { get; private set; }
+
+    public Visibility EventsCountVisibility
     {
-        private long _uid;
-        private bool _pickManaged;
-        private string _userName;
-        private GenericCollectionViewModel<List<Group>, GroupHeader> _allGroupsVM;
-        private GenericCollectionViewModel<List<Group>, Group<GroupHeader>> _eventsVM;
-        private GenericCollectionViewModel<List<Group>, GroupHeader> _managedVM;
-        private AsyncHelper<BackendResult<GroupsLists, ResultCode>> _helperGroups;
-        private CommunityInvitations _invitationsViewModel;
-        private bool _groupsFetchCalledAtLeastOnce;
-        private bool _managedFetchCalledAtLeastOnce;
-        private bool _eventsFetchCalledAtLeastOnce;
+      get
+      {
+        if (!this.EventsVM.IsLoaded || ((IEnumerable<Group<GroupHeader>>) this.EventsVM.Collection).Any<Group<GroupHeader>>())
+          return Visibility.Collapsed;
+        return Visibility.Visible;
+      }
+    }
 
-        public GenericCollectionViewModel<List<Group>, GroupHeader> AllGroupsVM
+    public Visibility InvitationsBlockVisibility
+    {
+      get
+      {
+        if (this._userId == AppGlobalStateManager.Current.LoggedInUserId)
         {
-            get
-            {
-                return this._allGroupsVM;
-            }
+          CommunityInvitations invitationsViewModel = this.InvitationsViewModel;
+          if ((invitationsViewModel != null ? invitationsViewModel.count : 0) > 0)
+            return Visibility.Visible;
         }
+        return Visibility.Collapsed;
+      }
+    }
 
-        public GenericCollectionViewModel<List<Group>, Group<GroupHeader>> EventsVM
-        {
-            get
-            {
-                return this._eventsVM;
-            }
-        }
+    public CommunityInvitations InvitationsViewModel
+    {
+      get
+      {
+        return this._invitationsViewModel;
+      }
+      set
+      {
+        this._invitationsViewModel = value;
+        this.NotifyPropertyChanged<CommunityInvitations>((Expression<Func<CommunityInvitations>>) (() => this.InvitationsViewModel));
+        this.NotifyPropertyChanged<Visibility>((() => this.InvitationsBlockVisibility));
+      }
+    }
 
-        public GenericCollectionViewModel<List<Group>, GroupHeader> ManagedVM
-        {
-            get
-            {
-                return this._managedVM;
-            }
-        }
+    public SolidColorBrush AllListBackground
+    {
+      get
+      {
+        if (((Collection<GroupHeader>) this.AllVM.Collection).Count > 0 || this.InvitationsBlockVisibility == Visibility.Visible)
+          return (SolidColorBrush) Application.Current.Resources["PhoneRequestOrInvitationBackgroundBrush"];
+        return new SolidColorBrush(Colors.Transparent);
+      }
+    }
 
-        public bool OwnGroups
-        {
-            get
-            {
-                return this._uid == AppGlobalStateManager.Current.LoggedInUserId;
-            }
-        }
+    public SolidColorBrush ManageListBackground
+    {
+      get
+      {
+        if (((Collection<GroupHeader>) this.ManagedVM.Collection).Count > 0)
+          return (SolidColorBrush) Application.Current.Resources["PhoneRequestOrInvitationBackgroundBrush"];
+        return new SolidColorBrush(Colors.Transparent);
+      }
+    }
 
-        public Visibility EventsCountVisibility
-        {
-            get
-            {
-                return !this.EventsVM.IsLoaded || this.EventsVM.Collection.Any<Group<GroupHeader>>() ? Visibility.Collapsed : Visibility.Visible;
-            }
-        }
+    public string Title
+    {
+      get
+      {
+        if (this._pickManaged)
+          return GroupResources.SELECTAGROUP;
+        if (string.IsNullOrEmpty(this._userName))
+          return GroupResources.GroupsListPage_Title;
+        return string.Format(GroupResources.GroupsListPage_TitleFrm, this._userName).ToUpperInvariant();
+      }
+    }
 
-        public Visibility InvitationsBlockVisibility
-        {
-            get
-            {
-                return !this.OwnGroups || this.InvitationsViewModel == null || this.InvitationsViewModel.count <= 0 ? Visibility.Collapsed : Visibility.Visible;
-            }
-        }
+    public Func<VKList<Group>, ListWithCount<GroupHeader>> ConverterFunc
+{
+	get
+	{
+		return delegate(VKList<Group> communities)
+		{
+			ListWithCount<GroupHeader> list = new ListWithCount<GroupHeader>();
+			list.TotalCount = communities.count;
+			ListWithCount<GroupHeader> arg_6F_0 = list;
+			IEnumerable<Group> arg_65_0 = Enumerable.Where<Group>(communities.items, delegate(Group g)
+			{
+				if (g.id == this._excludedId)
+				{
+					ListWithCount<GroupHeader> expr_19 = list;
+					int totalCount = expr_19.TotalCount;
+					expr_19.TotalCount = totalCount - 1;
+					return false;
+				}
+				return true;
+			});
+            Func<Group, GroupHeader> arg_65_1 = new Func<Group, GroupHeader>((g) => { return new GroupHeader(g, null); });
+			
+			arg_6F_0.List = new List<GroupHeader>(Enumerable.Select<Group, GroupHeader>(arg_65_0, arg_65_1));
+			return list;
+		};
+	}
+}
 
-        public CommunityInvitations InvitationsViewModel
+    Func<VKList<Group>, ListWithCount<Group<GroupHeader>>> ICollectionDataProvider<VKList<Group>, Group<GroupHeader>>.ConverterFunc
+    {
+        get
         {
-            get
+            return (Func<VKList<Group>, ListWithCount<Group<GroupHeader>>>)(events =>
             {
-                return this._invitationsViewModel;
-            }
-            set
-            {
-                this._invitationsViewModel = value;
-                this.NotifyPropertyChanged<CommunityInvitations>((System.Linq.Expressions.Expression<Func<CommunityInvitations>>)(() => this.InvitationsViewModel));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.InvitationsBlockVisibility));
-            }
-        }
-
-        public SolidColorBrush AllListBackground
-        {
-            get
-            {
-                if (this.AllGroupsVM.Collection.Count > 0 || this.InvitationsBlockVisibility == Visibility.Visible)
-                    return (SolidColorBrush)Application.Current.Resources["PhoneRequestOrInvitationBackgroundBrush"];
-                return new SolidColorBrush(Colors.Transparent);
-            }
-        }
-
-        public SolidColorBrush ManageListBackground
-        {
-            get
-            {
-                if (this.ManagedVM.Collection.Count > 0)
-                    return (SolidColorBrush)Application.Current.Resources["PhoneRequestOrInvitationBackgroundBrush"];
-                return new SolidColorBrush(Colors.Transparent);
-            }
-        }
-
-        public string Title
-        {
-            get
-            {
-                if (this._pickManaged)
-                    return GroupResources.SELECTAGROUP;
-                if (string.IsNullOrEmpty(this._userName))
-                    return GroupResources.GroupsListPage_Title;
-                return string.Format(GroupResources.GroupsListPage_TitleFrm, (object)this._userName).ToUpperInvariant();
-            }
-        }
-
-        public Func<List<Group>, ListWithCount<GroupHeader>> ConverterFunc
-        {
-            get
-            {
-                return (Func<List<Group>, ListWithCount<GroupHeader>>)(groups => new ListWithCount<GroupHeader>()
+                List<GroupHeader> pastEvents = new List<GroupHeader>();
+                List<GroupHeader> futureEvents = new List<GroupHeader>();
+                events.items.ForEach((Action<Group>)(g =>
                 {
-                    TotalCount = groups.Count,
-                    List = new List<GroupHeader>(groups.Select<Group, GroupHeader>((Func<Group, GroupHeader>)(g => new GroupHeader(g, (User)null))))
-                });
-            }
-        }
-
-        Func<List<Group>, ListWithCount<Group<GroupHeader>>> ICollectionDataProvider<List<Group>, Group<GroupHeader>>.ConverterFunc
-        {
-            get
-            {
-                return (Func<List<Group>, ListWithCount<Group<GroupHeader>>>)(events =>
-                {
-                    List<GroupHeader> pastEvents = new List<GroupHeader>();
-                    List<GroupHeader> futureEvents = new List<GroupHeader>();
-                    events.ForEach((Action<Group>)(g =>
-                    {
-                        GroupHeader groupHeader = new GroupHeader(g, (User)null);
-                        if (groupHeader.PastEvent)
-                            pastEvents.Add(groupHeader);
-                        else
-                            futureEvents.Add(groupHeader);
-                    }));
-                    pastEvents = pastEvents.OrderBy<GroupHeader, int>((Func<GroupHeader, int>)(g => -g.Group.start_date)).ToList<GroupHeader>();
-                    futureEvents = futureEvents.OrderBy<GroupHeader, int>((Func<GroupHeader, int>)(g => g.Group.start_date)).ToList<GroupHeader>();
-                    ListWithCount<Group<GroupHeader>> listWithCount = new ListWithCount<Group<GroupHeader>>();
-                    listWithCount.TotalCount = events.Count;
-                    if (futureEvents.Count > 0)
-                        listWithCount.List.Add(new Group<GroupHeader>(GroupResources.GroupsListPage_FutureEvents, (IEnumerable<GroupHeader>)futureEvents, false));
-                    if (pastEvents.Count > 0)
-                        listWithCount.List.Add(new Group<GroupHeader>(GroupResources.GroupsListPage_PastEvents, (IEnumerable<GroupHeader>)pastEvents, false));
-                    return listWithCount;
-                });
-            }
-        }
-
-        public GroupsListViewModel(long uid, string userName = "", bool pickManaged = false)
-        {
-            this._uid = uid;
-            this._userName = userName;
-            this._pickManaged = pickManaged;
-            EventAggregator.Current.Subscribe((object)this);
-            this._allGroupsVM = new GenericCollectionViewModel<List<Group>, GroupHeader>((ICollectionDataProvider<List<Group>, GroupHeader>)this)
-            {
-                NoContentText = CommonResources.NoContent_Communities,
-                NoContentImage = "../Resources/NoContentImages/Communities.png",
-                NeedCollectionCountBeforeFullyLoading = true
-            };
-            this._eventsVM = new GenericCollectionViewModel<List<Group>, Group<GroupHeader>>((ICollectionDataProvider<List<Group>, Group<GroupHeader>>)this)
-            {
-                NeedCollectionCountBeforeFullyLoading = true
-            };
-            this._managedVM = new GenericCollectionViewModel<List<Group>, GroupHeader>((ICollectionDataProvider<List<Group>, GroupHeader>)this)
-            {
-                NeedCollectionCountBeforeFullyLoading = true
-            };
-            this._helperGroups = new AsyncHelper<BackendResult<GroupsLists, ResultCode>>((Action<Action<BackendResult<GroupsLists, ResultCode>>>)(a => GroupsService.Current.GetUserGroups(this._uid, 0, 0, a)));
-        }
-
-        public void Handle(GroupMembershipStatusUpdated message)
-        {
-            Execute.ExecuteOnUIThread((Action)(() => this.LoadGroups(true, true)));
-        }
-
-        public void LoadGroups(bool refresh = true, bool suppressStatus = true)
-        {
-            CountersManager.Current.RefreshCounters();
-            this._eventsVM.LoadData(refresh, suppressStatus, (Action<BackendResult<List<Group>, ResultCode>>)null, false);
-            this._managedVM.LoadData(refresh, suppressStatus, (Action<BackendResult<List<Group>, ResultCode>>)null, false);
-            this._allGroupsVM.LoadData(refresh, suppressStatus, (Action<BackendResult<List<Group>, ResultCode>>)null, false);
-        }
-
-        public void GetData(GenericCollectionViewModel<List<Group>, GroupHeader> caller, int offset, int count, Action<BackendResult<List<Group>, ResultCode>> callback)
-        {
-            if (caller == this._allGroupsVM)
-            {
-                this._helperGroups.RunAction((Action<BackendResult<GroupsLists, ResultCode>>)(res =>
-                {
-                    if (res.ResultCode == ResultCode.Succeeded)
-                    {
-                        callback(new BackendResult<List<Group>, ResultCode>(ResultCode.Succeeded)
-                        {
-                            ResultData = res.ResultData.Communities
-                        });
-                        this.InvitationsViewModel = res.ResultData.Invitations;
-                        CountersManager.Current.Counters.groups = this.InvitationsViewModel.count;
-                        EventAggregator.Current.Publish((object)new CountersChanged(CountersManager.Current.Counters));
-                    }
+                    GroupHeader groupHeader = new GroupHeader(g, (User)null);
+                    if (groupHeader.PastEvent)
+                        pastEvents.Add(groupHeader);
                     else
-                        callback(new BackendResult<List<Group>, ResultCode>(res.ResultCode));
-                    this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>)(() => this.AllListBackground));
-                }), this._groupsFetchCalledAtLeastOnce);
-                this._groupsFetchCalledAtLeastOnce = true;
-            }
-            else
-            {
-                if (caller != this._managedVM)
-                    return;
-                this._helperGroups.RunAction((Action<BackendResult<GroupsLists, ResultCode>>)(res =>
+                        futureEvents.Add(groupHeader);
+                }));
+                pastEvents = pastEvents.OrderBy<GroupHeader, int>((Func<GroupHeader, int>)(g => -g.Group.start_date)).ToList<GroupHeader>();
+                futureEvents = futureEvents.OrderBy<GroupHeader, int>((Func<GroupHeader, int>)(g => g.Group.start_date)).ToList<GroupHeader>();
+                ListWithCount<Group<GroupHeader>> listWithCount = new ListWithCount<Group<GroupHeader>>();
+                listWithCount.TotalCount = events.count;
+                if (futureEvents.Any<GroupHeader>())
                 {
-                    if (res.ResultCode == ResultCode.Succeeded)
-                        callback(new BackendResult<List<Group>, ResultCode>(ResultCode.Succeeded)
-                        {
-                            ResultData = res.ResultData.AdminGroups
-                        });
-                    else
-                        callback(new BackendResult<List<Group>, ResultCode>(res.ResultCode));
-                    this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>)(() => this.ManageListBackground));
-                }), this._managedFetchCalledAtLeastOnce);
-                this._managedFetchCalledAtLeastOnce = true;
-            }
-        }
-
-        public string GetFooterTextForCount(GenericCollectionViewModel<List<Group>, GroupHeader> caller, int count)
-        {
-            if (count <= 0)
-                return GroupResources.NoCommunites;
-            return UIStringFormatterHelper.FormatNumberOfSomething(count, GroupResources.OneCommunityFrm, GroupResources.TwoFourCommunitiesFrm, GroupResources.FiveCommunitiesFrm, true, (string)null, false);
-        }
-
-        public void GetData(GenericCollectionViewModel<List<Group>, Group<GroupHeader>> caller, int offset, int count, Action<BackendResult<List<Group>, ResultCode>> callback)
-        {
-            this._helperGroups.RunAction((Action<BackendResult<GroupsLists, ResultCode>>)(res =>
-            {
-                if (res.ResultCode == ResultCode.Succeeded)
-                    callback(new BackendResult<List<Group>, ResultCode>(ResultCode.Succeeded)
-                    {
-                        ResultData = res.ResultData.Events
-                    });
-                else
-                    callback(new BackendResult<List<Group>, ResultCode>(res.ResultCode));
-            }), this._eventsFetchCalledAtLeastOnce);
-            this._eventsFetchCalledAtLeastOnce = true;
-        }
-
-        public string GetFooterTextForCount(GenericCollectionViewModel<List<Group>, Group<GroupHeader>> caller, int count)
-        {
-            if (count <= 0)
-                return GroupResources.NoEvents;
-            return UIStringFormatterHelper.FormatNumberOfSomething(count, GroupResources.OneEventFrm, GroupResources.TwoFourEventsFrm, GroupResources.FiveEventsFrm, true, (string)null, false);
-        }
-
-        public void Handle(CountersChanged message)
-        {
-            this.NotifyPropertyChanged<CommunityInvitations>((System.Linq.Expressions.Expression<Func<CommunityInvitations>>)(() => this.InvitationsViewModel));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.InvitationsBlockVisibility));
-            this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>)(() => this.AllListBackground));
-            this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>)(() => this.ManageListBackground));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.EventsCountVisibility));
+                    Group<GroupHeader> group = new Group<GroupHeader>(GroupResources.GroupsListPage_FutureEvents, (IEnumerable<GroupHeader>)futureEvents, false);
+                    listWithCount.List.Add(group);
+                }
+                if (pastEvents.Any<GroupHeader>())
+                {
+                    Group<GroupHeader> group = new Group<GroupHeader>(GroupResources.GroupsListPage_PastEvents, (IEnumerable<GroupHeader>)pastEvents, false);
+                    listWithCount.List.Add(group);
+                }
+                return listWithCount;
+            });
         }
     }
+
+    public GroupsListViewModel(long userId, string userName = "", bool pickManaged = false, long excludedId = 0)
+    {
+      this._userId = userId;
+      this._userName = userName;
+      this._pickManaged = pickManaged;
+      this._excludedId = excludedId;
+      EventAggregator.Current.Subscribe(this);
+      this.AllVM = new GenericCollectionViewModel<VKList<Group>, GroupHeader>((ICollectionDataProvider<VKList<Group>, GroupHeader>) this)
+      {
+        NoContentImage = "../Resources/NoContentImages/Communities.png",
+        NoContentText = CommonResources.NoContent_Communities,
+        NeedCollectionCountBeforeFullyLoading = true
+      };
+      this.EventsVM = new GenericCollectionViewModel<VKList<Group>, Group<GroupHeader>>((ICollectionDataProvider<VKList<Group>, Group<GroupHeader>>) this)
+      {
+        NeedCollectionCountBeforeFullyLoading = true
+      };
+      this.ManagedVM = new GenericCollectionViewModel<VKList<Group>, GroupHeader>((ICollectionDataProvider<VKList<Group>, GroupHeader>) this)
+      {
+        NeedCollectionCountBeforeFullyLoading = true
+      };
+    }
+
+    public void GetData(GenericCollectionViewModel<VKList<Group>, GroupHeader> caller, int offset, int count, Action<BackendResult<VKList<Group>, ResultCode>> callback)
+    {
+      if (caller == this.AllVM)
+      {
+        GroupsService.Current.GetUserGroups(this._userId, offset, count, "", (Action<BackendResult<GroupsLists, ResultCode>>) (result =>
+        {
+          if (result.ResultCode == ResultCode.Succeeded)
+          {
+            callback(new BackendResult<VKList<Group>, ResultCode>(ResultCode.Succeeded)
+            {
+              ResultData = result.ResultData.Communities
+            });
+            this.InvitationsViewModel = result.ResultData.Invitations;
+            CountersManager.Current.Counters.groups = this.InvitationsViewModel.count;
+            EventAggregator.Current.Publish(new CountersChanged(CountersManager.Current.Counters));
+          }
+          else
+            callback(new BackendResult<VKList<Group>, ResultCode>(result.ResultCode));
+          this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>) (() => this.AllListBackground));
+        }));
+      }
+      else
+      {
+        if (caller != this.ManagedVM)
+          return;
+        GroupsService.Current.GetUserGroups(this._userId, offset, count, "moder", (Action<BackendResult<GroupsLists, ResultCode>>) (result =>
+        {
+          if (result.ResultCode == ResultCode.Succeeded)
+            callback(new BackendResult<VKList<Group>, ResultCode>(ResultCode.Succeeded)
+            {
+              ResultData = result.ResultData.Communities
+            });
+          else
+            callback(new BackendResult<VKList<Group>, ResultCode>(result.ResultCode));
+          this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>) (() => this.ManageListBackground));
+        }));
+      }
+    }
+
+    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Group>, GroupHeader> caller, int count)
+    {
+      if (count <= 0)
+        return GroupResources.NoCommunites;
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, GroupResources.OneCommunityFrm, GroupResources.TwoFourCommunitiesFrm, GroupResources.FiveCommunitiesFrm, true,  null, false);
+    }
+
+    public void GetData(GenericCollectionViewModel<VKList<Group>, Group<GroupHeader>> caller, int offset, int count, Action<BackendResult<VKList<Group>, ResultCode>> callback)
+    {
+      GroupsService.Current.GetUserGroups(this._userId, offset, count, "events", (Action<BackendResult<GroupsLists, ResultCode>>) (result =>
+      {
+        if (result.ResultCode == ResultCode.Succeeded)
+          callback(new BackendResult<VKList<Group>, ResultCode>(ResultCode.Succeeded)
+          {
+            ResultData = result.ResultData.Communities
+          });
+        else
+          callback(new BackendResult<VKList<Group>, ResultCode>(result.ResultCode));
+      }));
+    }
+
+    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Group>, Group<GroupHeader>> caller, int count)
+    {
+      if (count <= 0)
+        return GroupResources.NoEvents;
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, GroupResources.OneEventFrm, GroupResources.TwoFourEventsFrm, GroupResources.FiveEventsFrm, true,  null, false);
+    }
+
+    public void Handle(GroupMembershipStatusUpdated message)
+    {
+      if (this._userId != AppGlobalStateManager.Current.LoggedInUserId)
+        return;
+      this.AllVM.LoadData(true, true,  null, false);
+      this.EventsVM.LoadData(true, true,  null, false);
+      this.ManagedVM.LoadData(true, true,  null, false);
+      CountersManager.Current.RefreshCounters();
+    }
+
+    public void Handle(CountersChanged message)
+    {
+      this.NotifyPropertyChanged<CommunityInvitations>((Expression<Func<CommunityInvitations>>) (() => this.InvitationsViewModel));
+      this.NotifyPropertyChanged<Visibility>((() => this.InvitationsBlockVisibility));
+      this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>) (() => this.AllListBackground));
+      this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>) (() => this.ManageListBackground));
+      this.NotifyPropertyChanged<Visibility>((() => this.EventsCountVisibility));
+    }
+  }
 }

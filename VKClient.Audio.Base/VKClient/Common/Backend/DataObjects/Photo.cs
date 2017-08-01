@@ -243,18 +243,20 @@ namespace VKClient.Common.Backend.DataObjects
     {
       string str1 = "?wh=";
       int num = this.width;
-      string string1 = num.ToString();
-      string str2 = "_";
+      string str2 = num.ToString();
+      string str3 = "_";
       num = this.height;
-      string string2 = num.ToString();
-      return str1 + string1 + str2 + string2;
+      string str4 = num.ToString();
+      return str1 + str2 + str3 + str4;
     }
 
     public string GetAppropriateForScaleFactor(Size size)
     {
       int realScaleFactor = ScaleFactor.GetRealScaleFactor();
-      double width = size.Width;
-      double height = size.Height;
+      // ISSUE: explicit reference operation
+      double width = ((Size) @size).Width;
+      // ISSUE: explicit reference operation
+      double height = ((Size) @size).Height;
       double num1 = width * ((double) realScaleFactor / 100.0);
       double num2 = height * ((double) realScaleFactor / 100.0);
       double num3 = (double) this.width / (double) this.height;
@@ -354,7 +356,7 @@ namespace VKClient.Common.Backend.DataObjects
 
     public override string ToString()
     {
-      return string.Format("photo{0}_{1}", (object) this.owner_id, (object) this.id);
+      return string.Format("photo{0}_{1}", this.owner_id, this.id);
     }
 
     public void Write(BinaryWriter writer)

@@ -20,7 +20,7 @@ namespace VKClient.Common.UC
     {
       set
       {
-        this.TitleList = string.IsNullOrEmpty(value) ? this.Title : string.Format("{0} {1}", (object) value, (object) this.Title);
+        this.TitleList = string.IsNullOrEmpty(value) ? this.Title : string.Format("{0} {1}", value, this.Title);
       }
     }
 
@@ -66,10 +66,11 @@ namespace VKClient.Common.UC
 
     private void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
-      PropertyChangedEventHandler changedEventHandler = this.PropertyChanged;
-      if (changedEventHandler == null)
+      // ISSUE: reference to a compiler-generated field
+      PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+      if (propertyChanged == null)
         return;
-      changedEventHandler((object) this, new PropertyChangedEventArgs(propertyName));
+      propertyChanged(this, new PropertyChangedEventArgs(propertyName));
     }
   }
 }

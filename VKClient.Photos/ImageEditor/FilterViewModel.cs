@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Common.Framework;
 
@@ -21,7 +22,7 @@ namespace VKClient.Photos.ImageEditor
       set
       {
         this._isSelectedVisibilty = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.IsSelectedVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.IsSelectedVisibility));
       }
     }
   }

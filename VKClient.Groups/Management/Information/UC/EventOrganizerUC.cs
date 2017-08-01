@@ -7,23 +7,25 @@ using VKClient.Groups.Management.Information.Library;
 
 namespace VKClient.Groups.Management.Information.UC
 {
-    public partial class EventOrganizerUC : UserControl
+  public class EventOrganizerUC : UserControl
   {
+    private bool _contentLoaded;
 
     public EventOrganizerViewModel ViewModel
     {
       get
       {
-        return this.DataContext as EventOrganizerViewModel;
+        return base.DataContext as EventOrganizerViewModel;
       }
     }
 
     public EventOrganizerUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
-    private void SetContacts_OnClicked(object sender, GestureEventArgs e)
+    private void SetContacts_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (!this.ViewModel.ParentViewModel.IsFormEnabled)
         return;
@@ -34,33 +36,41 @@ namespace VKClient.Groups.Management.Information.UC
     {
       if (e.Key != Key.Enter)
         return;
-      this.Focus();
+      ((Control) this).Focus();
     }
 
     private void TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-      ((FrameworkElement) sender).GetBindingExpression(TextBox.TextProperty).UpdateSource();
+      ((FrameworkElement) sender).GetBindingExpression((DependencyProperty) TextBox.TextProperty).UpdateSource();
     }
 
     private void TextBox_OnGotFocus(object sender, RoutedEventArgs e)
     {
-      RoutedEventHandler routedEventHandler = this.ViewModel.ParentViewModel.OnTextBoxGotFocus;
-      if (routedEventHandler == null)
+      RoutedEventHandler onTextBoxGotFocus = this.ViewModel.ParentViewModel.OnTextBoxGotFocus;
+      if (onTextBoxGotFocus == null)
         return;
-      object sender1 = sender;
-      RoutedEventArgs e1 = e;
-      routedEventHandler(sender1, e1);
+      object obj = sender;
+      RoutedEventArgs routedEventArgs = e;
+      onTextBoxGotFocus.Invoke(obj, routedEventArgs);
     }
 
     private void TextBox_OnLostFocus(object sender, RoutedEventArgs e)
     {
-      RoutedEventHandler routedEventHandler = this.ViewModel.ParentViewModel.OnTextBoxLostFocus;
-      if (routedEventHandler == null)
+      RoutedEventHandler textBoxLostFocus = this.ViewModel.ParentViewModel.OnTextBoxLostFocus;
+      if (textBoxLostFocus == null)
         return;
-      object sender1 = sender;
-      RoutedEventArgs e1 = e;
-      routedEventHandler(sender1, e1);
+      object obj = sender;
+      RoutedEventArgs routedEventArgs = e;
+      textBoxLostFocus.Invoke(obj, routedEventArgs);
     }
 
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Groups;component/Management/Information/UC/EventOrganizerUC.xaml", UriKind.Relative));
+    }
   }
 }

@@ -59,7 +59,7 @@ namespace VKClient.Audio.Base.MediaStream
         return;
       this._startedDownloading = true;
       this._request = WebRequest.CreateHttp(this._uri);
-      this._request.Headers["range"] = "bytes=" + (object) this._fromByte + "-" + (this._fromByte + (long) this.DEFAULT_CHUNK_SIZE - 1L).ToString();
+      this._request.Headers["range"] = "bytes=" + this._fromByte + "-" + (this._fromByte + (long) this.DEFAULT_CHUNK_SIZE - 1L).ToString();
       this._request.BeginGetResponse(new AsyncCallback(this.RequestCallback), null);
     }
 
@@ -80,7 +80,7 @@ namespace VKClient.Audio.Base.MediaStream
         this._toByte = Math.Min(this._contentLength - 1L, this._fromByte + (long) this.DEFAULT_CHUNK_SIZE - 1L);
         this.ProcessResponse(response);
       }
-      catch
+      catch (Exception )
       {
         this._downloadFailed = true;
       }
@@ -90,7 +90,7 @@ namespace VKClient.Audio.Base.MediaStream
     {
       try
       {
-        using (Stream responseStream = response.GetResponseStream())
+        using (Stream responseStream = ((WebResponse) response).GetResponseStream())
         {
           using (IsolatedStorageFile storeForApplication = IsolatedStorageFile.GetUserStoreForApplication())
           {
@@ -106,7 +106,7 @@ namespace VKClient.Audio.Base.MediaStream
           }
         }
       }
-      catch
+      catch (Exception ex)
       {
         this._downloadFailed = true;
       }
@@ -145,7 +145,7 @@ namespace VKClient.Audio.Base.MediaStream
 
     private string GetFileNamePath(long offset)
     {
-      return this._tempFolder + "\\" + this._fileId + "_" + (object) offset + "_" + this._guid.ToString();
+      return this._tempFolder + "\\" + this._fileId + "_" + offset + "_" + this._guid.ToString();
     }
 
     private void ReportDownloadedChunk(string currentPath)
@@ -179,10 +179,10 @@ namespace VKClient.Audio.Base.MediaStream
               }
             }
           }
-          DownloadedFilesInfo.Instance.ReportDownloadedFileChunk(this._fileId, str, 0L, num - 1L, true);
+          DownloadedFilesInfo.Instance.ReportDownloadedFileChunk(this._fileId, str, 0, num - 1L, true);
           flag = true;
         }
-        catch
+        catch (Exception ex)
         {
         }
       }

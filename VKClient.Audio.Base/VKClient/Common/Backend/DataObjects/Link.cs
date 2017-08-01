@@ -1,4 +1,5 @@
 using System.IO;
+using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.Framework;
 
 namespace VKClient.Common.Backend.DataObjects
@@ -63,9 +64,11 @@ namespace VKClient.Common.Backend.DataObjects
 
     public LinkRating rating { get; set; }
 
+    public MoneyTransfer money_transfer { get; set; }
+
     public void Write(BinaryWriter writer)
     {
-      writer.Write(3);
+      writer.Write(4);
       writer.WriteString(this.url);
       writer.WriteString(this.title);
       writer.WriteString(this.description);
@@ -78,6 +81,7 @@ namespace VKClient.Common.Backend.DataObjects
       writer.Write<LinkButton>(this.button, false);
       writer.Write<LinkApplication>(this.application, false);
       writer.Write<LinkRating>(this.rating, false);
+      writer.Write<MoneyTransfer>(this.money_transfer, false);
     }
 
     public void Read(BinaryReader reader)
@@ -94,14 +98,19 @@ namespace VKClient.Common.Backend.DataObjects
         this.image_src = reader.ReadString();
       }
       int num3 = 3;
-      if (num1 < num3)
+      if (num1 >= num3)
+      {
+        this.caption = reader.ReadString();
+        this.photo = reader.ReadGeneric<Photo>();
+        this.product = reader.ReadGeneric<LinkProduct>();
+        this.button = reader.ReadGeneric<LinkButton>();
+        this.application = reader.ReadGeneric<LinkApplication>();
+        this.rating = reader.ReadGeneric<LinkRating>();
+      }
+      int num4 = 4;
+      if (num1 < num4)
         return;
-      this.caption = reader.ReadString();
-      this.photo = reader.ReadGeneric<Photo>();
-      this.product = reader.ReadGeneric<LinkProduct>();
-      this.button = reader.ReadGeneric<LinkButton>();
-      this.application = reader.ReadGeneric<LinkApplication>();
-      this.rating = reader.ReadGeneric<LinkRating>();
+      this.money_transfer = reader.ReadGeneric<MoneyTransfer>();
     }
   }
 }

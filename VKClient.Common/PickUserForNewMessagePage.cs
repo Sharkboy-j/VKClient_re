@@ -1,6 +1,7 @@
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -23,35 +24,20 @@ namespace VKClient.Common
 {
   public class PickUserForNewMessagePage : PageBase
   {
-    private readonly ApplicationBarIconButton _appBarButtonSearch = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/appbar.feature.search.rest.png", UriKind.Relative),
-      Text = CommonResources.FriendsPage_AppBar_Search
-    };
-    private readonly ApplicationBarIconButton _appBarButtonEnableSelection = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/appbar.manage.rest.png", UriKind.Relative),
-      Text = CommonResources.AppBar_SelectSeveral
-    };
-    private readonly ApplicationBarIconButton _appBarButtonCheck = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/check.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Save
-    };
-    private readonly ApplicationBarIconButton _appBarButtonCancel = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative),
-      Text = CommonResources.AppBar_Cancel
-    };
     private bool _isInitialized;
     private DialogService _dialogService;
     private bool _groupViewOpened;
+    private readonly ApplicationBarIconButton _appBarButtonSearch;
+    private readonly ApplicationBarIconButton _appBarButtonEnableSelection;
+    private readonly ApplicationBarIconButton _appBarButtonCheck;
+    private readonly ApplicationBarIconButton _appBarButtonCancel;
     private ApplicationBar _mainAppBar;
     private ApplicationBar _selectionAppBar;
     private bool _createChat;
     private long _initialUserId;
     private bool _goBackOnResult;
     private int _currentCountInChat;
+    private bool _isGlobalSearchForbidden;
     private bool _creatingChat;
     internal ProgressIndicator progressIndicator;
     internal Grid LayoutRoot;
@@ -68,7 +54,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as PickUserViewModel;
+        return base.DataContext as PickUserViewModel;
       }
     }
 
@@ -76,18 +62,44 @@ namespace VKClient.Common
     {
       get
       {
-        if (this._currentCountInChat <= 0)
-          return this._createChat;
+        if (this._currentCountInChat <= 0 && !this._createChat)
+          return this._isGlobalSearchForbidden;
         return true;
       }
     }
 
     public PickUserForNewMessagePage()
     {
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+      Uri uri1 = new Uri("/Resources/appbar.feature.search.rest.png", UriKind.Relative);
+      applicationBarIconButton1.IconUri = uri1;
+      string pageAppBarSearch = CommonResources.FriendsPage_AppBar_Search;
+      applicationBarIconButton1.Text = pageAppBarSearch;
+      this._appBarButtonSearch = applicationBarIconButton1;
+      ApplicationBarIconButton applicationBarIconButton2 = new ApplicationBarIconButton();
+      Uri uri2 = new Uri("/Resources/appbar.manage.rest.png", UriKind.Relative);
+      applicationBarIconButton2.IconUri = uri2;
+      string barSelectSeveral = CommonResources.AppBar_SelectSeveral;
+      applicationBarIconButton2.Text = barSelectSeveral;
+      this._appBarButtonEnableSelection = applicationBarIconButton2;
+      ApplicationBarIconButton applicationBarIconButton3 = new ApplicationBarIconButton();
+      Uri uri3 = new Uri("/Resources/check.png", UriKind.Relative);
+      applicationBarIconButton3.IconUri = uri3;
+      string chatEditAppBarSave = CommonResources.ChatEdit_AppBar_Save;
+      applicationBarIconButton3.Text = chatEditAppBarSave;
+      this._appBarButtonCheck = applicationBarIconButton3;
+      ApplicationBarIconButton applicationBarIconButton4 = new ApplicationBarIconButton();
+      Uri uri4 = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative);
+      applicationBarIconButton4.IconUri = uri4;
+      string appBarCancel = CommonResources.AppBar_Cancel;
+      applicationBarIconButton4.Text = appBarCancel;
+      this._appBarButtonCancel = applicationBarIconButton4;
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.BuildAppBar();
-      this.allFriendsListBox.JumpListOpening += (EventHandler) ((s, e) => this._groupViewOpened = true);
-      this.allFriendsListBox.JumpListClosed += (EventHandler) ((s, e) => this._groupViewOpened = false);
+      this.allFriendsListBox.JumpListOpening += ((EventHandler) ((s, e) => this._groupViewOpened = true));
+      this.allFriendsListBox.JumpListClosed += ((EventHandler) ((s, e) => this._groupViewOpened = false));
       this.Header.HideSandwitchButton = true;
       this.SuppressMenu = true;
     }
@@ -96,15 +108,15 @@ namespace VKClient.Common
     {
       this._mainAppBar = ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
       this._selectionAppBar = ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
-      this._mainAppBar.Buttons.Add((object) this._appBarButtonSearch);
-      this._mainAppBar.Buttons.Add((object) this._appBarButtonEnableSelection);
-      this._selectionAppBar.Buttons.Add((object) this._appBarButtonCheck);
-      this._selectionAppBar.Buttons.Add((object) this._appBarButtonCancel);
-      this._appBarButtonSearch.Click += new EventHandler(this.AppBarButtonSearch_Click);
-      this._appBarButtonEnableSelection.Click += new EventHandler(this.AppBarButtonEnableSelection_Click);
-      this._appBarButtonCheck.Click += new EventHandler(this.AppBarButtonCheck_Click);
-      this._appBarButtonCancel.Click += new EventHandler(this.AppBarButtonCancel_Click);
-      this.ApplicationBar = (IApplicationBar) this._mainAppBar;
+      this._mainAppBar.Buttons.Add(this._appBarButtonSearch);
+      this._mainAppBar.Buttons.Add(this._appBarButtonEnableSelection);
+      this._selectionAppBar.Buttons.Add(this._appBarButtonCheck);
+      this._selectionAppBar.Buttons.Add(this._appBarButtonCancel);
+      this._appBarButtonSearch.Click+=(new EventHandler(this.AppBarButtonSearch_Click));
+      this._appBarButtonEnableSelection.Click+=(new EventHandler(this.AppBarButtonEnableSelection_Click));
+      this._appBarButtonCheck.Click+=(new EventHandler(this.AppBarButtonCheck_Click));
+      this._appBarButtonCancel.Click+=(new EventHandler(this.AppBarButtonCancel_Click));
+      this.ApplicationBar = ((IApplicationBar) this._mainAppBar);
     }
 
     private void AppBarButtonEnableSelection_Click(object sender, EventArgs e)
@@ -129,82 +141,109 @@ namespace VKClient.Common
       List<FriendHeader> allSelected = this.PickUserVM.GetAllSelected();
       if (allSelected.Count <= 0)
         return;
-      this.RespondToSelection(allSelected.Where<FriendHeader>((Func<FriendHeader, bool>) (fh => fh.User != null)).Select<FriendHeader, User>((Func<FriendHeader, User>) (fh => fh.User)).ToList<User>(), allSelected.Where<FriendHeader>((Func<FriendHeader, bool>) (fh => fh.FriendsList != null)).Select<FriendHeader, FriendsList>((Func<FriendHeader, FriendsList>) (fh => fh.FriendsList)).ToList<FriendsList>());
+      this.RespondToSelection((List<User>)Enumerable.ToList<User>(Enumerable.Select<FriendHeader, User>(Enumerable.Where<FriendHeader>(allSelected, (Func<FriendHeader, bool>)(fh => fh.User != null)), (Func<FriendHeader, User>)(fh => fh.User))), (List<FriendsList>)Enumerable.ToList<FriendsList>(Enumerable.Select<FriendHeader, FriendsList>(Enumerable.Where<FriendHeader>(allSelected, (Func<FriendHeader, bool>)(fh => fh.FriendsList != null)), (Func<FriendHeader, FriendsList>)(fh => fh.FriendsList))));
     }
 
     private void UpdateAppBar()
     {
       if (this.PickUserVM.IsInSelectionMode)
-        this.ApplicationBar = (IApplicationBar) this._selectionAppBar;
+        this.ApplicationBar = ((IApplicationBar) this._selectionAppBar);
       else
-        this.ApplicationBar = (IApplicationBar) this._mainAppBar;
+        this.ApplicationBar = ((IApplicationBar) this._mainAppBar);
       if (this.PickUserVM.PickUserMode == PickUserMode.PickForPartner)
-        this.ApplicationBar = (IApplicationBar) null;
-      if (this.PickUserVM.PickUserMode == PickUserMode.PickForPrivacy)
-        this._mainAppBar.Buttons.Remove((object) this._appBarButtonEnableSelection);
-      this._appBarButtonCheck.IsEnabled = this.PickUserVM.SelectedCount > 0;
+        this.ApplicationBar = ( null);
+      if (this.PickUserVM.PickUserMode == PickUserMode.PickWithSearch || this.PickUserVM.PickUserMode == PickUserMode.PickForPrivacy || this.PickUserVM.PickUserMode == PickUserMode.PickForStickerPackGift)
+        this._mainAppBar.Buttons.Remove(this._appBarButtonEnableSelection);
+      this._appBarButtonCheck.IsEnabled = (this.PickUserVM.SelectedCount > 0);
     }
 
     private void AppBarButtonSearch_Click(object sender, EventArgs e)
-    {
-      DialogService dialogService = new DialogService();
-      dialogService.BackgroundBrush = (Brush) new SolidColorBrush(Colors.Transparent);
-      int num1 = 1;
-      dialogService.HideOnNavigation = num1 != 0;
-      int num2 = 6;
-      dialogService.AnimationType = (DialogService.AnimationTypes) num2;
-      this._dialogService = dialogService;
-      UsersSearchDataProvider searchDataProvider = new UsersSearchDataProvider(this.PickUserVM.AllFriendsRaw.Select<User, FriendHeader>((Func<User, FriendHeader>) (f => new FriendHeader(f, false))), !this.ForbidGlobalSearch);
-      DataTemplate itemTemplate = (DataTemplate) Application.Current.Resources["FriendItemTemplate"];
-      GenericSearchUC searchUC = new GenericSearchUC();
-      searchUC.LayoutRootGrid.Margin = new Thickness(0.0, 77.0, 0.0, 0.0);
-      searchUC.Initialize<User, FriendHeader>((ISearchDataProvider<User, FriendHeader>) searchDataProvider, new Action<object, object>(this.HandleSelectedItem), itemTemplate);
-      searchUC.SearchTextBox.TextChanged += (TextChangedEventHandler) ((s, ev) => this.pivot.Visibility = searchUC.SearchTextBox.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible);
-      this._dialogService.Child = (FrameworkElement) searchUC;
-      this._dialogService.Show((UIElement) this.pivot);
-    }
+{
+	this._dialogService = new DialogService
+	{
+		BackgroundBrush = new SolidColorBrush(Colors.Transparent),
+		HideOnNavigation = true,
+		AnimationType = DialogService.AnimationTypes.None
+	};
+	IEnumerable<User> arg_60_0 = this.PickUserVM.AllFriendsRaw;
+	Func<User, FriendHeader> arg_60_1 = new Func<User, FriendHeader>((f)=>new FriendHeader(f, false));
+	
+	UsersSearchDataProvider searchDataProvider = new UsersSearchDataProvider(Enumerable.Select<User, FriendHeader>(arg_60_0, arg_60_1), !this.ForbidGlobalSearch);
+	DataTemplate itemTemplate = (DataTemplate)Application.Current.Resources["FriendItemTemplate"];
+	GenericSearchUC searchUC = new GenericSearchUC();
+	searchUC.LayoutRootGrid.Margin=new Thickness(0.0, 77.0, 0.0, 0.0);
+	searchUC.Initialize<User, FriendHeader>(searchDataProvider, new Action<object, object>(this.HandleSelectedItem), itemTemplate);
+	searchUC.SearchTextBox.TextChanged+=(delegate(object s, TextChangedEventArgs ev)
+	{
+		bool flag = searchUC.SearchTextBox.Text != string.Empty;
+        this.pivot.Visibility = (flag ? Visibility.Collapsed : Visibility.Visible);
+	});
+	this._dialogService.Child = searchUC;
+	this._dialogService.Show(this.pivot);
+}
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
     {
       base.HandleOnNavigatedTo(e);
       if (!this._isInitialized)
       {
+        IDictionary<string, string> queryString = ((Page) this).NavigationContext.QueryString;
         bool flag;
-        if (this.NavigationContext.QueryString.ContainsKey("GoBackOnResult"))
+        if (queryString.ContainsKey("GoBackOnResult"))
         {
-          string str = this.NavigationContext.QueryString["GoBackOnResult"];
+          string str1 = queryString["GoBackOnResult"];
           flag = true;
-          string @string = flag.ToString();
-          if (str == @string)
+          string str2 = flag.ToString();
+          if (str1 == str2)
           {
             this._goBackOnResult = true;
-            goto label_7;
+            goto label_8;
           }
         }
-        if (this.NavigationContext.QueryString.ContainsKey("CreateChat"))
+        if (queryString.ContainsKey("CreateChat"))
         {
-          string str = this.NavigationContext.QueryString["CreateChat"];
+          string str1 = queryString["CreateChat"];
           flag = true;
-          string @string = flag.ToString();
-          if (str == @string)
+          string str2 = flag.ToString();
+          if (str1 == str2)
           {
             this._createChat = true;
-            this._initialUserId = long.Parse(this.NavigationContext.QueryString["InitialUserId"]);
+            if (queryString.ContainsKey("InitialUserId"))
+              this._initialUserId = long.Parse(queryString["InitialUserId"]);
           }
         }
-label_7:
-        PickUserMode mode = (PickUserMode) Enum.Parse(typeof (PickUserMode), this.NavigationContext.QueryString["PickMode"]);
-        this._currentCountInChat = int.Parse(this.NavigationContext.QueryString["CurrentCountInChat"]);
-        int sexFilter = int.Parse(this.NavigationContext.QueryString["SexFilter"]);
-        PickUserViewModel pickUserViewModel = new PickUserViewModel(mode, sexFilter);
-        if (this.NavigationContext.QueryString.ContainsKey("CustomTitle"))
-          pickUserViewModel.CustomTitle = this.NavigationContext.QueryString["CustomTitle"];
-        if (mode == PickUserMode.PickForMessage || mode == PickUserMode.PickForPartner)
-          this.pivot.Items.Remove((object) this.pivotItemLists);
-        this.DataContext = (object) pickUserViewModel;
+label_8:
+        PickUserMode mode = PickUserMode.PickForMessage;
+        if (queryString.ContainsKey("PickMode"))
+        {
+          // ISSUE: type reference
+          mode = (PickUserMode) Enum.Parse(typeof (PickUserMode), queryString["PickMode"]);
+        }
+        if (queryString.ContainsKey("CurrentCountInChat"))
+          this._currentCountInChat = int.Parse(queryString["CurrentCountInChat"]);
+        int sexFilter = 0;
+        if (queryString.ContainsKey("SexFilter"))
+          sexFilter = int.Parse(queryString["SexFilter"]);
+        long result = 0;
+        if (queryString.ContainsKey("ProductId"))
+          long.TryParse(queryString["ProductId"], out result);
+        if (queryString.ContainsKey("IsGlobalSearchForbidden"))
+        {
+          string str1 = queryString["IsGlobalSearchForbidden"];
+          flag = true;
+          string str2 = flag.ToString();
+          if (str1 == str2)
+            this._isGlobalSearchForbidden = true;
+        }
+        PickUserViewModel pickUserViewModel = result == 0L ? new PickUserViewModel(mode, sexFilter) : new PickUserViewModel(result);
+        if (queryString.ContainsKey("CustomTitle"))
+          pickUserViewModel.CustomTitle = queryString["CustomTitle"];
+        if (mode == PickUserMode.PickForMessage || mode == PickUserMode.PickForPartner || (mode == PickUserMode.PickWithSearch || mode == PickUserMode.PickForStickerPackGift))
+          ((PresentationFrameworkCollection<object>) ((ItemsControl) this.pivot).Items).Remove(this.pivotItemLists);
+        base.DataContext = pickUserViewModel;
         pickUserViewModel.PropertyChanged += new PropertyChangedEventHandler(this.OnPropertyChanged);
-        pickUserViewModel.Friends.LoadData(false, false, (Action<BackendResult<List<User>, ResultCode>>) null, false);
-        pickUserViewModel.Lists.LoadData(false, false, (Action<BackendResult<List<FriendsList>, ResultCode>>) null, false);
+        pickUserViewModel.Friends.LoadData(false, false,  null, false);
+        pickUserViewModel.Lists.LoadData(false, false,  null, false);
         this._isInitialized = true;
       }
       this.UpdateAppBar();
@@ -231,7 +270,7 @@ label_7:
     {
       ExtendedLongListSelector longListSelector = sender as ExtendedLongListSelector;
       object selectedItem = longListSelector.SelectedItem;
-      this.HandleSelectedItem((object) longListSelector, selectedItem);
+      this.HandleSelectedItem(longListSelector, selectedItem);
       longListSelector.SelectedItem = null;
     }
 
@@ -253,6 +292,8 @@ label_7:
       {
         List<User> users = new List<User>();
         users.Add(friendHeader.User);
+        // ISSUE: variable of the null type
+        
         this.RespondToSelection(users, null);
       }
       else
@@ -267,24 +308,24 @@ label_7:
 
     private void ShowMessageBoxCannotAdd(int maxAllowedCount)
     {
-      int num = (int) MessageBox.Show(UIStringFormatterHelper.FormatNumberOfSomething(maxAllowedCount, CommonResources.YouCanSelectNoMoreOneFrm, CommonResources.YouCanSelectNoMoreTwoFourFrm, CommonResources.YouCanSelectNoMoreFiveFrm, true, null, false));
+      MessageBox.Show(UIStringFormatterHelper.FormatNumberOfSomething(maxAllowedCount, CommonResources.YouCanSelectNoMoreOneFrm, CommonResources.YouCanSelectNoMoreTwoFourFrm, CommonResources.YouCanSelectNoMoreFiveFrm, true,  null, false));
     }
 
     private void RespondToSelection(List<User> users, List<FriendsList> lists)
     {
-      if (users.IsNullOrEmpty() && lists.IsNullOrEmpty())
+      if (ListExtensions.IsNullOrEmpty((IList) users) && ListExtensions.IsNullOrEmpty((IList) lists))
         return;
       if (this._goBackOnResult)
       {
-        ParametersRepository.SetParameterForId("SelectedUsers", (object) users);
-        if (lists.NotNullAndHasAtLeastOneNonNullElement())
-          ParametersRepository.SetParameterForId("SelectedLists", (object) lists);
-        this.NavigationService.GoBackSafe();
+        ParametersRepository.SetParameterForId("SelectedUsers", users);
+        if (ListExtensions.NotNullAndHasAtLeastOneNonNullElement((IList) lists))
+          ParametersRepository.SetParameterForId("SelectedLists", lists);
+        ((Page) this).NavigationService.GoBackSafe();
       }
       else if (this._createChat || users.Count > 1)
-        this.CreateChatAndProceed(users.Select<User, long>((Func<User, long>) (u => u.uid)).ToList<long>());
+          this.CreateChatAndProceed((List<long>)Enumerable.ToList<long>(Enumerable.Select<User, long>(users, (Func<User, long>)(u => u.uid))));
       else
-        Navigator.Current.NavigateToConversation(users.First<User>().uid, false, true, "", 0L, false);
+        Navigator.Current.NavigateToConversation(((User) Enumerable.First<User>(users)).uid, false, true, "", 0, false);
     }
 
     private void CreateChatAndProceed(List<long> uids)
@@ -294,30 +335,30 @@ label_7:
         return;
       this._creatingChat = true;
       this.ShowProgressIndicator(true, CommonResources.FriendsAndContactsSearchPage_CreatingChat);
-      List<long> userIds = new List<long>()
+      List<long> longList = new List<long>()
       {
         loggedInUserId
       };
       if (this._initialUserId != 0L)
-        userIds.Add(this._initialUserId);
-      userIds.AddRange((IEnumerable<long>) uids);
-      MessagesService.Instance.CreateChat(userIds, (Action<BackendResult<VKClient.Audio.Base.ResponseWithId, ResultCode>>) (res =>
+        longList.Add(this._initialUserId);
+      longList.AddRange((IEnumerable<long>) uids);
+      MessagesService.Instance.CreateChat(longList, (Action<BackendResult<VKClient.Audio.Base.ResponseWithId, ResultCode>>) (res =>
       {
         this._creatingChat = false;
         this.ShowProgressIndicator(false, "");
         if (res.ResultCode != ResultCode.Succeeded)
           ExtendedMessageBox.ShowSafe(CommonResources.FriendsAndContactsSearchPage_FailedToCreateChat);
         else
-          Navigator.Current.NavigateToConversation(res.ResultData.response, true, true, "", 0L, false);
+          Navigator.Current.NavigateToConversation(res.ResultData.response, true, true, "", 0, false);
       }));
     }
 
     private void ShowProgressIndicator(bool show, string text = "")
     {
-      if (this.Dispatcher.CheckAccess())
+      if (base.Dispatcher.CheckAccess())
         this.DoShowProgressIndicator(show, text);
       else
-        this.Dispatcher.BeginInvoke((Action) (() => this.DoShowProgressIndicator(show, text)));
+        base.Dispatcher.BeginInvoke((Action) (() => this.DoShowProgressIndicator(show, text)));
     }
 
     private void DoShowProgressIndicator(bool show, string text)
@@ -335,16 +376,16 @@ label_7:
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/PickUserForNewMessagePage.xaml", UriKind.Relative));
-      this.progressIndicator = (ProgressIndicator) this.FindName("progressIndicator");
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.Header = (GenericHeaderUC) this.FindName("Header");
-      this.pivot = (Pivot) this.FindName("pivot");
-      this.pivotItemAll = (PivotItem) this.FindName("pivotItemAll");
-      this.ContentPanel = (Grid) this.FindName("ContentPanel");
-      this.allFriendsListBox = (ExtendedLongListSelector) this.FindName("allFriendsListBox");
-      this.pivotItemLists = (PivotItem) this.FindName("pivotItemLists");
-      this.friendListsListBox = (ExtendedLongListSelector) this.FindName("friendListsListBox");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/PickUserForNewMessagePage.xaml", UriKind.Relative));
+      this.progressIndicator = (ProgressIndicator) base.FindName("progressIndicator");
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.pivot = (Pivot) base.FindName("pivot");
+      this.pivotItemAll = (PivotItem) base.FindName("pivotItemAll");
+      this.ContentPanel = (Grid) base.FindName("ContentPanel");
+      this.allFriendsListBox = (ExtendedLongListSelector) base.FindName("allFriendsListBox");
+      this.pivotItemLists = (PivotItem) base.FindName("pivotItemLists");
+      this.friendListsListBox = (ExtendedLongListSelector) base.FindName("friendListsListBox");
     }
   }
 }

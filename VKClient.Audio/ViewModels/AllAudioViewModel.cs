@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using VKClient.Audio.Base.AudioCache;
 using VKClient.Audio.Library;
 using VKClient.Audio.Localization;
@@ -20,9 +21,10 @@ namespace VKClient.Audio.ViewModels
     protected long _userOrGroupId;
     protected bool _isGroup;
     private bool _isPickMode;
-    private long _albumId;
     private GenericCollectionViewModel<List<AudioObj>, AudioHeader> _allTracks;
     private AllAlbumsViewModel _allAlbumsVM;
+
+    public long AlbumId { get; private set; }
 
     public long UserOrGroupId
     {
@@ -49,7 +51,7 @@ namespace VKClient.Audio.ViewModels
       set
       {
         this._allTracks = value;
-        this.NotifyPropertyChanged<GenericCollectionViewModel<List<AudioObj>, AudioHeader>>((Expression<Func<GenericCollectionViewModel<List<AudioObj>, AudioHeader>>>) (() => this.AllTracks));
+        base.NotifyPropertyChanged<GenericCollectionViewModel<List<AudioObj>, AudioHeader>>(() => this.AllTracks);
       }
     }
 
@@ -65,7 +67,7 @@ namespace VKClient.Audio.ViewModels
     {
       get
       {
-        return CommonResources.Audio.ToUpperInvariant();
+        return ((string) CommonResources.Audio).ToUpperInvariant();
       }
     }
 
@@ -73,9 +75,12 @@ namespace VKClient.Audio.ViewModels
     {
       get
       {
-        return (Func<List<AudioObj>, ListWithCount<AudioHeader>>) (input => new ListWithCount<AudioHeader>()
+        return (Func<List<AudioObj>, ListWithCount<AudioHeader>>) (input =>
         {
-          List = new List<AudioHeader>(input.Select<AudioObj, AudioHeader>((Func<AudioObj, AudioHeader>) (i => new AudioHeader(i))))
+          ListWithCount<AudioHeader> listWithCount = new ListWithCount<AudioHeader>();
+          List<AudioHeader> audioHeaderList = new List<AudioHeader>((IEnumerable<AudioHeader>)Enumerable.Select<AudioObj, AudioHeader>(input, (Func<AudioObj, AudioHeader>)(i => new AudioHeader(i, 0L))));
+          listWithCount.List = audioHeaderList;
+          return listWithCount;
         });
       }
     }
@@ -87,13 +92,19 @@ namespace VKClient.Audio.ViewModels
         return (Action<bool, GenericCollectionViewModel<List<AudioObj>, AudioHeader>>) ((b, c) => {});
       }
     }
-
+    public bool IsSavedAudiosAlbum//mod
+    {
+        get
+        {
+            return this.AlbumId == AllAlbumsViewModel.SAVED_ALBUM_ID;
+        }
+    }
     public AllAudioViewModel(long userOrGroupId, bool isGroup, bool isPickMode, long albumId = 0, long exludeAlbumId = 0)
     {
       this._isGroup = isGroup;
       this._userOrGroupId = userOrGroupId;
       this._isPickMode = isPickMode;
-      this._albumId = albumId;
+      this.AlbumId = albumId;
       this.AllTracks = new GenericCollectionViewModel<List<AudioObj>, AudioHeader>((ICollectionDataProvider<List<AudioObj>, AudioHeader>) this)
       {
         NoContentText = CommonResources.NoContent_Audios,
@@ -101,7 +112,7 @@ namespace VKClient.Audio.ViewModels
       };
       this.AllTracks.LoadCount = 80;
       this._allAlbumsVM = new AllAlbumsViewModel(userOrGroupId, isGroup, isPickMode, exludeAlbumId);
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
     }
 
     public void LoadMore(object linkedItem)
@@ -111,7 +122,7 @@ namespace VKClient.Audio.ViewModels
 
     public void GetData(GenericCollectionViewModel<List<AudioObj>, AudioHeader> caller, int offset, int count, Action<BackendResult<List<AudioObj>, ResultCode>> callback)
     {
-      if (this._albumId == 0L)
+      if (this.AlbumId == 0)
         AudioService.Instance.GetAllAudio((Action<BackendResult<List<AudioObj>, ResultCode>>) (res =>
         {
           if (res.ResultCode != ResultCode.Succeeded && AudioCacheManager.Instance.CachedListForCurrentUser.Count > 0 && (!this._isGroup && this._userOrGroupId == AppGlobalStateManager.Current.LoggedInUserId) || this._userOrGroupId == 0L)
@@ -119,26 +130,29 @@ namespace VKClient.Audio.ViewModels
           else
             callback(res);
         }), new long?(this.UserOrGroupId), this.IsGroup, new long?(), offset, count);
-      else if (this._albumId == AllAlbumsViewModel.RECOMMENDED_ALBUM_ID)
+      else if (this.AlbumId == AllAlbumsViewModel.RECOMMENDED_ALBUM_ID)
         AudioService.Instance.GetRecommended(this.UserOrGroupId, (long) offset, (long) count, callback);
-      else if (this._albumId == AllAlbumsViewModel.POPULAR_ALBUM_ID)
-        AudioService.Instance.GetPopular(offset, count, callback);
-      else if (this._albumId == AllAlbumsViewModel.SAVED_ALBUM_ID)
+      else if (this.AlbumId == AllAlbumsViewModel.POPULAR_ALBUM_ID)
       {
-        callback(new BackendResult<List<AudioObj>, ResultCode>(ResultCode.Succeeded, AudioCacheManager.Instance.CachedListForCurrentUser));
+        AudioService.Instance.GetPopular(offset, count, callback);
+      }
+      else if (this.AlbumId == AllAlbumsViewModel.SAVED_ALBUM_ID)//mod
+      {
+          callback.Invoke(new BackendResult<List<AudioObj>, ResultCode>(ResultCode.Succeeded, AudioCacheManager.Instance.CachedListForCurrentUser));
+          return;
       }
       else
       {
         AudioService instance = AudioService.Instance;
-        Action<BackendResult<List<AudioObj>, ResultCode>> callback1 = callback;
-        long? userOrGroupId = new long?(this.UserOrGroupId);
+        Action<BackendResult<List<AudioObj>, ResultCode>> action = callback;
+        long? nullable1 = new long?(this.UserOrGroupId);
         int num1 = this.IsGroup ? 1 : 0;
         int num2 = offset;
         int num3 = count;
-        long? albumId = new long?(this._albumId);
-        int offset1 = num2;
-        int count1 = num3;
-        instance.GetAllAudio(callback1, userOrGroupId, num1 != 0, albumId, offset1, count1);
+        long? nullable2 = new long?(this.AlbumId);
+        int num4 = num2;
+        int num5 = num3;
+        instance.GetAllAudio(action, nullable1, num1 != 0, nullable2, num4, num5);
       }
     }
 
@@ -146,51 +160,65 @@ namespace VKClient.Audio.ViewModels
     {
       if (count <= 0)
         return AudioResources.NoTracks;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, AudioResources.OneTrackFrm, AudioResources.TwoFourTracksFrm, AudioResources.FiveTracksFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, AudioResources.OneTrackFrm, AudioResources.TwoFourTracksFrm, AudioResources.FiveTracksFrm, true,  null, false);
     }
 
     public void Handle(AudioTrackAddedRemoved message)
-    {
-      if (this.IsGroup || this.UserOrGroupId != AppGlobalStateManager.Current.LoggedInUserId)
-        return;
-      Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        if (message.Added && this._albumId == 0L)
-        {
-          this.AllTracks.Insert(new AudioHeader(message.Audio), 0);
-        }
-        else
-        {
-          AudioHeader audioHeader = this.AllTracks.Collection.FirstOrDefault<AudioHeader>((Func<AudioHeader, bool>) (ah => ah.Track.aid == message.Audio.aid));
-          if (audioHeader == null)
-            return;
-          this.AllTracks.Delete(audioHeader);
-        }
-      }));
-    }
+{
+	if (!this.IsGroup && this.UserOrGroupId == AppGlobalStateManager.Current.LoggedInUserId)
+	{
+		Execute.ExecuteOnUIThread(delegate
+		{
+			if (message.Added && this.AlbumId == 0)
+			{
+				this.AllTracks.LoadData(true, false, null, false);
+				return;
+			}
+			IEnumerable<AudioHeader> arg_5E_0 = this.AllTracks.Collection;
+			Func<AudioHeader, bool> arg_5E_1=  ( ((AudioHeader h) => h.Track.aid == message.Audio.aid));
+			
+			AudioHeader audioHeader = Enumerable.FirstOrDefault<AudioHeader>(arg_5E_0, arg_5E_1);
+			if (audioHeader != null)
+			{//
+                if (message.IsSavedAudiosAlbum && this.AlbumId != AllAlbumsViewModel.SAVED_ALBUM_ID)
+                {
+                    audioHeader.NotifyChanged();
+                    return;
+                }//
+				this.AllTracks.Delete(audioHeader);
+			}
+		});
+	}
+}
 
-    internal void DeleteAudios(List<AudioHeader> list)
+
+    internal async void DeleteAudios(List<AudioHeader> list)//todo:IsSavedAudiosAlbum
     {
-      AudioService.Instance.DeleteAudios(list.Select<AudioHeader, long>((Func<AudioHeader, long>) (a => a.Track.aid)).ToList<long>());
-      foreach (AudioHeader audioHeader in list)
+        AudioService.Instance.DeleteAudios((List<long>)Enumerable.ToList<long>(Enumerable.Select<AudioHeader, long>(list, (Func<AudioHeader, long>)(a => a.Track.aid))));
+        await AudioCacheManager.Instance.ClearCache((IEnumerable<string>)Enumerable.Select<AudioHeader, string>(list, (Func<AudioHeader, string>)(h => h.Track.Id)));
+      List<AudioHeader>.Enumerator enumerator = list.GetEnumerator();
+      try
       {
-        EventAggregator current = EventAggregator.Current;
-        AudioTrackAddedRemoved trackAddedRemoved = new AudioTrackAddedRemoved();
-        trackAddedRemoved.Added = false;
-        AudioObj track = audioHeader.Track;
-        trackAddedRemoved.Audio = track;
-        current.Publish((object) trackAddedRemoved);
+        while (enumerator.MoveNext())
+        {
+          AudioHeader current1 = enumerator.Current;
+          EventAggregator current2 = EventAggregator.Current;
+          AudioTrackAddedRemoved trackAddedRemoved = new AudioTrackAddedRemoved();
+          trackAddedRemoved.Added = false;
+          AudioObj track = current1.Track;
+          trackAddedRemoved.Audio = track;
+          current2.Publish(trackAddedRemoved);
+        }
       }
-    }
-
-    internal void AddTracksToAlbum(List<AudioHeader> headersToMove)
-    {
-      throw new NotImplementedException();
+      finally
+      {
+        enumerator.Dispose();
+      }
     }
 
     internal void MoveTracksToAlbum(List<AudioHeader> headersToMove, AudioAlbum pickedAlbum, Action<bool> callback)
     {
-      AudioService.Instance.MoveToAlbum(headersToMove.Select<AudioHeader, long>((Func<AudioHeader, long>) (h => h.Track.aid)).ToList<long>(), pickedAlbum.album_id, (Action<BackendResult<object, ResultCode>>) (res =>
+        AudioService.Instance.MoveToAlbum((List<long>)Enumerable.ToList<long>(Enumerable.Select<AudioHeader, long>(headersToMove, (Func<AudioHeader, long>)(h => h.Track.aid))), pickedAlbum.album_id, (Action<BackendResult<object, ResultCode>>)(res =>
       {
         if (res.ResultCode == ResultCode.Succeeded)
           callback(true);
@@ -203,7 +231,7 @@ namespace VKClient.Audio.ViewModels
     {
       if (item == null)
         return;
-      AudioService.Instance.ReorderAudio(item.Track.aid, AppGlobalStateManager.Current.LoggedInUserId, this._albumId, after == null ? 0L : after.Track.aid, before == null ? 0L : before.Track.aid, (Action<BackendResult<long, ResultCode>>) (res => {}));
+      AudioService.Instance.ReorderAudio(item.Track.aid, AppGlobalStateManager.Current.LoggedInUserId, this.AlbumId, after == null ? 0L : after.Track.aid, before == null ? 0L : before.Track.aid, (Action<BackendResult<long, ResultCode>>) (res => {}));
     }
 
     public string GetFooterTextForCount(GenericCollectionViewModel<List<AudioObj>, AudioHeader> caller, int count)

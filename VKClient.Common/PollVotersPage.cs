@@ -24,7 +24,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as PollVotersViewModel;
+        return base.DataContext as PollVotersViewModel;
       }
     }
 
@@ -33,7 +33,7 @@ namespace VKClient.Common
       this.InitializeComponent();
       this.ucHeader.OnHeaderTap = (Action) (() => this.listBoxVoters.ScrollToTop());
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.listBoxVoters);
-      this.listBoxVoters.OnRefresh = (Action) (() => this.PollVotersVM.VotersVM.LoadData(true, false, (Action<BackendResult<UsersListWithCount, ResultCode>>) null, false));
+      this.listBoxVoters.OnRefresh = (Action) (() => this.PollVotersVM.VotersVM.LoadData(true, false,  null, false));
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -41,16 +41,16 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      long ownerId = long.Parse(this.NavigationContext.QueryString["OwnerId"]);
-      long num1 = long.Parse(this.NavigationContext.QueryString["PollId"]);
-      long num2 = long.Parse(this.NavigationContext.QueryString["AnswerId"]);
-      string str = this.NavigationContext.QueryString["AnswerText"];
+      long ownerId = long.Parse(((Page) this).NavigationContext.QueryString["OwnerId"]);
+      long num1 = long.Parse(((Page) this).NavigationContext.QueryString["PollId"]);
+      long num2 = long.Parse(((Page) this).NavigationContext.QueryString["AnswerId"]);
+      string str = ((Page) this).NavigationContext.QueryString["AnswerText"];
       long pollId = num1;
       long answerId = num2;
       string answerText = str;
       PollVotersViewModel pollVotersViewModel = new PollVotersViewModel(ownerId, pollId, answerId, answerText);
       pollVotersViewModel.LoadData();
-      this.DataContext = (object) pollVotersViewModel;
+      base.DataContext = pollVotersViewModel;
       this._isInitialized = true;
     }
 
@@ -61,10 +61,10 @@ namespace VKClient.Common
 
     private void ExtendedLongListSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      FriendHeader friendHeader = this.listBoxVoters.SelectedItem as FriendHeader;
-      if (friendHeader == null)
+      FriendHeader selectedItem = this.listBoxVoters.SelectedItem as FriendHeader;
+      if (selectedItem == null)
         return;
-      Navigator.Current.NavigateToUserProfile(friendHeader.UserId, friendHeader.User.Name, "", false);
+      Navigator.Current.NavigateToUserProfile(selectedItem.UserId, selectedItem.User.Name, "", false);
       this.listBoxVoters.SelectedItem = null;
     }
 
@@ -74,10 +74,10 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/PollVotersPage.xaml", UriKind.Relative));
-      this.listBoxVoters = (ExtendedLongListSelector) this.FindName("listBoxVoters");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/PollVotersPage.xaml", UriKind.Relative));
+      this.listBoxVoters = (ExtendedLongListSelector) base.FindName("listBoxVoters");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
     }
   }
 }

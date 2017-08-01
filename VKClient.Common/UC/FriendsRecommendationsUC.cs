@@ -21,7 +21,7 @@ namespace VKClient.Common.UC
 {
   public class FriendsRecommendationsUC : UserControl, IHandle<ContactsSyncEnabled>, IHandle
   {
-    private readonly ObservableCollection<FriendRecommendationItem> _itemsSource = new ObservableCollection<FriendRecommendationItem>();
+      private readonly ObservableCollection<FriendRecommendationItem> _itemsSource = new ObservableCollection<FriendRecommendationItem>();
     private readonly List<long> _sendedToStatsRecommendationsIds = new List<long>();
     private readonly List<long> _recommendationsIds = new List<long>();
     private FriendRecommendationItem _contactsSyncPromoItem;
@@ -33,9 +33,10 @@ namespace VKClient.Common.UC
 
     public FriendsRecommendationsUC(NewsItemDataWithUsersAndGroupsInfo newsItem)
     {
+      //this.\u002Ector();
       this.InitializeComponent();
-      EventAggregator.Current.Subscribe((object) this);
-      this.ItemsList.ItemsSource = (IList) this._itemsSource;
+      EventAggregator.Current.Subscribe(this);
+      this.ItemsList.ItemsSource = ((IList) this._itemsSource);
       this._loadingNextFrom = newsItem.NewsItem.next_from;
       foreach (User profile in newsItem.NewsItem.profiles)
       {
@@ -56,16 +57,16 @@ namespace VKClient.Common.UC
       }
       if (!newsItem.NewsItem.account_import_block_pos.HasValue || AppGlobalStateManager.Current.GlobalState.AllowSendContacts)
         return;
-      this._contactsSyncPromoItem = new FriendRecommendationItem((User) null);
+      this._contactsSyncPromoItem = new FriendRecommendationItem( null);
       this._itemsSource.Insert(newsItem.NewsItem.account_import_block_pos.Value, this._contactsSyncPromoItem);
     }
 
-    private void Recommendation_OnTapped(object sender, GestureEventArgs e)
+    private void Recommendation_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       Navigator.Current.NavigateToUserProfile((((FrameworkElement) sender).DataContext as FriendRecommendationItem).UserId, "", "user_rec", false);
     }
 
-    private void RecommendationHideButton_OnTapped(object sender, GestureEventArgs e)
+    private void RecommendationHideButton_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       FriendRecommendationItem recommendation = ((FrameworkElement) sender).DataContext as FriendRecommendationItem;
       e.Handled = true;
@@ -86,10 +87,12 @@ namespace VKClient.Common.UC
       int num1 = 0;
       int num2 = 1;
       CancellationToken? cancellationToken = new CancellationToken?();
-      VKRequestsDispatcher.DispatchRequestToVK<int>(methodName, parameters, callback, (Func<string, int>) (json => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<int>>(json).response), num1 != 0, num2 != 0, cancellationToken);
+      // ISSUE: variable of the null type
+      
+      VKRequestsDispatcher.DispatchRequestToVK<int>(methodName, parameters, callback, (Func<string, int>) (json => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<int>>(json).response), num1 != 0, num2 != 0, cancellationToken, null);
     }
 
-    private void RecommendationAddToFriendsButton_OnTapped(object sender, GestureEventArgs e)
+    private void RecommendationAddToFriendsButton_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       FriendRecommendationItem recommendation = ((FrameworkElement) sender).DataContext as FriendRecommendationItem;
       e.Handled = true;
@@ -106,7 +109,7 @@ namespace VKClient.Common.UC
         {
           if (c.ResultCode != ResultCode.Succeeded)
             return;
-          EventAggregator.Current.Publish((object) new FriendRequestSent()
+          EventAggregator.Current.Publish(new FriendRequestSent()
           {
             UserId = recommendation.UserId
           });
@@ -114,7 +117,9 @@ namespace VKClient.Common.UC
         int num1 = 0;
         int num2 = 1;
         CancellationToken? cancellationToken = new CancellationToken?();
-        VKRequestsDispatcher.DispatchRequestToVK<int>(methodName, parameters, callback, (Func<string, int>) (json => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<int>>(json).response), num1 != 0, num2 != 0, cancellationToken);
+        // ISSUE: variable of the null type
+        
+        VKRequestsDispatcher.DispatchRequestToVK<int>(methodName, parameters, callback, (Func<string, int>) (json => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<int>>(json).response), num1 != 0, num2 != 0, cancellationToken, null);
       }
     }
 
@@ -162,7 +167,9 @@ namespace VKClient.Common.UC
         int num1 = 0;
         int num2 = 1;
         CancellationToken? cancellationToken = new CancellationToken?();
-        VKRequestsDispatcher.DispatchRequestToVK<FriendsRecommendationsList>(methodName, parameters, callback, (Func<string, FriendsRecommendationsList>) (result => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<FriendsRecommendationsList>>(result).response), num1 != 0, num2 != 0, cancellationToken);
+        // ISSUE: variable of the null type
+        
+        VKRequestsDispatcher.DispatchRequestToVK<FriendsRecommendationsList>(methodName, parameters, callback, (Func<string, FriendsRecommendationsList>) (result => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<FriendsRecommendationsList>>(result).response), num1 != 0, num2 != 0, cancellationToken, null);
       }
       if (this.ItemsList.ScrollPosition >= 8388608.0 || this.ItemsList.ScrollPosition + 480.0 <= 272.0 * ((double) this._addedToStatsCount + 1.55) || this._addedToStatsCount >= this._itemsSource.Count)
         return;
@@ -178,7 +185,7 @@ namespace VKClient.Common.UC
       this._addedToStatsCount = this._addedToStatsCount + 1;
     }
 
-    private void ContactsSyncStartButton_OnTapped(object sender, GestureEventArgs e)
+    private void ContactsSyncStartButton_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       ContactsSyncRequestUC.OpenFriendsImportContacts((Action) (() => Navigator.Current.NavigateToFriendsImportContacts()));
     }
@@ -188,7 +195,7 @@ namespace VKClient.Common.UC
       if (this._contactsSyncPromoItem == null || !this._itemsSource.Contains(this._contactsSyncPromoItem))
         return;
       this._itemsSource.Remove(this._contactsSyncPromoItem);
-      this._contactsSyncPromoItem = (FriendRecommendationItem) null;
+      this._contactsSyncPromoItem =  null;
     }
 
     private void ItemsList_OnManipulationStarted(object sender, ManipulationStartedEventArgs e)
@@ -222,8 +229,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/FriendsRecommendationsUC.xaml", UriKind.Relative));
-      this.ItemsList = (ExtendedLongListSelector) this.FindName("ItemsList");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/FriendsRecommendationsUC.xaml", UriKind.Relative));
+      this.ItemsList = (ExtendedLongListSelector) base.FindName("ItemsList");
     }
   }
 }

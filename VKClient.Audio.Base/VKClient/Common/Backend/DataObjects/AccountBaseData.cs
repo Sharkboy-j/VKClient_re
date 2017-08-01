@@ -16,6 +16,8 @@ namespace VKClient.Common.Backend.DataObjects
 
     public int GamesSectionEnabled { get; set; }
 
+    public int DebugDisabled { get; set; }
+
     public int? NewStoreItemsCount { get; set; }
 
     public bool? HasStickersUpdates { get; set; }

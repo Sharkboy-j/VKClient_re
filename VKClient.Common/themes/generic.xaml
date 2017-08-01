@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vsm="clr-namespace:System.Windows;assembly=System.Windows"
-                    xmlns:framework="clr-namespace:VKClient.Common.Framework">
+                    xmlns:framework="clr-namespace:VKClient.Common.Framework"
+                    xmlns:uc="clr-namespace:VKClient.Common.UC">
 
     <Style TargetType="framework:MyListBox">
         <Setter Property="Background"
@@ -729,6 +730,107 @@
                         Padding="{TemplateBinding Padding}"
                         VerticalContentAlignment="Stretch" />
     </ControlTemplate>
+
+
+    <Style TargetType="uc:ToggleSwitchControl">
+        <Setter Property="SwitchBackground"
+                Value="{StaticResource PhoneToggleControlInactiveBackgroundBrush}" />
+        <Setter Property="SwitchForeground"
+                Value="{StaticResource PhoneToggleControlActiveBackgroundBrush}" />
+        <Setter Property="Fill"
+                Value="{StaticResource PhoneGray000_Gray900Brush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="uc:ToggleSwitchControl">
+                    <Border x:Name="Root"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CacheMode="BitmapCache"
+                            Opacity="{TemplateBinding Opacity}"
+                            Padding="{TemplateBinding Padding}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Root"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         Duration="0"
+                                                         To="0.3" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="CheckStates">
+                                <VisualStateGroup.Transitions>
+                                    <VisualTransition GeneratedDuration="0:0:0.1"
+                                                      To="Unchecked" />
+                                    <VisualTransition GeneratedDuration="0:0:0.1"
+                                                      To="Checked" />
+                                </VisualStateGroup.Transitions>
+                                <VisualState x:Name="Checked">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ThumbTranslation"
+                                                         Storyboard.TargetProperty="(TranslateTransform.X)"
+                                                         Duration="0"
+                                                         To="24">
+                                            <DoubleAnimation.EasingFunction>
+                                                <ExponentialEase Exponent="15"
+                                                                 EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="BorderSwitchForeground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         Duration="0"
+                                                         To="1" />
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Dragging" />
+                                <VisualState x:Name="Unchecked">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ThumbTranslation"
+                                                         Storyboard.TargetProperty="(TranslateTransform.X)"
+                                                         Duration="0"
+                                                         To="0" />
+                                        <DoubleAnimation Storyboard.TargetName="BorderSwitchForeground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         Duration="0"
+                                                         To="0" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid x:Name="SwitchRoot"
+                              Background="Transparent"
+                              Width="56"
+                              Height="32">
+                            <Grid x:Name="SwitchTrack">
+                                <Border x:Name="BorderSwitchBackground"
+                                        Background="{TemplateBinding SwitchBackground}"
+                                        CornerRadius="16" />
+
+                                <Border x:Name="BorderSwitchForeground"
+                                        Background="{TemplateBinding SwitchForeground}"
+                                        CornerRadius="16"
+                                        Opacity="0" />
+
+                                <Ellipse x:Name="SwitchThumb"
+                                         Width="24"
+                                         Height="24"
+                                         Margin="4 0"
+                                         HorizontalAlignment="Left"
+                                         Fill="{TemplateBinding Fill}">
+                                    <Ellipse.RenderTransform>
+                                        <TranslateTransform x:Name="ThumbTranslation" />
+                                    </Ellipse.RenderTransform>
+                                </Ellipse>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 
 
 </ResourceDictionary>

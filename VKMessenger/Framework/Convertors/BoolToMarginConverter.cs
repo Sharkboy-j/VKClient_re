@@ -22,11 +22,11 @@ namespace VKMessenger.Framework.Convertors
         switch ((int) value)
         {
           case 1:
-            return (object) BoolToMarginConverter._replyMessageMargin;
+            return BoolToMarginConverter._replyMessageMargin;
           case 0:
-            return (object) BoolToMarginConverter._ownMessageMargin;
+            return BoolToMarginConverter._ownMessageMargin;
           default:
-            return (object) BoolToMarginConverter._replyChatMessageMargin;
+            return BoolToMarginConverter._replyChatMessageMargin;
         }
       }
       else
@@ -34,14 +34,14 @@ namespace VKMessenger.Framework.Convertors
         if (value is bool && parameter == null)
         {
           if ((bool) value)
-            return (object) BoolToMarginConverter._onlineMargin;
-          return (object) BoolToMarginConverter._offlineMargin;
+            return BoolToMarginConverter._onlineMargin;
+          return BoolToMarginConverter._offlineMargin;
         }
         if (!(value is bool) || parameter == null || string.Compare(parameter.ToString(), "ForwardedMessage") != 0)
-          return (object) new Thickness();
+          return  null;
         if ((bool) value)
-          return (object) BoolToMarginConverter._forwardMessageMargin;
-        return (object) BoolToMarginConverter._forwardMessageMarginNoText;
+          return BoolToMarginConverter._forwardMessageMargin;
+        return BoolToMarginConverter._forwardMessageMarginNoText;
       }
     }
 

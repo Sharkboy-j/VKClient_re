@@ -80,7 +80,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>Bin\ARM\Release</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
     <NoStdLib>true</NoStdLib>
@@ -90,54 +90,55 @@
     <PlatformTarget />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="AssemblyInfo.cs" />
+    <Compile Include="ConversationsPage.cs">
+      <DependentUpon>conversationspage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ConversationsViewModelTemp.cs" />
-    <Compile Include="ConversationsPage.cs" />
+    <Compile Include="Framework\BoolToStyleConverter.cs" />
+    <Compile Include="Framework\CompressionEventArgs.cs" />
+    <Compile Include="Framework\CompressionType.cs" />
+    <Compile Include="Framework\ContentEventArgs.cs" />
+    <Compile Include="Framework\Convertors\BoolToMarginConverter.cs" />
+    <Compile Include="Framework\Convertors\BoolToSwitchConverter.cs" />
+    <Compile Include="Framework\Convertors\BoolToVisibilityConverter.cs" />
+    <Compile Include="Framework\Convertors\BoolToVisibilityInveterterConverter.cs" />
+    <Compile Include="Framework\Convertors\StringToTextBlockConverter.cs" />
+    <Compile Include="Framework\DependencyObjectExtension.cs" />
+    <Compile Include="Framework\ExtendedItemsControl.cs" />
+    <Compile Include="Framework\ExtendedListBox.cs" />
+    <Compile Include="Framework\InAppToastNotification.cs" />
+    <Compile Include="Framework\ScrollStateChangedEventArgs.cs" />
+    <Compile Include="Framework\UserSearchDataTemplateSelector.cs" />
     <Compile Include="IMessengerStateManager.cs" />
-    <Compile Include="MessengerStateManagerInstance.cs" />
-    <Compile Include="Views\ChatEditPage.cs" />
-    <Compile Include="Views\ConversationAvatarUC.cs" />
-    <Compile Include="Views\ConversationHeaderShareUC.cs" />
-    <Compile Include="Views\ConversationHeaderUC.cs" />
-    <Compile Include="Views\ConversationHeaderUCEmoji.cs" />
-    <Compile Include="Views\ConversationMaterialsPage.cs" />
-    <Compile Include="Views\IScroll.cs" />
-    <Compile Include="Views\ConversationPage.cs" />
-    <Compile Include="Views\ConversationsSearch.cs" />
-    <Compile Include="Views\ConversationsSearchDataProvider.cs" />
-    <Compile Include="Views\ConversationsUC.cs" />
-    <Compile Include="Views\MapAttachmentPage.cs" />
-    <Compile Include="Views\NavigationParametersNames.cs" />
-    <Compile Include="Views\PickConversationPage.cs" />
-    <Compile Include="Views\ShareExternalContentMessageUC.cs" />
     <Compile Include="Library\AttachmentTemplateSelector.cs" />
     <Compile Include="Library\BackendModelsExtensions.cs" />
     <Compile Include="Library\ChatEditViewModel.cs" />
-    <Compile Include="Library\ChatParticipant.cs" />
+    <Compile Include="Library\ChatMember.cs" />
     <Compile Include="Library\ContactHeader.cs" />
-    <None Include="Library\ConversationAvatarViewModel__DEL.cs" />
     <Compile Include="Library\ConversationHeader.cs" />
     <Compile Include="Library\ConversationMaterialsViewModel.cs" />
     <Compile Include="Library\ConversationSearchViewModel.cs" />
     <Compile Include="Library\ConversationsUCFactory.cs" />
-    <Compile Include="Library\ConversationsViewModelUpdatesListener.cs" />
     <Compile Include="Library\ConversationsViewModel.cs" />
+    <Compile Include="Library\ConversationsViewModelUpdatesListener.cs" />
     <Compile Include="Library\ConversationViewModel.cs" />
+    <Compile Include="Library\ConversationViewModelCache.cs" />
     <Compile Include="Library\DeviceManager.cs" />
+    <Compile Include="Library\Events\MessageActionEvent.cs" />
+    <Compile Include="Library\Events\MessageActionType.cs" />
     <Compile Include="Library\FriendHeader.cs" />
     <Compile Include="Library\Group`1.cs" />
-    <Compile Include="Library\ConversationViewModelCache.cs" />
     <Compile Include="Library\LinkHeader.cs" />
-    <Compile Include="Library\MessageTemplateSelector.cs" />
     <Compile Include="Library\MessageDirectionType.cs" />
+    <Compile Include="Library\MessageTemplateSelector.cs" />
     <Compile Include="Library\MessageViewModel.cs" />
     <Compile Include="Library\OutboundMessageStatus.cs" />
     <Compile Include="Library\OutboundMessageViewModel.cs" />
     <Compile Include="Library\SearchConversationHeader.cs" />
     <Compile Include="Library\SystemMessageTextHelper.cs" />
     <Compile Include="Library\Transliteration.cs" />
+    <Compile Include="Library\UsersTypingHelper.cs" />
     <Compile Include="Library\VirtItems\ConversationItems.cs" />
     <Compile Include="Library\VirtItems\ForwardedHeaderItem.cs" />
     <Compile Include="Library\VirtItems\MessageContentItem.cs" />
@@ -145,43 +146,51 @@
     <Compile Include="Library\VirtItems\MessageItem.cs" />
     <Compile Include="Library\VirtItems\SystemMessageItem.cs" />
     <Compile Include="Library\VirtItems\TapHandlerItem.cs" />
-    <Compile Include="Library\Events\MessageActionType.cs" />
-    <Compile Include="Library\Events\MessageActionEvent.cs" />
+    <Compile Include="MessengerStateManagerInstance.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ObservableCollectionExtensions.cs" />
-    <Compile Include="Framework\BoolToStyleConverter.cs" />
-    <Compile Include="Framework\DependencyObjectExtension.cs" />
-    <Compile Include="Framework\CompressionEventArgs.cs" />
-    <Compile Include="Framework\ScrollStateChangedEventArgs.cs" />
-    <Compile Include="Framework\CompressionType.cs" />
-    <Compile Include="Framework\ExtendedListBox.cs" />
-    <Compile Include="Framework\ExtendedItemsControl.cs" />
-    <Compile Include="Framework\InAppToastNotification.cs" />
-    <Compile Include="Framework\UserSearchDataTemplateSelector.cs" />
-    <Compile Include="Framework\ContentEventArgs.cs" />
-    <Compile Include="Framework\Convertors\BoolToMarginConverter.cs" />
-    <Compile Include="Framework\Convertors\BoolToSwitchConverter.cs" />
-    <Compile Include="Framework\Convertors\BoolToVisibilityConverter.cs" />
-    <Compile Include="Framework\Convertors\BoolToVisibilityInveterterConverter.cs" />
-    <Compile Include="Framework\Convertors\StringToTextBlockConverter.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="conversationspage.xaml" />
-    <Resource Include="Resources\deleteattachment.png" />
-    <Resource Include="Resources\map_pin.png" />
-    <Resource Include="Resources\play.png" />
-    <Resource Include="themes\generic.xaml" />
-    <Resource Include="views\chateditpage.xaml" />
-    <Resource Include="views\conversationavataruc.xaml" />
-    <Resource Include="views\conversationheadershareuc.xaml" />
-    <Resource Include="views\conversationheaderuc.xaml" />
-    <Resource Include="views\conversationheaderucemoji.xaml" />
-    <Resource Include="views\conversationmaterialspage.xaml" />
-    <Resource Include="views\conversationpage.xaml" />
-    <Resource Include="views\conversationssearch.xaml" />
-    <Resource Include="views\conversationsuc.xaml" />
-    <Resource Include="views\mapattachmentpage.xaml" />
-    <Resource Include="views\pickconversationpage.xaml" />
-    <Resource Include="views\shareexternalcontentmessageuc.xaml" />
+    <Compile Include="Views\ChatEditPage.cs">
+      <DependentUpon>chateditpage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationAvatarUC.cs">
+      <DependentUpon>conversationavataruc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationHeaderShareUC.cs">
+      <DependentUpon>conversationheadershareuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationHeaderUC.cs">
+      <DependentUpon>conversationheaderuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationHeaderUCEmoji.cs">
+      <DependentUpon>ConversationHeaderUCEmoji.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationMaterialsPage.cs">
+      <DependentUpon>conversationmaterialspage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationPage.cs">
+      <DependentUpon>conversationpage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationsSearch.cs">
+      <DependentUpon>conversationssearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationsSearchDataProvider.cs" />
+    <Compile Include="Views\ConversationsSearchResultUC.cs">
+      <DependentUpon>ConversationsSearchResultUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConversationsUC.cs">
+      <DependentUpon>conversationsuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\IScroll.cs" />
+    <Compile Include="Views\MapAttachmentPage.cs">
+      <DependentUpon>mapattachmentpage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NavigationParametersNames.cs" />
+    <Compile Include="Views\PickConversationPage.cs">
+      <DependentUpon>PickConversationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ShareExternalContentMessageUC.cs">
+      <DependentUpon>shareexternalcontentmessageuc.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VKClient.Audio.Base\VKClient.Audio.Base.csproj">
@@ -200,22 +209,78 @@
   <ItemGroup>
     <Reference Include="Microsoft.Phone.Controls.Maps, Version=8.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls.Toolkit, Version=8.0.1.0, Culture=neutral, PublicKeyToken=b772ad94eb9ca604, processorArchitecture=MSIL">
-      <HintPath>..\VKClient\packages\WPtoolkit.4.2013.08.16\lib\wp8\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
+      <HintPath>..\libs\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="README_FIRST.txt" />
-    <Content Include="Toolkit.Content\ApplicationBar.Add.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Select.png" />
+    <Content Include="resources\deleteattachment.png" />
+    <Content Include="resources\map_pin.png" />
+    <Content Include="resources\play.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Resource Include="conversationspage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Page Include="themes\generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Resource Include="Views\chateditpage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationavataruc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationheadershareuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationheaderuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationheaderucemoji.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationmaterialspage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationpage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationssearch.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationssearchresultuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\conversationsuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\mapattachmentpage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\pickconversationpage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\shareexternalcontentmessageuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\v8.0\Microsoft.$(TargetFrameworkIdentifier).v8.0.Overrides.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
   <ProjectExtensions />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

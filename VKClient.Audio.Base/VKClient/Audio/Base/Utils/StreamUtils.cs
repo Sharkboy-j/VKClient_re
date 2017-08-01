@@ -15,7 +15,7 @@ namespace VKClient.Audio.Base.Utils
                 {
                     inputLength = input.Length;
                 }
-                catch
+                catch (Exception)
                 {
                 }
             }

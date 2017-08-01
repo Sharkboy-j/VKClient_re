@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Framework;
@@ -8,6 +6,8 @@ using VKClient.Common.Library;
 using VKClient.Common.Library.Events;
 using VKClient.Common.Utils;
 using VKClient.Groups.Localization;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace VKClient.Groups.Library
 {
@@ -69,14 +69,14 @@ namespace VKClient.Groups.Library
 
     public Func<TopicsInfo, ListWithCount<ThemeHeader>> ConverterFunc
     {
-      get
-      {
-        return (Func<TopicsInfo, ListWithCount<ThemeHeader>>) (ti => new ListWithCount<ThemeHeader>()
+        get
         {
-          TotalCount = ti.TotalCount,
-          List = new List<ThemeHeader>(ti.topics.Select<Topic, ThemeHeader>((Func<Topic, ThemeHeader>) (t => new ThemeHeader(t, ti.profiles.FirstOrDefault<User>((Func<User, bool>) (u => u.uid == t.updated_by)), ti.groups.FirstOrDefault<Group>((Func<Group, bool>) (g => g.id == -t.updated_by))))))
-        });
-      }
+            return (Func<TopicsInfo, ListWithCount<ThemeHeader>>)(ti => new ListWithCount<ThemeHeader>()
+            {
+                TotalCount = ti.TotalCount,
+                List = new List<ThemeHeader>(ti.topics.Select<Topic, ThemeHeader>((Func<Topic, ThemeHeader>)(t => new ThemeHeader(t, ti.profiles.FirstOrDefault<User>((Func<User, bool>)(u => u.uid == t.updated_by)), ti.groups.FirstOrDefault<Group>((Func<Group, bool>)(g => g.id == -t.updated_by))))))
+            });
+        }
     }
 
     public GroupDiscussionsViewModel(long gid, int adminLevel, bool isPublicPage, bool canCreateTopic)
@@ -85,13 +85,13 @@ namespace VKClient.Groups.Library
       this._adminLevel = adminLevel;
       this._isPublicPage = isPublicPage;
       this._canCreateTopic = canCreateTopic;
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
       this._discussionsVM = new GenericCollectionViewModel<TopicsInfo, ThemeHeader>((ICollectionDataProvider<TopicsInfo, ThemeHeader>) this);
     }
 
     public void LoadData(bool reload = false, bool suppressLoading = false)
     {
-      this._discussionsVM.LoadData(reload, suppressLoading, (Action<BackendResult<TopicsInfo, ResultCode>>) null, false);
+      this._discussionsVM.LoadData(reload, suppressLoading,  null, false);
     }
 
     internal void NavigateToDiscusson(bool loadFromEnd, ThemeHeader header)
@@ -101,16 +101,16 @@ namespace VKClient.Groups.Library
 
     public void Handle(TopicCommentAddedDeletedOrEdited message)
     {
-      if (message.gid != this._gid)
-        return;
-      Execute.ExecuteOnUIThread((Action) (() => this.LoadData(true, true)));
+        if (message.gid != this._gid)
+            return;
+        Execute.ExecuteOnUIThread((Action)(() => this.LoadData(true, true)));
     }
 
     public void Handle(TopicCreated message)
     {
-      if (message.gid != this._gid)
-        return;
-      Execute.ExecuteOnUIThread((Action) (() => this.LoadData(true, true)));
+        if (message.gid != this._gid)
+            return;
+        Execute.ExecuteOnUIThread((Action)(() => this.LoadData(true, true)));
     }
 
     public void GetData(GenericCollectionViewModel<TopicsInfo, ThemeHeader> caller, int offset, int count, Action<BackendResult<TopicsInfo, ResultCode>> callback)
@@ -122,7 +122,7 @@ namespace VKClient.Groups.Library
     {
       if (count <= 0)
         return GroupResources.NoTopics;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, GroupResources.OneTopicFrm, GroupResources.TwoFourTopicsFrm, GroupResources.FiveTopicsFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, GroupResources.OneTopicFrm, GroupResources.TwoFourTopicsFrm, GroupResources.FiveTopicsFrm, true,  null, false);
     }
   }
 }

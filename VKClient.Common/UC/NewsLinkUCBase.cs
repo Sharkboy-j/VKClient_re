@@ -6,16 +6,18 @@ namespace VKClient.Common.UC
 {
   public abstract class NewsLinkUCBase : UserControlVirtualizable
   {
-    public abstract void Initialize(Link link, double width);
+    public abstract void Initialize(Link link, double width, string parentPostId = "");
 
     public abstract double CalculateTotalHeight();
 
     protected double GetElementTotalHeight(FrameworkElement element)
     {
       Thickness margin = element.Margin;
-      double num = margin.Top + element.Height;
+      // ISSUE: explicit reference operation
+      double num = ((Thickness) @margin).Top + element.Height;
       margin = element.Margin;
-      double bottom = margin.Bottom;
+      // ISSUE: explicit reference operation
+      double bottom = ((Thickness) @margin).Bottom;
       return num + bottom;
     }
   }

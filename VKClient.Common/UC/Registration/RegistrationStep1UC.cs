@@ -24,20 +24,22 @@ namespace VKClient.Common.UC.Registration
     {
       get
       {
-        return this.DataContext as RegistrationProfileViewModel;
+        return base.DataContext as RegistrationProfileViewModel;
       }
     }
 
     public RegistrationStep1UC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.Loaded += new RoutedEventHandler(this.RegistrationStep1UC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.RegistrationStep1UC_Loaded));
     }
 
     private void RegistrationStep1UC_Loaded(object sender, RoutedEventArgs e)
     {
-      this.textBlockFirstNameWatermark.Visibility = this.textBoxFirstName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible;
-      this.textBlockLastNameWatermark.Visibility = this.textBoxLastName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible;
+      ((UIElement) this.textBlockFirstNameWatermark).Visibility = (this.textBoxFirstName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible);
+      ((UIElement) this.textBlockLastNameWatermark).Visibility = (this.textBoxLastName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible);
     }
 
     private void ChoosePhotoTap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -68,18 +70,18 @@ namespace VKClient.Common.UC.Registration
     private void textBoxFirstNameChanged(object sender, TextChangedEventArgs e)
     {
       this.UpdateSource(sender as TextBox);
-      this.textBlockFirstNameWatermark.Visibility = this.textBoxFirstName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible;
+      ((UIElement) this.textBlockFirstNameWatermark).Visibility = (this.textBoxFirstName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible);
     }
 
     private void textBoxLastNameChanged(object sender, TextChangedEventArgs e)
     {
       this.UpdateSource(sender as TextBox);
-      this.textBlockLastNameWatermark.Visibility = this.textBoxLastName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible;
+      ((UIElement) this.textBlockLastNameWatermark).Visibility = (this.textBoxLastName.Text != string.Empty ? Visibility.Collapsed : Visibility.Visible);
     }
 
     private void UpdateSource(TextBox textBox)
     {
-      textBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+      ((FrameworkElement) textBox).GetBindingExpression((DependencyProperty) TextBox.TextProperty).UpdateSource();
     }
 
     private void TermsClick(object sender, RoutedEventArgs e)
@@ -98,7 +100,7 @@ namespace VKClient.Common.UC.Registration
         e.Handled = true;
       if (e.Key != Key.Enter)
         return;
-      this.textBoxLastName.Focus();
+      ((Control) this.textBoxLastName).Focus();
     }
 
     private void textBoxLastName_KeyDown(object sender, KeyEventArgs e)
@@ -110,7 +112,7 @@ namespace VKClient.Common.UC.Registration
       PageBase currentPage = FramePageUtils.CurrentPage;
       if (currentPage == null)
         return;
-      currentPage.Focus();
+      ((Control) currentPage).Focus();
     }
 
     [DebuggerNonUserCode]
@@ -119,13 +121,13 @@ namespace VKClient.Common.UC.Registration
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep1UC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.PhotoMenu = (ContextMenu) this.FindName("PhotoMenu");
-      this.textBoxFirstName = (TextBox) this.FindName("textBoxFirstName");
-      this.textBlockFirstNameWatermark = (TextBlock) this.FindName("textBlockFirstNameWatermark");
-      this.textBoxLastName = (TextBox) this.FindName("textBoxLastName");
-      this.textBlockLastNameWatermark = (TextBlock) this.FindName("textBlockLastNameWatermark");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep1UC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.PhotoMenu = (ContextMenu) base.FindName("PhotoMenu");
+      this.textBoxFirstName = (TextBox) base.FindName("textBoxFirstName");
+      this.textBlockFirstNameWatermark = (TextBlock) base.FindName("textBlockFirstNameWatermark");
+      this.textBoxLastName = (TextBox) base.FindName("textBoxLastName");
+      this.textBlockLastNameWatermark = (TextBlock) base.FindName("textBlockLastNameWatermark");
     }
   }
 }

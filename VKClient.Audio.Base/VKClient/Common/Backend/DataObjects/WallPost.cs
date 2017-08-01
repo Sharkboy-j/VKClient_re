@@ -35,7 +35,7 @@ namespace VKClient.Common.Backend.DataObjects
         if (!this.copy_history.IsNullOrEmpty())
         {
           foreach (WallPost wallPost in this.copy_history)
-            stringList.Add(wallPost.owner_id.ToString() + "_" + (object) this.id);
+            stringList.Add(wallPost.owner_id.ToString() + "_" + this.id);
         }
         return stringList;
       }
@@ -131,6 +131,8 @@ namespace VKClient.Common.Backend.DataObjects
 
     public long signer_id { get; set; }
 
+    public int marked_as_ads { get; set; }
+
     public int can_publish { get; set; }
 
     public bool IsSuggestedPostponed
@@ -167,7 +169,19 @@ namespace VKClient.Common.Backend.DataObjects
       }
     }
 
+    public bool IsMarkedAsAds
+    {
+      get
+      {
+        return this.marked_as_ads == 1;
+      }
+    }
+
     public List<WallPost> copy_history { get; set; }
+
+    public NewsActivity activity { get; set; }
+
+    public NewsCaption caption { get; set; }
 
     public bool IsNotExist
     {
@@ -185,7 +199,7 @@ namespace VKClient.Common.Backend.DataObjects
 
     public void Write(BinaryWriter writer)
     {
-      writer.Write(2);
+      writer.Write(3);
       writer.Write(this.id);
       writer.Write(this.to_id);
       writer.Write(this.from_id);
@@ -194,31 +208,32 @@ namespace VKClient.Common.Backend.DataObjects
       writer.Write(this.signer_id);
       writer.WriteList<WallPost>((IList<WallPost>) this.copy_history, 10000);
       writer.Write(this.reply_post_id);
+      writer.Write(this.marked_as_ads);
     }
 
     public void Read(BinaryReader reader)
     {
-      switch (reader.ReadInt32())
+      int num1 = reader.ReadInt32();
+      int num2 = 1;
+      if (num1 >= num2)
       {
-        case 1:
-          this.id = reader.ReadInt64();
-          this.to_id = reader.ReadInt64();
-          this.from_id = reader.ReadInt64();
-          this.date = reader.ReadInt32();
-          this.attachments = reader.ReadList<Attachment>();
-          this.signer_id = reader.ReadInt64();
-          break;
-        case 2:
-          this.id = reader.ReadInt64();
-          this.to_id = reader.ReadInt64();
-          this.from_id = reader.ReadInt64();
-          this.date = reader.ReadInt32();
-          this.attachments = reader.ReadList<Attachment>();
-          this.signer_id = reader.ReadInt64();
-          this.copy_history = reader.ReadList<WallPost>();
-          this.reply_post_id = reader.ReadInt64();
-          break;
+        this.id = reader.ReadInt64();
+        this.to_id = reader.ReadInt64();
+        this.from_id = reader.ReadInt64();
+        this.date = reader.ReadInt32();
+        this.attachments = reader.ReadList<Attachment>();
+        this.signer_id = reader.ReadInt64();
       }
+      int num3 = 2;
+      if (num1 >= num3)
+      {
+        this.copy_history = reader.ReadList<WallPost>();
+        this.reply_post_id = reader.ReadInt64();
+      }
+      int num4 = 3;
+      if (num1 < num4)
+        return;
+      this.marked_as_ads = reader.ReadInt32();
     }
 
     public static WallPost CreateFromNewsItem(NewsItem newsItem)
@@ -240,6 +255,7 @@ namespace VKClient.Common.Backend.DataObjects
       wallPost.geo = newsItem.geo;
       wallPost.post_source = newsItem.post_source;
       wallPost.signer_id = WallPost.GetZeroIfNull(newsItem.signer_id);
+      wallPost.marked_as_ads = WallPost.GetZeroIfNull(newsItem.marked_as_ads);
       wallPost.reply_post_id = newsItem.reply_post_id;
       wallPost.friends_only = newsItem.friends_only;
       wallPost.post_type = newsItem.post_type;
@@ -270,10 +286,19 @@ namespace VKClient.Common.Backend.DataObjects
             type = "photo"
           });
       }
+      wallPost.activity = newsItem.activity;
+      wallPost.caption = newsItem.caption;
       return wallPost;
     }
 
     private static long GetZeroIfNull(long? val)
+    {
+      if (!val.HasValue)
+        return 0;
+      return val.Value;
+    }
+
+    private static int GetZeroIfNull(int? val)
     {
       if (!val.HasValue)
         return 0;

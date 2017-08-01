@@ -10,7 +10,7 @@ namespace VKMessenger.Framework
     {
       if (string.IsNullOrEmpty(message))
         return;
-      Execute.ExecuteOnUIThread((Action) (() => AppNotificationUC.Instance.ShowAndHideLater(imageSrc, title, message, callback, null)));
+      Execute.ExecuteOnUIThread( (() => AppNotificationUC.Instance.ShowAndHideLater(imageSrc, title, message, callback,  null)));
     }
   }
 }

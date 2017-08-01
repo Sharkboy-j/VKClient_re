@@ -9,10 +9,10 @@ namespace VKClient.Common.UC
   [TemplatePart(Name = "PART_textBlockPercentage", Type = typeof (TextBlock))]
   public class PollAnswerControl : Control
   {
-    public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof (double), typeof (PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.Value_OnChanged)));
-    public static readonly DependencyProperty RelativePercentageProperty = DependencyProperty.Register("RelativePercentage", typeof (double), typeof (PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.RelativePercentage_OnChanged)));
-    public static readonly DependencyProperty AbsolutePercentageProperty = DependencyProperty.Register("AbsolutePercentage", typeof (double), typeof (PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.AbsolutePercentage_OnChanged)));
-    public static readonly DependencyProperty AnswerProperty = DependencyProperty.Register("Answer", typeof (string), typeof (PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.Answer_OnChanged)));
+      public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(double), typeof(PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.Value_OnChanged)));
+      public static readonly DependencyProperty RelativePercentageProperty = DependencyProperty.Register("RelativePercentage", typeof(double), typeof(PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.RelativePercentage_OnChanged)));
+      public static readonly DependencyProperty AbsolutePercentageProperty = DependencyProperty.Register("AbsolutePercentage", typeof(double), typeof(PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.AbsolutePercentage_OnChanged)));
+      public static readonly DependencyProperty AnswerProperty = DependencyProperty.Register("Answer", typeof(string), typeof(PollAnswerControl), new PropertyMetadata(new PropertyChangedCallback(PollAnswerControl.Answer_OnChanged)));
     private const string RECTANGLE_FILL_NAME = "PART_rectangleFill";
     private const string TEXTBLOCK_ANSWER_NAME = "PART_textBlockAnswer";
     private const string TEXTBLOCK_PERCENTAGE_NAME = "PART_textBlockPercentage";
@@ -24,11 +24,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (double) this.GetValue(PollAnswerControl.ValueProperty);
+        return (double) base.GetValue(PollAnswerControl.ValueProperty);
       }
       set
       {
-        this.SetValue(PollAnswerControl.ValueProperty, (object) value);
+        base.SetValue(PollAnswerControl.ValueProperty, value);
       }
     }
 
@@ -36,11 +36,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (double) this.GetValue(PollAnswerControl.RelativePercentageProperty);
+        return (double) base.GetValue(PollAnswerControl.RelativePercentageProperty);
       }
       set
       {
-        this.SetValue(PollAnswerControl.RelativePercentageProperty, (object) value);
+        base.SetValue(PollAnswerControl.RelativePercentageProperty, value);
       }
     }
 
@@ -48,11 +48,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (double) this.GetValue(PollAnswerControl.AbsolutePercentageProperty);
+        return (double) base.GetValue(PollAnswerControl.AbsolutePercentageProperty);
       }
       set
       {
-        this.SetValue(PollAnswerControl.AbsolutePercentageProperty, (object) value);
+        base.SetValue(PollAnswerControl.AbsolutePercentageProperty, value);
       }
     }
 
@@ -60,17 +60,19 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(PollAnswerControl.AnswerProperty);
+        return (string) base.GetValue(PollAnswerControl.AnswerProperty);
       }
       set
       {
-        this.SetValue(PollAnswerControl.AnswerProperty, (object) value);
+        base.SetValue(PollAnswerControl.AnswerProperty, value);
       }
     }
 
     public PollAnswerControl()
     {
-      this.SizeChanged += new SizeChangedEventHandler(this.OnSizeChanged);
+      //base.\u002Ector();
+      // ISSUE: method pointer
+      base.SizeChanged += (new SizeChangedEventHandler( this.OnSizeChanged));
     }
 
     public override void OnApplyTemplate()
@@ -90,7 +92,7 @@ namespace VKClient.Common.UC
     {
       if (this._rectangleFill == null)
         return;
-      this._rectangleFill.Width = this.ActualWidth * this.Value / 100.0;
+      ((FrameworkElement) this._rectangleFill).Width=(base.ActualWidth * this.Value / 100.0);
     }
 
     private static void RelativePercentage_OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

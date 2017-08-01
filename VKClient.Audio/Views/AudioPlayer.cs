@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,45 +23,57 @@ using VKClient.Common.Localization;
 
 namespace VKClient.Audio.Views
 {
-    public partial class AudioPlayer : PageBase
+    public class AudioPlayer : PageBase
     {
-        private ApplicationBarIconButton _addNewAppBarButton = new ApplicationBarIconButton()
-        {
-            IconUri = new Uri("/Resources/appbar.add.rest.png", UriKind.Relative),
-            Text = CommonResources.Audio_AppBar_AddToMyAudios
-        };
-        private bool _applyPositionFromVM = true;
-        private ApplicationBar _appBar = new ApplicationBar()
-        {
-            BackgroundColor = VKConstants.AppBarBGColor,
-            ForegroundColor = VKConstants.AppBarFGColor
-        };
         private bool _isInitialized;
+        private ApplicationBarIconButton _addNewAppBarButton;
         //private bool _subscribed;
+        private bool _applyPositionFromVM;
+        private ApplicationBar _appBar;
+        internal Grid LayoutRoot;
+        internal TextBlock textBlockNowPlayingLabel;
+        internal Path music_icon;
+        internal Slider slider;
+        internal TextBlock textBlockNextLabel;
+        private bool _contentLoaded;
 
         private AudioPlayerViewModel VM
         {
             get
             {
-                return this.DataContext as AudioPlayerViewModel;
+                return base.DataContext as AudioPlayerViewModel;
             }
         }
 
         public AudioPlayer()
         {
+            ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton();
+            Uri uri = new Uri("/Resources/appbar.add.rest.png", UriKind.Relative);
+            applicationBarIconButton.IconUri = uri;
+            string barAddToMyAudios = CommonResources.Audio_AppBar_AddToMyAudios;
+            applicationBarIconButton.Text = barAddToMyAudios;
+            this._addNewAppBarButton = applicationBarIconButton;
+            this._applyPositionFromVM = true;
+            ApplicationBar applicationBar = new ApplicationBar();
+            Color appBarBgColor = VKConstants.AppBarBGColor;
+            applicationBar.BackgroundColor = appBarBgColor;
+            Color appBarFgColor = VKConstants.AppBarFGColor;
+            applicationBar.ForegroundColor = appBarFgColor;
+            this._appBar = applicationBar;
+            //base.\u002Ector();
             this.InitializeComponent();
             this.SetupAppBar();
-            this.textBlockNowPlayingLabel.Text = CommonResources.AudioPlayer_NowPlaying.ToUpperInvariant();
-            this.textBlockNextLabel.Text = CommonResources.AudioPlayer_Next.ToUpperInvariant();
-            this._progressBar.Foreground = (Brush)(Application.Current.Resources["PhoneAudioPlayerForeground2Brush"] as SolidColorBrush);
-            this.Loaded += new RoutedEventHandler(this.AudioPlayer_Loaded);
+            this.textBlockNowPlayingLabel.Text = (CommonResources.AudioPlayer_NowPlaying.ToUpperInvariant());
+            this.textBlockNextLabel.Text = (CommonResources.AudioPlayer_Next.ToUpperInvariant());
+            ((Control)this._progressBar).Foreground = ((Brush)(Application.Current.Resources["PhoneAudioPlayerForeground2Brush"] as SolidColorBrush));
+            base.Loaded += (new RoutedEventHandler(this.AudioPlayer_Loaded));
         }
 
         private void AudioPlayer_Loaded(object sender, RoutedEventArgs e)
         {
             //if (!this._subscribed)
-                this.VM.PropertyChanged += this.VM_PropertyChanged;
-            this.slider.Value = this.VM.PositionSeconds;
+                this.VM.PropertyChanged += new PropertyChangedEventHandler(this.VM_PropertyChanged);
+            (this.slider).Value = this.VM.PositionSeconds;
         }
 
         private void VM_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -69,7 +82,7 @@ namespace VKClient.Audio.Views
                 this.UpdateAppBar();
             if (!(e.PropertyName == "PositionSeconds") || !this._applyPositionFromVM)
                 return;
-            this.slider.Value = this.VM.PositionSeconds;
+            (this.slider).Value = this.VM.PositionSeconds;
         }
 
         private void Slider_ManipulationStarted_1(object sender, ManipulationStartedEventArgs e)
@@ -79,7 +92,7 @@ namespace VKClient.Audio.Views
 
         private void Slider_ManipulationCompleted_1(object sender, ManipulationCompletedEventArgs e)
         {
-            this.VM.PositionSeconds = this.slider.Value;
+            this.VM.PositionSeconds = (this.slider).Value;
             this._applyPositionFromVM = true;
         }
 
@@ -89,8 +102,8 @@ namespace VKClient.Audio.Views
 
         private void SetupAppBar()
         {
-            this._addNewAppBarButton.Click += this.addNew_Click;
-            this._appBar.Buttons.Add((object)this._addNewAppBarButton);
+            this._addNewAppBarButton.Click += (new EventHandler(this.addNew_Click));
+            this._appBar.Buttons.Add(this._addNewAppBarButton);
         }
 
         private void addNew_Click(object sender, EventArgs e)
@@ -105,9 +118,9 @@ namespace VKClient.Audio.Views
             {
                 AudioPlayerViewModel audioPlayerViewModel = new AudioPlayerViewModel();
                 audioPlayerViewModel.PreventPositionUpdates = true;
-                this.DataContext = (object)audioPlayerViewModel;
+                base.DataContext = audioPlayerViewModel;
                 audioPlayerViewModel.PreventPositionUpdates = false;
-                //int num = this.NavigationContext.QueryString["startPlaying"] == bool.TrueString ? 1 : 0;
+                int num = ((Page)this).NavigationContext.QueryString["startPlaying"] == bool.TrueString ? 1 : 0;
                 this._isInitialized = true;
             }
             this.VM.Activate(true);
@@ -126,42 +139,42 @@ namespace VKClient.Audio.Views
             this.VM.Cleanup();
         }
 
-        private void playImage_Tap(object sender, GestureEventArgs e)
+        private void playImage_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.Play();
         }
 
-        private void pauseImage_Tap(object sender, GestureEventArgs e)
+        private void pauseImage_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.Pause();
         }
 
-        private void RevButton_Tap(object sender, GestureEventArgs e)
+        private void RevButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.PreviousTrack();
         }
 
-        private void ForwardButton_Tap(object sender, GestureEventArgs e)
+        private void ForwardButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.NextTrack();
         }
 
-        private void Shuffle_Tap(object sender, GestureEventArgs e)
+        private void Shuffle_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.Shuffle = !this.VM.Shuffle;
         }
 
-        private void Repeat_Tap(object sender, GestureEventArgs e)
+        private void Repeat_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.Repeat = !this.VM.Repeat;
         }
 
-        private void Broadcast_Tap(object sender, GestureEventArgs e)
+        private void Broadcast_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.Broadcast = !this.VM.Broadcast;
         }
 
-        private void SongText_Tap(object sender, GestureEventArgs e)
+        private void SongText_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             long lyricsId = this.VM.LyricsId;
             if (lyricsId == 0L)
@@ -170,49 +183,80 @@ namespace VKClient.Audio.Views
             dialogService.SetStatusBarBackground = true;
             dialogService.HideOnNavigation = false;
             LyricsUC ucLyrics = new LyricsUC();
-            ucLyrics.textBlockNowPlayingTitle.Text = this.VM.CurrentTrackStr.ToUpperInvariant();
+            ucLyrics.textBlockNowPlayingTitle.Text = (this.VM.CurrentTrackStr.ToUpperInvariant());
             LyricsUC lyricsUc = ucLyrics;
-            dialogService.Child = (FrameworkElement)lyricsUc;
+            dialogService.Child = lyricsUc;
             dialogService.Show(null);
-            AudioService.Instance.GetLyrics(lyricsId, (Action<BackendResult<Lyrics, ResultCode>>)(res =>
+            AudioService.Instance.GetLyrics(lyricsId, delegate(BackendResult<Lyrics, ResultCode> res)
             {
-                if (res.ResultCode != ResultCode.Succeeded)
-                    return;
-                Execute.ExecuteOnUIThread((Action)(() => ucLyrics.textBlockLyrics.Text = res.ResultData.text));
-            }));
+                if (res.ResultCode == ResultCode.Succeeded)
+                {
+                    Execute.ExecuteOnUIThread(delegate
+                    {
+                        ucLyrics.textBlockLyrics.Text = res.ResultData.text;
+                    });
+                }
+            });
         }
 
-        private void Add_Tap(object sender, GestureEventArgs e)
+        private void Add_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             this.VM.AddTrack();
         }
 
-        private void Next_Tap(object sender, GestureEventArgs e)
+        private void Next_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            DialogService dialogService = new DialogService();
-            dialogService.SetStatusBarBackground = true;
-            dialogService.HideOnNavigation = false;
+            DialogService expr_12 = new DialogService();
+            expr_12.SetStatusBarBackground = true;
+            expr_12.HideOnNavigation = false;
             PlaylistUC ucPlaylist = new PlaylistUC();
-            PlaylistUC playlistUc = ucPlaylist;
-            dialogService.Child = (FrameworkElement)playlistUc;
-            EventHandler eventHandler = (EventHandler)((s, ev) =>
+            expr_12.Child = ucPlaylist;
+            expr_12.Opened += delegate(object s, EventArgs ev)
             {
                 PlaylistViewModel vm = new PlaylistViewModel();
                 vm.Shuffle = this.VM.Shuffle;
-                ucPlaylist.DataContext = (object)vm;
-                vm.Audios.LoadData(false, false, (Action<BackendResult<List<AudioObj>, ResultCode>>)(res => Execute.ExecuteOnUIThread((Action)(() =>
+                ucPlaylist.DataContext = (vm);
+                Action _9__2 = null;
+                vm.Audios.LoadData(false, false, delegate(BackendResult<List<AudioObj>, ResultCode> res)
                 {
-                    AudioHeader audioHeader = vm.Audios.Collection.FirstOrDefault<AudioHeader>((Func<AudioHeader, bool>)(i => i.IsCurrentTrack));
-                    if (audioHeader == null)
-                        return;
-                    int num = vm.Audios.Collection.IndexOf(audioHeader);
-                    if (num > 0)
-                        audioHeader = vm.Audios.Collection[num - 1];
-                    ucPlaylist.AllAudios.ScrollTo((object)audioHeader);
-                }))), false);
-            });
-            dialogService.Opened += eventHandler;
-            dialogService.Show(null);
+                    Action arg_1F_0;
+                    if ((arg_1F_0 = _9__2) == null)
+                    {
+                        arg_1F_0 = (_9__2 = delegate
+                        {
+                            IEnumerable<AudioHeader> arg_2F_0 = vm.Audios.Collection;
+                            Func<AudioHeader, bool> arg_2F_1 = new Func<AudioHeader, bool>((i) => { return i.IsCurrentTrack; });
+
+                            AudioHeader audioHeader = Enumerable.FirstOrDefault<AudioHeader>(arg_2F_0, arg_2F_1);
+                            if (audioHeader != null)
+                            {
+                                int num = vm.Audios.Collection.IndexOf(audioHeader);
+                                if (num > 0)
+                                {
+                                    audioHeader = vm.Audios.Collection[num - 1];
+                                }
+                                ucPlaylist.AllAudios.ScrollTo(audioHeader);
+                            }
+                        });
+                    }
+                    Execute.ExecuteOnUIThread(arg_1F_0);
+                }, false);
+            };
+            expr_12.Show(null);
+        }
+
+        [DebuggerNonUserCode]
+        public void InitializeComponent()
+        {
+            if (this._contentLoaded)
+                return;
+            this._contentLoaded = true;
+            Application.LoadComponent(this, new Uri("/VKClient.Audio;component/Views/AudioPlayer.xaml", UriKind.Relative));
+            this.LayoutRoot = (Grid)base.FindName("LayoutRoot");
+            this.textBlockNowPlayingLabel = (TextBlock)base.FindName("textBlockNowPlayingLabel");
+            this.music_icon = (Path)base.FindName("music_icon");
+            this.slider = (Slider)base.FindName("slider");
+            this.textBlockNextLabel = (TextBlock)base.FindName("textBlockNextLabel");
         }
     }
 }

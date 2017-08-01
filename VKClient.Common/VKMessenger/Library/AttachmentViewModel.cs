@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
+using VKClient.Audio.Base.DataObjects;
 using VKClient.Common;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
@@ -13,8 +17,8 @@ namespace VKMessenger.Library
 {
     public class AttachmentViewModel : ViewModelBase, IBinarySerializable
     {
-        private string _resourceDescription = string.Empty;
-        //private string _accessKey = "";
+        private string _resourceDescription;
+        private string _accessKey;
         private AttachmentType _attachmentType;
         private double _latitude;
         private double _longitude;
@@ -68,6 +72,24 @@ namespace VKMessenger.Library
 
         public string Artist { get; private set; }
 
+        public int AudioContentRestricted { get; private set; }
+
+        private bool IsAudioContentRestricted
+        {
+            get
+            {
+                return this.AudioContentRestricted > 0;
+            }
+        }
+
+        public double TrackOpacity
+        {
+            get
+            {
+                return this.IsAudioContentRestricted ? 0.4 : 1.0;
+            }
+        }
+
         public string UniqueId { get; private set; }
 
         public double Latitude
@@ -104,7 +126,7 @@ namespace VKMessenger.Library
             }
             set
             {
-                AudioObj audioObj = this._audio;
+                AudioObj audio = this._audio;
                 this._audio = value;
             }
         }
@@ -177,6 +199,10 @@ namespace VKMessenger.Library
             }
         }
 
+        public Gift Gift { get; set; }
+
+        public string ParentPostId { get; set; }
+
         public bool IsDocumentImageAttachement
         {
             get
@@ -184,21 +210,29 @@ namespace VKMessenger.Library
                 bool flag = false;
                 if (this.AttachmentType == AttachmentType.Document && !string.IsNullOrEmpty(this.ResourceDescription))
                 {
-                    string upperInvariant = this.ResourceDescription.ToUpperInvariant();
-                    foreach (string supportedImageExtension in VKConstants.SupportedImageExtensions)
+                    string upperInvariant = ((string)this.ResourceDescription).ToUpperInvariant();
+                    List<string>.Enumerator enumerator = VKConstants.SupportedImageExtensions.GetEnumerator();
+                    try
                     {
-                        if (upperInvariant.EndsWith(supportedImageExtension))
+                        while (enumerator.MoveNext())
                         {
-                            flag = true;
-                            break;
+                            string current = enumerator.Current;
+                            if (((string)upperInvariant).EndsWith(current))
+                            {
+                                flag = true;
+                                break;
+                            }
                         }
+                    }
+                    finally
+                    {
+                        enumerator.Dispose();
                     }
                 }
                 return flag;
             }
         }
 
-        // NEW: 4.8.0
         public bool IsDocumentGraffitiAttachment
         {
             get
@@ -225,17 +259,17 @@ namespace VKMessenger.Library
         }
 
         public AttachmentViewModel(Attachment attachment, Message message)
-            : this(attachment)
+            : this(attachment/*, null*/)
         {
             if (message == null)
                 return;
             if (message.@out == 1)
-                this._stickerAlignment = HorizontalAlignment.Right;
+                this._stickerAlignment = (HorizontalAlignment)2;
             else
-                this._stickerAlignment = HorizontalAlignment.Left;
+                this._stickerAlignment = (HorizontalAlignment)0;
         }
 
-        public AttachmentViewModel(Attachment attachment)
+        public AttachmentViewModel(Attachment attachment, string parentPostId = null)
         {
             this._attachment = attachment;
             if (attachment.type == "photo")
@@ -263,22 +297,24 @@ namespace VKMessenger.Library
                 {
                     this.ResourceDescription = attachment.doc.title;
                     this.ResourceUri = attachment.doc.url;
-                    this._documentImageUri = !attachment.doc.IsGraffiti ? attachment.doc.PreviewUri : attachment.doc.GraffitiPreviewUri;// UPDATE: 4.8.0
+                    this._documentImageUri = !attachment.doc.IsGraffiti ? attachment.doc.PreviewUri : attachment.doc.GraffitiPreviewUri;
                 }
             }
             if (attachment.type == "audio")
             {
                 this.AttachmentType = AttachmentType.Audio;
-                if (attachment.audio != null)
+                AudioObj audio = attachment.audio;
+                if (audio != null)
                 {
-                    this.ResourceUri = attachment.audio.url;
-                    this.ResourceDescription = attachment.audio.title ?? "";
-                    this.ResourceDescription = this.ResourceDescription.Trim();
-                    this.Artist = attachment.audio.artist ?? "";
-                    this.Artist = this.Artist.Trim();
-                    this.MediaId = attachment.audio.aid;
-                    this.MediaOwnerId = attachment.audio.owner_id;
-                    this._audio = attachment.audio;
+                    this.ResourceUri = audio.url;
+                    this.ResourceDescription = audio.title ?? "";
+                    this.ResourceDescription = ((string)this.ResourceDescription).Trim();
+                    this.Artist = audio.artist ?? "";
+                    this.Artist = ((string)this.Artist).Trim();
+                    this.AudioContentRestricted = audio.content_restricted;
+                    this.MediaId = audio.aid;
+                    this.MediaOwnerId = audio.owner_id;
+                    this._audio = audio;
                 }
             }
             if (attachment.type == "wall")
@@ -287,7 +323,13 @@ namespace VKMessenger.Library
                 if (attachment.wall != null)
                 {
                     this._wallPost = attachment.wall;
-                    this.ResourceUri = "http://vk.com/wall" + (object)attachment.wall.to_id + "_" + (object)attachment.wall.id;
+                    this.ResourceUri = string.Concat(new object[4]
+                  {
+                    "https://vk.com/wall",
+                    attachment.wall.to_id,
+                    "_",
+                    attachment.wall.id
+                  });
                 }
             }
             if (attachment.type == "wall_reply")
@@ -296,7 +338,13 @@ namespace VKMessenger.Library
                 if (attachment.wall_reply != null)
                 {
                     this._comment = attachment.wall_reply;
-                    this.ResourceUri = "http://vk.com/wall" + (object)attachment.wall_reply.owner_id + "_" + (object)attachment.wall_reply.post_id;
+                    this.ResourceUri = string.Concat(new object[4]
+          {
+            "https://vk.com/wall",
+            attachment.wall_reply.owner_id,
+            "_",
+            attachment.wall_reply.post_id
+          });
                 }
             }
             if (attachment.type == "sticker")
@@ -309,6 +357,12 @@ namespace VKMessenger.Library
                     this.TryReadStickerData(attachment.sticker.photo_256, 256);
                 }
             }
+            if (attachment.type == "gift")
+            {
+                this.AttachmentType = AttachmentType.Gift;
+                this.Gift = attachment.gift;
+            }
+            this.ParentPostId = parentPostId;
             this.UniqueId = Guid.NewGuid().ToString();
         }
 
@@ -316,7 +370,10 @@ namespace VKMessenger.Library
         {
             this._geo = geo;
             this.AttachmentType = AttachmentType.Geo;
-            string[] strArray = geo.coordinates.Split(' ');
+            string[] strArray = ((string)geo.coordinates).Split((char[])new char[1]
+      {
+        ' '
+      });
             if (strArray.Length > 1)
             {
                 double.TryParse(strArray[0], NumberStyles.Any, (IFormatProvider)CultureInfo.InvariantCulture, out this._latitude);
@@ -327,6 +384,8 @@ namespace VKMessenger.Library
 
         public AttachmentViewModel()
         {
+            this._resourceDescription = string.Empty;
+        this._accessKey = "";
         }
 
         private void TryReadStickerData(string resourceUri, int dimension)
@@ -343,7 +402,7 @@ namespace VKMessenger.Library
 
         private void InitializeUIPropertiesForGeoAttachment()
         {
-            this.ResourceUri = MapsService.Current.GetMapUri(this.Latitude, this.Longitude, 15, 310, 1.8).ToString();
+            this.ResourceUri = (MapsService.Current.GetMapUri(this.Latitude, this.Longitude, 15, 310, 1.8)).ToString();
             MapsService.Current.ReverseGeocodeToAddress(this.Latitude, this.Longitude, (Action<BackendResult<string, ResultCode>>)(res =>
             {
                 if (res.ResultCode != ResultCode.Succeeded)
@@ -354,7 +413,7 @@ namespace VKMessenger.Library
 
         public void Write(BinaryWriter writer)
         {
-            writer.Write(5);
+            writer.Write(7);
             writer.Write((int)this._attachmentType);
             writer.WriteString(this.ResourceUri);
             writer.WriteString(this._resourceDescription);
@@ -377,6 +436,8 @@ namespace VKMessenger.Library
             writer.Write<Attachment>(this._attachment, false);
             writer.Write<Geo>(this._geo, false);
             writer.Write<Comment>(this._comment, false);
+            writer.WriteString(this.ParentPostId);
+            writer.Write(this.AudioContentRestricted);
         }
 
         public void Read(BinaryReader reader)
@@ -420,9 +481,15 @@ namespace VKMessenger.Library
                 this._geo = reader.ReadGeneric<Geo>();
             }
             int num6 = 5;
-            if (num1 < num6)
+            if (num1 >= num6)
+                this._comment = reader.ReadGeneric<Comment>();
+            int num7 = 6;
+            if (num1 >= num7)
+                this.ParentPostId = reader.ReadString();
+            int num8 = 7;
+            if (num1 < num8)
                 return;
-            this._comment = reader.ReadGeneric<Comment>();
+            this.AudioContentRestricted = reader.ReadInt32();
         }
 
         public void NotifyResourceUriChanged()

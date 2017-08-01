@@ -10,7 +10,7 @@ namespace VKClient.Common.Utils
 
     public static Dictionary<string, string> ParseQueryString(this Uri uri)
     {
-      if (uri == (Uri) null)
+      if (uri ==  null)
         throw new ArgumentException("uri");
       return uri.OriginalString.ParseQueryString();
     }
@@ -27,6 +27,15 @@ namespace VKClient.Common.Utils
         dictionary[match.Groups["name"].Value] = match.Groups["value"].Value;
       }
       return dictionary;
+    }
+
+    public static bool IsExternal(this string uriString)
+    {
+      if (string.IsNullOrWhiteSpace(uriString))
+        return false;
+      if (!uriString.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase))
+        return uriString.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase);
+      return true;
     }
   }
 }

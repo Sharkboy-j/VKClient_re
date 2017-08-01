@@ -236,7 +236,7 @@ label_7:
 
     public override string ToString()
     {
-      return string.Empty + "FrameSize\t" + (object) this.FrameSize + "\n" + "BitRate\t" + (object) this.Bitrate + "\n" + "SamplingRate" + (object) this.SamplingRate + "\n";
+      return string.Empty + "FrameSize\t" + this.FrameSize + "\n" + "BitRate\t" + this.Bitrate + "\n" + "SamplingRate" + this.SamplingRate + "\n";
     }
 
     public void CopyHeader(byte[] destinationBuffer)

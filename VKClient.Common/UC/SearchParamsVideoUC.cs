@@ -28,7 +28,7 @@ namespace VKClient.Common.UC
     public override void Initialize(Dictionary<string, string> parameters)
     {
       this._viewModel = new SearchParamsVideoViewModel(parameters);
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
     }
 
     [DebuggerNonUserCode]
@@ -37,8 +37,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/SearchParamsVideoUC.xaml", UriKind.Relative));
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/SearchParamsVideoUC.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
     }
   }
 }

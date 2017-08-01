@@ -13,7 +13,8 @@
                     SupportedOrientations="Portrait"
                     Orientation="Portrait"
                     mc:Ignorable="d"
-                    shell:SystemTray.IsVisible="True">
+                    shell:SystemTray.IsVisible="True"
+                    xmlns:uc_w10m="clr-namespace:VKClient.Common.UC.w10m">
 
     <Grid>
         <StackPanel>
@@ -61,11 +62,14 @@
 
                 </Grid>
 
-                <toolkit:ToggleSwitch IsChecked="{Binding PushNotificationsEnabled, Mode=TwoWay}"
+                <!--<toolkit:ToggleSwitch IsChecked="{Binding PushNotificationsEnabled, Mode=TwoWay}"
                                       Margin="-12 26 -12 0"
                                       HeaderTemplate="{StaticResource ToggleSwitchHeaderTemplate}"
-                                      Header="{Binding LocalizedResources.Games_Settings_PushNotifications, Source={StaticResource LocalizedStrings}}" />
-
+                                      Header="{Binding LocalizedResources.Games_Settings_PushNotifications, Source={StaticResource LocalizedStrings}}" />-->
+                <uc_w10m:ToggleSwitch IsChecked="{Binding PushNotificationsEnabled, Mode=TwoWay}"
+                                              Margin="0 26 0 0"
+                                              Title="{Binding LocalizedResources.Games_Settings_PushNotifications, Source={StaticResource LocalizedStrings}}"
+                                              />
                 <Button Style="{StaticResource VKButtonSecondaryStyle}"
                         HorizontalAlignment="Left"
                         Padding="16 0 16 3"

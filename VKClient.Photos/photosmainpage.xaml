@@ -196,55 +196,7 @@
                                                      ListHeader="{Binding}">
                     <framework:ExtendedLongListSelector.ListHeaderTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <Grid Visibility="{Binding PhotoFeedMoveNotificationVisibility}">
-                                    <StackPanel Margin="16 0">
-                                        <Image Width="160"
-                                               Height="56"
-                                               Margin="0 24 0 0"
-                                               framework:MultiResImageLoader.UriSource="{Binding PhotoFeedMoveNotificationIconSource}" />
-
-                                        <TextBlock FontSize="22.67"
-                                                   Margin="0 12 0 0"
-                                                   LineStackingStrategy="BlockLineHeight"
-                                                   LineHeight="28"
-                                                   Foreground="{StaticResource PhoneGray800_Gray000Brush}"
-                                                   TextWrapping="Wrap"
-                                                   TextAlignment="Center"
-                                                   Text="{Binding LocalizedResources.PhotoFeedMoveNotificationMessage, Source={StaticResource LocalizedStrings}}" />
-
-                                        <Button Margin="-12 8 -12 12"
-                                                HorizontalAlignment="Center"
-                                                Style="{StaticResource VKButtonSecondaryStyle}"
-                                                Content="{Binding LocalizedResources.PhotoFeedMoveNotificationButton, Source={StaticResource LocalizedStrings}}"
-                                                Click="ButtonPhotosMoveNotification_OnClick" />
-
-                                        <Rectangle Height="16"
-                                                   Margin="-16 0"
-                                                   Fill="{StaticResource PhoneGray050_Gray800Brush}" />
-                                    </StackPanel>
-
-                                    <Canvas Width="56"
-                                            Height="56"
-                                            VerticalAlignment="Top"
-                                            HorizontalAlignment="Right"
-                                            Background="Transparent"
-                                            framework:MetroInMotion.Tilt="1.5"
-                                            Tap="Dismiss_OnTap">
-                                        <Border Width="24"
-                                                Height="24"
-                                                Canvas.Left="16"
-                                                Canvas.Top="16"
-                                                Background="#abafb3">
-                                            <Border.OpacityMask>
-                                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Dismiss24px.png" />
-                                            </Border.OpacityMask>
-                                        </Border>
-                                    </Canvas>
-                                </Grid>
-
-                                <Grid Height="16" />
-                            </StackPanel>
+                            <Grid Height="16" />
                         </DataTemplate>
                     </framework:ExtendedLongListSelector.ListHeaderTemplate>
                 </framework:ExtendedLongListSelector>

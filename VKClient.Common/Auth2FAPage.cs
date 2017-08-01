@@ -20,13 +20,9 @@ namespace VKClient.Common
 {
   public class Auth2FAPage : PageBase
   {
-    private readonly ApplicationBarIconButton _sendButton = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/check.png", UriKind.Relative),
-      Text = CommonResources.AppBar_Confirm
-    };
     private bool _isInitialized;
     private Auth2FAViewModel _viewModel;
+    private readonly ApplicationBarIconButton _sendButton;
     internal GenericHeaderUC ucHeader;
     internal TextBox textBoxConfirmationCode;
     internal TextBlock textBlockConfirmationCodeWatermark;
@@ -35,35 +31,42 @@ namespace VKClient.Common
 
     public Auth2FAPage()
     {
+      ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton();
+      Uri uri = new Uri("/Resources/check.png", UriKind.Relative);
+      applicationBarIconButton.IconUri = uri;
+      string appBarConfirm = CommonResources.AppBar_Confirm;
+      applicationBarIconButton.Text = appBarConfirm;
+      this._sendButton = applicationBarIconButton;
+      //base.\u002Ector();
       this.InitializeComponent();
       this.ucHeader.TextBlockTitle.Text = CommonResources.PageTitle_SecurityCheck;
       this.ucHeader.HideSandwitchButton = true;
       this.ucHeader.SupportMenu = false;
       this.SuppressMenu = true;
-      this.Loaded += new RoutedEventHandler(this.OnLoaded);
+      base.Loaded+=(new RoutedEventHandler( this.OnLoaded));
       this.BuildAppBar();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-      new DelayedExecutor(300).AddToDelayedExecution((Action) (() => Execute.ExecuteOnUIThread((Action) (() => this.textBoxConfirmationCode.Focus()))));
+      new DelayedExecutor(300).AddToDelayedExecution((Action) (() => Execute.ExecuteOnUIThread((Action) (() => ((Control) this.textBoxConfirmationCode).Focus()))));
     }
 
     private void BuildAppBar()
     {
       ApplicationBar applicationBar = ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
-      this._sendButton.Click += new EventHandler(this.SendButton_OnClick);
-      applicationBar.Buttons.Add((object) this._sendButton);
-      this.ApplicationBar = (IApplicationBar) applicationBar;
+      this._sendButton.Click+=(new EventHandler(this.SendButton_OnClick));
+      applicationBar.Buttons.Add(this._sendButton);
+      this.ApplicationBar = ((IApplicationBar) applicationBar);
     }
 
     private void SendButton_OnClick(object sender, EventArgs eventArgs)
     {
       if (string.IsNullOrWhiteSpace(this._viewModel.Code))
         return;
-      this.textBoxConfirmationCode.IsEnabled = false;
-      this._viewModel.Login((Action) (() => Execute.ExecuteOnUIThread((Action) (() => this.textBoxConfirmationCode.IsEnabled = true))));
-      this.Focus();
+      ((Control) this.textBoxConfirmationCode).IsEnabled = false;
+      this._viewModel.Login((Action) (() => Execute.ExecuteOnUIThread((Action) (() => ((Control) this.textBoxConfirmationCode).IsEnabled = true))));
+      ((Control) this).Focus();
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -71,7 +74,7 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      IDictionary<string, string> queryString = this.NavigationContext.QueryString;
+      IDictionary<string, string> queryString = ((Page) this).NavigationContext.QueryString;
       string index1 = "username";
       string username = queryString[index1];
       string index2 = "password";
@@ -84,7 +87,7 @@ namespace VKClient.Common
       string validationSid = queryString[index5];
       this._viewModel = new Auth2FAViewModel(username, password, phoneMask, validationType, validationSid);
       this.RestorePageUnboundState();
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
       this._isInitialized = true;
     }
 
@@ -93,7 +96,7 @@ namespace VKClient.Common
       base.HandleOnNavigatingFrom(e);
       if (e.NavigationMode != NavigationMode.Back || ParametersRepository.Contains("ValidationResponse"))
         return;
-      ParametersRepository.SetParameterForId("ValidationResponse", (object) new ValidationUserResponse()
+      ParametersRepository.SetParameterForId("ValidationResponse", new ValidationUserResponse()
       {
         IsSucceeded = false
       });
@@ -114,7 +117,7 @@ namespace VKClient.Common
       Auth2FAPage.PageState pageState = new Auth2FAPage.PageState();
       int num = this._viewModel.IsSMSMode ? 1 : 0;
       pageState.IsSMSMode = num != 0;
-      state[index] = (object) pageState;
+      state[index] = pageState;
     }
 
     private void RestorePageUnboundState()
@@ -131,27 +134,27 @@ namespace VKClient.Common
     private void SetSmsInputScope()
     {
       InputScope inputScope = new InputScope();
-      InputScopeName inputScopeName = new InputScopeName()
-      {
-        NameValue = InputScopeNameValue.NameOrPhoneNumber
-      };
-      inputScope.Names.Add((object) inputScopeName);
+      InputScopeName inputScopeName1 = new InputScopeName();
+      int num = 52;
+      inputScopeName1.NameValue = ((InputScopeNameValue) num);
+      InputScopeName inputScopeName2 = inputScopeName1;
+      inputScope.Names.Add(inputScopeName2);
       this.textBoxConfirmationCode.InputScope = inputScope;
     }
 
     private void TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
       this._viewModel.Code = this.textBoxConfirmationCode.Text;
-      this._sendButton.IsEnabled = !string.IsNullOrWhiteSpace(this._viewModel.Code);
-      this.textBlockConfirmationCodeWatermark.Visibility = string.IsNullOrEmpty(this.textBoxConfirmationCode.Text) ? Visibility.Visible : Visibility.Collapsed;
+      this._sendButton.IsEnabled = (!string.IsNullOrWhiteSpace(this._viewModel.Code));
+      ((UIElement) this.textBlockConfirmationCodeWatermark).Visibility = (string.IsNullOrEmpty(this.textBoxConfirmationCode.Text) ? Visibility.Visible : Visibility.Collapsed);
     }
 
     private void TextBox_OnKeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key != Key.Enter || string.IsNullOrWhiteSpace(this._viewModel.Code))
         return;
-      this._viewModel.Login(null);
-      this.Focus();
+      this._viewModel.Login( null);
+      ((Control) this).Focus();
     }
 
     private void TextBox_OnGotFocus(object sender, RoutedEventArgs e)
@@ -166,28 +169,28 @@ namespace VKClient.Common
       if (this._viewModel.IsSMSMode)
       {
         this._viewModel.SendSMS();
-        this.textBoxConfirmationCode.Focus();
+        ((Control) this.textBoxConfirmationCode).Focus();
       }
       else
       {
         List<MenuItem> menuItemList = new List<MenuItem>();
         MenuItem menuItem1 = new MenuItem();
         string auth2FaSendSmsCode = CommonResources.Auth2FA_SendSmsCode;
-        menuItem1.Header = (object) auth2FaSendSmsCode;
+        menuItem1.Header = auth2FaSendSmsCode;
         MenuItem menuItem2 = menuItem1;
-        menuItem2.Click += new RoutedEventHandler(this.SendSmsMenuItem_OnClick);
+        menuItem2.Click += new RoutedEventHandler( this.SendSmsMenuItem_OnClick);
         MenuItem menuItem3 = menuItem2;
         menuItemList.Add(menuItem3);
         ContextMenu contextMenu1 = new ContextMenu();
         SolidColorBrush solidColorBrush1 = (SolidColorBrush) Application.Current.Resources["PhoneMenuBackgroundBrush"];
-        contextMenu1.Background = (Brush) solidColorBrush1;
+        ((Control) contextMenu1).Background = ((Brush) solidColorBrush1);
         SolidColorBrush solidColorBrush2 = (SolidColorBrush) Application.Current.Resources["PhoneMenuForegroundBrush"];
-        contextMenu1.Foreground = (Brush) solidColorBrush2;
+        ((Control) contextMenu1).Foreground = ((Brush) solidColorBrush2);
         int num = 0;
         contextMenu1.IsZoomEnabled = num != 0;
         ContextMenu contextMenu2 = contextMenu1;
         foreach (MenuItem menuItem4 in menuItemList)
-          contextMenu2.Items.Add((object) menuItem4);
+          ((PresentationFrameworkCollection<object>) contextMenu2.Items).Add(menuItem4);
         ContextMenuService.SetContextMenu((DependencyObject) this.textBlockSendSms, contextMenu2);
         contextMenu2.IsOpen = true;
       }
@@ -197,7 +200,7 @@ namespace VKClient.Common
     {
       this._viewModel.SendSMS();
       this.SetSmsInputScope();
-      this.textBoxConfirmationCode.Focus();
+      ((Control) this.textBoxConfirmationCode).Focus();
     }
 
     [DebuggerNonUserCode]
@@ -206,11 +209,11 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/Auth2FAPage.xaml", UriKind.Relative));
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.textBoxConfirmationCode = (TextBox) this.FindName("textBoxConfirmationCode");
-      this.textBlockConfirmationCodeWatermark = (TextBlock) this.FindName("textBlockConfirmationCodeWatermark");
-      this.textBlockSendSms = (TextBlock) this.FindName("textBlockSendSms");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/Auth2FAPage.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.textBoxConfirmationCode = (TextBox) base.FindName("textBoxConfirmationCode");
+      this.textBlockConfirmationCodeWatermark = (TextBlock) base.FindName("textBlockConfirmationCodeWatermark");
+      this.textBlockSendSms = (TextBlock) base.FindName("textBlockSendSms");
     }
 
     [DataContract]

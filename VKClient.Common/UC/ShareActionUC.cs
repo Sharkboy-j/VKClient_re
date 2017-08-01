@@ -9,8 +9,8 @@ namespace VKClient.Common.UC
 {
   public class ShareActionUC : UserControl
   {
-    public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof (string), typeof (ShareActionUC), new PropertyMetadata(new PropertyChangedCallback(ShareActionUC.OnIconChanged)));
-    public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof (string), typeof (ShareActionUC), new PropertyMetadata(new PropertyChangedCallback(ShareActionUC.OnTitleChanged)));
+      public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(ShareActionUC), new PropertyMetadata(new PropertyChangedCallback(ShareActionUC.OnIconChanged)));
+      public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(ShareActionUC), new PropertyMetadata(new PropertyChangedCallback(ShareActionUC.OnTitleChanged)));
     internal ImageBrush imageBrushIcon;
     internal TextBlock textBlockTitle;
     private bool _contentLoaded;
@@ -19,11 +19,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(ShareActionUC.IconProperty);
+        return (string) base.GetValue(ShareActionUC.IconProperty);
       }
       set
       {
-        this.SetValue(ShareActionUC.IconProperty, (object) value);
+        base.SetValue(ShareActionUC.IconProperty, value);
       }
     }
 
@@ -31,16 +31,17 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(ShareActionUC.TitleProperty);
+        return (string) base.GetValue(ShareActionUC.TitleProperty);
       }
       set
       {
-        this.SetValue(ShareActionUC.TitleProperty, (object) value);
+        base.SetValue(ShareActionUC.TitleProperty, value);
       }
     }
 
     public ShareActionUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -49,10 +50,11 @@ namespace VKClient.Common.UC
       ShareActionUC shareActionUc = d as ShareActionUC;
       if (shareActionUc == null)
         return;
-      string str = e.NewValue as string;
-      if (string.IsNullOrEmpty(str))
+      // ISSUE: explicit reference operation
+      string newValue = e.NewValue as string;
+      if (string.IsNullOrEmpty(newValue))
         return;
-      ImageLoader.SetImageBrushMultiResSource(shareActionUc.imageBrushIcon, str);
+      ImageLoader.SetImageBrushMultiResSource(shareActionUc.imageBrushIcon, newValue);
     }
 
     private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -60,10 +62,11 @@ namespace VKClient.Common.UC
       ShareActionUC shareActionUc = d as ShareActionUC;
       if (shareActionUc == null)
         return;
-      string str = e.NewValue as string;
-      if (string.IsNullOrEmpty(str))
+      // ISSUE: explicit reference operation
+      string newValue = e.NewValue as string;
+      if (string.IsNullOrEmpty(newValue))
         return;
-      shareActionUc.textBlockTitle.Text = str;
+      shareActionUc.textBlockTitle.Text = newValue;
     }
 
     [DebuggerNonUserCode]
@@ -72,9 +75,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/ShareActionUC.xaml", UriKind.Relative));
-      this.imageBrushIcon = (ImageBrush) this.FindName("imageBrushIcon");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/ShareActionUC.xaml", UriKind.Relative));
+      this.imageBrushIcon = (ImageBrush) base.FindName("imageBrushIcon");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
     }
   }
 }

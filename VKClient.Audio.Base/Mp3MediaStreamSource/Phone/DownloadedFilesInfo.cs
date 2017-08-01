@@ -75,7 +75,7 @@ namespace Mp3MediaStreamSource.Phone
 
     public FileDescription GetFileFor(string fileId, long offset, int maxWaitTimeSeconds = 15)
     {
-      FileDescription fileDescription = (FileDescription) null;
+      FileDescription fileDescription =  null;
       if (maxWaitTimeSeconds > 0)
       {
         int num = 0;
@@ -99,15 +99,15 @@ namespace Mp3MediaStreamSource.Phone
       lock (this._lockObj)
       {
         if (!this._filesMap.ContainsKey(fileId))
-          return (FileDescription) null;
-        List<FileDescription> temp_15 = this._filesMap[fileId];
-        List<FileDescription> local_3 = new List<FileDescription>();
-        foreach (FileDescription item_0 in temp_15)
+          return  null;
+        List<FileDescription> files = this._filesMap[fileId];
+        List<FileDescription> source = new List<FileDescription>();
+        foreach (FileDescription fileDescription in files)
         {
-          if (item_0.FromByte <= offset && item_0.ToByte >= offset)
-            local_3.Add(item_0);
+          if (fileDescription.FromByte <= offset && fileDescription.ToByte >= offset)
+            source.Add(fileDescription);
         }
-        return local_3.OrderBy<FileDescription, long>((Func<FileDescription, long>) (fd => fd.ToByte - offset + (fd.IsWholeFile ? 1L : 0L))).LastOrDefault<FileDescription>();
+        return source.OrderBy<FileDescription, long>((Func<FileDescription, long>) (fd => fd.ToByte - offset + (fd.IsWholeFile ? 1L : 0L))).LastOrDefault<FileDescription>();
       }
     }
   }

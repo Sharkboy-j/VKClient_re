@@ -4,9 +4,9 @@ namespace VKClient.Common.UC
 {
   public class TemplateSettingValues2 : DependencyObject
   {
-    public static readonly DependencyProperty MaxSideLengthProperty = DependencyProperty.Register("MaxSideLength", typeof (double), typeof (TemplateSettingValues2), new PropertyMetadata((object) 0.0));
-    public static readonly DependencyProperty EllipseDiameterProperty = DependencyProperty.Register("EllipseDiameter", typeof (double), typeof (TemplateSettingValues2), new PropertyMetadata((object) 0.0));
-    public static readonly DependencyProperty EllipseOffsetProperty = DependencyProperty.Register("EllipseOffset", typeof (Thickness), typeof (TemplateSettingValues2), new PropertyMetadata((object) new Thickness()));
+    public static readonly DependencyProperty MaxSideLengthProperty = DependencyProperty.Register("MaxSideLength", typeof (double), typeof (TemplateSettingValues2), new PropertyMetadata(0.0));
+    public static readonly DependencyProperty EllipseDiameterProperty = DependencyProperty.Register("EllipseDiameter", typeof (double), typeof (TemplateSettingValues2), new PropertyMetadata(0.0));
+    public static readonly DependencyProperty EllipseOffsetProperty = DependencyProperty.Register("EllipseOffset", typeof(Thickness), typeof(TemplateSettingValues2), new PropertyMetadata(null));
 
     public double MaxSideLength
     {
@@ -16,7 +16,7 @@ namespace VKClient.Common.UC
       }
       set
       {
-        this.SetValue(TemplateSettingValues2.MaxSideLengthProperty, (object) value);
+        this.SetValue(TemplateSettingValues2.MaxSideLengthProperty, value);
       }
     }
 
@@ -28,7 +28,7 @@ namespace VKClient.Common.UC
       }
       set
       {
-        this.SetValue(TemplateSettingValues2.EllipseDiameterProperty, (object) value);
+        this.SetValue(TemplateSettingValues2.EllipseDiameterProperty, value);
       }
     }
 
@@ -40,7 +40,7 @@ namespace VKClient.Common.UC
       }
       set
       {
-        this.SetValue(TemplateSettingValues2.EllipseOffsetProperty, (object) value);
+        this.SetValue(TemplateSettingValues2.EllipseOffsetProperty, value);
       }
     }
 
@@ -53,6 +53,7 @@ namespace VKClient.Common.UC
 
     public TemplateSettingValues2()
     {
+      //base.\u002Ector();
       this.MaxSideLength = 400.0;
     }
   }

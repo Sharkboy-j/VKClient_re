@@ -52,7 +52,7 @@ namespace VKClient.Audio.Base.AudioCache
 
     public override string ToString()
     {
-      return string.Format("{{InProgressDownload id={0}, uri={1}, downloadedToByte={2}, length={3}}} ", (object) this.RemoteFile.UniqueId, (object) this.RemoteFile.UriStr, (object) this.DownloadedToByte, (object) this.Length);
+      return string.Format("{{InProgressDownload id={0}, uri={1}, downloadedToByte={2}, length={3}}} ", this.RemoteFile.UniqueId, this.RemoteFile.UriStr, this.DownloadedToByte, this.Length);
     }
   }
 }

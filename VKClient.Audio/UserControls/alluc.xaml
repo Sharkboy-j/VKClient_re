@@ -15,37 +15,80 @@
         <localization:AudioLocalizedStrings x:Key="LocalizedStrings" />
 
         <DataTemplate x:Key="TrackTemplate">
-            <Grid  Margin="16 0 16 0"
+            <Grid  Margin="8 0"
                    Background="Transparent"
-                   framework:MetroInMotion.Tilt="2.5">
+                   framework:MetroInMotion.Tilt="2.5"
+                   Opacity="{Binding TrackOpacity}">
                 <Grid.ColumnDefinitions>
+                    <!--<ColumnDefinition Width="56"/>-->
+                    <!--MOD-->
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+
+
+                <Grid Width="48"
+                        Height="48"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        Tag="{Binding Track.UniqueId}"
+                      Tap="Temp_Click"
+                      Visibility="Collapsed">
+
+                    <Grid Width="36"
+              Height="36"
+              Canvas.Top="8"
+              Canvas.Left="16">
+
+                        <Ellipse Width="36"
+                     Height="36"
+                     Stroke="{StaticResource PhoneAccentBlueBrush}"
+                     StrokeThickness="2" />
+
+
+                        <Border x:Name="borderPlay"
+                    Width="28"
+                    Height="28"
+                    Background="{StaticResource PhoneAccentBlueBrush}"
+                                Opacity="1">
+                            <Border.OpacityMask>
+                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/WallPost/AttachPlay.png" />
+                            </Border.OpacityMask>
+                        </Border>
+
+                        <Border x:Name="borderPause"
+                    Width="28"
+                    Height="28"
+                    Background="{StaticResource PhoneAccentBlueBrush}"
+                        >
+                            <Border.OpacityMask>
+                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/WallPost/AttachPause.png" />
+                            </Border.OpacityMask>
+                        </Border>
+                    </Grid>
+
+                </Grid>
                 
-                <StackPanel Margin="0,10"
+                <StackPanel Margin="0,5"
                                 Orientation="Vertical"
-                                >
-                    <TextBlock Text="{Binding Track.title}" Margin="0 0 0 0" 
-                               
-                                   FontSize="36.67"
+                            Grid.Column="0">
+                    <TextBlock Text="{Binding Title}" 
+                               Margin="0 0 0 0"                                
+                               FontSize="25"
                                Foreground="{Binding TitleBrush}"
                                FontFamily="Segoe WP SemiLight"/>
-                    <TextBlock Text="{Binding Track.artist}"
-                                   Margin="1, -8, 0, 0"
-                               Foreground="{Binding SubtitleBrush}"
-                                
+                    <TextBlock Text="{Binding Artist}"
+                               Margin="1, -2, 0, 0"
+                               Foreground="{Binding SubtitleBrush}"                                
                                Style="{StaticResource PhoneTextSubtleStyle}"/>
                 </StackPanel>
-
-
-                
+<!--MOD-->
                 <Border
                     Background="{StaticResource PhoneForegroundBrush}"
-                    Width="26"
-                       Height="26"
+                    Width="23"
+                       Height="23"
                        Grid.Column="1"
-                       Margin="0 24 0 0"
+                       Margin="0,10,0,0"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Top"
                        Visibility="{Binding IsCachedVisibility}">
@@ -53,7 +96,7 @@
                         <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicCached.png"/>
                     </Border.OpacityMask>
                 </Border>
-           
+                <!--MOD-->
                 <TextBlock Text="{Binding UIDuration}"
                            Grid.Column="1"
                            VerticalAlignment="Bottom"
@@ -61,11 +104,14 @@
                            Foreground="{Binding SubtitleBrush}"/>
 
                 <toolkit:ContextMenuService.ContextMenu>
-                    <toolkit:ContextMenu   Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"  IsZoomEnabled="False" IsEnabled="{Binding IsMenuEnabled}" Visibility="{Binding IsMenuEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
-                       
-                        <toolkit:MenuItem Header="{Binding Path=LocalizedResources.Delete, 
-                                                   Source={StaticResource LocalizedStrings}}"
-                                          Visibility="{Binding DeleteTrackVisibility}"      
+                    <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 
+                                         Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"  
+                                         Visibility="{Binding IsMenuEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                                         IsEnabled="{Binding IsMenuEnabled}"
+                                         IsZoomEnabled="False">
+                        <toolkit:MenuItem Header="{Binding Path=LocalizedResources.Edit, Source={StaticResource LocalizedStrings}}"
+                                          Click="EditTrackItem_Tap"/>
+                        <toolkit:MenuItem Header="{Binding Path=LocalizedResources.Delete, Source={StaticResource LocalizedStrings}}"
                                           Click="DeleteTrackItem_Tap"/>
                     </toolkit:ContextMenu>
                 </toolkit:ContextMenuService.ContextMenu>

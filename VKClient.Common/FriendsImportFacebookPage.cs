@@ -25,7 +25,7 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       this.ucFriendsImport.SetFriendsImportProvider((IFriendsImportProvider) FacebookFriendsImportProvider.Instance);
-      this.DataContext = (object) new FriendsImportPageViewModel();
+      base.DataContext = (new FriendsImportPageViewModel());
       this._isInitialized = true;
     }
 
@@ -35,8 +35,8 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/FriendsImportFacebookPage.xaml", UriKind.Relative));
-      this.ucFriendsImport = (FriendsImportUC) this.FindName("ucFriendsImport");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/FriendsImportFacebookPage.xaml", UriKind.Relative));
+      this.ucFriendsImport = (FriendsImportUC) base.FindName("ucFriendsImport");
     }
   }
 }

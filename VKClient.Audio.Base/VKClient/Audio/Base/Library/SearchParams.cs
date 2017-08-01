@@ -22,7 +22,7 @@ namespace VKClient.Audio.Base.Library
           this._parameters.Remove(key);
       }
       else
-        this._parameters[key] = (object) value;
+        this._parameters[key] = value;
       return value;
     }
 

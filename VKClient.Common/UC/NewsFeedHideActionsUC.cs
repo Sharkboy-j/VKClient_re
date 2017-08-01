@@ -28,13 +28,13 @@ namespace VKClient.Common.UC
 
     private void Cancel_OnClick(object sender, GestureEventArgs args)
     {
-      NewsFeedHideActionsViewModel actionsViewModel = this._viewModel;
-      if (actionsViewModel != null)
-        actionsViewModel.Cancel();
-      Action action = this._cancelCallback;
-      if (action == null)
+      NewsFeedHideActionsViewModel viewModel = this._viewModel;
+      if (viewModel != null)
+        viewModel.Cancel();
+      Action cancelCallback = this._cancelCallback;
+      if (cancelCallback == null)
         return;
-      action();
+      cancelCallback();
     }
 
     [DebuggerNonUserCode]
@@ -43,7 +43,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/NewsFeedHideActionsUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/NewsFeedHideActionsUC.xaml", UriKind.Relative));
     }
   }
 }

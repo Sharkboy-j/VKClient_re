@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using VKClient.Common.Backend.DataObjects;
@@ -34,7 +35,7 @@ namespace VKClient.Common.UC
     public void Initialize(Poll poll, long topicId = 0)
     {
       this._viewModel = new PollViewModel(poll, topicId);
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
     }
 
     public double CalculateTotalHeight()
@@ -45,23 +46,31 @@ namespace VKClient.Common.UC
     private double CalculateTotalHeight1()
     {
       double num1 = 0.0;
-      Thickness margin1 = this.textBlockTitle.Margin;
-      double num2 = margin1.Top + this.textBlockTitle.ActualHeight;
-      margin1 = this.textBlockTitle.Margin;
+      Thickness margin1 = ((FrameworkElement) this.textBlockTitle).Margin;
+      // ISSUE: explicit reference operation
+      double num2 = margin1.Top + ((FrameworkElement) this.textBlockTitle).ActualHeight;
+      margin1 = ((FrameworkElement) this.textBlockTitle).Margin;
+      // ISSUE: explicit reference operation
       double bottom1 = margin1.Bottom;
       double num3 = num2 + bottom1;
       double num4 = num1 + num3;
-      Thickness margin2 = this.textBlockDescrption.Margin;
-      double num5 = margin2.Top + this.textBlockDescrption.ActualHeight;
-      margin2 = this.textBlockDescrption.Margin;
-      double bottom2 = margin2.Bottom;
+      Thickness margin2 = ((FrameworkElement) this.textBlockDescrption).Margin;
+      // ISSUE: explicit reference operation
+      double num5 = ((Thickness) @margin2).Top + ((FrameworkElement) this.textBlockDescrption).ActualHeight;
+      margin2 = ((FrameworkElement) this.textBlockDescrption).Margin;
+      // ISSUE: explicit reference operation
+      double bottom2 = ((Thickness) @margin2).Bottom;
       double num6 = num5 + bottom2;
       double num7 = num4 + num6;
       foreach (PollAnswerHeader answer in this._viewModel.Answers)
       {
-        PollUC._pollAnswerUC.DataContext = (object) answer;
-        PollUC._pollAnswerUC.Measure(new Size(448.0, double.PositiveInfinity));
-        num7 += PollUC._pollAnswerUC.DesiredSize.Height;
+        ((FrameworkElement) PollUC._pollAnswerUC).DataContext = answer;
+        ((UIElement) PollUC._pollAnswerUC).Measure(new Size(448.0, double.PositiveInfinity));
+        double num8 = num7;
+        Size desiredSize = ((UIElement) PollUC._pollAnswerUC).DesiredSize;
+        // ISSUE: explicit reference operation
+        double height = ((Size) @desiredSize).Height;
+        num7 = num8 + height;
         num7 += 8.0;
       }
       return num7 + 8.0;
@@ -70,21 +79,25 @@ namespace VKClient.Common.UC
     private double CalculateTotalHeight2()
     {
       double num1 = 0.0;
-      Thickness margin1 = this.textBlockTitle.Margin;
-      double num2 = margin1.Top + this.textBlockTitle.ActualHeight;
-      margin1 = this.textBlockTitle.Margin;
+      Thickness margin1 = ((FrameworkElement) this.textBlockTitle).Margin;
+      // ISSUE: explicit reference operation
+      double num2 = margin1.Top + ((FrameworkElement) this.textBlockTitle).ActualHeight;
+      margin1 = ((FrameworkElement) this.textBlockTitle).Margin;
+      // ISSUE: explicit reference operation
       double bottom1 = margin1.Bottom;
       double num3 = num2 + bottom1;
       double num4 = num1 + num3;
-      Thickness margin2 = this.textBlockDescrption.Margin;
-      double num5 = margin2.Top + this.textBlockDescrption.ActualHeight;
-      margin2 = this.textBlockDescrption.Margin;
-      double bottom2 = margin2.Bottom;
+      Thickness margin2 = ((FrameworkElement) this.textBlockDescrption).Margin;
+      // ISSUE: explicit reference operation
+      double num5 = ((Thickness) @margin2).Top + ((FrameworkElement) this.textBlockDescrption).ActualHeight;
+      margin2 = ((FrameworkElement) this.textBlockDescrption).Margin;
+      // ISSUE: explicit reference operation
+      double bottom2 = ((Thickness) @margin2).Bottom;
       double num6 = num5 + bottom2;
       double num7 = num4 + num6;
       foreach (PollAnswerHeader answer in this._viewModel.Answers)
       {
-        num7 += TextBlockMeasurementHelper.MeasureHeight(332.0, answer.AnswerStr, new FontFamily("Segoe WP"), 20.0, 26.0, LineStackingStrategy.BlockLineHeight, TextWrapping.Wrap, new Thickness(12.0, 8.0, 96.0, 14.0));
+        num7 += TextBlockMeasurementHelper.MeasureHeight(332.0, answer.AnswerStr, new FontFamily("Segoe WP"), 20.0, 26.0, (LineStackingStrategy) 1, (TextWrapping) 2, new Thickness(12.0, 8.0, 96.0, 14.0));
         num7 += 8.0;
       }
       return num7 + 8.0;
@@ -119,7 +132,7 @@ namespace VKClient.Common.UC
         }
         if (this._viewModel.Poll.anonymous == 0 && pollAnswerHeader.Answer.votes > 0)
         {
-          string str = UIStringFormatterHelper.FormatNumberOfSomething(pollAnswerHeader.Answer.votes, CommonResources.OnePersonFrm, CommonResources.TwoFourPersonsFrm, CommonResources.FivePersonsFrm, true, null, false);
+          string str = UIStringFormatterHelper.FormatNumberOfSomething(pollAnswerHeader.Answer.votes, CommonResources.OnePersonFrm, CommonResources.TwoFourPersonsFrm, CommonResources.FivePersonsFrm, true,  null, false);
           List<MenuItemExtended> menuItemExtendedList2 = menuItemExtendedList1;
           MenuItemExtended menuItemExtended = new MenuItemExtended();
           menuItemExtended.Id = 2;
@@ -134,22 +147,23 @@ namespace VKClient.Common.UC
         ContextMenu contextMenu1 = new ContextMenu();
         contextMenu1.IsZoomEnabled = false;
         SolidColorBrush solidColorBrush1 = (SolidColorBrush) Application.Current.Resources["PhoneMenuBackgroundBrush"];
-        contextMenu1.Background = (Brush) solidColorBrush1;
+        ((Control) contextMenu1).Background = ((Brush) solidColorBrush1);
         SolidColorBrush solidColorBrush2 = (SolidColorBrush) Application.Current.Resources["PhoneMenuForegroundBrush"];
-        contextMenu1.Foreground = (Brush) solidColorBrush2;
+        ((Control) contextMenu1).Foreground = ((Brush) solidColorBrush2);
         ContextMenu contextMenu2 = contextMenu1;
         foreach (MenuItemExtended menuItemExtended1 in menuItemExtendedList1)
         {
           MenuItem menuItem1 = new MenuItem();
-          ControlTemplate controlTemplate = (ControlTemplate) this.Resources["MenuItemTemplate"];
-          menuItem1.Template = controlTemplate;
+          ControlTemplate controlTemplate = (ControlTemplate) base.Resources["MenuItemTemplate"];
+          ((Control) menuItem1).Template = controlTemplate;
           MenuItemExtended menuItemExtended2 = menuItemExtended1;
-          menuItem1.DataContext = (object) menuItemExtended2;
+          ((FrameworkElement) menuItem1).DataContext = menuItemExtended2;
           Thickness thickness = menuItemExtended1.Id == 2 ? new Thickness(0.0, 0.0, 0.0, 0.0) : new Thickness(0.0, 8.0, 0.0, 19.0);
-          menuItem1.Margin = thickness;
+          ((FrameworkElement) menuItem1).Margin = thickness;
           MenuItem menuItem2 = menuItem1;
-          menuItem2.Click += new RoutedEventHandler(this.PollOptionMenuItem_OnClick);
-          contextMenu2.Items.Add((object) menuItem2);
+          // ISSUE: method pointer
+          menuItem2.Click += new RoutedEventHandler( this.PollOptionMenuItem_OnClick);
+          ((PresentationFrameworkCollection<object>) contextMenu2.Items).Add(menuItem2);
         }
         ContextMenuService.SetContextMenu(element, contextMenu2);
         contextMenu2.IsOpen = true;
@@ -161,48 +175,56 @@ namespace VKClient.Common.UC
       FrameworkElement frameworkElement = sender as FrameworkElement;
       if (frameworkElement == null)
         return;
-      MenuItemExtended menuItemExtended = frameworkElement.DataContext as MenuItemExtended;
-      if (menuItemExtended == null || menuItemExtended.Action == null)
+      MenuItemExtended dataContext = frameworkElement.DataContext as MenuItemExtended;
+      if (dataContext == null || dataContext.Action == null)
         return;
-      menuItemExtended.Action();
+      dataContext.Action();
     }
 
     private void GridContent_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-      double height = e.NewSize.Height;
+      Size newSize = e.NewSize;
+      // ISSUE: explicit reference operation
+      double height = ((Size) @newSize).Height;
       if (double.IsInfinity(height) || double.IsNaN(height))
         return;
-      this.gridBackground.Height = height;
-      this.gridBackground.Children.Clear();
+      ((FrameworkElement) this.gridBackground).Height = height;
+      ((PresentationFrameworkCollection<UIElement>) ((Panel) this.gridBackground).Children).Clear();
       Rectangle rectangle = new Rectangle();
       double num1 = 1.0;
-      rectangle.Width = num1;
+      ((FrameworkElement) rectangle).Width = num1;
       double num2 = height;
-      rectangle.Height = num2;
+      ((FrameworkElement) rectangle).Height = num2;
       SolidColorBrush solidColorBrush1 = (SolidColorBrush) Application.Current.Resources["PhoneAttachmentBorderBrush"];
-      rectangle.Fill = (Brush) solidColorBrush1;
+      ((Shape) rectangle).Fill = ((Brush) solidColorBrush1);
       int num3 = 0;
-      rectangle.VerticalAlignment = (VerticalAlignment) num3;
+      ((FrameworkElement) rectangle).VerticalAlignment = ((VerticalAlignment) num3);
       int num4 = 0;
-      rectangle.HorizontalAlignment = (HorizontalAlignment) num4;
+      ((FrameworkElement) rectangle).HorizontalAlignment = ((HorizontalAlignment) num4);
       Rectangle rect1 = rectangle;
       Rectangle rect2 = new Rectangle();
       double num5 = 1.0;
-      rect2.Width = num5;
+      ((FrameworkElement) rect2).Width = num5;
       double num6 = height;
-      rect2.Height = num6;
+      ((FrameworkElement) rect2).Height = num6;
       SolidColorBrush solidColorBrush2 = (SolidColorBrush) Application.Current.Resources["PhoneAttachmentBorderBrush"];
-      rect2.Fill = (Brush) solidColorBrush2;
+      ((Shape) rect2).Fill = ((Brush) solidColorBrush2);
       int num7 = 0;
-      rect2.VerticalAlignment = (VerticalAlignment) num7;
+      ((FrameworkElement) rect2).VerticalAlignment = ((VerticalAlignment) num7);
       int num8 = 2;
-      rect2.HorizontalAlignment = (HorizontalAlignment) num8;
+      ((FrameworkElement) rect2).HorizontalAlignment = ((HorizontalAlignment) num8);
       List<Rectangle> rectangleList1 = RectangleHelper.CoverByRectangles(rect1);
       List<Rectangle> rectangleList2 = RectangleHelper.CoverByRectangles(rect2);
-      foreach (UIElement uiElement in rectangleList1)
-        this.gridBackground.Children.Add(uiElement);
-      foreach (UIElement uiElement in rectangleList2)
-        this.gridBackground.Children.Add(uiElement);
+      using (List<Rectangle>.Enumerator enumerator = rectangleList1.GetEnumerator())
+      {
+        while (enumerator.MoveNext())
+          ((PresentationFrameworkCollection<UIElement>) ((Panel) this.gridBackground).Children).Add((UIElement) enumerator.Current);
+      }
+      using (List<Rectangle>.Enumerator enumerator = rectangleList2.GetEnumerator())
+      {
+        while (enumerator.MoveNext())
+          ((PresentationFrameworkCollection<UIElement>) ((Panel) this.gridBackground).Children).Add((UIElement) enumerator.Current);
+      }
     }
 
     [DebuggerNonUserCode]
@@ -211,11 +233,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/PollUC.xaml", UriKind.Relative));
-      this.MenuItemTemplate = (ControlTemplate) this.FindName("MenuItemTemplate");
-      this.gridBackground = (Grid) this.FindName("gridBackground");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.textBlockDescrption = (TextBlock) this.FindName("textBlockDescrption");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/PollUC.xaml", UriKind.Relative));
+      this.MenuItemTemplate = (ControlTemplate) base.FindName("MenuItemTemplate");
+      this.gridBackground = (Grid) base.FindName("gridBackground");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
+      this.textBlockDescrption = (TextBlock) base.FindName("textBlockDescrption");
     }
   }
 }

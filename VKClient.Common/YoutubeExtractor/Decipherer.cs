@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace YoutubeExtractor
   {
     public static string DecipherWithVersion(string cipher, string cipherVersion)
     {
-      string input = HttpHelper.DownloadString(string.Format("http://s.ytimg.com/yts/jsbin/player-{0}.js", (object) cipherVersion));
+      string input = HttpHelper.DownloadString(string.Format("http://s.ytimg.com/yts/jsbin/player-{0}.js", cipherVersion));
       string pattern1 = "\\.sig\\s*\\|\\|([a-zA-Z0-9\\$]+)\\(";
       string str1 = Regex.Match(input, pattern1).Groups[1].Value;
       if (str1.Contains("$"))
@@ -21,37 +22,57 @@ namespace YoutubeExtractor
       string str3 = "";
       string str4 = "";
       string str5 = "";
-      foreach (string currentLine in ((IEnumerable<string>) strArray).Skip<string>(1).Take<string>(strArray.Length - 2))
+      IEnumerator<string> enumerator1 = ((IEnumerable<string>) Enumerable.Take<string>(Enumerable.Skip<string>(strArray, 1), strArray.Length - 2)).GetEnumerator();
+      try
       {
-        if (!string.IsNullOrEmpty(str2) && !string.IsNullOrEmpty(str3))
+        while (((IEnumerator) enumerator1).MoveNext())
         {
-          if (!string.IsNullOrEmpty(str4))
-            break;
+          string current = enumerator1.Current;
+          if (!string.IsNullOrEmpty(str2) && !string.IsNullOrEmpty(str3))
+          {
+            if (!string.IsNullOrEmpty(str4))
+              break;
+          }
+          string functionFromLine = Decipherer.GetFunctionFromLine(current);
+          string pattern3 = string.Format("{0}:\\bfunction\\b\\(\\w+\\)", functionFromLine);
+          string pattern4 = string.Format("{0}:\\bfunction\\b\\([a],b\\).(\\breturn\\b)?.?\\w+\\.", functionFromLine);
+          string pattern5 = string.Format("{0}:\\bfunction\\b\\(\\w+\\,\\w\\).\\bvar\\b.\\bc=a\\b", functionFromLine);
+          if (Regex.Match(input, pattern3).Success)
+            str2 = functionFromLine;
+          if (Regex.Match(input, pattern4).Success)
+            str3 = functionFromLine;
+          if (Regex.Match(input, pattern5).Success)
+            str4 = functionFromLine;
         }
-        string functionFromLine = Decipherer.GetFunctionFromLine(currentLine);
-        string pattern3 = string.Format("{0}:\\bfunction\\b\\(\\w+\\)", (object) functionFromLine);
-        string pattern4 = string.Format("{0}:\\bfunction\\b\\([a],b\\).(\\breturn\\b)?.?\\w+\\.", (object) functionFromLine);
-        string pattern5 = string.Format("{0}:\\bfunction\\b\\(\\w+\\,\\w\\).\\bvar\\b.\\bc=a\\b", (object) functionFromLine);
-        if (Regex.Match(input, pattern3).Success)
-          str2 = functionFromLine;
-        if (Regex.Match(input, pattern4).Success)
-          str3 = functionFromLine;
-        if (Regex.Match(input, pattern5).Success)
-          str4 = functionFromLine;
       }
-      foreach (string str6 in ((IEnumerable<string>) strArray).Skip<string>(1).Take<string>(strArray.Length - 2))
+      finally
       {
-        string functionFromLine = Decipherer.GetFunctionFromLine(str6);
-        string pattern3 = "\\(\\w+,(?<index>\\d+)\\)";
-        Match match1;
-        if ((match1 = Regex.Match(str6, pattern3)).Success && functionFromLine == str4)
-          str5 = str5 + "w" + match1.Groups["index"].Value + " ";
-        string pattern4 = "\\(\\w+,(?<index>\\d+)\\)";
-        Match match2;
-        if ((match2 = Regex.Match(str6, pattern4)).Success && functionFromLine == str3)
-          str5 = str5 + "s" + match2.Groups["index"].Value + " ";
-        if (functionFromLine == str2)
-          str5 += "r ";
+        if (enumerator1 != null)
+          ((IDisposable) enumerator1).Dispose();
+      }
+      IEnumerator<string> enumerator2 = ((IEnumerable<string>) Enumerable.Take<string>(Enumerable.Skip<string>(strArray, 1), strArray.Length - 2)).GetEnumerator();
+      try
+      {
+        while (((IEnumerator) enumerator2).MoveNext())
+        {
+          string current = enumerator2.Current;
+          string functionFromLine = Decipherer.GetFunctionFromLine(current);
+          string pattern3 = "\\(\\w+,(?<index>\\d+)\\)";
+          Match match1;
+          if ((match1 = Regex.Match(current, pattern3)).Success && functionFromLine == str4)
+            str5 = str5 + "w" + match1.Groups["index"].Value + " ";
+          string pattern4 = "\\(\\w+,(?<index>\\d+)\\)";
+          Match match2;
+          if ((match2 = Regex.Match(current, pattern4)).Success && functionFromLine == str3)
+            str5 = str5 + "s" + match2.Groups["index"].Value + " ";
+          if (functionFromLine == str2)
+            str5 += "r ";
+        }
+      }
+      finally
+      {
+        if (enumerator2 != null)
+          ((IDisposable) enumerator2).Dispose();
       }
       string operations = str5.Trim();
       return Decipherer.DecipherWithOperations(cipher, operations);
@@ -62,7 +83,7 @@ namespace YoutubeExtractor
       switch (op[0])
       {
         case 'r':
-          return new string(((IEnumerable<char>) cipher.ToCharArray()).Reverse<char>().ToArray<char>());
+          return new string((char[]) Enumerable.ToArray<char>(Enumerable.Reverse<char>(cipher.ToCharArray())));
         case 's':
           int opIndex1 = Decipherer.GetOpIndex(op);
           return cipher.Substring(opIndex1);
@@ -76,7 +97,7 @@ namespace YoutubeExtractor
 
     private static string DecipherWithOperations(string cipher, string operations)
     {
-      return ((IEnumerable<string>) operations.Split(new string[1]{ " " }, StringSplitOptions.RemoveEmptyEntries)).Aggregate<string, string>(cipher, new Func<string, string, string>(Decipherer.ApplyOperation));
+        return Enumerable.Aggregate<string, string>(operations.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries), cipher, new Func<string, string, string>(Decipherer.ApplyOperation));
     }
 
     private static string GetFunctionFromLine(string currentLine)
@@ -98,7 +119,7 @@ namespace YoutubeExtractor
       int index2 = index;
       int num2 = (int) cipher[0];
       stringBuilder[index2] = (char) num2;
-      return stringBuilder.ToString();
+      return (stringBuilder).ToString();
     }
   }
 }

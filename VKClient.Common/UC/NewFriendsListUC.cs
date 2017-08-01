@@ -19,7 +19,9 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return !this.IsNew ? Visibility.Visible : Visibility.Collapsed;
+        if (!this.IsNew)
+          return Visibility.Visible;
+        return Visibility.Collapsed;
       }
     }
 
@@ -27,12 +29,15 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return !this.IsNew ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.IsNew)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
     public NewFriendsListUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
       this.UpdateButtonEnabled();
     }
@@ -40,7 +45,7 @@ namespace VKClient.Common.UC
     public void Initialize(bool isNew)
     {
       this.IsNew = isNew;
-      this.DataContext = (object) this;
+      base.DataContext = this;
       this.UpdateButtonEnabled();
     }
 
@@ -51,7 +56,11 @@ namespace VKClient.Common.UC
 
     private void UpdateButtonEnabled()
     {
-      this.buttonCreate.IsEnabled = this.buttonSave.IsEnabled = !string.IsNullOrWhiteSpace(this.textBoxTitle.Text);
+      Button buttonCreate = this.buttonCreate;
+      bool flag;
+      ((Control) this.buttonSave).IsEnabled = (flag = !string.IsNullOrWhiteSpace(this.textBoxTitle.Text));
+      int num = flag ? 1 : 0;
+      ((Control) buttonCreate).IsEnabled = (num != 0);
     }
 
     [DebuggerNonUserCode]
@@ -60,11 +69,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/NewFriendsListUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.textBoxTitle = (TextBox) this.FindName("textBoxTitle");
-      this.buttonCreate = (Button) this.FindName("buttonCreate");
-      this.buttonSave = (Button) this.FindName("buttonSave");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/NewFriendsListUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.textBoxTitle = (TextBox) base.FindName("textBoxTitle");
+      this.buttonCreate = (Button) base.FindName("buttonCreate");
+      this.buttonSave = (Button) base.FindName("buttonSave");
     }
   }
 }

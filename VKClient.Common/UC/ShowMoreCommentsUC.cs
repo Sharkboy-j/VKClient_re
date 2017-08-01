@@ -31,7 +31,7 @@ namespace VKClient.Common.UC
       this.InitializeComponent();
     }
 
-    private void LayoutRoot_Tap(object sender, GestureEventArgs e)
+    private void LayoutRoot_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.OnClickAction == null)
         return;
@@ -44,8 +44,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/ShowMoreCommentsUC.xaml", UriKind.Relative));
-      this.textBlockText = (TextBlock) this.FindName("textBlockText");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/ShowMoreCommentsUC.xaml", UriKind.Relative));
+      this.textBlockText = (TextBlock) base.FindName("textBlockText");
     }
   }
 }

@@ -8,7 +8,7 @@ namespace VKClient.Video.Library
 
     public override string ToString()
     {
-      return string.Format("{0}p", (object) this.Resolution);
+      return string.Format("{0}p", this.Resolution);
     }
   }
 }

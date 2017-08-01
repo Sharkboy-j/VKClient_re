@@ -28,7 +28,7 @@ namespace VKClient.Audio.Base.Utils
 
     public static Uri ConvertToUri(this string uriStr)
     {
-      return !string.IsNullOrEmpty(uriStr) ? (uriStr.StartsWith(".") || uriStr.StartsWith("/") ? new Uri(uriStr, UriKind.Relative) : new Uri(uriStr, UriKind.Absolute)) : null;
+      return !string.IsNullOrEmpty(uriStr) ? (uriStr.StartsWith(".") || uriStr.StartsWith("/") ? new Uri(uriStr, UriKind.Relative) : new Uri(uriStr, UriKind.Absolute)) :  null;
     }
 
     public static DateTime UnixTimeStampToDateTime(double unixTimeStamp, bool includeTimeDiff = true)
@@ -52,7 +52,10 @@ namespace VKClient.Audio.Base.Utils
     {
       if (string.IsNullOrWhiteSpace(commaSeparatedIds))
         return new List<long>();
-      string[] strArray = commaSeparatedIds.Split(new char[1]{ ',' }, StringSplitOptions.RemoveEmptyEntries);
+      string[] strArray = commaSeparatedIds.Split(new char[1]
+      {
+        ','
+      }, StringSplitOptions.RemoveEmptyEntries);
       List<long> longList = new List<long>();
       foreach (string s in strArray)
         longList.Add(long.Parse(s));
@@ -63,7 +66,10 @@ namespace VKClient.Audio.Base.Utils
     {
       if (string.IsNullOrWhiteSpace(commaSeparated))
         return new List<string>();
-      string[] strArray = commaSeparated.Split(new char[1]{ ',' }, StringSplitOptions.RemoveEmptyEntries);
+      string[] strArray = commaSeparated.Split(new char[1]
+      {
+        ','
+      }, StringSplitOptions.RemoveEmptyEntries);
       List<string> stringList = new List<string>();
       foreach (string str in strArray)
         stringList.Add(str);

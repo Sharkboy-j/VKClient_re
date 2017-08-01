@@ -26,7 +26,7 @@ namespace VKClient.Common
     public HelpPage()
     {
       this.InitializeComponent();
-      this.Header.TextBlockTitle.Text = CommonResources.Help.ToUpperInvariant();
+      this.Header.TextBlockTitle.Text = (CommonResources.NewSettings_QuestionsAndAnswers.ToUpperInvariant());
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -35,7 +35,7 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       this._uri = AppGlobalStateManager.Current.GlobalState.SupportUri;
-      this.DataContext = (object) new ViewModelBase();
+      base.DataContext = (new ViewModelBase());
       this._isInitialized = true;
       this.InitializeWebBrowser();
     }
@@ -53,18 +53,21 @@ namespace VKClient.Common
     {
       if (string.IsNullOrEmpty(this._uri))
         return;
-      string str = this._uri;
-      this.webBrowser.NavigationFailed += new NavigationFailedEventHandler(this.BrowserOnNavigationFailed);
-      this.webBrowser.Navigating += new EventHandler<NavigatingEventArgs>(this.BrowserOnNavigating);
-      this.webBrowser.LoadCompleted += new LoadCompletedEventHandler(this.BrowserOnLoadCompleted);
+      string uri = this._uri;
+      // ISSUE: method pointer
+      this.webBrowser.NavigationFailed += (new NavigationFailedEventHandler( this.BrowserOnNavigationFailed));
+      this.webBrowser.Navigating += (new EventHandler<NavigatingEventArgs>(this.BrowserOnNavigating));
+      // ISSUE: method pointer
+      this.webBrowser.LoadCompleted += (new LoadCompletedEventHandler( this.BrowserOnLoadCompleted));
       this.webBrowser.Navigate(new Uri(this._uri));
     }
 
     private void BrowserOnLoadCompleted(object sender, NavigationEventArgs navigationEventArgs)
     {
-      this.webBrowser.LoadCompleted -= new LoadCompletedEventHandler(this.BrowserOnLoadCompleted);
-      this.progressBar.Visibility = Visibility.Collapsed;
-      this.webBrowser.Visibility = Visibility.Visible;
+      // ISSUE: method pointer
+      this.webBrowser.LoadCompleted -= (new LoadCompletedEventHandler( this.BrowserOnLoadCompleted));
+      ((UIElement) this.progressBar).Visibility = Visibility.Collapsed;
+      ((UIElement) this.webBrowser).Visibility = Visibility.Visible;
     }
 
     private void BrowserOnNavigating(object sender, NavigatingEventArgs args)
@@ -73,8 +76,8 @@ namespace VKClient.Common
 
     private void BrowserOnNavigationFailed(object sender, NavigationFailedEventArgs navigationFailedEventArgs)
     {
-      new GenericInfoUC().ShowAndHideLater(CommonResources.Error, null);
-      this.progressBar.Visibility = Visibility.Collapsed;
+      new GenericInfoUC().ShowAndHideLater(CommonResources.Error,  null);
+      ((UIElement) this.progressBar).Visibility = Visibility.Collapsed;
     }
 
     [DebuggerNonUserCode]
@@ -83,12 +86,12 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/HelpPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ContentPanel = (Grid) this.FindName("ContentPanel");
-      this.webBrowser = (WebBrowser) this.FindName("webBrowser");
-      this.progressBar = (ProgressBar) this.FindName("progressBar");
-      this.Header = (GenericHeaderUC) this.FindName("Header");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/HelpPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ContentPanel = (Grid) base.FindName("ContentPanel");
+      this.webBrowser = (WebBrowser) base.FindName("webBrowser");
+      this.progressBar = (ProgressBar) base.FindName("progressBar");
+      this.Header = (GenericHeaderUC) base.FindName("Header");
     }
   }
 }

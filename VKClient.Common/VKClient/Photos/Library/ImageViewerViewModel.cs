@@ -17,7 +17,7 @@ namespace VKClient.Photos.Library
     private string _aid;
     private AlbumType _albumType;
     private ViewerMode _mode;
-    //private bool _isLocked;
+    private bool _isLocked;
     private int _photosCount;
     private long _userOrGroupId;
     private bool _isGroup;
@@ -122,7 +122,7 @@ namespace VKClient.Photos.Library
       if (this._isLoading)
         return;
       this._isLoading = true;
-      PhotosService.Current.GetPhotos(this._userOrGroupId, this._isGroup, this._aid, (List<long>) null, (long) this._date, this._mode == ViewerMode.Photos ? "photo" : "photo_tag", (Action<BackendResult<List<Photo>, ResultCode>>) (res =>
+      PhotosService.Current.GetPhotos(this._userOrGroupId, this._isGroup, this._aid,  null, (long) this._date, this._mode == ViewerMode.Photos ? "photo" : "photo_tag", (Action<BackendResult<List<Photo>, ResultCode>>) (res =>
       {
         this._isLoading = false;
         if (res.ResultCode == ResultCode.Succeeded)
@@ -131,20 +131,20 @@ namespace VKClient.Photos.Library
             int num;
             for (int i = 0; i < res.ResultData.Count; i = num + 1)
             {
-              PhotoViewModel photoViewModel = this.PhotosCollection.FirstOrDefault<PhotoViewModel>((Func<PhotoViewModel, bool>) (p =>
+                PhotoViewModel photoViewModel = (PhotoViewModel)Enumerable.FirstOrDefault<PhotoViewModel>(this.PhotosCollection, (Func<PhotoViewModel, bool>)(p =>
               {
                 if (p.Photo != null)
                   return p.Photo.pid == res.ResultData[i].pid;
                 return false;
               }));
               if (photoViewModel != null)
-                this.PhotosCollection[this.PhotosCollection.IndexOf(photoViewModel)].Photo = res.ResultData[i];
+                ((Collection<PhotoViewModel>) this.PhotosCollection)[((Collection<PhotoViewModel>) this.PhotosCollection).IndexOf(photoViewModel)].Photo = res.ResultData[i];
               else
-                this.PhotosCollection.Add(new PhotoViewModel(res.ResultData[i], (PhotoWithFullInfo) null));
+                ((Collection<PhotoViewModel>) this.PhotosCollection).Add(new PhotoViewModel(res.ResultData[i],  null));
               num = i;
             }
-            if (this._photosCount < this.PhotosCollection.Count)
-              this._photosCount = this.PhotosCollection.Count;
+            if (this._photosCount < ((Collection<PhotoViewModel>) this.PhotosCollection).Count)
+              this._photosCount = ((Collection<PhotoViewModel>) this.PhotosCollection).Count;
             callback(true);
           }));
         else
@@ -155,7 +155,7 @@ namespace VKClient.Photos.Library
     private void LoadPhotosByIds(List<long> photoIds)
     {
       for (int index = 0; index < photoIds.Count; ++index)
-        this.PhotosCollection.Add(new PhotoViewModel(this._ownerIds[0], photoIds[index], index < this._accessKeys.Count ? this._accessKeys[index] : ""));
+        ((Collection<PhotoViewModel>) this.PhotosCollection).Add(new PhotoViewModel(this._ownerIds[0], photoIds[index], index < this._accessKeys.Count ? this._accessKeys[index] : ""));
     }
 
     public void LoadMorePhotos(Action<bool> callback = null)
@@ -163,18 +163,26 @@ namespace VKClient.Photos.Library
       if (this._isLoading)
         return;
       this._isLoading = true;
-      if (this._photosCount == this.PhotosCollection.Count || this._mode == ViewerMode.ProfilePhotosList && !this._canLoadMoreProfileListPhotos)
+      if (this._photosCount == ((Collection<PhotoViewModel>) this.PhotosCollection).Count || this._mode == ViewerMode.ProfilePhotosList && !this._canLoadMoreProfileListPhotos)
         return;
       switch (this._mode)
       {
         case ViewerMode.AlbumPhotos:
-          ImageViewerViewModel.GetAlbumPhotos(this._albumType, this._aid, this._userOrGroupId, this._isGroup, this.PhotosCollection.Count, 50, (Action<BackendResult<PhotosListWithCount, ResultCode>>) (res => Execute.ExecuteOnUIThread((Action) (() =>
+          ImageViewerViewModel.GetAlbumPhotos(this._albumType, this._aid, this._userOrGroupId, this._isGroup, ((Collection<PhotoViewModel>) this.PhotosCollection).Count, 50, (Action<BackendResult<PhotosListWithCount, ResultCode>>) (res => Execute.ExecuteOnUIThread((Action) (() =>
           {
             if (res.ResultCode == ResultCode.Succeeded)
               Execute.ExecuteOnUIThread((Action) (() =>
               {
-                foreach (Photo photo in res.ResultData.response)
-                  this._photosCollection.Add(new PhotoViewModel(photo, (PhotoWithFullInfo) null));
+                List<Photo>.Enumerator enumerator = res.ResultData.response.GetEnumerator();
+                try
+                {
+                  while (enumerator.MoveNext())
+                    ((Collection<PhotoViewModel>) this._photosCollection).Add(new PhotoViewModel(enumerator.Current,  null));
+                }
+                finally
+                {
+                  enumerator.Dispose();
+                }
                 this._photosCount = res.ResultData.photosCount;
               }));
             if (callback != null)
@@ -183,12 +191,20 @@ namespace VKClient.Photos.Library
           }))));
           break;
         case ViewerMode.PhotosByIdsForFavorites:
-          FavoritesService.Instance.GetFavePhotos(this._initialOffset + this.PhotosCollection.Count, 50, (Action<BackendResult<PhotosListWithCount, ResultCode>>) (res => Execute.ExecuteOnUIThread((Action) (() =>
+          FavoritesService.Instance.GetFavePhotos(this._initialOffset + ((Collection<PhotoViewModel>) this.PhotosCollection).Count, 50, (Action<BackendResult<PhotosListWithCount, ResultCode>>) (res => Execute.ExecuteOnUIThread((Action) (() =>
           {
             if (res.ResultCode == ResultCode.Succeeded)
             {
-              foreach (Photo photo in res.ResultData.response)
-                this._photosCollection.Add(new PhotoViewModel(photo, (PhotoWithFullInfo) null));
+              List<Photo>.Enumerator enumerator = res.ResultData.response.GetEnumerator();
+              try
+              {
+                while (enumerator.MoveNext())
+                  ((Collection<PhotoViewModel>) this._photosCollection).Add(new PhotoViewModel(enumerator.Current,  null));
+              }
+              finally
+              {
+                enumerator.Dispose();
+              }
               this._photosCount = res.ResultData.photosCount;
             }
             if (callback != null)
@@ -201,12 +217,20 @@ namespace VKClient.Photos.Library
           {
             if (this._albumId != 0L)
             {
-              ProfilesService.Instance.GetPhotos(-this._userOrGroupId, this._photosCollection.Count, this._albumId, (Action<BackendResult<VKList<Photo>, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
+              ProfilesService.Instance.GetPhotos(-this._userOrGroupId, ((Collection<PhotoViewModel>) this._photosCollection).Count, this._albumId, (Action<BackendResult<VKList<Photo>, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
               {
                 if (result.ResultCode == ResultCode.Succeeded)
                 {
-                  foreach (Photo photo in result.ResultData.items)
-                    this._photosCollection.Add(new PhotoViewModel(photo, (PhotoWithFullInfo) null));
+                  List<Photo>.Enumerator enumerator = result.ResultData.items.GetEnumerator();
+                  try
+                  {
+                    while (enumerator.MoveNext())
+                      ((Collection<PhotoViewModel>) this._photosCollection).Add(new PhotoViewModel(enumerator.Current,  null));
+                  }
+                  finally
+                  {
+                    enumerator.Dispose();
+                  }
                   this._canLoadMoreProfileListPhotos = result.ResultData.more;
                 }
                 if (callback != null)
@@ -220,12 +244,20 @@ namespace VKClient.Photos.Library
             this._isLoading = false;
             break;
           }
-          ProfilesService.Instance.GetAllPhotos(this._userOrGroupId, this._photosCollection.Last<PhotoViewModel>().RealOffset + 1, (Action<BackendResult<VKList<Photo>, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
+          ProfilesService.Instance.GetAllPhotos(this._userOrGroupId, ((PhotoViewModel) Enumerable.Last<PhotoViewModel>(this._photosCollection)).RealOffset + 1, (Action<BackendResult<VKList<Photo>, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
           {
             if (result.ResultCode == ResultCode.Succeeded)
             {
-              foreach (Photo photo in result.ResultData.items)
-                this._photosCollection.Add(new PhotoViewModel(photo, (PhotoWithFullInfo) null));
+              List<Photo>.Enumerator enumerator = result.ResultData.items.GetEnumerator();
+              try
+              {
+                while (enumerator.MoveNext())
+                  ((Collection<PhotoViewModel>) this._photosCollection).Add(new PhotoViewModel(enumerator.Current,  null));
+              }
+              finally
+              {
+                enumerator.Dispose();
+              }
               this._canLoadMoreProfileListPhotos = result.ResultData.more;
             }
             if (callback != null)
@@ -264,55 +296,81 @@ namespace VKClient.Photos.Library
 
     private void ReadPhotos(List<Photo> photos)
     {
-      this._photosCollection.Clear();
-      foreach (Photo photo in photos)
+      ((Collection<PhotoViewModel>) this._photosCollection).Clear();
+      List<Photo>.Enumerator enumerator = photos.GetEnumerator();
+      try
       {
-        PhotoWithFullInfo photoWithFullInfo1 = (PhotoWithFullInfo) null;
-        if (photo.owner_id == AppGlobalStateManager.Current.LoggedInUserId && photo.album_id == -3L)
+        while (enumerator.MoveNext())
         {
-          PhotoWithFullInfo photoWithFullInfo2 = new PhotoWithFullInfo();
-          photoWithFullInfo2.Photo = photo;
-          photoWithFullInfo2.Users = new List<User>()
+          Photo current = enumerator.Current;
+          PhotoWithFullInfo photoWithFullInfo1 =  null;
+          if (current.owner_id == AppGlobalStateManager.Current.LoggedInUserId && current.album_id == -3L)
           {
-            AppGlobalStateManager.Current.GlobalState.LoggedInUser
-          };
-          List<Group> groupList = new List<Group>();
-          photoWithFullInfo2.Groups = groupList;
-          List<PhotoVideoTag> photoVideoTagList = new List<PhotoVideoTag>();
-          photoWithFullInfo2.PhotoTags = photoVideoTagList;
-          List<Comment> commentList = new List<Comment>();
-          photoWithFullInfo2.Comments = commentList;
-          List<long> longList = new List<long>();
-          photoWithFullInfo2.LikesAllIds = longList;
-          List<User> userList1 = new List<User>();
-          photoWithFullInfo2.Users2 = userList1;
-          List<User> userList2 = new List<User>();
-          photoWithFullInfo2.Users3 = userList2;
-          photoWithFullInfo1 = photoWithFullInfo2;
+            PhotoWithFullInfo photoWithFullInfo2 = new PhotoWithFullInfo();
+            photoWithFullInfo2.Photo = current;
+            photoWithFullInfo2.Users = new List<User>()
+            {
+              AppGlobalStateManager.Current.GlobalState.LoggedInUser
+            };
+            List<Group> groupList = new List<Group>();
+            photoWithFullInfo2.Groups = groupList;
+            List<PhotoVideoTag> photoVideoTagList = new List<PhotoVideoTag>();
+            photoWithFullInfo2.PhotoTags = photoVideoTagList;
+            List<Comment> commentList = new List<Comment>();
+            photoWithFullInfo2.Comments = commentList;
+            List<long> longList = new List<long>();
+            photoWithFullInfo2.LikesAllIds = longList;
+            List<User> userList1 = new List<User>();
+            photoWithFullInfo2.Users2 = userList1;
+            List<User> userList2 = new List<User>();
+            photoWithFullInfo2.Users3 = userList2;
+            photoWithFullInfo1 = photoWithFullInfo2;
+          }
+          ((Collection<PhotoViewModel>) this._photosCollection).Add(new PhotoViewModel(current, photoWithFullInfo1));
         }
-        this._photosCollection.Add(new PhotoViewModel(photo, photoWithFullInfo1));
+      }
+      finally
+      {
+        enumerator.Dispose();
       }
     }
 
     private void ReadPhotos(List<Doc> gifDocs)
     {
-      this._photosCollection.Clear();
-      foreach (Doc gifDoc in gifDocs)
-        this._photosCollection.Add(new PhotoViewModel(gifDoc));
+      ((Collection<PhotoViewModel>) this._photosCollection).Clear();
+      List<Doc>.Enumerator enumerator = gifDocs.GetEnumerator();
+      try
+      {
+        while (enumerator.MoveNext())
+          ((Collection<PhotoViewModel>) this._photosCollection).Add(new PhotoViewModel(enumerator.Current));
+      }
+      finally
+      {
+        enumerator.Dispose();
+      }
     }
 
     private void ReadPhotosOrDocuments(List<PhotoOrDocument> photosOrDocuments)
     {
-      this._photosCollection.Clear();
-      foreach (PhotoOrDocument photosOrDocument in photosOrDocuments)
+      ((Collection<PhotoViewModel>) this._photosCollection).Clear();
+      List<PhotoOrDocument>.Enumerator enumerator = photosOrDocuments.GetEnumerator();
+      try
       {
-        PhotoViewModel photoViewModel = (PhotoViewModel) null;
-        if (photosOrDocument.photo != null)
-          photoViewModel = new PhotoViewModel(photosOrDocument.photo, (PhotoWithFullInfo) null);
-        else if (photosOrDocument.document != null)
-          photoViewModel = new PhotoViewModel(photosOrDocument.document);
-        if (photoViewModel != null)
-          this._photosCollection.Add(photoViewModel);
+        while (enumerator.MoveNext())
+        {
+          PhotoOrDocument current = enumerator.Current;
+          PhotoViewModel photoViewModel =  null;
+          if (current.photo != null)
+            photoViewModel = new PhotoViewModel(current.photo,  null);
+          else if (current.document != null)
+            photoViewModel = new PhotoViewModel(current.document);
+          if (photoViewModel != null)
+            ((Collection<PhotoViewModel>) this._photosCollection).Add(photoViewModel);
+        }
+      }
+      finally
+      {
+        enumerator.Dispose();
       }
     }
   }

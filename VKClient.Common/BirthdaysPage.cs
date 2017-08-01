@@ -2,13 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Navigation;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Framework;
-using VKClient.Common.Library;
 using VKClient.Common.UC;
 
 namespace VKClient.Common
@@ -16,15 +13,14 @@ namespace VKClient.Common
   public class BirthdaysPage : PageBase
   {
     private bool _isInitialized;
-    internal Grid LayoutRoot;
-    internal Grid ContentPanel;
-    internal ExtendedLongListSelector listBoxBirthdays;
-    internal GenericHeaderUC Header;
+    internal GenericHeaderUC ucHeader;
+    internal ExtendedLongListSelector listBox;
     private bool _contentLoaded;
 
     public BirthdaysPage()
     {
       this.InitializeComponent();
+      this.ucHeader.OnHeaderTap = (Action) (() => this.listBox.ScrollToTop());
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -32,16 +28,10 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      BirthdaysViewModel birthdaysViewModel = new BirthdaysViewModel();
-      this.DataContext = (object) birthdaysViewModel;
-      birthdaysViewModel.BithdaysGroupsViewModel.LoadData(false, false, (Action<BackendResult<List<User>, ResultCode>>) null, false);
+      VKClient.Common.Library.BirthdaysViewModel birthdaysViewModel = new VKClient.Common.Library.BirthdaysViewModel();
+      base.DataContext = birthdaysViewModel;
+      birthdaysViewModel.BithdaysGroupsViewModel.LoadData(false, false,  null, false);
       this._isInitialized = true;
-    }
-
-    private void Grid_Tap(object sender, GestureEventArgs e)
-    {
-      BirthdayInfo birthdayInfo = (sender as FrameworkElement).DataContext as BirthdayInfo;
-      Navigator.Current.NavigateToUserProfile(birthdayInfo.friend.uid, birthdayInfo.friend.Name, "", false);
     }
 
     [DebuggerNonUserCode]
@@ -50,11 +40,9 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/BirthdaysPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ContentPanel = (Grid) this.FindName("ContentPanel");
-      this.listBoxBirthdays = (ExtendedLongListSelector) this.FindName("listBoxBirthdays");
-      this.Header = (GenericHeaderUC) this.FindName("Header");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/BirthdaysPage.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.listBox = (ExtendedLongListSelector) base.FindName("listBox");
     }
   }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Common;
@@ -16,40 +17,59 @@ using Windows.Storage;
 
 namespace VKClient.Video
 {
-    public partial class AddEditVideoPage : PageBase
+    public class AddEditVideoPage : PageBase
     {
-        private ApplicationBarIconButton _appBarButtonCommit = new ApplicationBarIconButton()
-        {
-            IconUri = new Uri("Resources/check.png", UriKind.Relative),
-            Text = CommonResources.AppBarMenu_Save
-        };
-        private ApplicationBarIconButton _appBarButtonCancel = new ApplicationBarIconButton()
-        {
-            IconUri = new Uri("Resources/appbar.cancel.rest.png", UriKind.Relative),
-            Text = CommonResources.AppBar_Cancel
-        };
-        private ApplicationBar _appBar = new ApplicationBar()
-        {
-            BackgroundColor = VKConstants.AppBarBGColor,
-            ForegroundColor = VKConstants.AppBarFGColor
-        };
         private bool _isInitialized;
+        private ApplicationBarIconButton _appBarButtonCommit;
+        private ApplicationBarIconButton _appBarButtonCancel;
+        private ApplicationBar _appBar;
         //private bool _isSaving;
+        internal Grid LayoutRoot;
+        internal GenericHeaderUC ucHeader;
+        internal Grid ContentPanel;
+        internal Image PreviewImage;
+        internal ProgressBar ProgressUpload;
+        internal TextBox textBoxName;
+        internal TextBox textBoxDescription;
+        internal PrivacyHeaderUC ucPrivacyHeaderView;
+        internal PrivacyHeaderUC ucPrivacyHeaderComment;
+        private bool _contentLoaded;
 
         private AddEditVideoViewModel VM
         {
             get
             {
-                return this.DataContext as AddEditVideoViewModel;
+                return base.DataContext as AddEditVideoViewModel;
             }
         }
 
         public AddEditVideoPage()
         {
+            ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+            Uri uri1 = new Uri("Resources/check.png", UriKind.Relative);
+            applicationBarIconButton1.IconUri = uri1;
+            string appBarMenuSave = CommonResources.AppBarMenu_Save;
+            applicationBarIconButton1.Text = appBarMenuSave;
+            this._appBarButtonCommit = applicationBarIconButton1;
+            ApplicationBarIconButton applicationBarIconButton2 = new ApplicationBarIconButton();
+            Uri uri2 = new Uri("Resources/appbar.cancel.rest.png", UriKind.Relative);
+            applicationBarIconButton2.IconUri = uri2;
+            string appBarCancel = CommonResources.AppBar_Cancel;
+            applicationBarIconButton2.Text = appBarCancel;
+            this._appBarButtonCancel = applicationBarIconButton2;
+            ApplicationBar applicationBar = new ApplicationBar();
+            Color appBarBgColor = VKConstants.AppBarBGColor;
+            applicationBar.BackgroundColor = appBarBgColor;
+            Color appBarFgColor = VKConstants.AppBarFGColor;
+            applicationBar.ForegroundColor = appBarFgColor;
+            this._appBar = applicationBar;
+            // ISSUE: explicit constructor call
+            // base.\u002Ector();
             this.InitializeComponent();
             this.BuildAppBar();
             this.SuppressMenu = true;
-            this.Loaded += new RoutedEventHandler(this.AddEditVideoPage_Loaded);
+            // ISSUE: method pointer
+            base.Loaded += (new RoutedEventHandler(this.AddEditVideoPage_Loaded));
             this.ucPrivacyHeaderView.OnTap = new Action(this.PrivacyViewTap);
             this.ucPrivacyHeaderComment.OnTap = new Action(this.PrivacyCommentTap);
             this.ucHeader.HideSandwitchButton = true;
@@ -80,11 +100,11 @@ namespace VKClient.Video
 
         private void BuildAppBar()
         {
-            this._appBarButtonCommit.Click += new EventHandler(this._appBarCommit_Click);
-            this._appBarButtonCancel.Click += new EventHandler(this._appBarButtonCancel_Click);
+            this._appBarButtonCommit.Click += (new EventHandler(this._appBarCommit_Click));
+            this._appBarButtonCancel.Click += (new EventHandler(this._appBarButtonCancel_Click));
             this._appBar.Buttons.Add((object)this._appBarButtonCommit);
             this._appBar.Buttons.Add((object)this._appBarButtonCancel);
-            this.ApplicationBar = (IApplicationBar)this._appBar;
+            this.ApplicationBar = ((IApplicationBar)this._appBar);
         }
 
         private void _appBarButtonCancel_Click(object sender, EventArgs e)
@@ -92,7 +112,7 @@ namespace VKClient.Video
             if (this.VM.IsSaving)
                 this.VM.Cancel();
             else
-                this.NavigationService.GoBackSafe();
+                ((Page)this).NavigationService.GoBackSafe();
         }
 
         private void _appBarCommit_Click(object sender, EventArgs e)
@@ -101,7 +121,7 @@ namespace VKClient.Video
             this._appBarButtonCommit.IsEnabled = false;
             this.VM.Description = this.textBoxDescription.Text;
             this.VM.Name = this.textBoxName.Text;
-            this.Focus();
+            ((Control)this).Focus();
             this.VM.Save((Action<bool>)(res => Execute.ExecuteOnUIThread((Action)(() =>
             {
                 this._appBarButtonCommit.IsEnabled = true;
@@ -109,7 +129,7 @@ namespace VKClient.Video
                 this.UpdateAppBar();
                 if (res)
                 {
-                    this.NavigationService.GoBackSafe();
+                    ((Page)this).NavigationService.GoBackSafe();
                 }
                 else
                 {
@@ -125,18 +145,18 @@ namespace VKClient.Video
             base.HandleOnNavigatedTo(e);
             if (this._isInitialized)
                 return;
-            if (this.NavigationContext.QueryString.ContainsKey("VideoToUploadPath"))
+            if (((Page)this).NavigationContext.QueryString.ContainsKey("VideoToUploadPath"))
             {
-                this.DataContext = (object)AddEditVideoViewModel.CreateForNewVideo(this.NavigationContext.QueryString["VideoToUploadPath"], long.Parse(this.NavigationContext.QueryString["OwnerId"]));
+                base.DataContext = ((object)AddEditVideoViewModel.CreateForNewVideo(((Page)this).NavigationContext.QueryString["VideoToUploadPath"], long.Parse(((Page)this).NavigationContext.QueryString["OwnerId"])));
             }
             else
             {
-                long ownerId = long.Parse(this.NavigationContext.QueryString["OwnerId"]);
-                long num = long.Parse(this.NavigationContext.QueryString["VideoId"]);
-                VKClient.Common.Backend.DataObjects.Video video1 = ParametersRepository.GetParameterForIdAndReset("VideoForEdit") as VKClient.Common.Backend.DataObjects.Video;
+                long ownerId = long.Parse(((Page)this).NavigationContext.QueryString["OwnerId"]);
+                long num = long.Parse(((Page)this).NavigationContext.QueryString["VideoId"]);
+                VKClient.Common.Backend.DataObjects.Video parameterForIdAndReset = ParametersRepository.GetParameterForIdAndReset("VideoForEdit") as VKClient.Common.Backend.DataObjects.Video;
                 long videoId = num;
-                VKClient.Common.Backend.DataObjects.Video video2 = video1;
-                this.DataContext = (object)AddEditVideoViewModel.CreateForEditVideo(ownerId, videoId, video2);
+                VKClient.Common.Backend.DataObjects.Video video = parameterForIdAndReset;
+                base.DataContext = ((object)AddEditVideoViewModel.CreateForEditVideo(ownerId, videoId, video));
             }
             this.UpdateAppBar();
             this._isInitialized = true;
@@ -154,8 +174,25 @@ namespace VKClient.Video
 
         private void UpdateAppBar()
         {
-            this._appBarButtonCommit.IsEnabled = !string.IsNullOrWhiteSpace(this.textBoxName.Text);
+            this._appBarButtonCommit.IsEnabled = (!string.IsNullOrWhiteSpace(this.textBoxName.Text));
         }
 
+        [DebuggerNonUserCode]
+        public void InitializeComponent()
+        {
+            if (this._contentLoaded)
+                return;
+            this._contentLoaded = true;
+            Application.LoadComponent((object)this, new Uri("/VKClient.Video;component/AddEditVideoPage.xaml", UriKind.Relative));
+            this.LayoutRoot = (Grid)base.FindName("LayoutRoot");
+            this.ucHeader = (GenericHeaderUC)base.FindName("ucHeader");
+            this.ContentPanel = (Grid)base.FindName("ContentPanel");
+            this.PreviewImage = (Image)base.FindName("PreviewImage");
+            this.ProgressUpload = (ProgressBar)base.FindName("ProgressUpload");
+            this.textBoxName = (TextBox)base.FindName("textBoxName");
+            this.textBoxDescription = (TextBox)base.FindName("textBoxDescription");
+            this.ucPrivacyHeaderView = (PrivacyHeaderUC)base.FindName("ucPrivacyHeaderView");
+            this.ucPrivacyHeaderComment = (PrivacyHeaderUC)base.FindName("ucPrivacyHeaderComment");
+        }
     }
 }

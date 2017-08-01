@@ -58,7 +58,7 @@
                               Height="2"
                               Margin="-16 16 -16 0" />
                     </StackPanel>
-
+                    
                     <!-- Name last name-->
                     <Grid Margin="0 32 0 0">
                         <Grid Width="120"
@@ -70,9 +70,12 @@
                               Tap="ChoosePhotoTap"
                               Background="{StaticResource PhoneActiveAreaBackgroundBrush}">
                             <Grid.Clip>
-                                <EllipseGeometry Center="60 60"
+                                <!--<EllipseGeometry Center="60 60"
                                                  RadiusX="60"
-                                                 RadiusY="60" />
+                                                 RadiusY="60" />-->
+                                <RectangleGeometry Rect="0 0 120 120" x:Name="rectangleGeometry"
+                                                       RadiusX="60"
+                                                       RadiusY="60"/>
                             </Grid.Clip>
 
                             <TextBlock IsHitTestVisible="False"
@@ -91,10 +94,14 @@
                               Tap="GridPhotoTap"
                               Background="{StaticResource PhoneChromeBrush}">
                             <Grid.Clip>
-                                <EllipseGeometry Center="60 60"
+                                <!--<EllipseGeometry Center="60 60"
                                                  RadiusX="60"
-                                                 RadiusY="60" />
+                                                 RadiusY="60" />-->
+                                <RectangleGeometry Rect="0 0 120 120" x:Name="rectangleGeometry2"
+                                                       RadiusX="60"
+                                                       RadiusY="60"/>
                             </Grid.Clip>
+                            
 
                             <toolkit:ContextMenuService.ContextMenu>
                                 <toolkit:ContextMenu  Name="PhotoMenu"
@@ -113,11 +120,12 @@
                             <Image Width="120"
                                    IsHitTestVisible="False"
                                    Height="120"
-                                   framework:ImageLoader.UriSource="{Binding AvatarUri}">
+                                   framework:ImageLoader.UriSource="{Binding AvatarUri}"
+                                   >
                                 <Image.Clip>
-                                    <EllipseGeometry Center="60 60"
-                                                     RadiusX="60"
-                                                     RadiusY="60" />
+                                    <RectangleGeometry Rect="0 0 120 120" x:Name="rectangleGeometry3"
+                                                       RadiusX="60"
+                                                       RadiusY="60"/>
                                 </Image.Clip>
                             </Image>
 

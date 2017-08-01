@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
@@ -17,17 +18,9 @@ namespace VKClient.Common
 {
   public class FeedbackPage : PageBase
   {
-    private ApplicationBar _defaultAppBar = new ApplicationBar()
-    {
-      BackgroundColor = VKConstants.AppBarBGColor,
-      ForegroundColor = VKConstants.AppBarFGColor
-    };
-    private ApplicationBarIconButton _appBarButtonRefresh = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("Resources/appbar.refresh.rest.png", UriKind.Relative),
-      Text = CommonResources.Conversation_AppBar_Refresh
-    };
     private bool _isInitilized;
+    private ApplicationBar _defaultAppBar;
+    private ApplicationBarIconButton _appBarButtonRefresh;
     private bool _triggeredLoadingComments;
     internal Grid LayoutRoot;
     internal GenericHeaderUC Header;
@@ -47,12 +40,26 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as FeedbackViewModel;
+        return base.DataContext as FeedbackViewModel;
       }
     }
 
     public FeedbackPage()
     {
+      ApplicationBar applicationBar = new ApplicationBar();
+      Color appBarBgColor = VKConstants.AppBarBGColor;
+      applicationBar.BackgroundColor = appBarBgColor;
+      Color appBarFgColor = VKConstants.AppBarFGColor;
+      applicationBar.ForegroundColor = appBarFgColor;
+      this._defaultAppBar = applicationBar;
+      ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton();
+      Uri uri = new Uri("Resources/appbar.refresh.rest.png", UriKind.Relative);
+      applicationBarIconButton.IconUri = uri;
+      string conversationAppBarRefresh = CommonResources.Conversation_AppBar_Refresh;
+      applicationBarIconButton.Text = conversationAppBarRefresh;
+      this._appBarButtonRefresh = applicationBarIconButton;
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.BuildAppBar();
       this.panelComments.InitializeWithScrollViewer((IScrollableArea) new ViewportScrollableAreaAdapter(this.scrollComments), false);
@@ -61,7 +68,6 @@ namespace VKClient.Common
       this.panelFeedback.InitializeWithScrollViewer((IScrollableArea) new ViewportScrollableAreaAdapter(this.scrollFeedback), false);
       this.scrollFeedback.BindViewportBoundsTo((FrameworkElement) this.stackPanelFeedback);
       this.RegisterForCleanup((IMyVirtualizingPanel) this.panelFeedback);
-      this.panelFeedback.ScrollPositionChanged += new EventHandler<MyVirtualizingPanel2.ScrollPositionChangedEventAgrs>(this.panelFeedback_ScrollPositionChanged);
       this.Header.OnHeaderTap = new Action(this.OnHeaderTap);
     }
 
@@ -74,8 +80,8 @@ namespace VKClient.Common
 
     private void BuildAppBar()
     {
-      this._appBarButtonRefresh.Click += new EventHandler(this._appBarButtonRefresh_Click);
-      this._defaultAppBar.Buttons.Add((object) this._appBarButtonRefresh);
+      this._appBarButtonRefresh.Click+=(new EventHandler(this._appBarButtonRefresh_Click));
+      this._defaultAppBar.Buttons.Add(this._appBarButtonRefresh);
       this._defaultAppBar.Opacity = 0.9;
     }
 
@@ -97,13 +103,13 @@ namespace VKClient.Common
       if (this._isInitilized)
         return;
       FeedbackViewModel vm = new FeedbackViewModel(this.panelFeedback, this.panelComments);
-      this.DataContext = (object) vm;
+      base.DataContext = vm;
       vm.LoadFeedback(false);
       this.UpdateAppBar();
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.panelFeedback);
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.panelComments);
-      this.panelFeedback.OnRefresh = (Action) (() => vm.FeedbackVM.LoadData(true, false, (Action<BackendResult<NotificationData, ResultCode>>) null, false));
-      this.panelComments.OnRefresh = (Action) (() => vm.CommentsVM.LoadData(true, false, (Action<BackendResult<NewsFeedData, ResultCode>>) null, false));
+      this.panelFeedback.OnRefresh = (Action) (() => vm.FeedbackVM.LoadData(true, false,  null, false));
+      this.panelComments.OnRefresh = (Action) (() => vm.CommentsVM.LoadData(true, false,  null, false));
       CountersManager.Current.ResetFeedback();
       this._isInitilized = true;
     }
@@ -136,19 +142,19 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/FeedbackPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.Header = (GenericHeaderUC) this.FindName("Header");
-      this.pivot = (Pivot) this.FindName("pivot");
-      this.pivotItemFeedback = (PivotItem) this.FindName("pivotItemFeedback");
-      this.scrollFeedback = (ViewportControl) this.FindName("scrollFeedback");
-      this.stackPanelFeedback = (StackPanel) this.FindName("stackPanelFeedback");
-      this.panelFeedback = (MyVirtualizingPanel2) this.FindName("panelFeedback");
-      this.pivotItemComments = (PivotItem) this.FindName("pivotItemComments");
-      this.scrollComments = (ViewportControl) this.FindName("scrollComments");
-      this.stackPanelComments = (StackPanel) this.FindName("stackPanelComments");
-      this.panelComments = (MyVirtualizingPanel2) this.FindName("panelComments");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/FeedbackPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.pivot = (Pivot) base.FindName("pivot");
+      this.pivotItemFeedback = (PivotItem) base.FindName("pivotItemFeedback");
+      this.scrollFeedback = (ViewportControl) base.FindName("scrollFeedback");
+      this.stackPanelFeedback = (StackPanel) base.FindName("stackPanelFeedback");
+      this.panelFeedback = (MyVirtualizingPanel2) base.FindName("panelFeedback");
+      this.pivotItemComments = (PivotItem) base.FindName("pivotItemComments");
+      this.scrollComments = (ViewportControl) base.FindName("scrollComments");
+      this.stackPanelComments = (StackPanel) base.FindName("stackPanelComments");
+      this.panelComments = (MyVirtualizingPanel2) base.FindName("panelComments");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
     }
   }
 }

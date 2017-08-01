@@ -40,7 +40,7 @@ namespace VKMessenger.Library
         string t = VKRequestsDispatcher.Token;
         BackendServices.LongPollServerService.GetLongPollServer((Action<BackendResult<LongPollServerResponse, ResultCode>>) (result =>
         {
-          Logger.Instance.Info("InstantUpdatesManager.Restart callback result = {0}", (object) result.ResultCode);
+          Logger.Instance.Info("InstantUpdatesManager.Restart callback result = {0}", result.ResultCode);
           if (result.ResultCode == ResultCode.Succeeded)
             this.RunRequestsLoop(t, result.ResultData);
           else
@@ -55,7 +55,7 @@ namespace VKMessenger.Library
       {
         LongPollServerService.Instance.GetUpdates(requestsSettings.server, requestsSettings.key, requestsSettings.ts, (Action<BackendResult<UpdatesResponse, LongPollResultCode>>) (res =>
         {
-          Logger.Instance.Info("InstantUpdatesManager.RunRequestsLoop callback result = {0}", (object) res.ResultCode);
+          Logger.Instance.Info("InstantUpdatesManager.RunRequestsLoop callback result = {0}", res.ResultCode);
           if (VKRequestsDispatcher.Token != token)
             return;
           if (res.ResultCode == LongPollResultCode.RequireNewPollServer)
@@ -86,7 +86,12 @@ namespace VKMessenger.Library
       {
         try
         {
-          this.ReceivedUpdates(updateData);
+          // ISSUE: reference to a compiler-generated field
+          InstantUpdatesManager.UpdatesReceivedEventHandler receivedUpdates = this.ReceivedUpdates;
+          if (receivedUpdates == null)
+            return;
+          List<LongPollServerUpdateData> updates = updateData;
+          receivedUpdates(updates);
         }
         catch (Exception ex)
         {

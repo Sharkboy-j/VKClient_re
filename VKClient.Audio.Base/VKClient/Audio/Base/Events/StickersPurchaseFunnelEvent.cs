@@ -4,9 +4,9 @@ namespace VKClient.Audio.Base.Events
 {
   public class StickersPurchaseFunnelEvent : StatEventBase
   {
-      public StickersPurchaseFunnelSource Source { get; set; }
+      public StickersPurchaseFunnelSource Source { get; private set; }
 
-      public StickersPurchaseFunnelAction Action { get; set; }
+      public StickersPurchaseFunnelAction Action { get; private set; }
 
     public StickersPurchaseFunnelEvent(StickersPurchaseFunnelSource source, StickersPurchaseFunnelAction action)
     {

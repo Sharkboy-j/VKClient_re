@@ -95,7 +95,7 @@
                         <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Profile/ProfileLink.png" />
                     </Border.OpacityMask>
                 </Border>
-                <TextBlock Text="{Binding Link, FallbackValue='http://vk.com'}"
+                <TextBlock Text="{Binding Link, FallbackValue='https://vk.com'}"
                            Margin="12 -5 0 0"
                            FontFamily="Segoe WP Semibold"
                            Foreground="{StaticResource PhoneListItemAccentForegroundBrush}"

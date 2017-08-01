@@ -32,6 +32,9 @@
                                          Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
                                          IsZoomEnabled="False">
 
+                        <toolkit:MenuItem Header="{Binding Path=LocalizedResources.Edit, Source={StaticResource LocalizedStrings}}"
+                                          Click="item_OnEditButtonClicked"/>
+
                         <toolkit:MenuItem Header="{Binding Path=LocalizedResources.Delete, Source={StaticResource LocalizedStrings}}"
                                           Click="item_OnDeleteButtonClicked"/>
                         

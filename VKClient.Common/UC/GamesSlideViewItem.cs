@@ -13,6 +13,7 @@ namespace VKClient.Common.UC
 
     public GamesSlideViewItem()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -30,9 +31,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GamesSlideViewItem.xaml", UriKind.Relative));
-      this.Header = (Border) this.FindName("Header");
-      this.Content = (Grid) this.FindName("Content");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GamesSlideViewItem.xaml", UriKind.Relative));
+      this.Header = (Border) base.FindName("Header");
+      this.Content = (Grid) base.FindName("Content");
     }
   }
 }

@@ -28,7 +28,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as FollowersViewModel;
+        return base.DataContext as FollowersViewModel;
       }
     }
 
@@ -40,9 +40,9 @@ namespace VKClient.Common
       this.listBox.OnRefresh = (Action) (() =>
       {
         if (this._subscriptions)
-          this.FollowersVM.SubscriptionsVM.LoadData(true, false, (Action<BackendResult<UsersAndGroups, ResultCode>>) null, false);
+          this.FollowersVM.SubscriptionsVM.LoadData(true, false,  null, false);
         else
-          this.FollowersVM.FollowersVM.LoadData(true, false, (Action<BackendResult<List<User>, ResultCode>>) null, false);
+          this.FollowersVM.FollowersVM.LoadData(true, false,  null, false);
       });
     }
 
@@ -52,19 +52,19 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       string name = "";
-      if (this.NavigationContext.QueryString.ContainsKey("Name"))
-        name = this.NavigationContext.QueryString["Name"];
-      if (this.NavigationContext.QueryString.ContainsKey("Mode") && this.NavigationContext.QueryString["Mode"] == "Subscriptions")
+      if (((Page) this).NavigationContext.QueryString.ContainsKey("Name"))
+        name = ((Page) this).NavigationContext.QueryString["Name"];
+      if (((Page) this).NavigationContext.QueryString.ContainsKey("Mode") && ((Page) this).NavigationContext.QueryString["Mode"] == "Subscriptions")
       {
         this._subscriptions = true;
-        this.listBox.SetBinding(FrameworkElement.DataContextProperty, new Binding("SubscriptionsVM"));
+        ((FrameworkElement) this.listBox).SetBinding((DependencyProperty) FrameworkElement.DataContextProperty, new Binding("SubscriptionsVM"));
       }
       FollowersViewModel followersViewModel = new FollowersViewModel(this.CommonParameters.UserOrGroupId, this.CommonParameters.IsGroup, name, this._subscriptions);
-      this.DataContext = (object) followersViewModel;
+      base.DataContext = followersViewModel;
       if (!this._subscriptions)
-        followersViewModel.FollowersVM.LoadData(false, false, (Action<BackendResult<List<User>, ResultCode>>) null, false);
+        followersViewModel.FollowersVM.LoadData(false, false,  null, false);
       else
-        followersViewModel.SubscriptionsVM.LoadData(false, false, (Action<BackendResult<UsersAndGroups, ResultCode>>) null, false);
+        followersViewModel.SubscriptionsVM.LoadData(false, false,  null, false);
       this._isInitialized = true;
     }
 
@@ -78,13 +78,13 @@ namespace VKClient.Common
 
     private void ExtendedLongListSelector_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
     {
-      UserGroupHeader userGroupHeader = this.listBox.SelectedItem as UserGroupHeader;
-      if (userGroupHeader == null)
+      UserGroupHeader selectedItem = this.listBox.SelectedItem as UserGroupHeader;
+      if (selectedItem == null)
         return;
-      if (userGroupHeader.UserHeader != null)
-        Navigator.Current.NavigateToUserProfile(userGroupHeader.UserHeader.UserId, userGroupHeader.UserHeader.User.Name, "", false);
-      else if (userGroupHeader.GroupHeader != null)
-        Navigator.Current.NavigateToGroup(userGroupHeader.GroupHeader.Group.id, userGroupHeader.GroupHeader.Group.name, false);
+      if (selectedItem.UserHeader != null)
+        Navigator.Current.NavigateToUserProfile(selectedItem.UserHeader.UserId, selectedItem.UserHeader.User.Name, "", false);
+      else if (selectedItem.GroupHeader != null)
+        Navigator.Current.NavigateToGroup(selectedItem.GroupHeader.Group.id, selectedItem.GroupHeader.Group.name, false);
       this.listBox.SelectedItem = null;
     }
 
@@ -94,11 +94,11 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/FollowersPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
-      this.listBox = (ExtendedLongListSelector) this.FindName("listBox");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/FollowersPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
+      this.listBox = (ExtendedLongListSelector) base.FindName("listBox");
     }
   }
 }

@@ -5,9 +5,11 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Input;
 using VKClient.Audio.Base.DataObjects;
+using VKClient.Audio.Base.Events;
 using VKClient.Common;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
@@ -32,6 +34,7 @@ namespace VKClient.Photos.Library
         private readonly AlbumType _albumType;
         private readonly string _albumId;
         private readonly bool _isGroup;
+        private readonly bool _forceCanUpload;
         private readonly int _adminLevel;
         private readonly PhotoAlbumViewModel.PhotoAlbumViewModelInput _inputData;
         private GenericCollectionViewModel<PhotosListWithCount, AlbumPhotoHeaderFourInARow> _photosGenCol;
@@ -149,6 +152,18 @@ namespace VKClient.Photos.Library
             }
         }
 
+        public bool CanAddPhotos
+        {
+            get
+            {
+                if (this._albumType == AlbumType.SavedPhotos)
+                    return false;
+                if (!this.CanEditAlbum)
+                    return this._forceCanUpload;
+                return true;
+            }
+        }
+
         public bool CanRemovePhoto
         {
             get
@@ -184,7 +199,7 @@ namespace VKClient.Photos.Library
             set
             {
                 this._pageTitle = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.PageTitle));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.PageTitle));
             }
         }
 
@@ -207,8 +222,8 @@ namespace VKClient.Photos.Library
             set
             {
                 this._albumName = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.AlbumName));
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.Title));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.AlbumName));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.Title));
             }
         }
 
@@ -221,8 +236,8 @@ namespace VKClient.Photos.Library
             set
             {
                 this._albumDescription = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.AlbumDescription));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.HaveAlbumDescVisibility));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.AlbumDescription));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.HaveAlbumDescVisibility));
             }
         }
 
@@ -230,7 +245,9 @@ namespace VKClient.Photos.Library
         {
             get
             {
-                return !string.IsNullOrEmpty(this.AlbumDescription) ? Visibility.Visible : Visibility.Collapsed;
+                if (!string.IsNullOrEmpty(this.AlbumDescription))
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -243,8 +260,8 @@ namespace VKClient.Photos.Library
             private set
             {
                 this._photosCount = value;
-                this.NotifyPropertyChanged<int>((System.Linq.Expressions.Expression<Func<int>>)(() => this.PhotosCount));
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.PhotosCountStr));
+                this.NotifyPropertyChanged<int>((Expression<Func<int>>)(() => this.PhotosCount));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.PhotosCountStr));
             }
         }
 
@@ -329,7 +346,7 @@ namespace VKClient.Photos.Library
                 if (!(this._thumbSrc != value))
                     return;
                 this._thumbSrc = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.ThumbSrc));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.ThumbSrc));
             }
         }
 
@@ -342,7 +359,7 @@ namespace VKClient.Photos.Library
             set
             {
                 this._headerOpacity = value;
-                this.NotifyPropertyChanged<double>((System.Linq.Expressions.Expression<Func<double>>)(() => this.HeaderOpacity));
+                this.NotifyPropertyChanged<double>((Expression<Func<double>>)(() => this.HeaderOpacity));
             }
         }
 
@@ -365,19 +382,19 @@ namespace VKClient.Photos.Library
                         this._albumPhotos.Clear();
                     List<Photo> response = plwc.response;
                     foreach (Photo photo in response)
-                        this.AddPhotoToAlbumPhotos(new AlbumPhoto(photo), false);
+                        this.AddPhotoToAlbumPhotos(new AlbumPhoto(photo, 0L), false);
                     foreach (IEnumerable<Photo> source in response.Partition<Photo>(4))
                     {
                         List<Photo> list = source.ToList<Photo>();
                         AlbumPhotoHeaderFourInARow headerFourInArow = new AlbumPhotoHeaderFourInARow(this.CanEditAlbum, this.CanRemovePhoto);
                         if (list.Count > 0)
-                            headerFourInArow.Photo1 = new AlbumPhoto(list[0]);
+                            headerFourInArow.Photo1 = new AlbumPhoto(list[0], 0L);
                         if (list.Count > 1)
-                            headerFourInArow.Photo2 = new AlbumPhoto(list[1]);
+                            headerFourInArow.Photo2 = new AlbumPhoto(list[1], 0L);
                         if (list.Count > 2)
-                            headerFourInArow.Photo3 = new AlbumPhoto(list[2]);
+                            headerFourInArow.Photo3 = new AlbumPhoto(list[2], 0L);
                         if (list.Count > 3)
-                            headerFourInArow.Photo4 = new AlbumPhoto(list[3]);
+                            headerFourInArow.Photo4 = new AlbumPhoto(list[3], 0L);
                         listWithCount.List.Add(headerFourInArow);
                     }
                     listWithCount.TotalCount = plwc.photosCount;
@@ -406,6 +423,7 @@ namespace VKClient.Photos.Library
             this._albumId = inputData.AlbumId;
             this._photosCount = inputData.PhotosCount;
             this._adminLevel = inputData.AdminLevel;
+            this._forceCanUpload = inputData.ForceCanUpload;
             this._albumPhotos.CollectionChanged += new NotifyCollectionChangedEventHandler(this._albumPhotos_CollectionChanged);
             this._photosGenCol = new GenericCollectionViewModel<PhotosListWithCount, AlbumPhotoHeaderFourInARow>((ICollectionDataProvider<PhotosListWithCount, AlbumPhotoHeaderFourInARow>)this);
             this._photosGenCol.PropertyChanged += new PropertyChangedEventHandler(this._photosGenCol_PropertyChanged);
@@ -419,14 +437,14 @@ namespace VKClient.Photos.Library
 
         private void _photosGenCol_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.FooterText));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.FooterTextVisibility));
-            this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.StatusText));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.StatusTextVisibility));
-            this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.IsLoading));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.IsLoadingVisibility));
-            this.NotifyPropertyChanged<ICommand>((System.Linq.Expressions.Expression<Func<ICommand>>)(() => this.TryAgainCmd));
-            this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.TryAgainVisibility));
+            this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.FooterText));
+            this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.FooterTextVisibility));
+            this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.StatusText));
+            this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.StatusTextVisibility));
+            this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsLoading));
+            this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.IsLoadingVisibility));
+            this.NotifyPropertyChanged<ICommand>((Expression<Func<ICommand>>)(() => this.TryAgainCmd));
+            this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.TryAgainVisibility));
         }
 
         private void LoadAlbumData()
@@ -471,12 +489,12 @@ namespace VKClient.Photos.Library
 
         public void DeletePhoto(Photo photo)
         {
-            //Func<AlbumPhoto, bool> func=null;
+            Func<AlbumPhoto, bool> func;
             PhotosService.Current.DeletePhoto(photo.pid, this.OwnerId, (Action<BackendResult<ResponseWithId, ResultCode>>)(res => Execute.ExecuteOnUIThread((Action)(() =>
             {
                 if (res.ResultCode == ResultCode.Succeeded)
                 {
-                    AlbumPhoto albumPhoto = this._albumPhotos.FirstOrDefault<AlbumPhoto>(/*func ??*/ (/*func =*/ (Func<AlbumPhoto, bool>)(ap => ap.Photo.pid == photo.pid)));
+                    AlbumPhoto albumPhoto = this._albumPhotos.FirstOrDefault<AlbumPhoto>( (func = (Func<AlbumPhoto, bool>)(ap => ap.Photo.pid == photo.pid)));
                     if (albumPhoto != null)
                     {
                         this._albumPhotos.Remove(albumPhoto);
@@ -486,31 +504,14 @@ namespace VKClient.Photos.Library
                     }
                     EventAggregator.Current.Publish((object)new PhotoDeletedFromAlbum()
                     {
-                        aid = this._albumId,
-                        pid = photo.pid
+                        OwnerId = this.OwnerId,
+                        AlbumId = this._albumId,
+                        PhotoId = photo.pid
                     });
-                    if (!this._albumPhotos.Any<AlbumPhoto>())
-                    {
-                        EventAggregator.Current.Publish((object)new PhotoSetAsAlbumCover()
-                        {
-                            aid = this._albumId
-                        });
-                    }
-                    else
-                    {
-                        if (!(this.ThumbSrc == photo.photo_75) && !(this.ThumbSrc == photo.photo_130) && (!(this.ThumbSrc == photo.photo_604) && !(this.ThumbSrc == photo.photo_807)) && (!(this.ThumbSrc == photo.photo_1280) && !(this.ThumbSrc == photo.photo_2560) && (!(this.ThumbSrc == photo.src) && !(this.ThumbSrc == photo.src_small))) && (!(this.ThumbSrc == photo.src_big) && !(this.ThumbSrc == photo.src_xbig) && !(this.ThumbSrc == photo.src_xxbig)))
-                            return;
-                        photo = this._albumPhotos.First<AlbumPhoto>().Photo;
-                        EventAggregator.Current.Publish((object)new PhotoSetAsAlbumCover()
-                        {
-                            aid = this._albumId,
-                            Photo = photo,
-                            pid = photo.pid
-                        });
-                    }
+                    this.UpdateThumbAfterPhotosMoving();
                 }
                 else
-                    GenericInfoUC.ShowBasedOnResult((int)res.ResultCode, "", (VKRequestsDispatcher.Error)null);
+                    GenericInfoUC.ShowBasedOnResult((int)res.ResultCode, "", null);
             }))));
         }
 
@@ -519,15 +520,17 @@ namespace VKClient.Photos.Library
             PhotosService.Current.DeletePhotos(this.OwnerId, photosToBeDeleted.Select<AlbumPhoto, long>((Func<AlbumPhoto, long>)(p => p.Photo.pid)).ToList<long>());
             foreach (AlbumPhoto albumPhoto in photosToBeDeleted)
             {
-                EventAggregator.Current.Publish((object)new PhotoDeletedFromAlbum()
-                {
-                    aid = this._albumId,
-                    pid = albumPhoto.Photo.pid
-                });
                 this._albumPhotos.Remove(albumPhoto);
                 this.PhotosCount = this.PhotosCount - 1;
                 --this._photosGenCol.TotalCount;
+                EventAggregator.Current.Publish((object)new PhotoDeletedFromAlbum()
+                {
+                    OwnerId = this.OwnerId,
+                    AlbumId = this._albumId,
+                    PhotoId = albumPhoto.Photo.pid
+                });
             }
+            this.UpdateThumbAfterPhotosMoving();
             this.RebindHeadersToAlbumPhotos();
         }
 
@@ -551,7 +554,7 @@ namespace VKClient.Photos.Library
                 stream.Read(numArray, 0, (int)stream.Length);
                 stream.Close();
                 this.SetInProgress(true, "");
-                PhotosService.Current.UploadPhotoToAlbum(this._albumId, this._isGroup ? this._userOrGroupId : 0L, numArray, (Action<BackendResult<Photo, ResultCode>>)(res =>
+                PhotosService.Current.UploadPhotoToAlbum(this._albumId, this._isGroup ? this._userOrGroupId : 0, numArray, (Action<BackendResult<Photo, ResultCode>>)(res =>
                 {
                     this.SetInProgress(false, "");
                     if (res.ResultCode == ResultCode.Succeeded)
@@ -563,8 +566,8 @@ namespace VKClient.Photos.Library
                             photoUploadedToAlbum.photo = resultData1;
                             long pid = resultData1.pid;
                             photoUploadedToAlbum.pid = pid;
-                            string @string = resultData1.aid.ToString();
-                            photoUploadedToAlbum.aid = @string;
+                            string str = resultData1.aid.ToString();
+                            photoUploadedToAlbum.aid = str;
                             current.Publish((object)photoUploadedToAlbum);
                             if (string.IsNullOrEmpty(this.ThumbSrc))
                             {
@@ -701,7 +704,7 @@ namespace VKClient.Photos.Library
             {
                 if (!(message.aid == this._albumId))
                     return;
-                this.AddPhotoToAlbumPhotos(new AlbumPhoto(message.photo), true);
+                this.AddPhotoToAlbumPhotos(new AlbumPhoto(message.photo, 0L), true);
                 this.PhotosCount = this.PhotosCount + 1;
                 ++this._photosGenCol.TotalCount;
                 this.RebindHeadersToAlbumPhotos();
@@ -718,7 +721,7 @@ namespace VKClient.Photos.Library
         {
             if (count <= 0)
                 return CommonResources.NoPhotos;
-            return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OnePhotoFrm, CommonResources.TwoFourPhotosFrm, CommonResources.FivePhotosFrm, true, (string)null, false);
+            return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OnePhotoFrm, CommonResources.TwoFourPhotosFrm, CommonResources.FivePhotosFrm, true, null, false);
         }
 
         public void Handle(PhotoSetAsAlbumCover message)
@@ -744,9 +747,9 @@ namespace VKClient.Photos.Library
             }
             else
             {
-                ObservableCollection<AlbumPhoto> source = this._albumPhotos;
-                Func<AlbumPhoto, Photo> selector = (Func<AlbumPhoto, Photo>)(p => p.Photo);
-                if (source.Select<AlbumPhoto, Photo>(selector).Any<Photo>((Func<Photo, bool>)(photo =>
+                ObservableCollection<AlbumPhoto> albumPhotos = this._albumPhotos;
+                Func<AlbumPhoto, Photo> func = (Func<AlbumPhoto, Photo>)(p => p.Photo);
+                if (albumPhotos.Select<AlbumPhoto, Photo>(func).Any<Photo>((Func<Photo, bool>)(photo =>
                 {
                     if (!(this.ThumbSrc == photo.photo_75) && !(this.ThumbSrc == photo.photo_130) && (!(this.ThumbSrc == photo.photo_604) && !(this.ThumbSrc == photo.photo_807)) && (!(this.ThumbSrc == photo.photo_1280) && !(this.ThumbSrc == photo.photo_2560) && (!(this.ThumbSrc == photo.src) && !(this.ThumbSrc == photo.src_small))) && (!(this.ThumbSrc == photo.src_big) && !(this.ThumbSrc == photo.src_xbig)))
                         return this.ThumbSrc == photo.src_xxbig;
@@ -794,6 +797,8 @@ namespace VKClient.Photos.Library
             public int PhotosCount { get; set; }
 
             public int AdminLevel { get; set; }
+
+            public bool ForceCanUpload { get; set; }
         }
     }
 }

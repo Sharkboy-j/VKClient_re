@@ -15,7 +15,9 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return !string.IsNullOrEmpty(this.Description) ? Visibility.Visible : Visibility.Collapsed;
+        if (!string.IsNullOrEmpty(this.Description))
+          return Visibility.Visible;
+        return Visibility.Collapsed;
       }
     }
 

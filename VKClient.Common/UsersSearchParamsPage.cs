@@ -19,18 +19,10 @@ namespace VKClient.Common
 {
   public class UsersSearchParamsPage : PageBase
   {
-    private readonly ApplicationBarIconButton _appBarButtonSave = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("./Resources/check.png", UriKind.Relative),
-      Text = CommonResources.AppBarMenu_Save
-    };
-    private readonly ApplicationBarIconButton _appBarButtonReset = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("./Resources/appbar.cancel.rest.png", UriKind.Relative),
-      Text = CommonResources.AppBar_Cancel
-    };
     private bool _isIntialized;
     private UsersSearchParamsViewModel _viewModel;
+    private readonly ApplicationBarIconButton _appBarButtonSave;
+    private readonly ApplicationBarIconButton _appBarButtonReset;
     internal Storyboard ShowCustomAgeAnimation;
     internal Storyboard HideCustomAgeAnimation;
     internal GenericHeaderUC ucHeader;
@@ -39,6 +31,20 @@ namespace VKClient.Common
 
     public UsersSearchParamsPage()
     {
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+      Uri uri1 = new Uri("./Resources/check.png", UriKind.Relative);
+      applicationBarIconButton1.IconUri = uri1;
+      string appBarMenuSave = CommonResources.AppBarMenu_Save;
+      applicationBarIconButton1.Text = appBarMenuSave;
+      this._appBarButtonSave = applicationBarIconButton1;
+      ApplicationBarIconButton applicationBarIconButton2 = new ApplicationBarIconButton();
+      Uri uri2 = new Uri("./Resources/appbar.cancel.rest.png", UriKind.Relative);
+      applicationBarIconButton2.IconUri = uri2;
+      string appBarCancel = CommonResources.AppBar_Cancel;
+      applicationBarIconButton2.Text = appBarCancel;
+      this._appBarButtonReset = applicationBarIconButton2;
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.ucHeader.TextBlockTitle.Text = CommonResources.PageTitle_UsersSearch_SearchParameters;
       this.ucHeader.HideSandwitchButton = true;
@@ -49,11 +55,11 @@ namespace VKClient.Common
     private void BuildAppBar()
     {
       ApplicationBar applicationBar = ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
-      applicationBar.Buttons.Add((object) this._appBarButtonSave);
-      this._appBarButtonSave.Click += new EventHandler(this.AppBarButtonSave_OnClick);
-      applicationBar.Buttons.Add((object) this._appBarButtonReset);
-      this._appBarButtonReset.Click += new EventHandler(this.AppBarButtonReset_OnClick);
-      this.ApplicationBar = (IApplicationBar) applicationBar;
+      applicationBar.Buttons.Add(this._appBarButtonSave);
+      this._appBarButtonSave.Click+=(new EventHandler(this.AppBarButtonSave_OnClick));
+      applicationBar.Buttons.Add(this._appBarButtonReset);
+      this._appBarButtonReset.Click+=(new EventHandler(this.AppBarButtonReset_OnClick));
+      this.ApplicationBar = ((IApplicationBar) applicationBar);
     }
 
     private void AppBarButtonSave_OnClick(object sender, EventArgs eventArgs)
@@ -73,20 +79,20 @@ namespace VKClient.Common
       if (this._isIntialized)
         return;
       this._viewModel = new UsersSearchParamsViewModel(ParametersRepository.GetParameterForIdAndReset("UsersSearchParams") as SearchParams);
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
       this._isIntialized = true;
     }
 
-    private void CountryPicker_OnTap(object sender, GestureEventArgs e)
+    private void CountryPicker_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      CountryPickerUC.Show(this._viewModel.Country, true, (Action<Country>) (country => this._viewModel.Country = country), null);
+      CountryPickerUC.Show(this._viewModel.Country, true, (Action<Country>) (country => this._viewModel.Country = country),  null);
     }
 
-    private void CityPicker_OnTap(object sender, GestureEventArgs e)
+    private void CityPicker_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this._viewModel.Country == null)
         return;
-      CityPickerUC.Show(this._viewModel.Country.id, this._viewModel.City, true, (Action<City>) (city => this._viewModel.City = city), null);
+      CityPickerUC.Show(this._viewModel.Country.id, this._viewModel.City, true, (Action<City>) (city => this._viewModel.City = city),  null);
     }
 
     private void AnyAgeCheckBox_OnUnchecked(object sender, RoutedEventArgs e)
@@ -105,11 +111,11 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UsersSearchParamsPage.xaml", UriKind.Relative));
-      this.ShowCustomAgeAnimation = (Storyboard) this.FindName("ShowCustomAgeAnimation");
-      this.HideCustomAgeAnimation = (Storyboard) this.FindName("HideCustomAgeAnimation");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.customAgeContainer = (Border) this.FindName("customAgeContainer");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UsersSearchParamsPage.xaml", UriKind.Relative));
+      this.ShowCustomAgeAnimation = (Storyboard) base.FindName("ShowCustomAgeAnimation");
+      this.HideCustomAgeAnimation = (Storyboard) base.FindName("HideCustomAgeAnimation");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.customAgeContainer = (Border) base.FindName("customAgeContainer");
     }
   }
 }

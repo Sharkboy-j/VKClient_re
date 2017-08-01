@@ -35,8 +35,8 @@ namespace VKClient.Common
       else
       {
         this.ucShareContent.ShareContentDataProvider = contentDataProvider;
-        this.DataContext = (object) new ViewModelBase();
-        (Application.Current as IAppStateInfo).ShareOperation = (ShareOperation) null;
+        base.DataContext = (new ViewModelBase());
+        (Application.Current as IAppStateInfo).ShareOperation =  null;
         this._isInitialized = true;
       }
     }
@@ -47,8 +47,8 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/ShareExternalContentPage.xaml", UriKind.Relative));
-      this.ucShareContent = (ShareContentUC) this.FindName("ucShareContent");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/ShareExternalContentPage.xaml", UriKind.Relative));
+      this.ucShareContent = (ShareContentUC) base.FindName("ucShareContent");
     }
   }
 }

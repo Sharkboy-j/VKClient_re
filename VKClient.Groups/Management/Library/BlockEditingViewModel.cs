@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Navigation;
 using VKClient.Audio.Base.DataObjects;
@@ -31,35 +32,26 @@ namespace VKClient.Groups.Management.Library
     private Visibility _addedByVisibility;
     private string _pageTitle;
 
-    public List<CustomListPickerItem> AvailableReasons
+    public List<CustomListPickerItem> AvailableReasons = new List<CustomListPickerItem>()
     {
-        get
-        {
-            return new List<CustomListPickerItem>()
-            {
-              new CustomListPickerItem()
-              {
-                Name = CommonResources.Other
-              },
-              new CustomListPickerItem()
-              {
-                Name = CommonResources.Group_BanReason_Spam
-              },
-              new CustomListPickerItem()
-              {
-                Name = CommonResources.Group_BanReason_VerbalAbuse
-              },
-              new CustomListPickerItem()
-              {
-                Name = CommonResources.Group_BanReason_StrongLanguage
-              },
-              new CustomListPickerItem()
-              {
-                Name = CommonResources.Group_BanReason_IrrelevantMessages
-              }
-            };
-        }
-    }
+      new CustomListPickerItem() { Name = CommonResources.Other },
+      new CustomListPickerItem()
+      {
+        Name = CommonResources.Group_BanReason_Spam
+      },
+      new CustomListPickerItem()
+      {
+        Name = CommonResources.Group_BanReason_VerbalAbuse
+      },
+      new CustomListPickerItem()
+      {
+        Name = CommonResources.Group_BanReason_StrongLanguage
+      },
+      new CustomListPickerItem()
+      {
+        Name = CommonResources.Group_BanReason_IrrelevantMessages
+      }
+    };
 
     public bool IsFormEnabled
     {
@@ -70,7 +62,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._isFormEnabled = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormEnabled));
       }
     }
 
@@ -118,8 +110,8 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        User user = this._manager;
-        return (user != null ? user.Name : null) ?? "";
+        User manager = this._manager;
+        return (manager != null ? manager.Name :  null) ?? "";
       }
     }
 
@@ -148,8 +140,8 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._comment = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Comment));
-        this.NotifyPropertyChanged<double>((System.Linq.Expressions.Expression<Func<double>>) (() => this.CommentPlaceholderOpacity));
+        this.NotifyPropertyChanged<string>((() => this.Comment));
+        this.NotifyPropertyChanged<double>((() => this.CommentPlaceholderOpacity));
       }
     }
 
@@ -162,7 +154,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._isCommentVisible = value;
-        this.NotifyPropertyChanged<bool?>((System.Linq.Expressions.Expression<Func<bool?>>) (() => this.IsCommentVisible));
+        this.NotifyPropertyChanged<bool?>((() => this.IsCommentVisible));
       }
     }
 
@@ -175,7 +167,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._reason = value;
-        this.NotifyPropertyChanged<CustomListPickerItem>((System.Linq.Expressions.Expression<Func<CustomListPickerItem>>) (() => this.Reason));
+        this.NotifyPropertyChanged<CustomListPickerItem>((() => this.Reason));
       }
     }
 
@@ -188,7 +180,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._duration = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Duration));
+        this.NotifyPropertyChanged<string>((() => this.Duration));
       }
     }
 
@@ -201,7 +193,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._addedByVisibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.AddedByVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.AddedByVisibility));
       }
     }
 
@@ -214,7 +206,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._pageTitle = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.PageTitle));
+        this.NotifyPropertyChanged<string>((() => this.PageTitle));
       }
     }
 
@@ -236,16 +228,13 @@ namespace VKClient.Groups.Management.Library
       }
       else
       {
-        user.ban_info = new BlockInformation()
-        {
-          date = 0
-        };
+        user.ban_info = new BlockInformation() { date = 0 };
         this.Reason = this.AvailableReasons.First<CustomListPickerItem>();
         this.DurationUnixTime = 0;
         this.PageTitle = CommonResources.Block.ToUpper();
         this.AddedByVisibility = Visibility.Collapsed;
       }
-      this.Duration = this.DurationUnixTime == 0 ? CommonResources.Forever : string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) UIStringFormatterHelper.FormateDateForEventUI(Extensions.UnixTimeStampToDateTime((double) this.DurationUnixTime, true)));
+      this.Duration = this.DurationUnixTime == 0 ? CommonResources.Forever : string.Format("{0} {1}", CommonResources.Unblocking, UIStringFormatterHelper.FormateDateForEventUI(Extensions.UnixTimeStampToDateTime((double) this.DurationUnixTime, true)));
     }
 
     public void GoToManagerProfile()
@@ -256,65 +245,65 @@ namespace VKClient.Groups.Management.Library
     public void UpdateDuration(int durationUnixTime)
     {
       this.DurationUnixTime = durationUnixTime;
-      this.Duration = this.DurationUnixTime == 0 ? CommonResources.Forever : string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) UIStringFormatterHelper.FormateDateForEventUI(Extensions.UnixTimeStampToDateTime((double) this.DurationUnixTime, true)));
+      this.Duration = this.DurationUnixTime == 0 ? CommonResources.Forever : string.Format("{0} {1}", CommonResources.Unblocking, UIStringFormatterHelper.FormateDateForEventUI(Extensions.UnixTimeStampToDateTime((double) this.DurationUnixTime, true)));
     }
 
     public void SaveChanges(NavigationService navigationService)
     {
-      int reason = 0;
-      if (this.Reason.Name == CommonResources.Group_BanReason_Spam)
-        reason = 1;
-      else if (this.Reason.Name == CommonResources.Group_BanReason_VerbalAbuse)
-        reason = 2;
-      else if (this.Reason.Name == CommonResources.Group_BanReason_StrongLanguage)
-        reason = 3;
-      else if (this.Reason.Name == CommonResources.Group_BanReason_IrrelevantMessages)
-        reason = 4;
-      this.SetInProgress(true, "");
-      this.IsFormEnabled = false;
-      GroupsService current1 = GroupsService.Current;
-      long communityId = this._communityId;
-      long id = this._user.id;
-      int durationUnixTime = this.DurationUnixTime;
-      int reason1 = reason;
-      string comment = this.Comment;
-      bool? isCommentVisible1 = this.IsCommentVisible;
-      bool flag1 = true;
-      int num1 = isCommentVisible1.GetValueOrDefault() == flag1 ? (isCommentVisible1.HasValue ? 1 : 0) : 0;
-      Action<BackendResult<int, ResultCode>> callback = (Action<BackendResult<int, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        if (result.ResultCode == ResultCode.Succeeded)
+        int reason = 0;
+        if (this.Reason.Name == CommonResources.Group_BanReason_Spam)
+            reason = 1;
+        else if (this.Reason.Name == CommonResources.Group_BanReason_VerbalAbuse)
+            reason = 2;
+        else if (this.Reason.Name == CommonResources.Group_BanReason_StrongLanguage)
+            reason = 3;
+        else if (this.Reason.Name == CommonResources.Group_BanReason_IrrelevantMessages)
+            reason = 4;
+        this.SetInProgress(true, "");
+        this.IsFormEnabled = false;
+        GroupsService current1 = GroupsService.Current;
+        long communityId = this._communityId;
+        long id = this._user.id;
+        int durationUnixTime = this.DurationUnixTime;
+        int reason1 = reason;
+        string comment = this.Comment;
+        bool? isCommentVisible1 = this.IsCommentVisible;
+        bool flag1 = true;
+        int num1 = isCommentVisible1.GetValueOrDefault() == flag1 ? (isCommentVisible1.HasValue ? 1 : 0) : 0;
+        Action<BackendResult<int, ResultCode>> callback = (Action<BackendResult<int, ResultCode>>)(result => Execute.ExecuteOnUIThread((Action)(() =>
         {
-          this._user.ban_info.date = Extensions.DateTimeToUnixTimestamp(DateTime.Now.ToUniversalTime(), true);
-          this._user.ban_info.end_date = this.DurationUnixTime;
-          this._user.ban_info.reason = reason;
-          this._user.ban_info.comment = this.Comment;
-          BlockInformation banInfo = this._user.ban_info;
-          bool? isCommentVisible2 = this.IsCommentVisible;
-          bool flag2 = true;
-          int num2 = (isCommentVisible2.GetValueOrDefault() == flag2 ? (isCommentVisible2.HasValue ? 1 : 0) : 0) != 0 ? 1 : 0;
-          banInfo.comment_visible = num2;
-          this._user.ban_info.admin_id = AppGlobalStateManager.Current.LoggedInUserId;
-          this._user.ban_info.manager = AppGlobalStateManager.Current.GlobalState.LoggedInUser;
-          EventAggregator current2 = EventAggregator.Current;
-          CommunityBlockChanged communityBlockChanged = new CommunityBlockChanged();
-          communityBlockChanged.CommunityId = this._communityId;
-          communityBlockChanged.User = this._user;
-          int num3 = this._manager != null ? 1 : 0;
-          communityBlockChanged.IsEditing = num3 != 0;
-          current2.Publish((object) communityBlockChanged);
-          if (!this._isEditing && !this._isOpenedWithoutPicker)
-            navigationService.RemoveBackEntry();
-          Navigator.Current.GoBack();
-        }
-        else
-        {
-          this.SetInProgress(false, "");
-          this.IsFormEnabled = true;
-          GenericInfoUC.ShowBasedOnResult((int) result.ResultCode, "", (VKRequestsDispatcher.Error) null);
-        }
-      })));
-      current1.BlockUser(communityId, id, durationUnixTime, reason1, comment, num1 != 0, callback);
+            if (result.ResultCode == ResultCode.Succeeded)
+            {
+                this._user.ban_info.date = Extensions.DateTimeToUnixTimestamp(DateTime.Now.ToUniversalTime(), true);
+                this._user.ban_info.end_date = this.DurationUnixTime;
+                this._user.ban_info.reason = reason;
+                this._user.ban_info.comment = this.Comment;
+                BlockInformation banInfo = this._user.ban_info;
+                bool? isCommentVisible2 = this.IsCommentVisible;
+                bool flag2 = true;
+                int num2 = (isCommentVisible2.GetValueOrDefault() == flag2 ? (isCommentVisible2.HasValue ? 1 : 0) : 0) != 0 ? 1 : 0;
+                banInfo.comment_visible = num2;
+                this._user.ban_info.admin_id = AppGlobalStateManager.Current.LoggedInUserId;
+                this._user.ban_info.manager = AppGlobalStateManager.Current.GlobalState.LoggedInUser;
+                EventAggregator current2 = EventAggregator.Current;
+                CommunityBlockChanged communityBlockChanged = new CommunityBlockChanged();
+                communityBlockChanged.CommunityId = this._communityId;
+                communityBlockChanged.User = this._user;
+                int num3 = this._manager != null ? 1 : 0;
+                communityBlockChanged.IsEditing = num3 != 0;
+                current2.Publish((object)communityBlockChanged);
+                if (!this._isEditing && !this._isOpenedWithoutPicker)
+                    navigationService.RemoveBackEntry();
+                Navigator.Current.GoBack();
+            }
+            else
+            {
+                this.SetInProgress(false, "");
+                this.IsFormEnabled = true;
+                GenericInfoUC.ShowBasedOnResult((int)result.ResultCode, "", null);
+            }
+        })));
+        current1.BlockUser(communityId, id, durationUnixTime, reason1, comment, num1 != 0, callback);
     }
   }
 }

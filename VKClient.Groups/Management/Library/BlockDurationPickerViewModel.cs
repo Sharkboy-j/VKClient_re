@@ -18,7 +18,7 @@ namespace VKClient.Groups.Management.Library
       {
         string str = UIStringFormatterHelper.FormateDateForEventUI(Extensions.UnixTimeStampToDateTime((double) this._currentDuration, true));
         if (this._currentDuration != 0)
-          return string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) str);
+          return string.Format("{0} {1}", CommonResources.Unblocking, str);
         return CommonResources.UnblockByManager;
       }
     }
@@ -35,7 +35,7 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        return string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddYears(1)));
+        return string.Format("{0} {1}", CommonResources.Unblocking, UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddYears(1)));
       }
     }
 
@@ -43,7 +43,7 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        return string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddMonths(1)));
+        return string.Format("{0} {1}", CommonResources.Unblocking, UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddMonths(1)));
       }
     }
 
@@ -51,7 +51,7 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        return string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddDays(7.0)));
+        return string.Format("{0} {1}", CommonResources.Unblocking, UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddDays(7.0)));
       }
     }
 
@@ -59,7 +59,7 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        return string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddDays(1.0)));
+        return string.Format("{0} {1}", CommonResources.Unblocking, UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddDays(1.0)));
       }
     }
 
@@ -67,7 +67,7 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        return string.Format("{0} {1}", (object) CommonResources.Unblocking, (object) UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddHours(1.0)));
+        return string.Format("{0} {1}", CommonResources.Unblocking, UIStringFormatterHelper.FormateDateForEventUI(this.TimeNow.AddHours(1.0)));
       }
     }
 

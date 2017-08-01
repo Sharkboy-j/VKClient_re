@@ -9,7 +9,7 @@ namespace VKClient.Audio.Base.Library
 
     public static void Register<T>(T service)
     {
-      ServiceLocator._services[typeof (T)] = (object) service;
+      ServiceLocator._services[typeof (T)] = service;
     }
 
     public static T Resolve<T>()

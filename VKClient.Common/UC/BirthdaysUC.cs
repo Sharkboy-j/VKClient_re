@@ -3,41 +3,70 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using VKClient.Audio.Base.Events;
+using VKClient.Common.Framework;
 
 namespace VKClient.Common.UC
 {
   public class BirthdaysUC : UserControl
   {
-    internal Grid LayoutRoot;
-    internal Grid gridHeader;
     private bool _contentLoaded;
 
     public BirthdaysUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.DataContext = (object) new UpcomingBirthdaysViewModel();
+      base.DataContext = (new BirthdaysViewModel());
     }
 
-    private void HeaderTap(object sender, GestureEventArgs e)
+    private void Header_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
       MenuUC.Instance.NavigateToBirthdays(false);
     }
 
-    private void HeaderHold(object sender, GestureEventArgs e)
+    private void Header_OnHolding(object sender, System.Windows.Input.GestureEventArgs e)
     {
       MenuUC.Instance.NavigateToBirthdays(true);
     }
 
-    private void Grid_Tap(object sender, GestureEventArgs e)
+    private void Birthday_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      BirthdayInfo birthdayInfo = (sender as FrameworkElement).DataContext as BirthdayInfo;
-      MenuUC.Instance.NavigateToUserProfile(birthdayInfo.friend.uid, birthdayInfo.friend.Name, false);
+      BirthdaysUC.NavigateToUserProfile(sender, false);
     }
 
-    private void Grid_Hold(object sender, GestureEventArgs e)
+    private void Birthday_OnHolding(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      BirthdayInfo birthdayInfo = (sender as FrameworkElement).DataContext as BirthdayInfo;
-      MenuUC.Instance.NavigateToUserProfile(birthdayInfo.friend.uid, birthdayInfo.friend.Name, true);
+      BirthdaysUC.NavigateToUserProfile(sender, true);
+    }
+
+    private static void NavigateToUserProfile(object sender, bool isHoldingEvent)
+    {
+      FrameworkElement frameworkElement = (FrameworkElement) sender;
+      Birthday birthday = (frameworkElement != null ? frameworkElement.DataContext : null) as Birthday;
+      if (birthday == null)
+        return;
+      EventAggregator.Current.Publish(new GiftsPurchaseStepsEvent(GiftPurchaseStepsSource.left_menu, GiftPurchaseStepsAction.profile));
+      MenuUC.Instance.NavigateToUserProfile(birthday.UserId, birthday.UserName, isHoldingEvent);
+    }
+
+    private void SendGift_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      BirthdaysUC.NavigateToGiftsCatalog(sender, false);
+    }
+
+    private void SendGift_OnHold(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      BirthdaysUC.NavigateToGiftsCatalog(sender, true);
+    }
+
+    private static void NavigateToGiftsCatalog(object sender, bool isHoldingEvent)
+    {
+      FrameworkElement frameworkElement = (FrameworkElement) sender;
+      Birthday birthday = (frameworkElement != null ? frameworkElement.DataContext : null) as Birthday;
+      if (birthday == null)
+        return;
+      EventAggregator.Current.Publish(new GiftsPurchaseStepsEvent(GiftPurchaseStepsSource.left_menu, GiftPurchaseStepsAction.store));
+      MenuUC.Instance.NavigateToGiftsCatalog(birthday.UserId, isHoldingEvent);
     }
 
     [DebuggerNonUserCode]
@@ -46,9 +75,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/BirthdaysUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.gridHeader = (Grid) this.FindName("gridHeader");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/BirthdaysUC.xaml", UriKind.Relative));
     }
   }
 }

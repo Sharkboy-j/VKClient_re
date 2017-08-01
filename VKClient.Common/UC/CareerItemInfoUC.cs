@@ -9,8 +9,8 @@ namespace VKClient.Common.UC
 {
   public class CareerItemInfoUC : UserControl
   {
-    public static readonly DependencyProperty DescriptionProperty = DependencyProperty.Register("Description", typeof (string), typeof (CareerItemInfoUC), new PropertyMetadata(new PropertyChangedCallback(CareerItemInfoUC.OnDescriptionChanged)));
-    public static readonly DependencyProperty GroupImageProperty = DependencyProperty.Register("GroupImage", typeof (string), typeof (CareerItemInfoUC), new PropertyMetadata(new PropertyChangedCallback(CareerItemInfoUC.OnGroupImageChanged)));
+      public static readonly DependencyProperty DescriptionProperty = DependencyProperty.Register("Description", typeof(string), typeof(CareerItemInfoUC), new PropertyMetadata(new PropertyChangedCallback(CareerItemInfoUC.OnDescriptionChanged)));
+      public static readonly DependencyProperty GroupImageProperty = DependencyProperty.Register("GroupImage", typeof(string), typeof(CareerItemInfoUC), new PropertyMetadata(new PropertyChangedCallback(CareerItemInfoUC.OnGroupImageChanged)));
     internal TextBlock textBlockDescription;
     internal Ellipse imageGroupPlaceholder;
     internal Image imageGroup;
@@ -20,11 +20,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(CareerItemInfoUC.DescriptionProperty);
+        return (string) base.GetValue(CareerItemInfoUC.DescriptionProperty);
       }
       set
       {
-        this.SetValue(CareerItemInfoUC.DescriptionProperty, (object) value);
+        base.SetValue(CareerItemInfoUC.DescriptionProperty, value);
       }
     }
 
@@ -32,20 +32,21 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(CareerItemInfoUC.GroupImageProperty);
+        return (string) base.GetValue(CareerItemInfoUC.GroupImageProperty);
       }
       set
       {
-        this.SetValue(CareerItemInfoUC.GroupImageProperty, (object) value);
+        base.SetValue(CareerItemInfoUC.GroupImageProperty, value);
       }
     }
 
     public CareerItemInfoUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.imageGroupPlaceholder.Visibility = Visibility.Collapsed;
-      this.imageGroup.Visibility = Visibility.Collapsed;
-      this.textBlockDescription.Text = "";
+      ((UIElement) this.imageGroupPlaceholder).Visibility = Visibility.Collapsed;
+      ((UIElement) this.imageGroup).Visibility = Visibility.Collapsed;
+      this.textBlockDescription.Text=("");
     }
 
     private static void OnDescriptionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -53,8 +54,9 @@ namespace VKClient.Common.UC
       CareerItemInfoUC careerItemInfoUc = d as CareerItemInfoUC;
       if (careerItemInfoUc == null)
         return;
-      string str = e.NewValue as string;
-      careerItemInfoUc.textBlockDescription.Text = str;
+      // ISSUE: explicit reference operation
+      string newValue = e.NewValue as string;
+      careerItemInfoUc.textBlockDescription.Text = newValue;
     }
 
     private static void OnGroupImageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -62,18 +64,19 @@ namespace VKClient.Common.UC
       CareerItemInfoUC careerItemInfoUc = d as CareerItemInfoUC;
       if (careerItemInfoUc == null)
         return;
-      string str = e.NewValue as string;
-      if (!string.IsNullOrEmpty(str))
+      // ISSUE: explicit reference operation
+      string newValue = e.NewValue as string;
+      if (!string.IsNullOrEmpty(newValue))
       {
-        ImageLoader.SetUriSource(careerItemInfoUc.imageGroup, str);
-        careerItemInfoUc.imageGroupPlaceholder.Visibility = Visibility.Visible;
-        careerItemInfoUc.imageGroup.Visibility = Visibility.Visible;
+        ImageLoader.SetUriSource(careerItemInfoUc.imageGroup, newValue);
+        ((UIElement) careerItemInfoUc.imageGroupPlaceholder).Visibility = Visibility.Visible;
+        ((UIElement) careerItemInfoUc.imageGroup).Visibility = Visibility.Visible;
       }
       else
       {
         ImageLoader.SetUriSource(careerItemInfoUc.imageGroup, "");
-        careerItemInfoUc.imageGroupPlaceholder.Visibility = Visibility.Collapsed;
-        careerItemInfoUc.imageGroup.Visibility = Visibility.Collapsed;
+        ((UIElement) careerItemInfoUc.imageGroupPlaceholder).Visibility = Visibility.Collapsed;
+        ((UIElement) careerItemInfoUc.imageGroup).Visibility = Visibility.Collapsed;
       }
     }
 
@@ -83,10 +86,10 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/CareerItemInfoUC.xaml", UriKind.Relative));
-      this.textBlockDescription = (TextBlock) this.FindName("textBlockDescription");
-      this.imageGroupPlaceholder = (Ellipse) this.FindName("imageGroupPlaceholder");
-      this.imageGroup = (Image) this.FindName("imageGroup");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/CareerItemInfoUC.xaml", UriKind.Relative));
+      this.textBlockDescription = (TextBlock) base.FindName("textBlockDescription");
+      this.imageGroupPlaceholder = (Ellipse) base.FindName("imageGroupPlaceholder");
+      this.imageGroup = (Image) base.FindName("imageGroup");
     }
   }
 }

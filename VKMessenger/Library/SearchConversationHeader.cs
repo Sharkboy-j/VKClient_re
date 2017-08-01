@@ -1,27 +1,121 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using VKClient.Common.Backend.DataObjects;
+using VKClient.Common.Library;
 using VKMessenger.Backend;
 
 namespace VKMessenger.Library
 {
   public class SearchConversationHeader : ConversationHeader
   {
-    public Visibility IsOnlineSearch
+    public string Title
     {
       get
       {
-        return this._associatedUsers != null && this._associatedUsers.Count == 1 && (this._associatedUsers.First<User>().online != 0 && this._associatedUsers.First<User>().online_mobile == 0) ? Visibility.Visible : Visibility.Collapsed;
+        return this.UITitle;
       }
     }
 
-    public Visibility IsOnlineMobileSearch
+    public Visibility OnlineIconVisibility
     {
       get
       {
-        return this._associatedUsers != null && this._associatedUsers.Count == 1 && this._associatedUsers.First<User>().online_mobile != 0 ? Visibility.Visible : Visibility.Collapsed;
+        return this.IsOnlineVisibility;
+      }
+    }
+
+    public Visibility MobileOnlineIconVisibility
+    {
+      get
+      {
+        return this.IsOnlineMobileVisibility;
+      }
+    }
+
+    public Visibility DisabledNotificationsIconVisibility
+    {
+      get
+      {
+        return this.NotificationsDisabledVisibility;
+      }
+    }
+
+    public Visibility UserPhotoVisibility
+    {
+      get
+      {
+        return this.IsNotChatVisibility;
+      }
+    }
+
+    public Visibility ChatPhotosVisibility
+    {
+      get
+      {
+        return this.IsChatVisibility;
+      }
+    }
+
+    public string UserPhoto
+    {
+      get
+      {
+          if (this.UserPhotoVisibility != Visibility.Visible)
+          return "";
+        string photo200 = this._message.photo_200;
+        if (string.IsNullOrEmpty(photo200))
+          return this.User.photo_max;
+        return photo200;
+      }
+    }
+
+    public string ChatUserPhoto1
+    {
+      get
+      {
+        return this.GetChatUserPhoto(0);
+      }
+    }
+
+    public string ChatUserPhoto2
+    {
+      get
+      {
+        return this.GetChatUserPhoto(1);
+      }
+    }
+
+    public string ChatUserPhoto3
+    {
+      get
+      {
+        return this.GetChatUserPhoto(2);
+      }
+    }
+
+    public string ChatUserPhoto4
+    {
+      get
+      {
+        return this.GetChatUserPhoto(3);
+      }
+    }
+
+    public Visibility ChatLeftUserPhotoVisibility
+    {
+      get
+      {
+        if (!(this.GetChatUserPhoto(2) == ""))
+          return Visibility.Collapsed;
+        return Visibility.Visible;
+      }
+    }
+
+    public Visibility ChatRightUserPhotoVisibility
+    {
+      get
+      {
+        return this.ChatLeftUserPhotoVisibility;
       }
     }
 
@@ -30,10 +124,21 @@ namespace VKMessenger.Library
     {
     }
 
-    protected override string FormatTitleForUser(User user)
+    private string GetChatUserPhoto(int userIndex)
     {
-      this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.IsOnlineSearch));
-      return string.Format("{0} {1}", (object) user.first_name, (object) user.last_name);
+      List<User> associatedUsers = this._associatedUsers;
+      if (associatedUsers.Count <= userIndex)
+        return "";
+      int num = 0;
+      foreach (User user in associatedUsers)
+      {
+        if (user.id == AppGlobalStateManager.Current.LoggedInUserId && associatedUsers.Count > userIndex + 2)
+          ++userIndex;
+        if (userIndex == num)
+          return user.photo_max;
+        ++num;
+      }
+      return "";
     }
   }
 }

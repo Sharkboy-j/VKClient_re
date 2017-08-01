@@ -5,15 +5,20 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using VKClient.Audio.Base.BackendServices;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Events;
 using VKClient.Audio.Base.Library;
+using VKClient.Common.CommonExtensions;
 using VKClient.Common.Emoji;
 using VKClient.Common.Framework;
+using VKClient.Common.ImageViewer;
 using VKClient.Common.Library;
 using VKClient.Common.Shared.ImagePreview;
 using VKClient.Common.Stickers.AutoSuggest;
@@ -25,16 +30,22 @@ namespace VKClient.Common.UC
 {
   public class NewMessageUC : UserControl, IHandle<StickersAutoSuggestDictionary.AutoSuggestDictionaryUpdatedEvent>, IHandle, IHandle<PreviewCompletedEvent>, IHandle<HasStickersUpdatesChangedEvent>, IHandle<StickersSettings.StickersListUpdatedEvent>, IHandle<StickersSettings.StickersKeyboardOpenRequestEvent>, IHandle<StickersSettings.StickersItemTapEvent>
   {
-    private string _lastKeyForAutoSuggest = "";
-    private bool _isEnabled = true;
+      public static readonly DependencyProperty IsVoiceMessageButtonEnabledProperty = DependencyProperty.Register("IsVoiceMessageButtonEnabled", typeof(bool), typeof(NewMessageUC), new PropertyMetadata(new PropertyChangedCallback(NewMessageUC.IsVoiceMessageButtonEnabled_OnChanged)));
     private int _adminLevel;
     private PhoneApplicationPage _parentPage;
+    private bool _canRecordVoiceMessage;
+    private string _lastKeyForAutoSuggest;
     private bool _lastAutoSuggestStickersEnabled;
     private string _replyAutoForm;
+    private bool _isEnabled;
     private ImageBrush _keyboardBrush;
     private ImageBrush _emojiBrush;
+    private DispatcherTimer _auioRecordHoldTimer;
+    private Point _translationOrigin;
+    private bool _isAnimatingHoldToRecord;
     private bool _panelInitialized;
     private SwipeThroughControl _stickersSlideView;
+    internal MentionPickerUC mentionPicker;
     internal StackPanel panelReply;
     internal CheckBox checkBoxAsCommunity;
     internal TextBlock textBlockReply;
@@ -43,7 +54,10 @@ namespace VKClient.Common.UC
     internal NewPostUC ucNewPost;
     internal Border borderEmoji;
     internal Ellipse ellipseHasStickersUpdates;
+    internal Border borderHoldToRecord;
     internal Border borderSend;
+    internal Border borderVoice;
+    internal AudioRecorderUC ucAudioRecorder;
     internal StickersAutoSuggestUC ucStickersAutoSuggest;
     internal TextBoxPanelControl panelControl;
     private bool _contentLoaded;
@@ -55,6 +69,10 @@ namespace VKClient.Common.UC
         return this._adminLevel > 1;
       }
     }
+
+    public long UserOrChatId { get; set; }
+
+    public bool IsChat { get; set; }
 
     public ScrollViewer ScrollNewMessage
     {
@@ -104,28 +122,61 @@ namespace VKClient.Common.UC
     {
       get
       {
-        if (this.checkBoxAsCommunity.IsChecked.HasValue)
-          return this.checkBoxAsCommunity.IsChecked.Value;
+        if (((ToggleButton) this.checkBoxAsCommunity).IsChecked.HasValue)
+          return ((ToggleButton) this.checkBoxAsCommunity).IsChecked.Value;
         return false;
+      }
+    }
+
+    public bool IsVoiceMessageButtonEnabled
+    {
+      get
+      {
+        return (bool) base.GetValue(NewMessageUC.IsVoiceMessageButtonEnabledProperty);
+      }
+      set
+      {
+        base.SetValue(NewMessageUC.IsVoiceMessageButtonEnabledProperty, value);
+      }
+    }
+
+    public MentionPickerUC MentionPicker
+    {
+      get
+      {
+        return this.mentionPicker;
       }
     }
 
     public NewMessageUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
       this.SetAdminLevel(0);
       this.panelControl.BindTextBox(this.TextBoxNewComment);
       this.panelControl.IsFocusedChanged += new EventHandler<bool>(this.IsFocusedChanged);
       this.panelControl.IsEmojiOpenedChanged += new EventHandler<bool>(this.IsEmojiOpenedChanged);
+      // ISSUE: method pointer
       this.TextBoxNewComment.TextChanged += new TextChangedEventHandler(this.TextBoxNewComment_TextChanged);
-      this.UpdateSendButton(false);
+            this.UpdateSendButton(false);
       this.UpdateAutoSuggestVisibility();
       this.ucStickersAutoSuggest.AutoSuggestStickerSendingCallback = new Action(this.OnAutoSuggestStickerSending);
       this.ucStickersAutoSuggest.AutoSuggestStickerSentCallback = new Action(this.OnAutoSuggestStickerSent);
-      this.Loaded += new RoutedEventHandler(this.NewMessageUC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.NewMessageUC_Loaded));
       this.UpdateHasStickersUpdatesState();
       this._lastAutoSuggestStickersEnabled = AppGlobalStateManager.Current.GlobalState.StickersAutoSuggestEnabled;
-      EventAggregator.Current.Subscribe((object) this);
+      this.UpdateVoiceMessageAvailability();//4.12
+      EventAggregator.Current.Subscribe((object)this);
+      base.SizeChanged += (delegate(object sender, SizeChangedEventArgs args)//4.12
+      {
+          double width = args.NewSize.Width;
+          if (double.IsNaN(width) || double.IsInfinity(width))
+          {
+              return;
+          }
+          this.ucAudioRecorder.Width = (width);
+      });
     }
 
     public void SetAdminLevel(int adminLevel)
@@ -133,18 +184,48 @@ namespace VKClient.Common.UC
       this._adminLevel = adminLevel;
       if (this.HaveRightsToPostOnBehalfOfCommunity)
       {
-        this.panelReply.Visibility = Visibility.Visible;
-        this.checkBoxAsCommunity.Visibility = Visibility.Visible;
-        this.textBlockReply.Visibility = Visibility.Collapsed;
+        ((UIElement) this.panelReply).Visibility = Visibility.Visible;
+        ((UIElement) this.checkBoxAsCommunity).Visibility = Visibility.Visible;
+        ((UIElement) this.textBlockReply).Visibility = Visibility.Collapsed;
       }
       else
       {
-        this.checkBoxAsCommunity.Visibility = Visibility.Collapsed;
-        this.textBlockReply.Visibility = Visibility.Visible;
+        ((UIElement) this.checkBoxAsCommunity).Visibility = Visibility.Collapsed;
+        ((UIElement) this.textBlockReply).Visibility = Visibility.Visible;
         if (!string.IsNullOrEmpty(this.ucReplyUser.Title))
           return;
-        this.panelReply.Visibility = Visibility.Collapsed;
-        this.ucReplyUser.Visibility = Visibility.Collapsed;
+        ((UIElement) this.panelReply).Visibility = Visibility.Collapsed;
+        ((UIElement) this.ucReplyUser).Visibility = Visibility.Collapsed;
+      }
+    }
+
+    private static void IsVoiceMessageButtonEnabled_OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      ((NewMessageUC) d).UpdateVoiceMessageAvailability();
+    }
+
+    public void HideAudioRecoringUC()
+    {
+      this.ucAudioRecorder.IsOpened = false;
+    }
+
+    public void ShowAudioRecordingPreview()
+    {
+      this.ucAudioRecorder.StopRecordingAndShowPreview();
+    }
+
+    private void UpdateVoiceMessageAvailability()
+    {
+      this._canRecordVoiceMessage = AudioRecorderHelper.CanRecord && this.IsVoiceMessageButtonEnabled;
+      if (this._canRecordVoiceMessage)
+      {
+        ((UIElement) this.borderSend).Opacity = 0.0;
+        ((UIElement) this.borderVoice).Visibility = Visibility.Visible;
+      }
+      else
+      {
+        ((UIElement) this.borderSend).Opacity = 1.0;
+        ((UIElement) this.borderVoice).Visibility = Visibility.Collapsed;
       }
     }
 
@@ -155,7 +236,7 @@ namespace VKClient.Common.UC
       this._parentPage = (PhoneApplicationPage) FramePageUtils.CurrentPage;
       if (this._parentPage == null)
         return;
-      this._parentPage.OrientationChanged += new EventHandler<OrientationChangedEventArgs>(this._parentPage_OrientationChanged);
+      this._parentPage.OrientationChanged += (new EventHandler<OrientationChangedEventArgs>(this._parentPage_OrientationChanged));
     }
 
     private void _parentPage_OrientationChanged(object sender, OrientationChangedEventArgs e)
@@ -170,12 +251,14 @@ namespace VKClient.Common.UC
 
     private void OnAutoSuggestStickerSent()
     {
-      this.TextBoxNewComment.Text = "";
+      this.TextBoxNewComment.Text = ("");
       this._replyAutoForm = "";
     }
 
     private void TextBoxNewComment_TextChanged(object sender, TextChangedEventArgs e)
     {
+      if (this.ucAudioRecorder.IsOpened)
+        this.TextBoxNewComment.Text = ("");
       this.UpdateAutoSuggest(false);
     }
 
@@ -196,7 +279,25 @@ namespace VKClient.Common.UC
 
     private void UpdateAutoSuggestVisibility()
     {
-      this.ucStickersAutoSuggest.ShowHide((this.ucNewPost.IsFocused || this.panelControl.IsOpen) && (this._parentPage == null || this._parentPage.Orientation != PageOrientation.Landscape && this._parentPage.Orientation != PageOrientation.LandscapeLeft && this._parentPage.Orientation != PageOrientation.LandscapeRight) && this.ucStickersAutoSuggest.HasItemsToShow);
+        this.ucStickersAutoSuggest.ShowHide((this.ucNewPost.IsFocused || this.panelControl.IsOpen) && (this._parentPage == null || this._parentPage.Orientation != PageOrientation.Landscape && this._parentPage.Orientation != PageOrientation.LandscapeLeft && this._parentPage.Orientation != PageOrientation.LandscapeRight) && this.ucStickersAutoSuggest.HasItemsToShow);
+    }
+
+    private void UpdateAudioMessage()
+    {
+      if (this._isEnabled)
+      {
+        ((UIElement) this.borderVoice).Opacity = 0.0;
+        ((UIElement) this.borderSend).Opacity = 1.0;
+        ((UIElement) this.borderVoice).IsHitTestVisible = false;
+        ((UIElement) this.borderSend).IsHitTestVisible = true;
+      }
+      else
+      {
+        ((UIElement) this.borderVoice).Opacity = 1.0;
+        ((UIElement) this.borderSend).Opacity = 0.0;
+        ((UIElement) this.borderVoice).IsHitTestVisible = true;
+        ((UIElement) this.borderSend).IsHitTestVisible = false;
+      }
     }
 
     public void SetReplyAutoForm(string replyAutoForm)
@@ -207,7 +308,10 @@ namespace VKClient.Common.UC
     public void UpdateSendButton(bool isEnabled)
     {
       this._isEnabled = isEnabled;
-      MetroInMotion.SetTilt((DependencyObject) this.borderSend, !isEnabled ? 0.0 : 2.1);
+      this.scrollNewMessage.VerticalScrollBarVisibility=(this._isEnabled ? (ScrollBarVisibility) 1 : (ScrollBarVisibility) 0);
+      if (!this._canRecordVoiceMessage)
+        return;
+      this.UpdateAudioMessage();
     }
 
     private void IsEmojiOpenedChanged(object sender, bool e)
@@ -231,7 +335,7 @@ namespace VKClient.Common.UC
         }
         imageBrush = this._emojiBrush;
       }
-      this.borderEmoji.OpacityMask = (Brush) imageBrush;
+      ((UIElement) this.borderEmoji).OpacityMask=((Brush) imageBrush);
       this.UpdateAutoSuggest(false);
     }
 
@@ -257,21 +361,102 @@ namespace VKClient.Common.UC
       this.OnSendTap();
     }
 
+    private void UcAudioRecorder_OnOpened(object sender, EventArgs e)
+    {
+      this.panelControl.ShowOverlay();
+    }
+
+    private void UcAudioRecorder_OnClosed(object sender, EventArgs e)
+    {
+      this.panelControl.HideOverlay();
+      this.ucNewPost.ForceFocusIfNeeded();
+    }
+
+    private void BorderVoice_OnManipulationStarted(object sender, ManipulationStartedEventArgs e)
+    {
+      e.Handled = true;
+      this._translationOrigin = e.ManipulationOrigin;
+      this.TextBoxNewComment.Text = ("");
+      if (this._auioRecordHoldTimer == null)
+      {
+        DispatcherTimer dispatcherTimer = new DispatcherTimer();
+        TimeSpan timeSpan = TimeSpan.FromMilliseconds(200.0);
+        dispatcherTimer.Interval = timeSpan;
+        this._auioRecordHoldTimer = dispatcherTimer;
+      }
+      this._auioRecordHoldTimer.Tick-=(new EventHandler(this.AuioRecordHoldTimer_OnTick));
+      this._auioRecordHoldTimer.Tick+=(new EventHandler(this.AuioRecordHoldTimer_OnTick));
+      this._auioRecordHoldTimer.Start();
+    }
+
+    private void AuioRecordHoldTimer_OnTick(object sender, EventArgs eventArgs)
+    {
+      this._auioRecordHoldTimer.Tick-=(new EventHandler(this.AuioRecordHoldTimer_OnTick));
+      this._auioRecordHoldTimer.Stop();
+      ((UIElement) this.borderHoldToRecord).Visibility = Visibility.Collapsed;
+      ((UIElement) this.borderHoldToRecord).Opacity = 0.0;
+      this._isAnimatingHoldToRecord = false;
+      this.ucAudioRecorder.IsOpened = true;
+      this.ucAudioRecorder.HandleManipulationStarted(this._translationOrigin);
+    }
+
+    private void BorderVoice_OnManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+    {
+      e.Handled = true;
+      if (this.ucAudioRecorder.IsOpened)
+        this.ucAudioRecorder.HandleManipulationDelta(e);
+      else
+        this._translationOrigin = e.CumulativeManipulation.Translation;
+    }
+
+    private void BorderVoice_OnManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
+    {
+      e.Handled = true;
+      ((Control) this).Focus();
+      this.ucNewPost.ForceFocusIfNeeded();
+      if (this._auioRecordHoldTimer.IsEnabled)
+      {
+        this._auioRecordHoldTimer.Tick-=(new EventHandler(this.AuioRecordHoldTimer_OnTick));
+        this._auioRecordHoldTimer.Stop();
+        this.ShowHoldToRecord();
+      }
+      else
+        this.ucAudioRecorder.HandleManipulationCompleted(e);
+    }
+
+    private void ShowHoldToRecord()
+    {
+      if (this._isAnimatingHoldToRecord)
+        return;
+      this._isAnimatingHoldToRecord = true;
+      ((UIElement) this.borderHoldToRecord).Visibility = Visibility.Visible;
+      ((DependencyObject) this.borderHoldToRecord).Animate(((UIElement) this.borderHoldToRecord).Opacity, 1.0, UIElement.OpacityProperty, 100, new int?(),  null, (Action) (() => ((DependencyObject) this.borderHoldToRecord).Animate(((UIElement) this.borderHoldToRecord).Opacity, 0.0, UIElement.OpacityProperty, 100, new int?(1000),  null, (Action) (() =>
+      {
+        ((UIElement) this.borderHoldToRecord).Visibility = Visibility.Collapsed;
+        this._isAnimatingHoldToRecord = false;
+      }))));
+    }
+
     private void Smiles_OnMouseEnter(object sender, MouseEventArgs e)
     {
       this.InitPanel();
       if (!this.panelControl.IsOpen)
         this.OpenPanel();
       else
-        this.ucNewPost.TextBoxPost.Focus();
+        ((Control) this.ucNewPost.TextBoxPost).Focus();
     }
 
     private void InitPanel()
     {
       if (this._panelInitialized)
         return;
-      this._stickersSlideView = new SwipeThroughControl();
-      this._stickersSlideView.BackspaceTapCallback = new Action(this.HandleBackspaceTap);
+      SwipeThroughControl swipeThroughControl = new SwipeThroughControl();
+      swipeThroughControl.BackspaceTapCallback = new Action(this.HandleBackspaceTap);
+      long userOrChatId = this.UserOrChatId;
+      swipeThroughControl.UserOrChatId = userOrChatId;
+      int num = this.IsChat ? 1 : 0;
+      swipeThroughControl.IsChat = num != 0;
+      this._stickersSlideView = swipeThroughControl;
       this.panelControl.InitializeWithChildControl((FrameworkElement) this._stickersSlideView);
       this._stickersSlideView.CreateSingleElement = (Func<Control>) (() =>
       {
@@ -289,20 +474,20 @@ namespace VKClient.Common.UC
     private void HandleBackspaceTap()
     {
       TextBox textBoxNewComment = this.TextBoxNewComment;
-      string s = textBoxNewComment != null ? textBoxNewComment.Text : null;
+      string s = textBoxNewComment != null ? textBoxNewComment.Text :  null;
       if (string.IsNullOrEmpty(s) || s.Length <= 0)
         return;
       int num = 1;
       if (s.Length > 1 && char.IsSurrogatePair(s, s.Length - 2))
         num = 2;
-      this.TextBoxNewComment.Text = s.Substring(0, s.Length - num);
+      this.TextBoxNewComment.Text = (s.Substring(0, s.Length - num));
     }
 
     private void ReloadStickersItems(bool reloadSystemItems = false, bool keepPosition = true)
     {
       if (!this._panelInitialized)
         return;
-      StoreProduct storeProduct = null;
+      StoreProduct storeProduct =  null;
       if (keepPosition)
         storeProduct = this.GetCurrentSelectedProduct();
       this._stickersSlideView.Items = new ObservableCollection<object>((IEnumerable<object>) StickersSettings.Instance.CreateSpriteListItemData());
@@ -319,7 +504,7 @@ namespace VKClient.Common.UC
     private void OpenPanel()
     {
       this.panelControl.IsOpen = true;
-      this.Focus();
+      ((Control) this).Focus();
       this.MarkUpdatesAsViewed(false);
     }
 
@@ -332,20 +517,20 @@ namespace VKClient.Common.UC
     {
       if (!string.IsNullOrEmpty(this.ucReplyUser.Title))
       {
-        this.ucReplyUser.Visibility = Visibility.Visible;
-        this.panelReply.Visibility = Visibility.Visible;
-        this.textBlockReply.Visibility = this.HaveRightsToPostOnBehalfOfCommunity ? Visibility.Collapsed : Visibility.Visible;
+        ((UIElement) this.ucReplyUser).Visibility = Visibility.Visible;
+        ((UIElement) this.panelReply).Visibility = Visibility.Visible;
+        ((UIElement) this.textBlockReply).Visibility = (this.HaveRightsToPostOnBehalfOfCommunity ? Visibility.Collapsed : Visibility.Visible);
       }
       else
       {
-        this.ucReplyUser.Visibility = Visibility.Collapsed;
+        ((UIElement) this.ucReplyUser).Visibility = Visibility.Collapsed;
         if (!this.HaveRightsToPostOnBehalfOfCommunity)
         {
-          this.panelReply.Visibility = Visibility.Collapsed;
-          this.textBlockReply.Visibility = Visibility.Visible;
+          ((UIElement) this.panelReply).Visibility = Visibility.Collapsed;
+          ((UIElement) this.textBlockReply).Visibility = Visibility.Visible;
         }
         else
-          this.textBlockReply.Visibility = Visibility.Collapsed;
+          ((UIElement) this.textBlockReply).Visibility = Visibility.Collapsed;
       }
     }
 
@@ -372,9 +557,9 @@ namespace VKClient.Common.UC
 
     private StoreProduct GetCurrentSelectedProduct()
     {
-      SwipeThroughControl swipeThroughControl = this._stickersSlideView;
-      if ((swipeThroughControl != null ? swipeThroughControl.Items : null) == null || this._stickersSlideView.Items.Count == 0)
-        return null;
+      SwipeThroughControl stickersSlideView = this._stickersSlideView;
+      if ((stickersSlideView != null ? stickersSlideView.Items :  null) == null || this._stickersSlideView.Items.Count == 0)
+        return  null;
       return ((SpriteListItemData) this._stickersSlideView.Items[this._stickersSlideView.SelectedIndex]).StickerProduct;
     }
 
@@ -400,7 +585,7 @@ namespace VKClient.Common.UC
       {
         if (this._parentPage != FramePageUtils.CurrentPage)
           return;
-        if (this.IsHitTestVisible)
+        if (base.IsHitTestVisible)
         {
           this.TryOpenStickersPackKeyboard((long) stockItemHeader.ProductId, 0);
         }
@@ -414,7 +599,7 @@ namespace VKClient.Common.UC
 
     private void MarkUpdatesAsViewed(bool force = false)
     {
-      if (!force && this.ellipseHasStickersUpdates.Visibility != Visibility.Visible)
+      if (!force && ((UIElement) this.ellipseHasStickersUpdates).Visibility != Visibility.Visible)
         return;
       AppGlobalStateManager.Current.GlobalState.HasStickersUpdates = false;
       this.UpdateHasStickersUpdatesState();
@@ -423,7 +608,7 @@ namespace VKClient.Common.UC
 
     private void UpdateHasStickersUpdatesState()
     {
-      Execute.ExecuteOnUIThread((Action) (() => this.ellipseHasStickersUpdates.Visibility = AppGlobalStateManager.Current.GlobalState.HasStickersUpdates ? Visibility.Visible : Visibility.Collapsed));
+      Execute.ExecuteOnUIThread((Action) (() => ((UIElement) this.ellipseHasStickersUpdates).Visibility = (AppGlobalStateManager.Current.GlobalState.HasStickersUpdates ? Visibility.Visible : Visibility.Collapsed)));
     }
 
     public void Handle(StickersAutoSuggestDictionary.AutoSuggestDictionaryUpdatedEvent message)
@@ -433,6 +618,7 @@ namespace VKClient.Common.UC
 
     public void Handle(PreviewCompletedEvent message)
     {
+      ((Control) this).Focus();
       this.ucNewPost.ForceFocusIfNeeded();
     }
 
@@ -467,18 +653,22 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/NewMessageUC.xaml", UriKind.Relative));
-      this.panelReply = (StackPanel) this.FindName("panelReply");
-      this.checkBoxAsCommunity = (CheckBox) this.FindName("checkBoxAsCommunity");
-      this.textBlockReply = (TextBlock) this.FindName("textBlockReply");
-      this.ucReplyUser = (ReplyUserUC) this.FindName("ucReplyUser");
-      this.scrollNewMessage = (ScrollViewer) this.FindName("scrollNewMessage");
-      this.ucNewPost = (NewPostUC) this.FindName("ucNewPost");
-      this.borderEmoji = (Border) this.FindName("borderEmoji");
-      this.ellipseHasStickersUpdates = (Ellipse) this.FindName("ellipseHasStickersUpdates");
-      this.borderSend = (Border) this.FindName("borderSend");
-      this.ucStickersAutoSuggest = (StickersAutoSuggestUC) this.FindName("ucStickersAutoSuggest");
-      this.panelControl = (TextBoxPanelControl) this.FindName("panelControl");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/NewMessageUC.xaml", UriKind.Relative));
+      this.mentionPicker = (MentionPickerUC) base.FindName("mentionPicker");
+      this.panelReply = (StackPanel) base.FindName("panelReply");
+      this.checkBoxAsCommunity = (CheckBox) base.FindName("checkBoxAsCommunity");
+      this.textBlockReply = (TextBlock) base.FindName("textBlockReply");
+      this.ucReplyUser = (ReplyUserUC) base.FindName("ucReplyUser");
+      this.scrollNewMessage = (ScrollViewer) base.FindName("scrollNewMessage");
+      this.ucNewPost = (NewPostUC) base.FindName("ucNewPost");
+      this.borderEmoji = (Border) base.FindName("borderEmoji");
+      this.ellipseHasStickersUpdates = (Ellipse) base.FindName("ellipseHasStickersUpdates");
+      this.borderHoldToRecord = (Border) base.FindName("borderHoldToRecord");
+      this.borderSend = (Border) base.FindName("borderSend");
+      this.borderVoice = (Border) base.FindName("borderVoice");
+      this.ucAudioRecorder = (AudioRecorderUC) base.FindName("ucAudioRecorder");
+      this.ucStickersAutoSuggest = (StickersAutoSuggestUC) base.FindName("ucStickersAutoSuggest");
+      this.panelControl = (TextBoxPanelControl) base.FindName("panelControl");
     }
   }
 }

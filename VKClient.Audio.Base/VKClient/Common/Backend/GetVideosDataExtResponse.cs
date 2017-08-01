@@ -5,9 +5,9 @@ namespace VKClient.Common.Backend
 {
   public class GetVideosDataExtResponse
   {
-    public VKList<VKClient.Common.Backend.DataObjects.Video> AddedVideos { get; set; }
+    public VKList<Video> AddedVideos { get; set; }
 
-    public VKList<VKClient.Common.Backend.DataObjects.Video> UploadedVideos { get; set; }
+    public VKList<Video> UploadedVideos { get; set; }
 
     public VKList<VideoAlbum> Albums { get; set; }
 

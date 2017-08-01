@@ -18,53 +18,69 @@ namespace VKClient.ScheduledUpdater
 
         public ScheduledAgent()
         {
-            if (ScheduledAgent._classInitialized)
-                return;
-            ScheduledAgent._classInitialized = true;
-            Deployment.Current.Dispatcher.BeginInvoke((Action)(() => Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(this.ScheduledAgent_UnhandledException)));
+            if (!ScheduledAgent._classInitialized)
+            {
+                ScheduledAgent._classInitialized = true;
+                Deployment.Current.Dispatcher.BeginInvoke(delegate
+                {
+                    Application.Current.UnhandledException+=(new EventHandler<ApplicationUnhandledExceptionEventArgs>(this.ScheduledAgent_UnhandledException));
+                });
+            }
         }
 
         private void ScheduledAgent_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
         {
             Logger.Instance.Error("UNHANDLED exception in ScheduledAgent" + e.ExceptionObject);
-            if (!Debugger.IsAttached)
-                return;
-            Debugger.Break();
+            if (Debugger.IsAttached)
+            {
+                Debugger.Break();
+            }
         }
 
         protected override async void OnInvoke(ScheduledTask task)
         {
-            Logger.Instance.Info("Entering ScheduledAgent.OnInvoke, task.Name=" + task.Name ?? "");
+            Logger.Instance.Info(("Entering ScheduledAgent.OnInvoke, task.Name=" + task.Name) ?? "", new object[0]);
             try
             {
                 AppGlobalStateManager.Current.Initialize(true);
-                if (AppGlobalStateManager.Current.LoggedInUserId == 0)
-                    return;
-                if (task.Name == "ExtensibilityTaskAgent")
+                if (AppGlobalStateManager.Current.LoggedInUserId != 0L)
                 {
-                    await SocialDataManager.Instance.ProcessSocialOperationsQueue();
-                    this.NotifyComplete();
-                }
-                else
-                    SecondaryTileManager.Instance.UpdateAllExistingTiles((Action<bool>)(resSecondary => CountersService.Instance.GetCountersWithLastMessage((Action<BackendResult<CountersWithMessageInfo, ResultCode>>)(res =>
+                    if (task.Name == "ExtensibilityTaskAgent")
                     {
-                        if (res.ResultCode == ResultCode.Succeeded)
+                        await SocialDataManager.Instance.ProcessSocialOperationsQueue();
+                        this.NotifyComplete();
+                    }
+                    else
+                    {
+                        SecondaryTileManager.Instance.UpdateAllExistingTiles(delegate(bool resSecondary)
                         {
-                            string content1 = "";
-                            string content2 = "";
-                            string content3 = "";
-                            if (res.ResultData.LastMessage != null && BaseFormatterHelper.UnixTimeStampToDateTime((double)res.ResultData.LastMessage.date, true) > AppGlobalStateManager.Current.GlobalState.LastDeactivatedTime)
-                                MessageHeaderFormatterHelper.FormatForTileIntoThreeStrings(res.ResultData.LastMessage, res.ResultData.User, out content1, out content2, out content3);
-                            int messages = res.ResultData.Counters.messages;
-                            TileManager.Instance.SetContentAndCount(content1, content2, content3, messages, (Action)(() => this.NotifyComplete()));
-                        }
-                        else
-                            this.NotifyComplete();
-                    }))));
+                            CountersService.Instance.GetCountersWithLastMessage(delegate(BackendResult<CountersWithMessageInfo, ResultCode> res)
+                            {
+                                if (res.ResultCode == ResultCode.Succeeded)
+                                {
+                                    string content = "";
+                                    string content2 = "";
+                                    string content3 = "";
+                                    if (res.ResultData.LastMessage != null && BaseFormatterHelper.UnixTimeStampToDateTime((double)res.ResultData.LastMessage.date, true) > AppGlobalStateManager.Current.GlobalState.LastDeactivatedTime)
+                                    {
+                                        MessageHeaderFormatterHelper.FormatForTileIntoThreeStrings(res.ResultData.LastMessage, res.ResultData.User, out content, out content2, out content3);
+                                    }
+                                    int messages = res.ResultData.Counters.messages;
+                                    TileManager.Instance.SetContentAndCount(content, content2, content3, messages, delegate
+                                    {
+                                        base.NotifyComplete();
+                                    });
+                                    return;
+                                }
+                                base.NotifyComplete();
+                            });
+                        });
+                    }
+                }
             }
-            catch (Exception ex)
+            catch (Exception var_2_FE)
             {
-                Logger.Instance.Error("ScheduledAgent.OnInvoke failed", ex);
+                Logger.Instance.Error("ScheduledAgent.OnInvoke failed", var_2_FE);
                 this.NotifyComplete();
             }
         }

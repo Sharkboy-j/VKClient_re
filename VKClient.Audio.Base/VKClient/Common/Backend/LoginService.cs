@@ -43,7 +43,7 @@ namespace VKClient.Common.Backend
           "sid",
           validationSid
         }
-      }, callbackAction, (Func<string, int>) null, false, true, new CancellationToken?());
+      }, callbackAction,  null, false, true, new CancellationToken?(),  null);
     }
   }
 }

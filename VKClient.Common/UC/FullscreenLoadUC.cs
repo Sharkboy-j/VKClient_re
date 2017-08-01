@@ -11,6 +11,7 @@ namespace VKClient.Common.UC
 
     public FullscreenLoadUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -20,7 +21,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/FullscreenLoadUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/FullscreenLoadUC.xaml", UriKind.Relative));
     }
   }
 }

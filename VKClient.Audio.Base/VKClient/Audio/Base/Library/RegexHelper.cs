@@ -19,9 +19,9 @@ namespace VKClient.Audio.Base.Library
         string str1 = m.Groups[2].Value;
         string str2;
         if (num >= 0L)
-          str2 = string.Format("[id{0}:bp-{1}_{2}|{3}]", (object) num, (object) groupId, (object) result, (object) str1);
+          str2 = string.Format("[id{0}:bp-{1}_{2}|{3}]", num, groupId, result, str1);
         else
-          str2 = string.Format("[club{0}:bp-{1}_{2}|{3}]", (object) -num, (object) groupId, (object) result, (object) str1);
+          str2 = string.Format("[club{0}:bp-{1}_{2}|{3}]", -num, groupId, result, str1);
         return str2;
       }));
     }

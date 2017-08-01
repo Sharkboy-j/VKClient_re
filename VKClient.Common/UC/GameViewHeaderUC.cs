@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using VKClient.Common.Framework;
 using VKClient.Common.Library.Games;
@@ -14,10 +15,10 @@ namespace VKClient.Common.UC
 {
   public class GameViewHeaderUC : UserControl
   {
-    public static readonly DependencyProperty MoreActionsVisibilityProperty = DependencyProperty.Register("MoreActionsVisibility", typeof (Visibility), typeof (GameViewHeaderUC), new PropertyMetadata((object) Visibility.Visible, new PropertyChangedCallback(GameViewHeaderUC.OnMoreActionsVisibilityChanged)));
-    public static readonly DependencyProperty GameHeaderProperty = DependencyProperty.Register("GameHeader", typeof (GameHeader), typeof (GameViewHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameViewHeaderUC.OnGameHeaderChanged)));
-    public static readonly DependencyProperty NextGameHeaderProperty = DependencyProperty.Register("NextGameHeader", typeof (GameHeader), typeof (GameViewHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameViewHeaderUC.OnNextGameHeaderChanged)));
-    public static readonly DependencyProperty IsSystemTrayPlaceholderVisibleProperty = DependencyProperty.Register("IsSystemTrayPlaceholderVisible", typeof (bool), typeof (GameViewHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameViewHeaderUC.OnIsSystemTrayPlaceholderVisibleChanged)));
+      public static readonly DependencyProperty MoreActionsVisibilityProperty = DependencyProperty.Register("MoreActionsVisibility", typeof(Visibility), typeof(GameViewHeaderUC), new PropertyMetadata(Visibility.Visible, new PropertyChangedCallback(GameViewHeaderUC.OnMoreActionsVisibilityChanged)));
+      public static readonly DependencyProperty GameHeaderProperty = DependencyProperty.Register("GameHeader", typeof(GameHeader), typeof(GameViewHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameViewHeaderUC.OnGameHeaderChanged)));
+      public static readonly DependencyProperty NextGameHeaderProperty = DependencyProperty.Register("NextGameHeader", typeof(GameHeader), typeof(GameViewHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameViewHeaderUC.OnNextGameHeaderChanged)));
+      public static readonly DependencyProperty IsSystemTrayPlaceholderVisibleProperty = DependencyProperty.Register("IsSystemTrayPlaceholderVisible", typeof(bool), typeof(GameViewHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameViewHeaderUC.OnIsSystemTrayPlaceholderVisibleChanged)));
     internal Border borderSystemTrayPlaceholder;
     internal Grid HeaderPanel;
     internal Image imageIcon;
@@ -32,11 +33,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (Visibility) this.GetValue(GameViewHeaderUC.MoreActionsVisibilityProperty);
+        return (Visibility) base.GetValue(GameViewHeaderUC.MoreActionsVisibilityProperty);
       }
       set
       {
-        this.SetValue(GameViewHeaderUC.MoreActionsVisibilityProperty, (object) value);
+        base.SetValue(GameViewHeaderUC.MoreActionsVisibilityProperty, value);
       }
     }
 
@@ -44,11 +45,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (GameHeader) this.GetValue(GameViewHeaderUC.GameHeaderProperty);
+        return (GameHeader) base.GetValue(GameViewHeaderUC.GameHeaderProperty);
       }
       set
       {
-        this.SetValue(GameViewHeaderUC.GameHeaderProperty, (object) value);
+        base.SetValue(GameViewHeaderUC.GameHeaderProperty, value);
       }
     }
 
@@ -56,11 +57,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (GameHeader) this.GetValue(GameViewHeaderUC.NextGameHeaderProperty);
+        return (GameHeader) base.GetValue(GameViewHeaderUC.NextGameHeaderProperty);
       }
       set
       {
-        this.SetValue(GameViewHeaderUC.NextGameHeaderProperty, (object) value);
+        base.SetValue(GameViewHeaderUC.NextGameHeaderProperty, value);
       }
     }
 
@@ -68,16 +69,17 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (bool) this.GetValue(GameViewHeaderUC.IsSystemTrayPlaceholderVisibleProperty);
+        return (bool) base.GetValue(GameViewHeaderUC.IsSystemTrayPlaceholderVisibleProperty);
       }
       set
       {
-        this.SetValue(GameViewHeaderUC.IsSystemTrayPlaceholderVisibleProperty, (object) value);
+        base.SetValue(GameViewHeaderUC.IsSystemTrayPlaceholderVisibleProperty, value);
       }
     }
 
     public GameViewHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -85,9 +87,11 @@ namespace VKClient.Common.UC
     {
       GameViewHeaderUC gameViewHeaderUc = d as GameViewHeaderUC;
       Visibility result;
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
       if (gameViewHeaderUc == null || e.NewValue == null || !Enum.TryParse<Visibility>(e.NewValue.ToString(), out result))
         return;
-      gameViewHeaderUc.ucMoreActions.Visibility = result;
+      ((UIElement) gameViewHeaderUc.ucMoreActions).Visibility = result;
     }
 
     private static void OnGameHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -95,6 +99,7 @@ namespace VKClient.Common.UC
       GameViewHeaderUC gameViewHeaderUc = d as GameViewHeaderUC;
       if (gameViewHeaderUc == null)
         return;
+      // ISSUE: explicit reference operation
       if (!(e.NewValue is GameHeader))
         gameViewHeaderUc.ResetData();
       else
@@ -104,9 +109,9 @@ namespace VKClient.Common.UC
     private void ResetData()
     {
       ImageLoader.SetUriSource(this.imageIcon, "");
-      this.textBlockGenre.Text = "";
-      this.textBlockTitle.Text = "";
-      this.ucMoreActions.Visibility = Visibility.Collapsed;
+      this.textBlockGenre.Text = ("");
+      this.textBlockTitle.Text = ("");
+      ((UIElement) this.ucMoreActions).Visibility = Visibility.Collapsed;
     }
 
     private void UpdateData()
@@ -115,19 +120,19 @@ namespace VKClient.Common.UC
       this.textBlockGenre.Text = this.GameHeader.Genre;
       this.textBlockTitle.Text = this.GameHeader.Title;
       GameViewHeaderUC.CorrectTextName(this.textBlockTitle);
-      this.ucMoreActions.Visibility = this.GameHeader.IsInstalled ? Visibility.Visible : Visibility.Collapsed;
+      ((UIElement) this.ucMoreActions).Visibility = (this.GameHeader.IsInstalled ? Visibility.Visible : Visibility.Collapsed);
     }
 
     private static void CorrectTextName(TextBlock textName)
     {
-      if (string.IsNullOrWhiteSpace(textName.Text) || textName.ActualWidth <= 300.0)
+      if (string.IsNullOrWhiteSpace(textName.Text) || ((FrameworkElement) textName).ActualWidth <= 300.0)
         return;
-      int int32 = Convert.ToInt32(300.0 / (textName.ActualWidth / (double) textName.Text.Length));
+      int int32 = Convert.ToInt32(300.0 / (((FrameworkElement) textName).ActualWidth / (double) textName.Text.Length));
       if (int32 >= textName.Text.Length)
         return;
-      textName.Text = textName.Text.Substring(0, int32).Trim() + "...";
-      for (int index = 0; textName.ActualWidth > 300.0 && index < 10; ++index)
-        textName.Text = textName.Text.Substring(0, textName.Text.Length - 4).Trim() + "...";
+      textName.Text = (textName.Text.Substring(0, int32).Trim() + "...");
+      for (int index = 0; ((FrameworkElement) textName).ActualWidth > 300.0 && index < 10; ++index)
+        textName.Text = (textName.Text.Substring(0, textName.Text.Length - 4).Trim() + "...");
     }
 
     private static void OnNextGameHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -135,6 +140,7 @@ namespace VKClient.Common.UC
       GameViewHeaderUC gameViewHeaderUc = d as GameViewHeaderUC;
       if (gameViewHeaderUc == null)
         return;
+      // ISSUE: explicit reference operation
       if (!(e.NewValue is GameHeader))
         gameViewHeaderUc.ResetNextData();
       else
@@ -143,22 +149,24 @@ namespace VKClient.Common.UC
 
     private void ResetNextData()
     {
-      this.borderNextGame.Visibility = Visibility.Collapsed;
+      ((UIElement) this.borderNextGame).Visibility = Visibility.Collapsed;
       ImageLoader.SetUriSource(this.imageNextIcon, "");
     }
 
     private void UpdateNextData()
     {
-      this.borderNextGame.Visibility = Visibility.Visible;
+      ((UIElement) this.borderNextGame).Visibility = Visibility.Visible;
       ImageLoader.SetUriSource(this.imageNextIcon, this.NextGameHeader.Icon);
     }
 
     private static void OnIsSystemTrayPlaceholderVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       GameViewHeaderUC gameViewHeaderUc = d as GameViewHeaderUC;
+      // ISSUE: explicit reference operation
       if (gameViewHeaderUc == null || !(e.NewValue is bool))
         return;
-      gameViewHeaderUc.borderSystemTrayPlaceholder.Visibility = (bool) e.NewValue ? Visibility.Visible : Visibility.Collapsed;
+      // ISSUE: explicit reference operation
+      ((UIElement) gameViewHeaderUc.borderSystemTrayPlaceholder).Visibility = ((bool) e.NewValue ? Visibility.Visible : Visibility.Collapsed);
     }
 
     private void MoreActions_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
@@ -167,13 +175,14 @@ namespace VKClient.Common.UC
       List<MenuItem> menuItems = new List<MenuItem>();
       MenuItem menuItem1 = new MenuItem();
       string notificationsSettings = CommonResources.Games_NotificationsSettings;
-      menuItem1.Header = (object) notificationsSettings;
+      menuItem1.Header = notificationsSettings;
       MenuItem menuItem2 = menuItem1;
-      menuItem2.Click += new RoutedEventHandler(this.MenuItemNotificationsSettings_OnClick);
+      // ISSUE: method pointer
+      menuItem2.Click += new RoutedEventHandler( this.MenuItemNotificationsSettings_OnClick);
       MenuItem menuItem3 = menuItem2;
       menuItems.Add(menuItem3);
-      Grid grid = this.HeaderPanel;
-      GameViewHeaderUC.OpenMenu(menuItems, (DependencyObject) grid);
+      Grid headerPanel = this.HeaderPanel;
+      GameViewHeaderUC.OpenMenu(menuItems, (DependencyObject) headerPanel);
     }
 
     private void MenuItemNotificationsSettings_OnClick(object sender, RoutedEventArgs routedEventArgs)
@@ -189,14 +198,14 @@ namespace VKClient.Common.UC
         return;
       ContextMenu contextMenu1 = new ContextMenu();
       SolidColorBrush solidColorBrush1 = (SolidColorBrush) Application.Current.Resources["PhoneMenuBackgroundBrush"];
-      contextMenu1.Background = (Brush) solidColorBrush1;
+      ((Control) contextMenu1).Background = ((Brush) solidColorBrush1);
       SolidColorBrush solidColorBrush2 = (SolidColorBrush) Application.Current.Resources["PhoneMenuForegroundBrush"];
-      contextMenu1.Foreground = (Brush) solidColorBrush2;
+      ((Control) contextMenu1).Foreground = ((Brush) solidColorBrush2);
       int num = 0;
       contextMenu1.IsZoomEnabled = num != 0;
       ContextMenu contextMenu2 = contextMenu1;
       foreach (MenuItem menuItem in menuItems)
-        contextMenu2.Items.Add((object) menuItem);
+        ((PresentationFrameworkCollection<object>) contextMenu2.Items).Add(menuItem);
       ContextMenuService.SetContextMenu(sender, contextMenu2);
       contextMenu2.IsOpen = true;
     }
@@ -207,15 +216,15 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GameViewHeaderUC.xaml", UriKind.Relative));
-      this.borderSystemTrayPlaceholder = (Border) this.FindName("borderSystemTrayPlaceholder");
-      this.HeaderPanel = (Grid) this.FindName("HeaderPanel");
-      this.imageIcon = (Image) this.FindName("imageIcon");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.textBlockGenre = (TextBlock) this.FindName("textBlockGenre");
-      this.ucMoreActions = (Border) this.FindName("ucMoreActions");
-      this.borderNextGame = (Border) this.FindName("borderNextGame");
-      this.imageNextIcon = (Image) this.FindName("imageNextIcon");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GameViewHeaderUC.xaml", UriKind.Relative));
+      this.borderSystemTrayPlaceholder = (Border) base.FindName("borderSystemTrayPlaceholder");
+      this.HeaderPanel = (Grid) base.FindName("HeaderPanel");
+      this.imageIcon = (Image) base.FindName("imageIcon");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
+      this.textBlockGenre = (TextBlock) base.FindName("textBlockGenre");
+      this.ucMoreActions = (Border) base.FindName("ucMoreActions");
+      this.borderNextGame = (Border) base.FindName("borderNextGame");
+      this.imageNextIcon = (Image) base.FindName("imageNextIcon");
     }
   }
 }

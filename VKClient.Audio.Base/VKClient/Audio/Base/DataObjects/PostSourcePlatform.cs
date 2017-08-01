@@ -10,5 +10,7 @@ namespace VKClient.Audio.Base.DataObjects
     Android,
     Snapster,
     Instagram,
+    Prisma,
+    Vinci,
   }
 }

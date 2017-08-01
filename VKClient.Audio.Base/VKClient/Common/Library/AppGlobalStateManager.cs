@@ -91,8 +91,8 @@ namespace VKClient.Common.Library
       this.SaveState();
       this.ReceiveNewToken(new AutorizationData());
       AudioTrackHelper.EnsureStopPlayingOnLogout();
-      EventAggregator.Current.Publish((object) new BaseDataChangedEvent());
-      EventAggregator.Current.Publish((object) new UserIsLoggedOutEvent());
+      EventAggregator.Current.Publish(new BaseDataChangedEvent());
+      EventAggregator.Current.Publish(new UserIsLoggedOutEvent());
     }
 
     public void SaveState()

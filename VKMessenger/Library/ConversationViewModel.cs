@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Device.Location;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base;
 using VKClient.Audio.Base.DataObjects;
@@ -27,17 +28,14 @@ using Windows.Storage;
 
 namespace VKMessenger.Library
 {
-    public class ConversationViewModel : ViewModelBase, IBinarySerializableWithTrimSupport, IBinarySerializable, IHandle<NotificationSettingsChangedEvent>, IHandle
+    public class ConversationViewModel : ViewModelBase, IBinarySerializableWithTrimSupport, IBinarySerializable, IHandle<NotificationSettingsChangedEvent>, IHandle, IHandle<MessagesFromGroupAllowedDeniedEvent>
     {
-        internal static int b__124_0(MessageViewModel m1, MessageViewModel m2)
+        public static Func<MessageViewModel, MessageViewModel, int> _comparisonFunc = (Func<MessageViewModel, MessageViewModel, int>)((m1, m2) =>
         {
             if (m2.Message.mid > 0 && m1.Message.mid > 0)
-            {
                 return m2.Message.mid - m1.Message.mid;
-            }
             return m2.Message.date - m1.Message.date;
-        }
-        public static Func<MessageViewModel, MessageViewModel, int> _comparisonFunc = new Func<MessageViewModel, MessageViewModel, int>(ConversationViewModel.b__124_0);
+        });
         public static readonly string UNREAD_ITEM_ACTION = "UNREAD_MESSAGES";
         private readonly int _numberOfMessagesToStore = 10;
         private string _uiTitle = string.Empty;
@@ -57,12 +55,14 @@ namespace VKMessenger.Library
         private User _user;
         private ChatExtended _chat;
         private int _skipped;
+        private bool _isMessagesFromGroupDenied;
         private string _chatTypeStatusText;
         private bool _isInSelectionMode;
         private bool _isBusyLoadingMessages;
         private bool _isBusyLoadingHeaderInfo;
-        private bool _userIsTypingIsSet;
+        private UsersTypingHelper _usersTypingHelper;
         private bool _changingNotifications;
+        private bool _isMessageFromGroupBusy;
         private bool _isInProgressPinToStart;
 
         private int Skipped
@@ -76,8 +76,8 @@ namespace VKMessenger.Library
                 if (this._skipped == value)
                     return;
                 this._skipped = value;
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.ArrowDownDarkVisibility));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.ArrowDownLightVisibility));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.ArrowDownDarkVisibility));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.ArrowDownLightVisibility));
             }
         }
 
@@ -93,7 +93,7 @@ namespace VKMessenger.Library
         {
             get
             {
-                return (Visibility)Application.Current.Resources["PhoneDarkThemeVisibility"] == Visibility.Visible;
+                return (Visibility)Application.Current.Resources["PhoneDarkThemeVisibility"] == 0;
             }
         }
 
@@ -129,11 +129,41 @@ namespace VKMessenger.Library
             }
         }
 
+        public bool IsMessagesFromGroupDenied
+        {
+            get
+            {
+                if (this._user == null)
+                    return false;
+                long id = this._user.id;
+                if (id > 0L || id < -2000000000L)
+                    return false;
+                return this._user.is_messages_blocked == 1;
+            }
+            private set
+            {
+                if (this._user == null || this._isMessagesFromGroupDenied == value)
+                    return;
+                this._isMessagesFromGroupDenied = value;
+                this._user.is_messages_blocked = value ? 1 : 0;
+                UsersService.Instance.SetCachedUser(this._user);
+                EventAggregator current = EventAggregator.Current;
+                MessagesFromGroupAllowedDeniedEvent allowedDeniedEvent = new MessagesFromGroupAllowedDeniedEvent();
+                int num = !value ? 1 : 0;
+                allowedDeniedEvent.IsAllowed = num != 0;
+                long id = this._user.id;
+                allowedDeniedEvent.UserOrGroupId = id;
+                current.Publish((object)allowedDeniedEvent);
+            }
+        }
+
         public Visibility ArrowDownDarkVisibility
         {
             get
             {
-                return !this.IsDarkTheme || !this.ShowArrowDown ? Visibility.Collapsed : Visibility.Visible;
+                if (!this.IsDarkTheme || !this.ShowArrowDown)
+                    return Visibility.Collapsed;
+                return Visibility.Visible;
             }
         }
 
@@ -141,7 +171,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.IsDarkTheme || !this.ShowArrowDown ? Visibility.Collapsed : Visibility.Visible;
+                if (this.IsDarkTheme || !this.ShowArrowDown)
+                    return Visibility.Collapsed;
+                return Visibility.Visible;
             }
         }
 
@@ -168,7 +200,7 @@ namespace VKMessenger.Library
                 if (!(this._uiTitle != value))
                     return;
                 this._uiTitle = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.UITitle));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.UITitle));
             }
         }
 
@@ -191,7 +223,7 @@ namespace VKMessenger.Library
                 if (this._notificationsDisabledVisibility == value)
                     return;
                 this._notificationsDisabledVisibility = value;
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.NotificationsDisabledVisibility));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.NotificationsDisabledVisibility));
             }
         }
 
@@ -201,12 +233,12 @@ namespace VKMessenger.Library
             {
                 return this._uiSubtitle;
             }
-            private set
+            set
             {
                 if (!(this._uiSubtitle != value))
                     return;
                 this._uiSubtitle = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.UISubtitle));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.UISubtitle));
             }
         }
 
@@ -221,7 +253,7 @@ namespace VKMessenger.Library
                 if (!(this._chatTypeStatusText != value))
                     return;
                 this._chatTypeStatusText = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.ChatTypeStatusText));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.ChatTypeStatusText));
             }
         }
 
@@ -233,6 +265,38 @@ namespace VKMessenger.Library
             }
         }
 
+        public bool IsDialogWithOtherUser
+        {
+            get
+            {
+                if (this.IsDialogWithUserOrChat)
+                    return !this.IsChat;
+                return false;
+            }
+        }
+
+        public bool IsDialogWithUserOrChat
+        {
+            get
+            {
+                if (this.IsChat)
+                    return true;
+                if (this.User != null && this.User.id > 0L)
+                    return this.User.id != AppGlobalStateManager.Current.LoggedInUserId;
+                return false;
+            }
+        }
+
+        public bool IsDialogWithCommunity
+        {
+            get
+            {
+                if (!this.IsChat)
+                    return this.UserOrCharId < 0L;
+                return false;
+            }
+        }
+
         public long UserOrCharId
         {
             get
@@ -241,7 +305,6 @@ namespace VKMessenger.Library
             }
         }
 
-        // NEW: 4.8.0
         public ChatExtended Chat
         {
             get
@@ -260,6 +323,17 @@ namespace VKMessenger.Library
 
         public bool CanAddMembers { get; private set; }
 
+        public bool IsKickedFromChat
+        {
+            get
+            {
+                ChatExtended chat = this._chat;
+                if ((chat != null ? chat.users : (List<User>)null) != null)
+                    return !this._chat.users.Any<User>();
+                return true;
+            }
+        }
+
         public ObservableCollection<MessageViewModel> Messages
         {
             get
@@ -269,11 +343,11 @@ namespace VKMessenger.Library
             private set
             {
                 this._messages = value;
-                this.NotifyPropertyChanged<ObservableCollection<MessageViewModel>>((System.Linq.Expressions.Expression<Func<ObservableCollection<MessageViewModel>>>)(() => this.Messages));
+                this.NotifyPropertyChanged<ObservableCollection<MessageViewModel>>((Expression<Func<ObservableCollection<MessageViewModel>>>)(() => this.Messages));
             }
         }
 
-        public OutboundMessageViewModel OutboundMessageVm
+        public OutboundMessageViewModel OutboundMessageVM
         {
             get
             {
@@ -282,7 +356,7 @@ namespace VKMessenger.Library
             private set
             {
                 this._outboundMessage = value;
-                this.NotifyPropertyChanged<OutboundMessageViewModel>((System.Linq.Expressions.Expression<Func<OutboundMessageViewModel>>)(() => this.OutboundMessageVm));
+                this.NotifyPropertyChanged<OutboundMessageViewModel>((Expression<Func<OutboundMessageViewModel>>)(() => this.OutboundMessageVM));
             }
         }
 
@@ -338,6 +412,17 @@ namespace VKMessenger.Library
 
         public bool CanDettachProductAttachment { get; set; }
 
+        public List<User> ChatMembers
+        {
+            get
+            {
+                ChatExtended chat = this._chat;
+                if (chat == null)
+                    return (List<User>)null;
+                return chat.users;
+            }
+        }
+
         public ConversationViewModel()
         {
             EventAggregator.Current.Subscribe((object)this);
@@ -348,7 +433,7 @@ namespace VKMessenger.Library
             //this._isInitialized = true;
             this._isChat = isChat;
             this._userOrChatId = userOrChatId;
-            this.OutboundMessageVm = new OutboundMessageViewModel(isChat, userOrChatId);
+            this.OutboundMessageVM = new OutboundMessageViewModel(isChat, userOrChatId);
         }
 
         public void LoadFromLastUnread(Action<bool> callback = null)
@@ -395,11 +480,11 @@ namespace VKMessenger.Library
                     callback();
                 }
                 else
-                    GenericInfoUC.ShowBasedOnResult((int)result.ResultCode, "", (VKRequestsDispatcher.Error)null);
+                    GenericInfoUC.ShowBasedOnResult((int)result.ResultCode, "", null);
             }))));
         }
 
-        public void SendMessage(string messageText)
+        public void SendMessage(string messageText = "")
         {
             this.SendMessage(messageText, (StickerItemData)null, "", (GraffitiAttachmentItem)null);
         }
@@ -435,7 +520,6 @@ namespace VKMessenger.Library
                 this._outboundMessage.Attachments = new ObservableCollection<IOutboundAttachment>();
             }
             MessageViewModel messageViewModel = new MessageViewModel(outboundMessage);
-            this.ResetUserIsTypingStatusIfNeeded(true);
             this._messages.AddOrdered<MessageViewModel>(messageViewModel, ConversationViewModel._comparisonFunc, true);
             if (!this.CanDettachProductAttachment && stickerData == null)
             {
@@ -444,17 +528,23 @@ namespace VKMessenger.Library
                 if (product != null)
                     EventAggregator.Current.Publish((object)new MarketContactEvent(string.Format("{0}_{1}", (object)product.owner_id, (object)product.id), MarketContactAction.write));
             }
+            messageViewModel.OutboundMessageVM.MessageSent += (EventHandler)((o, e) =>
+            {
+                if (messageViewModel.OutboundMessageVM.OutboundMessageStatus != OutboundMessageStatus.Delivered)
+                    return;
+                this.IsMessagesFromGroupDenied = false;
+            });
             messageViewModel.Send();
             if (this._skipped > 0)
                 this.RefreshConversations();
-            this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.NoMessages));
+            this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.NoMessages));
             MessengerStateManagerInstance.Current.EnsureOnlineStatusIsSet(false);
         }
 
         public void AddForwardedMessagesToOutboundMessage(IList<Message> forwardedMessages)
         {
-            this.OutboundMessageVm.RemoveForwardedMessages();
-            this.OutboundMessageVm.Attachments.Add((IOutboundAttachment)new OutboundForwardedMessages(forwardedMessages.ToList<Message>()));
+            this.OutboundMessageVM.RemoveForwardedMessages();
+            this.OutboundMessageVM.Attachments.Add((IOutboundAttachment)new OutboundForwardedMessages(forwardedMessages.ToList<Message>()));
         }
 
         private void EnsureUserAndChatIdSet(Message message)
@@ -500,6 +590,7 @@ namespace VKMessenger.Library
                     {
                         this._user = r.ResultData.First<User>();
                         this.CanAddMembers = this._user.friend_status == 3;
+                        this.IsMessagesFromGroupDenied = this._user.is_messages_blocked == 1;
                         this.RefreshUIPropertiesSafe();
                         UsersService.Instance.GetStatus(this._userOrChatId, (Action<BackendResult<UserStatus, ResultCode>>)(res =>
                         {
@@ -521,30 +612,36 @@ namespace VKMessenger.Library
         private void RefreshUIPropertiesSafe()
         {
             if (this._isChat)
-                Deployment.Current.Dispatcher.BeginInvoke((Action)(() =>
+                ((DependencyObject)Deployment.Current).Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    if (this._chat == null)
-                        return;
-                    this.UITitle = this._chat.title;
-                    this.NotificationsDisabledVisibility = this._chat.push_settings.AreDisabledNow ? Visibility.Visible : Visibility.Collapsed;
-                    this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.AreNotificationsDisabled));
-                    if (this._chat.users == null)
-                        return;
-                    this._conversationAvatarVM.Initialize(this._chat.photo_200, true, this._chat.users.Select<User, long>((Func<User, long>)(u => u.uid)).ToList<long>(), this._chat.users);
-                    this.UISubtitle = UIStringFormatterHelper.FormatNumberOfSomething(this._chat.users.Count, CommonResources.Conversation_OnePerson, CommonResources.Conversation_TwoToFourPersonsFrm, CommonResources.Conversation_FiveOrMorePersionsFrm, true, null, false);
+                    if (this._chat != null)
+                    {
+                        this.UITitle = this._chat.title;
+                        this.NotificationsDisabledVisibility = this._chat.push_settings.AreDisabledNow ? Visibility.Visible : Visibility.Collapsed;
+                        this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.AreNotificationsDisabled));
+                        this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsKickedFromChat));
+                        if (this._chat.users != null)
+                        {
+                            this._conversationAvatarVM.Initialize(this._chat.photo_200, true, this._chat.users.Select<User, long>((Func<User, long>)(u => u.uid)).ToList<long>(), this._chat.users);
+                            this.UISubtitle = UIStringFormatterHelper.FormatNumberOfSomething(this._chat.users.Count, CommonResources.Conversation_OnePerson, CommonResources.Conversation_TwoToFourPersonsFrm, CommonResources.Conversation_FiveOrMorePersionsFrm, true, (string)null, false);
+                        }
+                    }
+                    this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsDialogWithOtherUser));
                 }));
             else
-                Deployment.Current.Dispatcher.BeginInvoke((Action)(() =>
+                ((DependencyObject)Deployment.Current).Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    if (this._user == null)
-                        return;
-                    this._conversationAvatarVM.Initialize(this._user.photo_max, false, new List<long>(), new List<User>());
-                    this.UITitle = this._user.first_name + " " + this._user.last_name;
-                    this.NotificationsDisabledVisibility = Visibility.Collapsed;
-                    this.CanAddMembers = this._user.friend_status == 3;
-                    if (this._userStatus == null)
-                        return;
-                    this.UISubtitle = this._userStatus.GetUserStatusString(this._user.sex % 2 == 0);
+                    if (this._user != null)
+                    {
+                        this._conversationAvatarVM.Initialize(this._user.photo_max, false, new List<long>(), new List<User>());
+                        this.UITitle = this._user.first_name + " " + this._user.last_name;
+                        this.NotificationsDisabledVisibility = Visibility.Collapsed;
+                        this.CanAddMembers = this._user.friend_status == 3;
+                        this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsMessagesFromGroupDenied));
+                        if (this._userStatus != null)
+                            this.UISubtitle = this._userOrChatId >= 0L || this._userOrChatId <= -2000000000L ? this._userStatus.GetUserStatusString(this._user.sex % 2 == 0) : CommonResources.Community;
+                    }
+                    this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsDialogWithOtherUser));
                 }));
         }
 
@@ -553,19 +650,17 @@ namespace VKMessenger.Library
             if (this._isBusyLoadingMessages)
                 return;
             this._isBusyLoadingMessages = true;
-            this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.NoMessages));
+            this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.NoMessages));
             if (showProgress || this.Messages.Count == 0)
                 this.SetInProgress(true, CommonResources.Conversation_LoadingMessages);
             bool scrolledToUnreadItem = false;
-            ObservableCollection<MessageViewModel> source = this._messages;
-
-            Func<MessageViewModel, bool> arg_CD_1 = new Func<MessageViewModel, bool>(m => m.Message.action == ConversationViewModel.UNREAD_ITEM_ACTION);
-
-            if (Enumerable.Any<MessageViewModel>(source, arg_CD_1) && this._scroll != null)
+            ObservableCollection<MessageViewModel> messages1 = this._messages;
+            Func<MessageViewModel, bool> func = (Func<MessageViewModel, bool>)(m => m.Message.action == ConversationViewModel.UNREAD_ITEM_ACTION);
+            if (messages1.Any<MessageViewModel>(func) && this._scroll != null)
             {
-                int? startMessageId2 = startMessageId;
+                int? nullable = startMessageId;
                 int num = -1;
-                if (startMessageId2.GetValueOrDefault() == num && startMessageId2.HasValue)
+                if ((nullable.GetValueOrDefault() == num ? (nullable.HasValue ? 1 : 0) : 0) != 0)
                 {
                     this._scroll.ScrollToUnreadItem();
                     scrolledToUnreadItem = true;
@@ -594,7 +689,7 @@ namespace VKMessenger.Library
                                 this.EnsureUserAndChatIdSet(m);
                                 messagesViewModels.Add(new MessageViewModel(m));
                             }));
-                            Deployment.Current.Dispatcher.BeginInvoke((Action)(() =>
+                            ((DependencyObject)Deployment.Current).Dispatcher.BeginInvoke((Action)(() =>
                             {
                                 int? nullable;
                                 if (offset != 0)
@@ -655,7 +750,7 @@ namespace VKMessenger.Library
                                         return;
                                     this._messages.AddOrdered<MessageViewModel>(messageVM, ConversationViewModel._comparisonFunc, false);
                                 }));
-                                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.NoMessages));
+                                this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.NoMessages));
                                 nullable = startMessageId;
                                 int num3 = -1;
                                 if ((nullable.GetValueOrDefault() == num3 ? (nullable.HasValue ? 1 : 0) : 0) != 0)
@@ -755,7 +850,7 @@ namespace VKMessenger.Library
                 this._user = reader.ReadGeneric<User>();
                 int num2 = 1;
                 if (num1 == num2)
-                    reader.ReadGeneric<Chat>();
+                    reader.ReadGeneric<VKClient.Audio.Base.DataObjects.Chat>();
                 this._messages = new ObservableCollection<MessageViewModel>(reader.ReadList<MessageViewModel>());
                 this._outboundMessage = reader.ReadGeneric<OutboundMessageViewModel>();
                 this._isInSelectionMode = reader.ReadBoolean();
@@ -781,7 +876,6 @@ namespace VKMessenger.Library
         {
             try
             {
-                this.ResetUserIsTypingStatusIfNeeded(true);
                 writer.Write(2);
                 writer.Write(this._userOrChatId);
                 writer.Write(this._isChat);
@@ -812,40 +906,16 @@ namespace VKMessenger.Library
             return this._messages.Skip<MessageViewModel>(Math.Max(0, this._messages.Count - this._numberOfMessagesToStore)).Take<MessageViewModel>(this._numberOfMessagesToStore).ToList<MessageViewModel>();
         }
 
-        private void SetUserIsTypingStatusWithDelayedReset(long userId, User user = null)
-        {
-            if (!this.IsOnScreen)
-                return;
-            Execute.ExecuteOnUIThread((Action)(() =>
-            {
-                if (user == null || string.IsNullOrWhiteSpace(user.first_name) || (string.IsNullOrWhiteSpace(this.UISubtitle) || this._userIsTypingIsSet))
-                    return;
-                this._userIsTypingIsSet = true;
-                this._savedSubtitle = this.UISubtitle;
-                string str = CommonResources.Conversation_IsTyping;
-                if (this._isChat)
-                    str = string.Format(CommonResources.Conversation_UserIsTypingFrm, (object)user.FirstNameLastNameShort);
-                this.UISubtitle = str;
-                this._delayedExecutorResetTypingStatus.AddToDelayedExecution((Action)(() => Execute.ExecuteOnUIThread((Action)(() => this.ResetUserIsTypingStatusIfNeeded(false)))));
-            }));
-        }
-
-        private void ResetUserIsTypingStatusIfNeeded(bool force = false)
-        {
-            if (!this._userIsTypingIsSet)
-                return;
-            this.UISubtitle = this._savedSubtitle;
-            this._userIsTypingIsSet = false;
-        }
-
         internal void ProcessInstantUpdates(List<LongPollServerUpdateData> updates)
         {
             List<MessageViewModel> newOrRestoredMessages = new List<MessageViewModel>();
             List<long> readMessages = new List<long>();
             List<long> deletedMessagesIds = new List<long>();
             bool atLeastOneNewMessage = false;
-            foreach (LongPollServerUpdateData update in updates)
+            bool flag = false;
+            foreach (LongPollServerUpdateData update1 in updates)
             {
+                LongPollServerUpdateData update = update1;
                 if (this._userOrChatId == (update.isChat ? update.chat_id : update.user_id) && update.isChat == this.IsChat)
                 {
                     if ((update.UpdateType == LongPollServerUpdateType.MessageHasBeenAdded || update.UpdateType == LongPollServerUpdateType.MessageHasBeenRestored) && (update.user != null && update.message != null))
@@ -853,14 +923,22 @@ namespace VKMessenger.Library
                         this.EnsureUserAndChatIdSet(update.message);
                         newOrRestoredMessages.Add(new MessageViewModel(update.message));
                         if (update.UpdateType == LongPollServerUpdateType.MessageHasBeenAdded)
+                        {
                             atLeastOneNewMessage = true;
+                            flag = this.IsChat && (this.IsKickedFromChat || update.message.action == "chat_photo_update" || update.message.action == "chat_photo_remove");
+                        }
                     }
                     if (update.UpdateType == LongPollServerUpdateType.MessageHasBeenRead)
                         readMessages.Add(update.message_id);
                     if (update.UpdateType == LongPollServerUpdateType.MessageHasBeenDeleted)
                         deletedMessagesIds.Add(update.message_id);
                     if (update.UpdateType == LongPollServerUpdateType.UserIsTyping || update.UpdateType == LongPollServerUpdateType.UserIsTypingInChat)
-                        this.SetUserIsTypingStatusWithDelayedReset(update.user_id, UsersService.Instance.GetCachedUser(update.user_id));
+                        Execute.ExecuteOnUIThread((Action)(() =>
+                        {
+                            if (this._usersTypingHelper == null)
+                                this._usersTypingHelper = new UsersTypingHelper(this);
+                            this._usersTypingHelper.SetUserIsTypingWithDelayedReset(update.user_id);
+                        }));
                     if (update.UpdateType == LongPollServerUpdateType.UserBecameOnline)
                     {
                         if (this._userStatus == null)
@@ -880,20 +958,12 @@ namespace VKMessenger.Library
             }
             if (newOrRestoredMessages.Count <= 0 && readMessages.Count <= 0 && deletedMessagesIds.Count <= 0)
                 return;
-            
             int delayInMilliseconds = 0;
-            IEnumerable<MessageViewModel> arg_221_0 = newOrRestoredMessages;
-            Func<MessageViewModel, bool> arg_221_1 = new Func<MessageViewModel, bool>(m => m.Message.@out == 1);
-
-            if (Enumerable.Any<MessageViewModel>(arg_221_0, arg_221_1))
-            {
+            List<MessageViewModel> source = newOrRestoredMessages;
+            Func<MessageViewModel, bool> func = (Func<MessageViewModel, bool>)(m => m.Message.@out == 1);
+            if (source.Any<MessageViewModel>(func))
                 delayInMilliseconds = 1500;
-            }
-
-
-
-
-            DelayedExecutorUtil.Execute((Action)(() => Deployment.Current.Dispatcher.BeginInvoke((Action)(() =>
+            DelayedExecutorUtil.Execute((Action)(() => ((DependencyObject)Deployment.Current).Dispatcher.BeginInvoke((Action)(() =>
             {
                 double num1 = this._scroll == null ? 0.0 : this._scroll.VerticalOffset;
                 Logger.Instance.Info("Applying new messages");
@@ -914,7 +984,12 @@ namespace VKMessenger.Library
                             Logger.Instance.Info("Adding instant update new message {0}, viewModelHashCode={1}", (object)newMessage.Message.mid, (object)this.GetHashCode());
                             newMessage.IsInSelectionMode = this.IsInSelectionMode;
                             this._messages.AddOrdered<MessageViewModel>(newMessage, ConversationViewModel._comparisonFunc, true);
-                            this.ResetUserIsTypingStatusIfNeeded(true);
+                            UsersTypingHelper usersTypingHelper = this._usersTypingHelper;
+                            if (usersTypingHelper != null)
+                            {
+                                long userId = (long)newMessage.Message.user_id;
+                                usersTypingHelper.SetUserIsNotTyping(userId);
+                            }
                             this.ChatTypeStatusText = string.Empty;
                         }
                     }
@@ -945,8 +1020,11 @@ namespace VKMessenger.Library
                 }
                 if (((this._scroll == null ? 0 : (this._messages.Count > 0 ? 1 : 0)) & (atLeastOneNewMessage ? 1 : 0)) != 0 && num1 < 50.0)
                     this._scroll.ScrollToBottom(true, false);
-                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.NoMessages));
+                this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.NoMessages));
             }))), delayInMilliseconds);
+            if (!flag)
+                return;
+            this.LoadHeaderInfoAsync();
         }
 
         internal void DeleteDialog()
@@ -987,7 +1065,7 @@ namespace VKMessenger.Library
                     if (res.ResultCode == ResultCode.Succeeded)
                         this.AreNotificationsDisabled = !this.AreNotificationsDisabled;
                     resultCallback(res.ResultCode == ResultCode.Succeeded);
-                }), this._isChat ? this._userOrChatId : 0L, !this._isChat ? this._userOrChatId : 0L);
+                }), this._isChat ? this._userOrChatId : 0, !this._isChat ? this._userOrChatId : 0L);
             }
             else
             {
@@ -995,6 +1073,28 @@ namespace VKMessenger.Library
                 this.AreNotificationsDisabled = !this.AreNotificationsDisabled;
                 resultCallback(true);
             }
+        }
+
+        internal void AllowDenyMessagesFromGroup(Action<bool> callback)
+        {
+            if (this._userOrChatId > 0L || this._userOrChatId < -2000000000L || this._isMessageFromGroupBusy)
+                return;
+            this._isMessageFromGroupBusy = true;
+            long groupId = Math.Abs(this._userOrChatId);
+            this.SetInProgress(true, "");
+            MessagesService.Instance.AllowDenyMessagesFromGroup(groupId, this.IsMessagesFromGroupDenied, (Action<BackendResult<int, ResultCode>>)(result =>
+            {
+                this._isMessageFromGroupBusy = false;
+                this.SetInProgress(false, "");
+                bool flag = result.ResultCode == ResultCode.Succeeded;
+                if (flag)
+                    this.IsMessagesFromGroupDenied = !this.IsMessagesFromGroupDenied;
+                Action<bool> action = callback;
+                if (action == null)
+                    return;
+                int num = flag ? 1 : 0;
+                action(num != 0);
+            }));
         }
 
         internal void PinToStart()
@@ -1031,8 +1131,7 @@ namespace VKMessenger.Library
                     {
                         this._isInProgressPinToStart = false;
                         this.SetInProgressMain(false, "");
-                        int num;
-                        Execute.ExecuteOnUIThread((Action)(() => num = (int)MessageBox.Show(CommonResources.Error)));
+                        Execute.ExecuteOnUIThread((Action)(() => MessageBox.Show(CommonResources.Error)));
                     }
                     else
                     {
@@ -1063,78 +1162,83 @@ namespace VKMessenger.Library
             this.AreNotificationsDisabled = message.AreNotificationsDisabled;
             this.RefreshUIPropertiesSafe();
         }
-        
+
+        public void Handle(MessagesFromGroupAllowedDeniedEvent message)
+        {
+            if (message.UserOrGroupId != this.UserOrCharId || this.IsChat)
+                return;
+            this.IsMessagesFromGroupDenied = !message.IsAllowed;
+            this.RefreshUIPropertiesSafe();
+        }
+
         public void AddAttachmentsFromRepository()
         {
-            WallPost wallPost = ParametersRepository.GetParameterForIdAndReset("WallPostAttachment") as WallPost;
-            if (wallPost != null)
-                this.OutboundMessageVm.AddWallPostAttachment(wallPost);
-            GeoCoordinate geoCoordinate = ParametersRepository.GetParameterForIdAndReset("NewPositionToBeAttached") as GeoCoordinate;
-            if (geoCoordinate != (GeoCoordinate)null)
-                this.OutboundMessageVm.AddGeoAttachment(geoCoordinate.Latitude, geoCoordinate.Longitude);
-            List<Stream> streamList1 = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotos") as List<Stream>;
-            List<Stream> streamList2 = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotosPreviews") as List<Stream>;
+            WallPost parameterForIdAndReset1 = ParametersRepository.GetParameterForIdAndReset("WallPostAttachment") as WallPost;
+            if (parameterForIdAndReset1 != null)
+                this.OutboundMessageVM.AddWallPostAttachment(parameterForIdAndReset1);
+            GeoCoordinate parameterForIdAndReset2 = ParametersRepository.GetParameterForIdAndReset("NewPositionToBeAttached") as GeoCoordinate;
+            if (parameterForIdAndReset2 != (GeoCoordinate)null)
+                this.OutboundMessageVM.AddGeoAttachment(parameterForIdAndReset2.Latitude, parameterForIdAndReset2.Longitude);
+            List<Stream> parameterForIdAndReset3 = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotos") as List<Stream>;
+            List<Stream> parameterForIdAndReset4 = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotosPreviews") as List<Stream>;
             ParametersRepository.GetParameterForIdAndReset("ChoosenPhotosSizes");
-            if (streamList1 != null)
+            if (parameterForIdAndReset3 != null)
             {
-                for (int index = 0; index < streamList1.Count; ++index)
+                for (int index = 0; index < parameterForIdAndReset3.Count; ++index)
                 {
-                    Stream stream = streamList1[index];
-                    Stream previewStream = null;
-                    if (streamList2 != null && streamList2.Count > index)
-                        previewStream = streamList2[index];
-                    this.OutboundMessageVm.AddPictureAttachment(stream, previewStream);
+                    Stream stream = parameterForIdAndReset3[index];
+                    Stream previewStream = (Stream)null;
+                    if (parameterForIdAndReset4 != null && parameterForIdAndReset4.Count > index)
+                        previewStream = parameterForIdAndReset4[index];
+                    this.OutboundMessageVM.AddPictureAttachment(stream, previewStream);
                 }
             }
-            Photo pickedPhoto = ParametersRepository.GetParameterForIdAndReset("PickedPhoto") as Photo;
-            if (pickedPhoto != null)
-                this.OutboundMessageVm.AddExistingPhotoAttachment(pickedPhoto);
-            VKClient.Common.Backend.DataObjects.Video pickedVideo = ParametersRepository.GetParameterForIdAndReset("PickedVideo") as VKClient.Common.Backend.DataObjects.Video;
-            if (pickedVideo != null)
-                this.OutboundMessageVm.AddExistingVideoAttachment(pickedVideo);
-            AudioObj pickedAudio = ParametersRepository.GetParameterForIdAndReset("PickedAudio") as AudioObj;
-            if (pickedAudio != null)
-                this.OutboundMessageVm.AddExistingAudioAttachment(pickedAudio);
-            Doc pickedDocument = ParametersRepository.GetParameterForIdAndReset("PickedDocument") as Doc;
-            if (pickedDocument != null)
-                this.OutboundMessageVm.AddExistingDocAttachment(pickedDocument);
-            Product product = ParametersRepository.GetParameterForIdAndReset("ShareProduct") as Product;
-            if (product != null)
-                this.OutboundMessageVm.AddProductAttachment(product, this.CanDettachProductAttachment);
-            FileOpenPickerContinuationEventArgs continuationEventArgs = ParametersRepository.GetParameterForIdAndReset("FilePicked") as FileOpenPickerContinuationEventArgs;
-            if (continuationEventArgs != null && ((IEnumerable<StorageFile>)continuationEventArgs.Files).Any<StorageFile>() || ParametersRepository.Contains("PickedPhotoDocument"))
+            Photo parameterForIdAndReset5 = ParametersRepository.GetParameterForIdAndReset("PickedPhoto") as Photo;
+            if (parameterForIdAndReset5 != null)
+                this.OutboundMessageVM.AddExistingPhotoAttachment(parameterForIdAndReset5);
+            Video parameterForIdAndReset6 = ParametersRepository.GetParameterForIdAndReset("PickedVideo") as Video;
+            if (parameterForIdAndReset6 != null)
+                this.OutboundMessageVM.AddExistingVideoAttachment(parameterForIdAndReset6);
+            AudioObj parameterForIdAndReset7 = ParametersRepository.GetParameterForIdAndReset("PickedAudio") as AudioObj;
+            if (parameterForIdAndReset7 != null)
+                this.OutboundMessageVM.AddExistingAudioAttachment(parameterForIdAndReset7);
+            Doc parameterForIdAndReset8 = ParametersRepository.GetParameterForIdAndReset("PickedDocument") as Doc;
+            if (parameterForIdAndReset8 != null)
+                this.OutboundMessageVM.AddExistingDocAttachment(parameterForIdAndReset8);
+            Product parameterForIdAndReset9 = ParametersRepository.GetParameterForIdAndReset("ShareProduct") as Product;
+            if (parameterForIdAndReset9 != null)
+                this.OutboundMessageVM.AddProductAttachment(parameterForIdAndReset9, this.CanDettachProductAttachment);
+            FileOpenPickerContinuationEventArgs parameterForIdAndReset10 = ParametersRepository.GetParameterForIdAndReset("FilePicked") as FileOpenPickerContinuationEventArgs;
+            if (parameterForIdAndReset10 != null && parameterForIdAndReset10.Files.Any<StorageFile>() || ParametersRepository.Contains("PickedPhotoDocuments"))
             {
-                object parameterForIdAndReset = ParametersRepository.GetParameterForIdAndReset("FilePickedType");
-                StorageFile file = continuationEventArgs != null ? ((IEnumerable<StorageFile>)continuationEventArgs.Files).First<StorageFile>() : (StorageFile)ParametersRepository.GetParameterForIdAndReset("PickedPhotoDocument");
+                object parameterForIdAndReset11 = ParametersRepository.GetParameterForIdAndReset("FilePickedType");
+                IReadOnlyList<StorageFile> storageFileList = parameterForIdAndReset10 != null ? parameterForIdAndReset10.Files : (IReadOnlyList<StorageFile>)ParametersRepository.GetParameterForIdAndReset("PickedPhotoDocuments");
                 VKClient.Common.Library.Posts.AttachmentType result;
-                if (parameterForIdAndReset != null && Enum.TryParse<VKClient.Common.Library.Posts.AttachmentType>(parameterForIdAndReset.ToString(), out result))
+                if (parameterForIdAndReset11 != null && Enum.TryParse<VKClient.Common.Library.Posts.AttachmentType>(parameterForIdAndReset11.ToString(), out result))
                 {
-                    if (result != VKClient.Common.Library.Posts.AttachmentType.VideoFromPhone)
+                    foreach (StorageFile file in (IEnumerable<StorageFile>)storageFileList)
                     {
-                        if (result == VKClient.Common.Library.Posts.AttachmentType.DocumentFromPhone || result == VKClient.Common.Library.Posts.AttachmentType.DocumentPhoto)
-                            this.OutboundMessageVm.AddUploadDocAttachment(file);
+                        if (result != VKClient.Common.Library.Posts.AttachmentType.VideoFromPhone)
+                        {
+                            if (result == VKClient.Common.Library.Posts.AttachmentType.DocumentFromPhone || result == VKClient.Common.Library.Posts.AttachmentType.DocumentPhoto)
+                                this.OutboundMessageVM.AddUploadDocAttachment(file);
+                        }
+                        else
+                            this.OutboundMessageVM.AddUploadVideoAttachment(file);
                     }
-                    else
-                        this.OutboundMessageVm.AddUploadVideoAttachment(file);
                 }
             }
-            List<StorageFile> storageFileList1 = ParametersRepository.GetParameterForIdAndReset("ChosenDocuments") as List<StorageFile>;
-            if (storageFileList1 != null && storageFileList1.Count > 0)
+            List<StorageFile> parameterForIdAndReset12 = ParametersRepository.GetParameterForIdAndReset("ChosenDocuments") as List<StorageFile>;
+            if (parameterForIdAndReset12 != null && parameterForIdAndReset12.Count > 0)
             {
-                using (List<StorageFile>.Enumerator enumerator = storageFileList1.GetEnumerator())
-                {
-                    while (enumerator.MoveNext())
-                        this.OutboundMessageVm.AddUploadDocAttachment(enumerator.Current);
-                }
+                foreach (StorageFile file in parameterForIdAndReset12)
+                    this.OutboundMessageVM.AddUploadDocAttachment(file);
             }
-            List<StorageFile> storageFileList2 = ParametersRepository.GetParameterForIdAndReset("ChosenVideos") as List<StorageFile>;
-            if (storageFileList2 == null || storageFileList2.Count <= 0)
+            List<StorageFile> parameterForIdAndReset13 = ParametersRepository.GetParameterForIdAndReset("ChosenVideos") as List<StorageFile>;
+            if (parameterForIdAndReset13 == null || parameterForIdAndReset13.Count <= 0)
                 return;
-            using (List<StorageFile>.Enumerator enumerator = storageFileList2.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                    this.OutboundMessageVm.AddUploadVideoAttachment(enumerator.Current);
-            }
+            foreach (StorageFile file in parameterForIdAndReset13)
+                this.OutboundMessageVM.AddUploadVideoAttachment(file);
         }
     }
 }

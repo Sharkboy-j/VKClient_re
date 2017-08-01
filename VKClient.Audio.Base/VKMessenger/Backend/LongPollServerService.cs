@@ -29,7 +29,7 @@ namespace VKMessenger.Backend
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["use_ssl"] = "1";
-      VKRequestsDispatcher.DispatchRequestToVK<LongPollServerResponse>("messages.getLongPollServer", parameters, callback, new Func<string, LongPollServerResponse>(this.GetLongPollResponseForJson), false, false, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<LongPollServerResponse>("messages.getLongPollServer", parameters, callback, new Func<string, LongPollServerResponse>(this.GetLongPollResponseForJson), false, false, new CancellationToken?(),  null);
     }
 
     public bool HaveToken()
@@ -39,7 +39,7 @@ namespace VKMessenger.Backend
 
     public void GetUpdates(string serverName, string key, long ts, Action<BackendResult<UpdatesResponse, LongPollResultCode>> callback)
     {
-      JsonWebRequest.SendHTTPRequestAsync(string.Format(this._getUpdatesURIFrm, (object) serverName, (object) key, (object) ts), (Action<JsonResponseData>) (jsonResp =>
+      JsonWebRequest.SendHTTPRequestAsync(string.Format(this._getUpdatesURIFrm, serverName, key, ts), (Action<JsonResponseData>) (jsonResp =>
       {
         BackendResult<UpdatesResponse, LongPollResultCode> backendResult = new BackendResult<UpdatesResponse, LongPollResultCode>();
         if (!jsonResp.IsSucceeded || string.IsNullOrWhiteSpace(jsonResp.JsonString))
@@ -57,7 +57,7 @@ namespace VKMessenger.Backend
           backendResult.ResultData.Updates = this.ReadUpdatesResponseFromRaw(objectGetUpdates.updates, new Func<List<object>, LongPollServerUpdateData>(this.GetUpdateDataForNewMessageLongPollData));
         }
         callback(backendResult);
-      }), (Dictionary<string, object>) null);
+      }),  null);
     }
 
     private List<LongPollServerUpdateData> ReadUpdatesResponseFromRaw(List<List<object>> rawUpdates, Func<List<object>, LongPollServerUpdateData> getUpdatesForNewMessageFunc)
@@ -207,7 +207,7 @@ namespace VKMessenger.Backend
     private LongPollServerUpdateData ReadUserOrChatIds(List<object> updateDataRaw)
     {
       if (updateDataRaw == null || updateDataRaw.Count < 4)
-        return (LongPollServerUpdateData) null;
+        return  null;
       long num1 = long.Parse(updateDataRaw[1].ToString());
       bool flag = false;
       long num2 = 0;
@@ -245,7 +245,7 @@ namespace VKMessenger.Backend
         bool flag1 = (long.Parse(updateDataRaw[2].ToString()) & 2L) == 2L;
         long num2 = long.Parse(updateDataRaw[3].ToString());
         long num3 = long.Parse(updateDataRaw[4].ToString());
-        string @string = updateDataRaw[6].ToString();
+        string str = updateDataRaw[6].ToString();
         bool flag2 = false;
         bool flag3 = false;
         long num4 = 0;
@@ -268,7 +268,7 @@ namespace VKMessenger.Backend
         serverUpdateData.user_id = num2;
         serverUpdateData.chat_id = num4;
         serverUpdateData.timestamp = num3;
-        serverUpdateData.text = @string;
+        serverUpdateData.text = str;
         serverUpdateData.isChat = flag3;
         serverUpdateData.hasAttachOrForward = flag2;
         return serverUpdateData;
@@ -276,7 +276,7 @@ namespace VKMessenger.Backend
       catch (Exception ex)
       {
         Logger.Instance.Error("GetUpdateDataForNewMessage", ex);
-        return (LongPollServerUpdateData) null;
+        return  null;
       }
     }
 

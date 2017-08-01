@@ -1,7 +1,6 @@
 ﻿<framework:PageBase x:Class="VKClient.Common.FavoritesPage"
                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
                     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -160,9 +159,12 @@
                            Stretch="UniformToFill"
                            framework:ImageLoader.UriSource="{Binding photo_100}">
                         <Image.Clip>
-                            <EllipseGeometry Center="31 31"
+                            <!--<EllipseGeometry Center="31 31"
                                              RadiusX="31"
-                                             RadiusY="31" />
+                                             RadiusY="31" />-->
+                            <RectangleGeometry Rect="0 0 62 62"
+							RadiusX="{Binding UserAvatarRadius}"
+							RadiusY="{Binding UserAvatarRadius}"/>
                         </Image.Clip>
                     </Image>
                 </Grid>
@@ -261,7 +263,7 @@
                 <ViewportControl Name="scrollPosts"
                                  VerticalContentAlignment="Stretch"
                                  HorizontalContentAlignment="Stretch">
-                    <StackPanel Name="stackPanelPosts">
+                    <commonUC:MyVirtualizingStackPanel Name="stackPanelPosts">
 
                         <framework:MyVirtualizingPanel2 VerticalAlignment="Top"
                                                        x:Name="panelPosts"
@@ -272,7 +274,7 @@
 
                         <commonUC:FooterUC DataContext="{Binding PostsVM}" />
 
-                    </StackPanel>
+                    </commonUC:MyVirtualizingStackPanel>
 
                 </ViewportControl>
             </controls:PivotItem>

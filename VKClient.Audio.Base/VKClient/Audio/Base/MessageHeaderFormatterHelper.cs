@@ -16,7 +16,7 @@ namespace VKClient.Audio.Base
       content3 = "";
       if (message == null || user == null)
         return;
-      content1 = message.chat_id != 0 ? string.Format("{0} ({1})", (object) user.Name, (object) BaseResources.InChat) : user.Name;
+      content1 = message.chat_id != 0 ? string.Format("{0} ({1})", user.Name, BaseResources.InChat) : user.Name;
       if (!string.IsNullOrWhiteSpace(message.body))
       {
         content2 = message.body.Replace(Environment.NewLine, " ");
@@ -46,16 +46,16 @@ namespace VKClient.Audio.Base
                   str = BaseResources.WallPost;
               }
               else
-                str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OneDocFrm, BaseResources.TwoFourDocsFrm, BaseResources.FiveDocsFrm, true, null, false);
+                str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OneDocFrm, BaseResources.TwoFourDocsFrm, BaseResources.FiveDocsFrm, true,  null, false);
             }
             else
-              str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OneAudioFrm, BaseResources.TwoFourAudiosFrm, BaseResources.FiveAudiosFrm, true, null, false);
+              str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OneAudioFrm, BaseResources.TwoFourAudiosFrm, BaseResources.FiveAudiosFrm, true,  null, false);
           }
           else
-            str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OneVideoFrm, BaseResources.TwoFourVideosFrm, BaseResources.FiveVideosFrm, true, null, false);
+            str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OneVideoFrm, BaseResources.TwoFourVideosFrm, BaseResources.FiveVideosFrm, true,  null, false);
         }
         else
-          str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OnePhotoFrm, BaseResources.TwoFourPhotosFrm, BaseResources.FivePhotosFrm, true, null, false);
+          str = BaseFormatterHelper.FormatNumberOfSomething(number, BaseResources.OnePhotoFrm, BaseResources.TwoFourPhotosFrm, BaseResources.FivePhotosFrm, true,  null, false);
       }
       return str;
     }

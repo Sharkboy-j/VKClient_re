@@ -80,7 +80,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>Bin\ARM\Release</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
     <NoStdLib>true</NoStdLib>
@@ -90,10 +90,13 @@
     <PlatformTarget />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ImageEditor\AvailableFilters.cs" />
     <Compile Include="ImageEditor\CropRegion.cs" />
     <Compile Include="ImageEditor\FilterViewModel.cs" />
-    <Compile Include="ImageEditor\ImageEditorDecorator2UC.cs" />
+    <Compile Include="ImageEditor\ImageEditorDecorator2UC.cs">
+      <DependentUpon>imageeditordecorator2uc.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ImageEditor\ImageEditorViewModel.cs" />
     <Compile Include="ImageEditor\ImageEffectsInfo.cs" />
     <Compile Include="ImageEditor\SessionEffects.cs" />
@@ -103,72 +106,40 @@
     <Compile Include="Library\AlbumHeaderTwoInARow.cs" />
     <Compile Include="Library\CommonUtils.cs" />
     <Compile Include="Library\CreateEditAlbumViewModel.cs" />
-    <Compile Include="Library\PhotoAlbumCreated.cs" />
-    <Compile Include="Library\PhotoAlbumDeleted.cs" />
     <Compile Include="Library\PhotoAlbumTemplateSelector.cs" />
     <Compile Include="Library\PhotoAlbumViewModel.cs" />
-    <Compile Include="Library\PhotoDeletedFromAlbum.cs" />
     <Compile Include="Library\PhotoPickerAlbumsViewModel.cs" />
     <Compile Include="Library\PhotoPickerPhotosViewModel.cs" />
-    <Compile Include="Library\PhotoSetAsAlbumCover.cs" />
     <Compile Include="Library\PhotosMainViewModel.cs" />
-    <Compile Include="Library\PhotosMovedToAlbum.cs" />
-    <Compile Include="Library\PhotoUploadedToAlbum.cs" />
     <Compile Include="Localization\PhotoLocalizedStrings.cs" />
-    <Compile Include="Localization\PhotoResources.cs">
+    <Compile Include="Localization\PhotoResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
       <DependentUpon>PhotoResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PhotoAlbumPage.cs" />
-    <Compile Include="PhotoCommentsPage.cs" />
-    <Compile Include="PhotoPickerPhotos.cs" />
-    <Compile Include="PhotosMainPage.cs" />
+    <Compile Include="PhotoAlbumPage.cs">
+      <DependentUpon>photoalbumpage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PhotoCommentsPage.cs">
+      <DependentUpon>photocommentspage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PhotoPickerPhotos.cs">
+      <DependentUpon>photopickerphotos.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PhotosMainPage.cs">
+      <DependentUpon>photosmainpage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PhotosToMoveInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UC\CreateAlbumUC.cs" />
-    <Compile Include="UC\EditPhotoTextUC.cs" />
-    <Compile Include="UC\PickAlbumUC.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="ImageEditor\imageeditordecorator2uc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="photoalbumpage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="photocommentspage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="photopickerphotos.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="photosmainpage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UC\createalbumuc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UC\editphototextuc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UC\pickalbumuc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Localization\PhotoResources.be-BY.resx"/>
-    <EmbeddedResource Include="Localization\PhotoResources.kk-KZ.resx"/>
-    <EmbeddedResource Include="Localization\PhotoResources.pt-BR.resx"/>
-    <EmbeddedResource Include="Localization\PhotoResources.resx"/>
-    <EmbeddedResource Include="Localization\PhotoResources.ru-RU.resx"/>
-    <EmbeddedResource Include="Localization\PhotoResources.uk-UA.resx"/>
+    <Compile Include="UC\CreateAlbumUC.cs">
+      <DependentUpon>createalbumuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UC\EditPhotoTextUC.cs">
+      <DependentUpon>editphototextuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UC\PickAlbumUC.cs">
+      <DependentUpon>pickalbumuc.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VKClient.Audio.Base\VKClient.Audio.Base.csproj">
@@ -187,6 +158,58 @@
     <Reference Include="VKCamera">
       <HintPath>..\libs\VKCamera.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ImageEditor\imageeditordecorator2uc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="photoalbumpage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="photocommentspage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="photopickerphotos.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="photosmainpage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UC\createalbumuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UC\editphototextuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UC\pickalbumuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\PhotoResources.be-BY.resx" />
+    <EmbeddedResource Include="Localization\PhotoResources.kk-KZ.resx" />
+    <EmbeddedResource Include="Localization\PhotoResources.pt-BR.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\PhotoResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PhotoResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\PhotoResources.ru-RU.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\PhotoResources.uk-UA.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />

@@ -5,6 +5,7 @@
                  xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
                  xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
                  xmlns:framework="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
+                 xmlns:uc="clr-namespace:VKMessenger.Views;assembly=VKMessenger"
                  xmlns:views="clr-namespace:VKMessenger.Views"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -22,133 +23,8 @@
 
     <client:PageBase.Resources>
 
-
         <DataTemplate x:Key="HeaderTemplate">
             <Grid Height="10" />
-        </DataTemplate>
-
-        <DataTemplate x:Key="SearchDialogItemTemplate">
-            <Grid framework:TiltEffect.IsTiltEnabled="False">
-
-
-                <Grid Height="62"
-                     
-                      Background="Transparent"
-                      framework:MetroInMotion.Tilt="2.5"
-                      Margin="16,6,16,6">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="62" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <Ellipse Style="{StaticResource PhotoPlaceholderEllipse}"                           
-                             HorizontalAlignment="Left"
-                             VerticalAlignment="Center"
-                             Height="62"
-                             Width="62"
-                             Visibility="{Binding ConversationAvatarVM.IsChat, Converter={StaticResource BoolToVisibilityInverterConverter}}"
-                             Grid.Column="1" />
-
-                    <Image HorizontalAlignment="Left"
-                           Grid.Column="1"
-                           Height="62"
-                           Width="62"
-                           Visibility="{Binding ConversationAvatarVM.IsChat, Converter={StaticResource BoolToVisibilityInverterConverter}}"
-                           framework:ImageLoader.UriSource="{Binding ConversationAvatarVM.UIImageUrl, Mode=OneWay}"
-                           VerticalAlignment="Center">
-                        <Image.Clip>
-                            <EllipseGeometry Center="31 31"
-                                             RadiusX="31"
-                                             RadiusY="31" />
-                        </Image.Clip>
-                    </Image>
-
-
-
-                    <Grid Grid.Column="1"
-                          Visibility="{Binding ConversationAvatarVM.IsChat, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Image Width="62"
-                               Height="62"
-                               Visibility="{Binding PhoneLightThemeVisibility, Source={StaticResource ThemeHelper}}"
-                               framework:MultiResImageLoader.UriSource="/Resources/New/PlaceholderGroup62Light.png">
-                            <Image.Clip>
-                                <EllipseGeometry Center="31 31"
-                                                 RadiusX="31"
-                                                 RadiusY="31" />
-                            </Image.Clip>
-                        </Image>
-                        <Image Width="62"
-                               Height="62"
-                               Visibility="{Binding PhoneDarkThemeVisibility, Source={StaticResource ThemeHelper}}"
-                               framework:MultiResImageLoader.UriSource="/Resources/New/PlaceholderGroup62Dark.png">
-                            <Image.Clip>
-                                <EllipseGeometry Center="31 31"
-                                                 RadiusX="31"
-                                                 RadiusY="31" />
-                            </Image.Clip>
-                        </Image>
-
-                        <Image HorizontalAlignment="Left"
-                               Height="62"
-                               Width="62"
-                               framework:ImageLoader.UriSource="{Binding Path=ConversationAvatarVM.UIImageUrl, Mode=OneWay}"
-                               VerticalAlignment="Center">
-                            <Image.Clip>
-                                <EllipseGeometry Center="31 31"
-                                                 RadiusX="31"
-                                                 RadiusY="31" />
-                            </Image.Clip>
-                        </Image>
-                    </Grid>
-
-
-
-                    <TextBlock Margin="12,0,12,6"
-                               Grid.Column="2"
-                               Text="{Binding UITitle}"
-                               TextWrapping="NoWrap"
-                               Style="{StaticResource PhoneTextLargeStyle}"
-                               Foreground="{StaticResource PhoneContrastTitleBrush}"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-
-
-
-                    <Border Grid.Column="3"
-                            Style="{StaticResource IconBorder}"
-                            HorizontalAlignment="Right"
-                            Width="9"
-                            Height="9"
-                            Visibility="{Binding IsOnlineVisibility}">
-
-                        <Border.OpacityMask>
-                            <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/OnlineMark.png" />
-                        </Border.OpacityMask>
-
-
-                    </Border>
-
-                    <Border Grid.Column="3"
-                            Style="{StaticResource IconBorder}"
-                            HorizontalAlignment="Right"
-                            Width="12"
-                            Height="18"
-                            Margin="0, 2, -3, 0"
-                            Visibility="{Binding IsOnlineMobileVisibility}">
-
-                        <Border.OpacityMask>
-                            <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/OnlineMobileMark.png" />
-                        </Border.OpacityMask>
-
-
-                    </Border>
-                </Grid>
-
-
-            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="SearchMessageItemTemplate">
@@ -203,9 +79,14 @@
                                                         IsFlatList="True"
                                                         Name="listBoxSearchDialog"
                                                         ManipulationStarted="searchDialogManipulationStarted"
-                                                        ItemTemplate="{StaticResource SearchDialogItemTemplate}"
                                                         ListHeaderTemplate="{StaticResource HeaderTemplate}"
-                                                        SelectionChanged="ListBox_SelectionChanged" />
+                                                        SelectionChanged="ListBox_SelectionChanged">
+                        <framework:ExtendedLongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <uc:ConversationsSearchResultUC/>
+                            </DataTemplate>
+                        </framework:ExtendedLongListSelector.ItemTemplate>
+                    </framework:ExtendedLongListSelector>
                 </Grid>
             </controls:PivotItem>
 

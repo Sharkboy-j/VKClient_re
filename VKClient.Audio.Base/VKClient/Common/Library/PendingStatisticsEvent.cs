@@ -152,9 +152,23 @@ namespace VKClient.Common.Library
 
     public string GifPlayContext { get; set; }
 
+    public string PostId { get; set; }
+
+    public PostActionType ActionType { get; set; }
+
+    public string AudioMessageId { get; set; }
+
+    public GiftPurchaseStepsSource GiftPurchaseStepsSource { get; set; }
+
+    public GiftPurchaseStepsAction GiftPurchaseStepsAction { get; set; }
+
+    public PostInteractionAction PostAction { get; set; }
+
+    public string Link { get; set; }
+
     public void Write(BinaryWriter writer)
     {
-      writer.Write(12);
+      writer.Write(16);
       writer.WriteString(this.event_name);
       writer.Write(this.user_id);
       writer.WriteString(this.post_id);
@@ -189,6 +203,12 @@ namespace VKClient.Common.Library
       writer.WriteString(this.GifPlayGifId);
       writer.Write((int) this.GifPlayStartType);
       writer.WriteString(this.GifPlayContext);
+      writer.WriteString(this.PostId);
+      writer.Write((int) this.ActionType);
+      writer.Write((int) this.GiftPurchaseStepsSource);
+      writer.Write((int) this.GiftPurchaseStepsAction);
+      writer.Write((int) this.PostAction);
+      writer.WriteString(this.Link);
     }
 
     public void Read(BinaryReader reader)
@@ -254,11 +274,31 @@ namespace VKClient.Common.Library
         this.StickersPurchaseFunnelAction = (StickersPurchaseFunnelAction) reader.ReadInt32();
       }
       int num12 = 12;
-      if (num1 < num12)
+      if (num1 >= num12)
+      {
+        this.GifPlayGifId = reader.ReadString();
+        this.GifPlayStartType = (GifPlayStartType) reader.ReadInt32();
+        this.GifPlayContext = reader.ReadString();
+      }
+      int num13 = 13;
+      if (num1 >= num13)
+      {
+        this.PostId = reader.ReadString();
+        this.ActionType = (PostActionType) reader.ReadInt32();
+      }
+      int num14 = 14;
+      if (num1 >= num14)
+      {
+        this.GiftPurchaseStepsSource = (GiftPurchaseStepsSource) reader.ReadInt32();
+        this.GiftPurchaseStepsAction = (GiftPurchaseStepsAction) reader.ReadInt32();
+      }
+      int num15 = 15;
+      if (num1 >= num15)
+        this.PostAction = (PostInteractionAction) reader.ReadInt32();
+      int num16 = 16;
+      if (num1 < num16)
         return;
-      this.GifPlayGifId = reader.ReadString();
-      this.GifPlayStartType = (GifPlayStartType) reader.ReadInt32();
-      this.GifPlayContext = reader.ReadString();
+      this.Link = reader.ReadString();
     }
   }
 }

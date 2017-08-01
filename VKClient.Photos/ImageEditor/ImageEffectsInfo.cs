@@ -39,7 +39,7 @@ namespace VKClient.Photos.ImageEditor
 
     public string GetUniqueKeyForFiltering()
     {
-      return this.AlbumId + "_" + (object) this.SeqNo + "_" + (object) this.RotateAngle + "_" + (this.CropRect == null ? "NoCrop" : this.CropRect.ToString()) + this.Contrast.ToString();
+      return this.AlbumId + "_" + this.SeqNo + "_" + this.RotateAngle + "_" + (this.CropRect == null ? "NoCrop" : this.CropRect.ToString()) + this.Contrast.ToString();
     }
   }
 }

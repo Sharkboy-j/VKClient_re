@@ -15,7 +15,7 @@ namespace VKClient.Common.UC
 {
   public class GenericInfoUC : UserControl
   {
-    private DelayedExecutor _deHide;
+    private readonly DelayedExecutor _deHide;
     private const int DEFAULT_DELAY = 1000;
     internal Grid LayoutRoot;
     internal ScrollableTextBlock textBlockInfo;
@@ -24,17 +24,19 @@ namespace VKClient.Common.UC
 
     public GenericInfoUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
       this._deHide = new DelayedExecutor(1000);
     }
 
     public GenericInfoUC(int delayToHide)
     {
+      //base.\u002Ector();
       this.InitializeComponent();
       this._deHide = new DelayedExecutor(delayToHide > 0 ? delayToHide : 1000);
     }
 
-    public void ShowAndHideLater(string text, FrameworkElement elementToFadeout)
+    public void ShowAndHideLater(string text, FrameworkElement elementToFadeout = null)
     {
       DialogService ds = new DialogService();
       this.textBlockInfo.Text = text;
@@ -45,74 +47,101 @@ namespace VKClient.Common.UC
       this._deHide.AddToDelayedExecution((Action) (() => Execute.ExecuteOnUIThread((Action) (() => ds.Hide()))));
     }
 
-    public static void ShowBasedOnResult(int resultCode, string successString = "", VKRequestsDispatcher.Error error = null)
+    public static void ShowBasedOnResult(ResultCode resultCode, string successString = "", VKRequestsDispatcher.Error error = null)
     {
       Execute.ExecuteOnUIThread((Action) (() =>
       {
-        if (resultCode == 0)
+        if (resultCode.IsCancelResultCode() || resultCode == ResultCode.ValidationCancelledOrFailed)
+          return;
+        if (resultCode == ResultCode.Succeeded)
         {
           if (string.IsNullOrWhiteSpace(successString))
             return;
-          new GenericInfoUC().ShowAndHideLater(successString, null);
+          new GenericInfoUC().ShowAndHideLater(successString,  null);
         }
         else
         {
           int delayToHide = 0;
           string text = CommonResources.Error;
-          if (Enum.IsDefined(typeof (ResultCode), (object) resultCode))
+          switch (resultCode)
           {
-            switch ((ResultCode) resultCode)
-            {
-              case ResultCode.InvalidCode:
-                text = CommonResources.Registration_WrongCode;
-                break;
-              case ResultCode.Processing:
-                text = CommonResources.Registration_TryAgainLater;
-                break;
-              case ResultCode.ProductNotFound:
-                text = CommonResources.CannotLoadProduct;
-                delayToHide = 2000;
-                break;
-              case ResultCode.CommunicationFailed:
-                text = CommonResources.Error_Connection;
-                delayToHide = 3000;
-                break;
-              case ResultCode.WrongPhoneNumberFormat:
-                text = CommonResources.Registration_InvalidPhoneNumber;
-                break;
-              case ResultCode.PhoneAlreadyRegistered:
-                text = CommonResources.Registration_PhoneNumberIsBusy;
-                break;
-            }
+            case ResultCode.Processing:
+              text = CommonResources.Registration_TryAgainLater;
+              break;
+            case ResultCode.ProductNotFound:
+              text = CommonResources.CannotLoadProduct;
+              delayToHide = 2000;
+              break;
+            case ResultCode.VideoNotFound:
+              text = CommonResources.CannotLoadVideo;
+              delayToHide = 2000;
+              break;
+            case ResultCode.WrongPhoneNumberFormat:
+              text = CommonResources.Registration_InvalidPhoneNumber;
+              break;
+            case ResultCode.PhoneAlreadyRegistered:
+              text = CommonResources.Registration_PhoneNumberIsBusy;
+              break;
+            case ResultCode.InvalidCode:
+              text = CommonResources.Registration_WrongCode;
+              break;
+            case ResultCode.InvalidAudioFormat:
+              text = CommonResources.InvalidAudioFormatError;
+              delayToHide = 3000;
+              break;
+            case ResultCode.AudioIsExcludedByRightholder:
+              text = CommonResources.AudioIsExcludedByRightholderError;
+              delayToHide = 3000;
+              break;
+            case ResultCode.MaximumLimitReached:
+              text = CommonResources.AudioFileSizeLimitReachedError;
+              delayToHide = 3000;
+              break;
+            case ResultCode.UploadingFailed:
+              text = CommonResources.FailedToConnectError;
+              delayToHide = 3000;
+              break;
+            case ResultCode.CommunicationFailed:
+              text = CommonResources.Error_Connection;
+              delayToHide = 3000;
+              break;
           }
-          if (error != null && !string.IsNullOrWhiteSpace(error.error_text))
-            text = error.error_text;
-          new GenericInfoUC(delayToHide).ShowAndHideLater(text, null);
+          VKRequestsDispatcher.Error error1 = error;
+          string str = error1 != null ? error1.error_text :  null;
+          if (!string.IsNullOrWhiteSpace(str))
+            text = str;
+          new GenericInfoUC(delayToHide).ShowAndHideLater(text,  null);
         }
       }));
+    }
+
+    public static void ShowBasedOnResult(int resultCode, string successString = "", VKRequestsDispatcher.Error error = null)
+    {
+      GenericInfoUC.ShowBasedOnResult((ResultCode) resultCode, successString, error);
     }
 
     public static void ShowPhotoIsSavedInSavedPhotos()
     {
       GenericInfoUC genericInfoUc = new GenericInfoUC(3000);
-      genericInfoUc.richTextBox.Visibility = Visibility.Visible;
-      genericInfoUc.textBlockInfo.Visibility = Visibility.Collapsed;
+      ((UIElement) genericInfoUc.richTextBox).Visibility = Visibility.Visible;
+      ((UIElement) genericInfoUc.textBlockInfo).Visibility = Visibility.Collapsed;
       RichTextBox richTextBox = genericInfoUc.richTextBox;
       Paragraph paragraph = new Paragraph();
       string text1 = CommonResources.PhotoIsSaved.Replace(".", "") + " ";
-      paragraph.Inlines.Add((Inline) BrowserNavigationService.GetRunWithStyle(text1, richTextBox));
-      Hyperlink hyperlink = HyperlinkHelper.GenerateHyperlink(CommonResources.InTheAlbum, "", (Action<Hyperlink, string>) ((hl, str) => Navigator.Current.NavigateToPhotoAlbum(AppGlobalStateManager.Current.LoggedInUserId, false, "SavedPhotos", "", CommonResources.AlbumSavedPictures, 1, "", "", false, 0)), richTextBox.Foreground);
-      hyperlink.FontSize = richTextBox.FontSize;
-      paragraph.Inlines.Add((Inline) hyperlink);
-      richTextBox.Blocks.Add((Block) paragraph);
+      ((PresentationFrameworkCollection<Inline>) paragraph.Inlines).Add((Inline) BrowserNavigationService.GetRunWithStyle(text1, richTextBox));
+      Hyperlink hyperlink = HyperlinkHelper.GenerateHyperlink(CommonResources.InTheAlbum, "", (Action<Hyperlink, string>) ((hl, str) => Navigator.Current.NavigateToPhotoAlbum(AppGlobalStateManager.Current.LoggedInUserId, false, "SavedPhotos", "", CommonResources.AlbumSavedPictures, 1, "", "", false, 0, false)), ((Control) richTextBox).Foreground, HyperlinkState.Normal);
+      ((TextElement) hyperlink).FontSize=(((Control) richTextBox).FontSize);
+      ((PresentationFrameworkCollection<Inline>) paragraph.Inlines).Add((Inline) hyperlink);
+      ((PresentationFrameworkCollection<Block>) richTextBox.Blocks).Add((Block) paragraph);
       string text2 = "";
-      object local = null;
-      genericInfoUc.ShowAndHideLater(text2, (FrameworkElement) local);
+      // ISSUE: variable of the null type
+      
+      genericInfoUc.ShowAndHideLater(text2, null);
     }
 
     public static void ShowPublishResult(GenericInfoUC.PublishedObj publishedObj, long gid = 0, string groupName = "")
     {
-      new GenericInfoUC(3000).ShowAndHideLater(GenericInfoUC.GetInfoStr(publishedObj, gid, groupName), null);
+      new GenericInfoUC(3000).ShowAndHideLater(GenericInfoUC.GetInfoStr(publishedObj, gid, groupName),  null);
     }
 
     private static string GetInfoStr(GenericInfoUC.PublishedObj publishedObj, long gid, string groupName)
@@ -136,7 +165,7 @@ namespace VKClient.Common.UC
             format = CommonResources.TheDocumentIsPublishedOnWallFrm;
             break;
         }
-        str = string.Format(format, (object) ("[id" + (object) AppGlobalStateManager.Current.LoggedInUserId + "|" + CommonResources.Yours + "]"));
+        str = string.Format(format, ("[id" + AppGlobalStateManager.Current.LoggedInUserId + "|" + CommonResources.Yours + "]"));
       }
       else
       {
@@ -155,7 +184,7 @@ namespace VKClient.Common.UC
             format = CommonResources.TheDocumentIsPublishedInCommunityFrm;
             break;
         }
-        str = string.Format(format, (object) ("[club" + (object) gid + "|" + groupName + "]"));
+        str = string.Format(format, ("[club" + gid + "|" + groupName + "]"));
       }
       return str;
     }
@@ -166,10 +195,10 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GenericInfoUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.textBlockInfo = (ScrollableTextBlock) this.FindName("textBlockInfo");
-      this.richTextBox = (RichTextBox) this.FindName("richTextBox");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GenericInfoUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.textBlockInfo = (ScrollableTextBlock) base.FindName("textBlockInfo");
+      this.richTextBox = (RichTextBox) base.FindName("richTextBox");
     }
 
     public enum PublishedObj

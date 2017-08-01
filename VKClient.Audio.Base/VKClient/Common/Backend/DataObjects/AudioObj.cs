@@ -28,11 +28,11 @@ namespace VKClient.Common.Backend.DataObjects
       get
       {
         long num = this.owner_id;
-        string string1 = num.ToString();
-        string str = "_";
+        string str1 = num.ToString();
+        string str2 = "_";
         num = this.aid;
-        string string2 = num.ToString();
-        return string1 + str + string2;
+        string str3 = num.ToString();
+        return str1 + str2 + str3;
       }
     }
 
@@ -92,9 +92,11 @@ namespace VKClient.Common.Backend.DataObjects
       }
     }
 
+    public int content_restricted { get; set; }
+
     public override string ToString()
     {
-      return string.Format("audio{0}_{1}", (object) this.owner_id, (object) this.id);
+      return string.Format("audio{0}_{1}", this.owner_id, this.id);
     }
 
     public void Write(BinaryWriter writer)

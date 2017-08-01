@@ -8,9 +8,12 @@ using VKClient.Photos.Library;
 
 namespace VKClient.Photos.UC
 {
-  public partial class PickAlbumUC : UserControl
+  public class PickAlbumUC : UserControl
   {
     private static PhotoPickerAlbumsViewModel _vmInstance;
+    internal Grid LayoutRoot;
+    internal ExtendedLongListSelector listBoxAlbums;
+    private bool _contentLoaded;
 
     public static PhotoPickerAlbumsViewModel VM
     {
@@ -26,30 +29,41 @@ namespace VKClient.Photos.UC
 
     public PickAlbumUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     public void Initialize()
     {
-      this.DataContext = (object) PickAlbumUC.VM;
+      base.DataContext = PickAlbumUC.VM;
     }
 
     public void Cleanup()
     {
-      this.DataContext = null;
+      base.DataContext = null;
     }
 
-    private void Image_Tap(object sender, GestureEventArgs e)
+    private void Image_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       FrameworkElement frameworkElement = sender as FrameworkElement;
-      AlbumHeaderTwoInARow albumHeaderTwoInArow = frameworkElement.DataContext as AlbumHeaderTwoInARow;
-      if (albumHeaderTwoInArow == null)
+      AlbumHeaderTwoInARow dataContext = frameworkElement.DataContext as AlbumHeaderTwoInARow;
+      if (dataContext == null)
         return;
-      AlbumHeader albumHeader = frameworkElement.Tag.ToString() == "1" ? albumHeaderTwoInArow.AlbumHeader1 : albumHeaderTwoInArow.AlbumHeader2;
+      AlbumHeader albumHeader = frameworkElement.Tag.ToString() == "1" ? dataContext.AlbumHeader1 : dataContext.AlbumHeader2;
       if (albumHeader == null)
         return;
       this.SelectedAlbumCallback(albumHeader.AlbumId);
     }
 
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Photos;component/UC/PickAlbumUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.listBoxAlbums = (ExtendedLongListSelector) base.FindName("listBoxAlbums");
+    }
   }
 }

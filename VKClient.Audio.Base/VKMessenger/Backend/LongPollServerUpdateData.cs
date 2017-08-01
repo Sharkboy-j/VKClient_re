@@ -37,7 +37,7 @@ namespace VKMessenger.Backend
 
     public override string ToString()
     {
-      return string.Format("UpdateType = {0}, user_id = {1}, message_id= {2}, chat_id={3}", (object) this.UpdateType, (object) this.user_id, (object) this.message_id, (object) this.chat_id);
+      return string.Format("UpdateType = {0}, user_id = {1}, message_id= {2}, chat_id={3}", this.UpdateType, this.user_id, this.message_id, this.chat_id);
     }
   }
 }

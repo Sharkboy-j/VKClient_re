@@ -17,11 +17,11 @@ namespace VKClient.Audio.Base.AudioCache
       get
       {
         long num = this.ownerId;
-        string string1 = num.ToString();
-        string str = "_";
+        string str1 = num.ToString();
+        string str2 = "_";
         num = this.audioId;
-        string string2 = num.ToString();
-        return string1 + str + string2;
+        string str3 = num.ToString();
+        return str1 + str2 + str3;
       }
     }
 

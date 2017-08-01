@@ -80,7 +80,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>Bin\ARM\Release</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
     <NoStdLib>true</NoStdLib>
@@ -90,24 +90,50 @@
     <PlatformTarget />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Common\VideoCatalog\CatalogCategoryViewModel.cs" />
-    <Compile Include="Common\VideoCatalog\CatalogHorizontalItemExtUC.cs" />
-    <Compile Include="Common\VideoCatalog\CatalogHorizontalItemUC.cs" />
-    <Compile Include="Common\VideoCatalog\CatalogItemsHorizontalExtUC.cs" />
-    <Compile Include="Common\VideoCatalog\CatalogItemsHorizontalUC.cs" />
-    <Compile Include="Common\VideoCatalog\CatalogItemsHorizontalViewModel.cs" />
-    <Compile Include="Common\VideoCatalog\CategoryMoreFooter.cs" />
-    <Compile Include="Common\VideoCatalog\CategoryMoreFooterUC.cs" />
-    <Compile Include="Common\VideoCatalog\DividerSpaceDownUC.cs" />
-    <Compile Include="Common\VideoCatalog\DividerSpaceDownViewModel.cs" />
-    <Compile Include="Common\VideoCatalog\DividerSpaceUpUC.cs" />
-    <Compile Include="Common\VideoCatalog\DividerSpaceUpViewModel.cs" />
-    <Compile Include="Common\VideoCatalog\VideoCatalogPage.cs" />
-    <Compile Include="Common\VideoCatalog\VideoCatalogTemplateSelector.cs" />
-    <Compile Include="Common\VideoCatalog\VideoCatalogViewModel.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AddEditVideoPage.cs">
-      <DependentUpon>AddEditVideoPage.xaml</DependentUpon>
+      <DependentUpon>addeditvideopage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="PickVideoAlbumPage.cs">
+      <DependentUpon>pickvideoalbumpage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CatalogCategoryViewModel.cs" />
+    <Compile Include="VideoCatalog\CatalogHorizontalItemExtUC.cs">
+      <DependentUpon>CatalogHorizontalItemExtUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CatalogHorizontalItemUC.cs">
+      <DependentUpon>CatalogHorizontalItemUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CatalogItemsHorizontalExtUC.cs">
+      <DependentUpon>CatalogItemsHorizontalExtUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CatalogItemsHorizontalUC.cs">
+      <DependentUpon>CatalogItemsHorizontalUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CatalogItemsHorizontalViewModel.cs" />
+    <Compile Include="VideoCatalog\CategoryMoreFooter.cs" />
+    <Compile Include="VideoCatalog\CategoryMoreFooterUC.cs">
+      <DependentUpon>CategoryMoreFooterUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\DividerSpaceDownUC.cs">
+      <DependentUpon>DividerSpaceDownUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\DividerSpaceDownViewModel.cs" />
+    <Compile Include="VideoCatalog\DividerSpaceUpUC.cs">
+      <DependentUpon>DividerSpaceUpUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\DividerSpaceUpViewModel.cs" />
+    <Compile Include="VideoCatalog\VideoCatalogPage.cs">
+      <DependentUpon>VideoCatalogPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\VideoCatalogTemplateSelector.cs" />
+    <Compile Include="VideoCatalog\VideoCatalogViewModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VideoCommentsPage.cs">
+      <DependentUpon>videocommentspage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoPage.cs">
+      <DependentUpon>videopage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Video\Library\AddEditVideoViewModel.cs" />
     <Compile Include="Video\Library\AlbumPageViewModel.cs" />
@@ -116,142 +142,154 @@
     <Compile Include="Video\Library\VideoResolution.cs" />
     <Compile Include="Video\Library\VideosSearchDataProvider.cs" />
     <Compile Include="Video\Library\VideoStartPlaying.cs" />
-    <Compile Include="Video\Localization\VideoLocalizedStrings.cs" />
-    <Compile Include="PickVideoAlbumPage.cs">
-      <DependentUpon>PickVideoAlbumPage.xaml</DependentUpon>
+    <Compile Include="Localization\VideoLocalizedStrings.cs" />
+    <None Include="Localization\VideoResources.cs" />
+    <Compile Include="VideoCatalog\AddToAlbumPage.cs">
+      <DependentUpon>AddToAlbumPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Video\Localization\VideoResources.Designer.cs">
+    <Compile Include="VideoCatalog\AddToAlbumViewModel.cs" />
+    <Compile Include="VideoCatalog\AlbumsListHorizontalViewModel.cs" />
+    <Compile Include="VideoCatalog\CatalogItemCompactUC.cs">
+      <DependentUpon>CatalogItemCompactUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CatalogItemTwoInARowUC.cs">
+      <DependentUpon>CatalogItemTwoInARowUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CatalogItemTwoInARowViewModel.cs" />
+    <Compile Include="VideoCatalog\CreateEditVideoAlbumPage.cs">
+      <DependentUpon>CreateEditVideoAlbumPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CreateEditVideoAlbumUC.cs">
+      <DependentUpon>CreateEditVideoAlbumUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\CreateEditVideoAlbumViewModel.cs" />
+    <Compile Include="VideoCatalog\GroupVideosPage.cs">
+      <DependentUpon>GroupVideosPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\GroupVideosViewModel.cs" />
+    <Compile Include="VideoCatalog\PickableAlbumUC.cs">
+      <DependentUpon>PickableAlbumUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\UserVideosUC.cs">
+      <DependentUpon>UserVideosUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\UserVideosViewModel.cs" />
+    <Compile Include="VideoCatalog\VideoAlbumsListPage.cs">
+      <DependentUpon>VideoAlbumsListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\VideoAlbumsListViewModel.cs" />
+    <Compile Include="VideoCatalog\VideoCatalogItemUCFactory.cs" />
+    <Compile Include="VideoCatalog\VideoListPage.cs">
+      <DependentUpon>VideoListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoCatalog\VideoListViewModel.cs" />
+    <Compile Include="Localization\VideoResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>VideoResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Video\VideoCatalog\AddToAlbumPage.cs" />
-    <Compile Include="Video\VideoCatalog\AddToAlbumViewModel.cs" />
-    <Compile Include="Video\VideoCatalog\AlbumsListHorizontalViewModel.cs" />
-    <Compile Include="Video\VideoCatalog\CatalogItemCompactUC.cs" />
-    <Compile Include="Video\VideoCatalog\CatalogItemTwoInARowUC.cs" />
-    <Compile Include="Video\VideoCatalog\CatalogItemTwoInARowViewModel.cs" />
-    <Compile Include="Video\VideoCatalog\CreateEditVideoAlbumPage.cs" />
-    <Compile Include="Video\VideoCatalog\CreateEditVideoAlbumUC.cs" />
-    <Compile Include="Video\VideoCatalog\CreateEditVideoAlbumViewModel.cs" />
-    <Compile Include="Video\VideoCatalog\GroupVideosPage.cs" />
-    <Compile Include="Video\VideoCatalog\GroupVideosViewModel.cs" />
-    <Compile Include="Video\VideoCatalog\PickableAlbumUC.cs" />
-    <Compile Include="Video\VideoCatalog\UserVideosUC.cs" />
-    <Compile Include="Video\VideoCatalog\UserVideosViewModel.cs" />
-    <Compile Include="Video\VideoCatalog\VideoAlbumsListPage.cs" />
-    <Compile Include="Video\VideoCatalog\VideoAlbumsListViewModel.cs" />
-    <Compile Include="Video\VideoCatalog\VideoCatalogItemUCFactory.cs" />
-    <Compile Include="Video\VideoCatalog\VideoListPage.cs" />
-    <Compile Include="Video\VideoCatalog\VideoListViewModel.cs" />
-    <Compile Include="VideoCommentsPage.cs">
-      <DependentUpon>VideoCommentsPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="VideoPage.cs">
-      <DependentUpon>VideoPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Video\VideosOfOwnerViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Video\Localization\VideoResources.be-BY.resx" />
-    <EmbeddedResource Include="Video\Localization\VideoResources.kk-KZ.resx" />
-    <EmbeddedResource Include="Video\Localization\VideoResources.pt-BR.resx" />
-    <EmbeddedResource Include="Video\Localization\VideoResources.resx">
+    <EmbeddedResource Include="Localization\VideoResources.be-BY.resx" />
+    <EmbeddedResource Include="Localization\VideoResources.kk-KZ.resx" />
+    <EmbeddedResource Include="Localization\VideoResources.pt-BR.resx" />
+    <EmbeddedResource Include="Localization\VideoResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>VideoResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Video\Localization\VideoResources.ru-RU.resx" />
-    <EmbeddedResource Include="Video\Localization\VideoResources.uk-UA.resx" />
+    <EmbeddedResource Include="Localization\VideoResources.ru-RU.resx" />
+    <EmbeddedResource Include="Localization\VideoResources.uk-UA.resx" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="addeditvideopage.xaml">
+    <Resource Include="addeditvideopage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="pickvideoalbumpage.xaml">
+    </Resource>
+    <Resource Include="pickvideoalbumpage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\addtoalbumpage.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\addtoalbumpage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\cataloghorizontalitemextuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\cataloghorizontalitemextuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\cataloghorizontalitemuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\cataloghorizontalitemuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\catalogitemcompactuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\catalogitemcompactuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\catalogitemshorizontalextuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\catalogitemshorizontalextuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\catalogitemshorizontaluc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\catalogitemshorizontaluc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\catalogitemtwoinarowuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\catalogitemtwoinarowuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\categorymorefooteruc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\categorymorefooteruc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\createeditvideoalbumpage.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\createeditvideoalbumpage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\createeditvideoalbumuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\createeditvideoalbumuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\dividerspacedownuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\dividerspacedownuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\dividerspaceupuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\dividerspaceupuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\groupvideospage.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\groupvideospage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\pickablealbumuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\pickablealbumuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\uservideosuc.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\uservideosuc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\videoalbumslistpage.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\videoalbumslistpage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\videocatalogpage.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\videocatalogpage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocatalog\videolistpage.xaml">
+    </Resource>
+    <Resource Include="VideoCatalog\videolistpage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videocommentspage.xaml">
+    </Resource>
+    <Resource Include="videocommentspage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="videopage.xaml">
+    </Resource>
+    <Resource Include="videopage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VKClient.Audio.Base\VKClient.Audio.Base.csproj">

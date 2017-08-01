@@ -34,7 +34,7 @@ namespace MediaParsers
 
     public override string ToString()
     {
-      return string.Format((IFormatProvider) CultureInfo.InvariantCulture, "WAVEFORMATEX FormatTag: {0}, Channels: {1}, SamplesPerSec: {2}, AvgBytesPerSec: {3}, BlockAlign: {4}, BitsPerSample: {5}, Size: {6} ", (object) this.FormatTag, (object) this.Channels, (object) this.SamplesPerSec, (object) this.AverageBytesPerSecond, (object) this.BlockAlign, (object) this.BitsPerSample, (object) this.ExtraDataSize);
+      return string.Format((IFormatProvider) CultureInfo.InvariantCulture, "WAVEFORMATEX FormatTag: {0}, Channels: {1}, SamplesPerSec: {2}, AvgBytesPerSec: {3}, BlockAlign: {4}, BitsPerSample: {5}, Size: {6} ", this.FormatTag, this.Channels, this.SamplesPerSec, this.AverageBytesPerSecond, this.BlockAlign, this.BitsPerSample, this.ExtraDataSize);
     }
   }
 }

@@ -17,34 +17,35 @@ namespace VKClient.Common.UC
 
     public AppTipContainerUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     public void InitForSwipeFromLeftSideTip()
     {
       AppTipBubbleUC appTipBubbleUc = new AppTipBubbleUC();
-      appTipBubbleUc.LayoutRoot.Width = 293.0;
-      appTipBubbleUc.Margin = new Thickness(16.0, 96.0, 0.0, 0.0);
-      appTipBubbleUc.imageTip.Width = 100.0;
-      appTipBubbleUc.imageTip.Height = 92.0;
+      ((FrameworkElement) appTipBubbleUc.LayoutRoot).Width = 293.0;
+      ((FrameworkElement) appTipBubbleUc).Margin=(new Thickness(16.0, 96.0, 0.0, 0.0));
+      ((FrameworkElement) appTipBubbleUc.imageTip).Width = 100.0;
+      ((FrameworkElement) appTipBubbleUc.imageTip).Height = 92.0;
       ImageLoader.SetUriSource(appTipBubbleUc.imageTip, "/Resources/New/SwipeMenuTip.png");
       appTipBubbleUc.textBlockTip.Text = CommonResources.SwipeToOpenMenuTip;
-      this.LayoutRoot.Children.Add((UIElement) appTipBubbleUc);
+      ((PresentationFrameworkCollection<UIElement>) ((Panel) this.LayoutRoot).Children).Add((UIElement) appTipBubbleUc);
     }
 
     public void InitForPullToRefresh()
     {
       AppTipBubbleUC appTipBubbleUc = new AppTipBubbleUC();
-      appTipBubbleUc.LayoutRoot.Width = 277.0;
-      appTipBubbleUc.Margin = new Thickness(90.0, 96.0, 0.0, 0.0);
-      appTipBubbleUc.imageTip.Width = 66.0;
-      appTipBubbleUc.imageTip.Height = 117.0;
+      ((FrameworkElement) appTipBubbleUc.LayoutRoot).Width = 277.0;
+      ((FrameworkElement) appTipBubbleUc).Margin=(new Thickness(90.0, 96.0, 0.0, 0.0));
+      ((FrameworkElement) appTipBubbleUc.imageTip).Width = 66.0;
+      ((FrameworkElement) appTipBubbleUc.imageTip).Height = 117.0;
       ImageLoader.SetUriSource(appTipBubbleUc.imageTip, "/Resources/New/PullToRefreshTip.png");
       appTipBubbleUc.textBlockTip.Text = CommonResources.PullToRefreshTip;
-      this.LayoutRoot.Children.Add((UIElement) appTipBubbleUc);
+      ((PresentationFrameworkCollection<UIElement>) ((Panel) this.LayoutRoot).Children).Add((UIElement) appTipBubbleUc);
     }
 
-    private void LayoutRoot_Tap(object sender, GestureEventArgs e)
+    private void LayoutRoot_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.OnTap == null)
         return;
@@ -58,8 +59,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/AppTipContainerUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/AppTipContainerUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
     }
   }
 }

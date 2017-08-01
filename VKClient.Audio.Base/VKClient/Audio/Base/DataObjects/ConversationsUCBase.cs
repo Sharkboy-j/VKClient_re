@@ -10,15 +10,22 @@ namespace VKClient.Audio.Base.DataObjects
 
     public event EventHandler<Action> ConversationTap;
 
+    protected ConversationsUCBase()
+    {
+      //base.\u002Ector();
+    }
+
     public abstract void SetListHeader(FrameworkElement element);
 
     public abstract void PrepareForViewIfNeeded();
 
     protected void OnConversationTap(Action callback)
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.ConversationTap == null)
         return;
-      this.ConversationTap((object) this, callback);
+      // ISSUE: reference to a compiler-generated field
+      this.ConversationTap(this, callback);
     }
   }
 }

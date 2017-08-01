@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -25,8 +26,8 @@ namespace VKClient.Common.UC
 {
   public class GameInvitationHeaderUC : UserControl
   {
-    public static readonly DependencyProperty DataProviderProperty = DependencyProperty.Register("DataProvider", typeof (GameRequestHeader), typeof (GameInvitationHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameInvitationHeaderUC.OnDataProviderChanged)));
-    public static readonly DependencyProperty IsSeparatorVisibleProperty = DependencyProperty.Register("IsSeparatorVisible", typeof (bool), typeof (GameInvitationHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameInvitationHeaderUC.OnIsSeparatorVisibleChanged)));
+      public static readonly DependencyProperty DataProviderProperty = DependencyProperty.Register("DataProvider", typeof(GameRequestHeader), typeof(GameInvitationHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameInvitationHeaderUC.OnDataProviderChanged)));
+      public static readonly DependencyProperty IsSeparatorVisibleProperty = DependencyProperty.Register("IsSeparatorVisible", typeof(bool), typeof(GameInvitationHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameInvitationHeaderUC.OnIsSeparatorVisibleChanged)));
     private bool _isInPlayHandler;
     internal Image UserIconImage;
     internal TextBlock InvitationTextBlock;
@@ -40,11 +41,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (GameRequestHeader) this.GetValue(GameInvitationHeaderUC.DataProviderProperty);
+        return (GameRequestHeader) base.GetValue(GameInvitationHeaderUC.DataProviderProperty);
       }
       set
       {
-        this.SetDPValue(GameInvitationHeaderUC.DataProviderProperty, (object) value, "DataProvider");
+        this.SetDPValue(GameInvitationHeaderUC.DataProviderProperty, value, "DataProvider");
       }
     }
 
@@ -52,11 +53,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (bool) this.GetValue(GameInvitationHeaderUC.IsSeparatorVisibleProperty);
+        return (bool) base.GetValue(GameInvitationHeaderUC.IsSeparatorVisibleProperty);
       }
       set
       {
-        this.SetDPValue(GameInvitationHeaderUC.IsSeparatorVisibleProperty, (object) value, "IsSeparatorVisible");
+        this.SetDPValue(GameInvitationHeaderUC.IsSeparatorVisibleProperty, value, "IsSeparatorVisible");
       }
     }
 
@@ -64,8 +65,9 @@ namespace VKClient.Common.UC
 
     public GameInvitationHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      ((FrameworkElement) this.Content).DataContext = (object) this;
+      ((FrameworkElement) this.Content).DataContext = this;
     }
 
     private static void OnDataProviderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -73,23 +75,30 @@ namespace VKClient.Common.UC
       GameInvitationHeaderUC invitationHeaderUc = d as GameInvitationHeaderUC;
       if (invitationHeaderUc == null)
         return;
-      GameRequestHeader gameRequestHeader = e.NewValue as GameRequestHeader;
-      if (gameRequestHeader == null)
+      // ISSUE: explicit reference operation
+      GameRequestHeader newValue = e.NewValue as GameRequestHeader;
+      if (newValue == null)
         return;
-      Game game = gameRequestHeader.Game;
-      User user = gameRequestHeader.User;
-      invitationHeaderUc.UserIconImage.Tag = (object) user;
+      Game game = newValue.Game;
+      User user = newValue.User;
+      ((FrameworkElement) invitationHeaderUc.UserIconImage).Tag = user;
       ImageLoader.SetUriSource(invitationHeaderUc.UserIconImage, user.photo_max);
-      invitationHeaderUc.GameIconImage.Tag = (object) game;
-      ImageLoader.SetUriSource(invitationHeaderUc.GameIconImage, game.icon_100);
+      ((FrameworkElement) invitationHeaderUc.GameIconImage).Tag = game;
+      ImageLoader.SetUriSource(invitationHeaderUc.GameIconImage, game.icon_150);
       invitationHeaderUc.GameTitleTextBlock.Text = game.title;
       invitationHeaderUc.GameGenreTextBlock.Text = game.genre;
-      List<Inline> list = GameInvitationHeaderUC.ComposeInvitationText(user.Name);
-      if (list.IsNullOrEmpty())
+      List<Inline> inlineList = GameInvitationHeaderUC.ComposeInvitationText(user.Name);
+      if (((IList) inlineList).IsNullOrEmpty())
         return;
-      invitationHeaderUc.InvitationTextBlock.Inlines.Clear();
-      foreach (Inline inline in list)
-        invitationHeaderUc.InvitationTextBlock.Inlines.Add(inline);
+      ((PresentationFrameworkCollection<Inline>) invitationHeaderUc.InvitationTextBlock.Inlines).Clear();
+      using (List<Inline>.Enumerator enumerator = inlineList.GetEnumerator())
+      {
+        while (enumerator.MoveNext())
+        {
+          Inline current = enumerator.Current;
+          ((PresentationFrameworkCollection<Inline>) invitationHeaderUc.InvitationTextBlock.Inlines).Add(current);
+        }
+      }
     }
 
     private static List<Inline> ComposeInvitationText(string userName)
@@ -97,14 +106,18 @@ namespace VKClient.Common.UC
       FontFamily fontFamily1 = new FontFamily("Segoe WP Semilight");
       Brush brush1 = (Brush) Application.Current.Resources["PhoneVKSubtleBrush"];
       List<Inline> inlineList = new List<Inline>();
-      inlineList.Add((Inline) new Run() { Text = userName });
-      Run run = new Run();
-      run.Text = " " + CommonResources.Games_FriendInvitedToGame;
+      Run run1 = new Run();
+      string str1 = userName;
+      run1.Text = str1;
+      inlineList.Add((Inline) run1);
+      Run run2 = new Run();
+      string str2 = " " + CommonResources.Games_FriendInvitedToGame;
+      run2.Text = str2;
       FontFamily fontFamily2 = fontFamily1;
-      run.FontFamily = fontFamily2;
+      ((TextElement) run2).FontFamily = fontFamily2;
       Brush brush2 = brush1;
-      run.Foreground = brush2;
-      inlineList.Add((Inline) run);
+      ((TextElement) run2).Foreground = brush2;
+      inlineList.Add((Inline) run2);
       return inlineList;
     }
 
@@ -113,36 +126,39 @@ namespace VKClient.Common.UC
       GameInvitationHeaderUC invitationHeaderUc = d as GameInvitationHeaderUC;
       if (invitationHeaderUc == null)
         return;
-      bool flag = (bool) e.NewValue;
-      invitationHeaderUc.BottomSeparator.Visibility = flag ? Visibility.Visible : Visibility.Collapsed;
+      // ISSUE: explicit reference operation
+      bool newValue = (bool) e.NewValue;
+      ((UIElement) invitationHeaderUc.BottomSeparator).Visibility = (newValue ? Visibility.Visible : Visibility.Collapsed);
     }
 
     private void SetDPValue(DependencyProperty property, object value, [CallerMemberName] string propertyName = null)
     {
-      this.SetValue(property, value);
+      base.SetValue(property, value);
+      // ISSUE: reference to a compiler-generated field
       if (this.PropertyChanged == null)
         return;
-      this.PropertyChanged((object) this, new PropertyChangedEventArgs(propertyName));
+      // ISSUE: reference to a compiler-generated field
+      this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    private void User_OnTap(object sender, GestureEventArgs e)
+    private void User_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      User user = this.UserIconImage.Tag as User;
-      if (user == null)
+      User tag = ((FrameworkElement) this.UserIconImage).Tag as User;
+      if (tag == null)
         return;
-      Navigator.Current.NavigateToUserProfile(user.uid, user.Name, "", false);
+      Navigator.Current.NavigateToUserProfile(tag.uid, tag.Name, "", false);
     }
 
-    private void Game_OnTap(object sender, GestureEventArgs e)
+    private void Game_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      Game game = this.GameIconImage.Tag as Game;
-      if (game == null)
+      Game tag = ((FrameworkElement) this.GameIconImage).Tag as Game;
+      if (tag == null)
         return;
       GameRequest gameRequest = this.DataProvider.GameRequest;
       FramePageUtils.CurrentPage.OpenGamesPopup(new List<object>()
       {
-        (object) new GameHeader(game)
-      }, GamesClickSource.request, gameRequest.name, 0, null);
+        new GameHeader(tag)
+      }, GamesClickSource.request, gameRequest.name, 0,  null);
     }
 
     private async void PlayButton_OnClicked(object sender, RoutedEventArgs e)
@@ -154,7 +170,7 @@ namespace VKClient.Common.UC
       Game game = this.DataProvider.Game;
       GameRequest gameRequest = this.DataProvider.GameRequest;
       bool flag = InstalledPackagesFinder.Instance.IsPackageInstalled(game.platform_id);
-      EventAggregator.Current.Publish((object) new GamesActionEvent()
+      EventAggregator.Current.Publish(new GamesActionEvent()
       {
         game_id = game.id,
         visit_source = AppGlobalStateManager.Current.GlobalState.GamesVisitSource,
@@ -179,7 +195,7 @@ namespace VKClient.Common.UC
         if (result.ResultCode != ResultCode.Succeeded)
           return;
         CountersManager.Current.Counters = result.ResultData;
-        EventAggregator.Current.Publish((object) new GameInvitationHiddenEvent(gameRequest));
+        EventAggregator.Current.Publish(new GameInvitationHiddenEvent(gameRequest));
       }));
     }
 
@@ -189,13 +205,13 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GameInvitationHeaderUC.xaml", UriKind.Relative));
-      this.UserIconImage = (Image) this.FindName("UserIconImage");
-      this.InvitationTextBlock = (TextBlock) this.FindName("InvitationTextBlock");
-      this.GameIconImage = (Image) this.FindName("GameIconImage");
-      this.GameTitleTextBlock = (TextBlock) this.FindName("GameTitleTextBlock");
-      this.GameGenreTextBlock = (TextBlock) this.FindName("GameGenreTextBlock");
-      this.BottomSeparator = (Rectangle) this.FindName("BottomSeparator");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GameInvitationHeaderUC.xaml", UriKind.Relative));
+      this.UserIconImage = (Image) base.FindName("UserIconImage");
+      this.InvitationTextBlock = (TextBlock) base.FindName("InvitationTextBlock");
+      this.GameIconImage = (Image) base.FindName("GameIconImage");
+      this.GameTitleTextBlock = (TextBlock) base.FindName("GameTitleTextBlock");
+      this.GameGenreTextBlock = (TextBlock) base.FindName("GameGenreTextBlock");
+      this.BottomSeparator = (Rectangle) base.FindName("BottomSeparator");
     }
   }
 }

@@ -8,8 +8,9 @@
              FontFamily="{StaticResource PhoneFontFamilyNormal}"
              FontSize="{StaticResource PhoneFontSizeNormal}"
              Foreground="{StaticResource PhoneForegroundBrush}"
-             d:DesignHeight="56"
-             d:DesignWidth="300">
+             d:DesignHeight="88"
+             d:DesignWidth="300"
+             xmlns:uc_w10m="clr-namespace:VKClient.Common.UC.w10m">
 
     <UserControl.Resources>
         <QuadraticEase x:Name="EasingFunc"
@@ -44,7 +45,8 @@
         </Storyboard>
     </UserControl.Resources>
 
-    <Grid Background="Transparent">
+    <Grid Background="Transparent"
+          Margin="0 16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -52,19 +54,26 @@
 
         <Border Tap="BorderToggleTitle_OnTap">
             <TextBlock x:Name="textBlockTitle"
-                       Text="Description"
-                       Margin="0 -6 0 0"
+                       Text="Very long description"
+                       Margin="0 -6 12 0"
                        FontSize="25.33"
                        Foreground="{StaticResource PhoneAlmostBlackBrush}"
                        VerticalAlignment="Center"
                        TextWrapping="Wrap"/>
         </Border>
 
-        <uc:ToggleSwitchControl x:Name="controlToggleSwitch"
+        <!--<uc:ToggleSwitchControl x:Name="controlToggleSwitch"
                                 Grid.Column="1"
                                 Width="56"
                                 Checked="ControlToggleSwitch_OnCheckedUnchecked"
-                                Unchecked="ControlToggleSwitch_OnCheckedUnchecked" />
+                                Unchecked="ControlToggleSwitch_OnCheckedUnchecked" />-->
+        <uc_w10m:ToggleSwitch
+            x:Name="controlToggleSwitch"
+            Grid.Column="1"
+            Width="56"
+            IsStateTextVisible="False" VerticalAlignment="Center"
+                              Checked="ControlToggleSwitch_OnCheckedUnchecked"
+           />
 
     </Grid>
 </UserControl>

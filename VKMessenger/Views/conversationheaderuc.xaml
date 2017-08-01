@@ -42,183 +42,116 @@
         <Border Background="{Binding MainBackgroundBrush}">
             <Grid Background="Transparent"
                   framework:MetroInMotion.Tilt="1.5">
+                <Border HorizontalAlignment="Left"
+                        Width="72"
+                        Height="72"
+                        Background="{StaticResource PhoneChromeBrush}"
+                        CornerRadius="5"
+                        Margin="14,0,0,0"
+                        Name="border"
+                        >
+                    <Grid DataContext="{Binding ConversationAvatarVM}">
 
-                <Grid DataContext="{Binding ConversationAvatarVM}">
-
-                    <Canvas HorizontalAlignment="Left"
+                        <Canvas HorizontalAlignment="Left"
                             VerticalAlignment="Top"
-                            Margin="14 14 0 0"
+                            
                             Visibility="{Binding IsNotChatVisibility}">
-                        <Rectangle Width="72"
-                                   Height="72"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
-                            <Rectangle.Clip>
-                                <EllipseGeometry Center="36 36"
-                                                 RadiusX="36"
-                                                 RadiusY="36" />
-                            </Rectangle.Clip>
-                        </Rectangle>
+                            
 
-                        <Image framework:ImageLoader.UriSource="{Binding Path=UIImageUrl, Mode=OneWay}"
+                            <Image framework:ImageLoader.UriSource="{Binding Path=UIImageUrl, Mode=OneWay}"
                                Width="72"
                                Height="72"
                                VerticalAlignment="Center">
-                            <Image.Clip>
-                                <EllipseGeometry Center="36 36"
-                                                 RadiusX="36"
-                                                 RadiusY="36" />
-                            </Image.Clip>
-                        </Image>
-                    </Canvas>
+                                <Image.Clip>
+                                    <RectangleGeometry Rect="0 0 72 72" x:Name="rectangleGeometry1" RadiusX="5" RadiusY="5"/>
+                                </Image.Clip>
+                            </Image>
+                        </Canvas>
 
-                    <Canvas Visibility="{Binding IsChatVisibility}"
+                        <Canvas Visibility="{Binding IsChatVisibility}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top">
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="14 14 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
-                            <Rectangle.Clip>
-                                <EllipseGeometry Center="35 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Rectangle.Clip>
-                        </Rectangle>
-                        <Image Width="35"
+                            
+                            <Image Width="35"
                                Height="35"
-                               Margin="14 14 0 0"
                                framework:ImageLoader.UriSource="{Binding Path=UIChatImage1Url, Mode=OneWay}">
-                            <Image.Clip>
-                                <EllipseGeometry Center="35 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Image.Clip>
-                        </Image>
+                                <Image.Clip>
+                                    <RectangleGeometry Rect="0 0 70 70" x:Name="rectangleGeometry2" RadiusX="5" RadiusY="5"/>
+                                </Image.Clip>
+                            </Image>
 
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="51 14 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
-                            <Rectangle.Clip>
-                                <EllipseGeometry Center="0 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Rectangle.Clip>
-                        </Rectangle>
-                        <Image Width="35"
+                            
+                            <Image Width="35"
                                Height="35"
-                               Margin="51 14 0 0"
+                               Margin="37 0 0 0"
                                framework:ImageLoader.UriSource="{Binding Path=UIChatImage2Url, Mode=OneWay}">
-                            <Image.Clip>
-                                <EllipseGeometry Center="0 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Image.Clip>
-                        </Image>
+                                <Image.Clip>
+                                    <RectangleGeometry Rect="-35 0 70 70" x:Name="rectangleGeometry3" RadiusX="5" RadiusY="5"/>
+                                </Image.Clip>
+                            </Image>
 
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="14 51 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
-                            <Rectangle.Clip>
-                                <EllipseGeometry Center="35 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Rectangle.Clip>
-                        </Rectangle>
-                        <Image Width="35"
+                            <Image Width="35"
                                Height="35"
-                               Margin="14 51 0 0"
+                               Margin="0 37 0 0"
                                framework:ImageLoader.UriSource="{Binding Path=UIChatImage3Url, Mode=OneWay}">
-                            <Image.Clip>
-                                <EllipseGeometry Center="35 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Image.Clip>
-                        </Image>
+                                <Image.Clip>
+                                    <RectangleGeometry Rect="0 -35 70 70" x:Name="rectangleGeometry4" RadiusX="5" RadiusY="5"/>
+                                </Image.Clip>
+                            </Image>
 
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="51 51 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
-                            <Rectangle.Clip>
-                                <EllipseGeometry Center="0 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Rectangle.Clip>
-                        </Rectangle>
-                        <Image Width="35"
+                            
+                            <Image Width="35"
                                Height="35"
-                               Margin="51 51 0 0"
+                               Margin="37 37 0 0"
                                framework:ImageLoader.UriSource="{Binding Path=UIChatImage4Url, Mode=OneWay}">
-                            <Image.Clip>
-                                <EllipseGeometry Center="0 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
-                            </Image.Clip>
-                        </Image>
-
-
-
-                        <Canvas Visibility="{Binding ChatLeftImageVisibility}"
-                                Margin="14 14 0 0">
-                            <Rectangle Width="35"
-                                       Height="72"
-                                       Style="{StaticResource PhotoPlaceholderRectangle}">
-                                <Rectangle.Clip>
-                                    <EllipseGeometry Center="36 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
-                                </Rectangle.Clip>
-                            </Rectangle>
-
-                            <Image framework:ImageLoader.UriSource="{Binding Path=ChatLeftImageUrl, Mode=OneWay}"
-                                   Width="35"
-                                   Height="72"
-                                   Stretch="UniformToFill"
-                                   VerticalAlignment="Center">
                                 <Image.Clip>
-                                    <EllipseGeometry Center="36 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
+                                    <RectangleGeometry Rect="-35 -35 70 70" x:Name="rectangleGeometry5" RadiusX="5" RadiusY="5"/>
                                 </Image.Clip>
                             </Image>
 
-                        </Canvas>
 
-                        <Canvas Visibility="{Binding ChatRightImageVisibility}"
-                                Margin="51 14 0 0">
-                            <Rectangle Width="35"
-                                       Height="72"
-                                       Style="{StaticResource PhotoPlaceholderRectangle}">
-                                <Rectangle.Clip>
-                                    <EllipseGeometry Center="0 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
-                                </Rectangle.Clip>
-                            </Rectangle>
 
-                            <Image framework:ImageLoader.UriSource="{Binding Path=ChatRightImageUrl, Mode=OneWay}"
+                            <Canvas Visibility="{Binding ChatLeftImageVisibility}">
+                                
+
+                                <Image framework:ImageLoader.UriSource="{Binding Path=ChatLeftImageUrl, Mode=OneWay}"
                                    Width="35"
                                    Height="72"
                                    Stretch="UniformToFill"
+                                       
                                    VerticalAlignment="Center">
-                                <Image.Clip>
-                                    <EllipseGeometry Center="0 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
-                                </Image.Clip>
-                            </Image>
+                                    <Image.Clip>
+                                        <RectangleGeometry Rect="0 0 72 72" x:Name="rectangleGeometry6"  RadiusX="5" RadiusY="5"/>
+                                    </Image.Clip>
+                                </Image>
+
+                            </Canvas>
+
+                            <Canvas Visibility="{Binding ChatRightImageVisibility}"
+                                Margin="37 0 0 0">
+                               
+
+                                <Image framework:ImageLoader.UriSource="{Binding Path=ChatRightImageUrl, Mode=OneWay}"
+                                   Width="35"
+                                   Height="72"
+                                   Stretch="UniformToFill"
+                                       
+                                   VerticalAlignment="Center">
+                                    <Image.Clip>
+                                        <RectangleGeometry Rect="-37 0 72 72" x:Name="rectangleGeometry7"  RadiusX="5" RadiusY="5"/>
+                                    </Image.Clip>
+                                </Image>
+
+                            </Canvas>
 
                         </Canvas>
+                    </Grid>
+                </Border>
 
-                    </Canvas>
-
-                </Grid>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -292,7 +225,7 @@
 
                 <!-- Body Text-->
                 <TextBlock TextWrapping="Wrap"
-                           Margin="96 23 60 0"
+                           Margin="96 28 60 0"
                            Height="54"
                            Visibility="{Binding NoUserThumbVisibility}"
                            Foreground="{Binding TextForegroundBrush}"
@@ -311,19 +244,19 @@
                            VerticalAlignment="Top"
                            Visibility="{Binding UserThumbVisibility}">
 
-                        <Ellipse Style="{StaticResource PhotoPlaceholderEllipse}"
+                        <Rectangle Fill="{StaticResource PhoneChromeBrush}" Name="rectangle"
                                  Width="38"
                                  Height="38"
-                                 HorizontalAlignment="Left" />
+                                 HorizontalAlignment="Left" RadiusX="5" RadiusY="5"/>
 
                         <Image Width="38"
                                Height="38"
                                framework:ImageLoader.UriSource="{Binding UserThumb}"
                                HorizontalAlignment="Left">
                             <Image.Clip>
-                                <EllipseGeometry Center="19 19"
-                                                 RadiusX="19"
-                                                 RadiusY="19" />
+                                <RectangleGeometry Rect="0 0 38 38" x:Name="rectangleGeometry8"
+							RadiusX="5"
+							RadiusY="5"/>
                             </Image.Clip>
                         </Image>
 
@@ -357,6 +290,16 @@
                     </Border>
 
                 </Grid>
+
+                <Border Margin="96 28 0 0"
+                        Height="54"
+                        Background="{Binding MainBackgroundBrush}"
+                        Visibility="{Binding TypingVisibility}">
+                    <TextBlock VerticalAlignment="Top"
+                               Foreground="{StaticResource PhoneGray400_Gray500Brush}"
+                               Text="{Binding TypingStr, FallbackValue='is typing...'}" />
+                </Border>
+
             </Grid>
         </Border>
         <Rectangle Height="2"

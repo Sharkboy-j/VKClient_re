@@ -1,4 +1,6 @@
 using System;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
 using VKClient.Audio.Base.Library;
 using VKClient.Common.Framework;
@@ -44,7 +46,9 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return !this._searchParams.IsAnySet ? Visibility.Collapsed : Visibility.Visible;
+        if (!this._searchParams.IsAnySet)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -52,7 +56,9 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return !this._searchParams.IsAnySet ? Visibility.Visible : Visibility.Collapsed;
+        if (!this._searchParams.IsAnySet)
+          return Visibility.Visible;
+        return Visibility.Collapsed;
       }
     }
 
@@ -75,10 +81,14 @@ namespace VKClient.Common.UC
 
     private void NotifyUIProperties()
     {
-      this.NotifyPropertyChanged<SearchParams>((System.Linq.Expressions.Expression<Func<SearchParams>>) (() => this.SearchParams));
-      this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.ParamsStr));
-      this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.AnySetVisibility));
-      this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.SetParamsVisibility));
+      // ISSUE: method reference
+      this.NotifyPropertyChanged<SearchParams>(() => this.SearchParams);
+      // ISSUE: method reference
+      this.NotifyPropertyChanged<string>(() => this.ParamsStr);
+      // ISSUE: method reference
+      this.NotifyPropertyChanged<Visibility>(() => this.AnySetVisibility);
+      // ISSUE: method reference
+      this.NotifyPropertyChanged<Visibility>(() => this.SetParamsVisibility);
     }
   }
 }

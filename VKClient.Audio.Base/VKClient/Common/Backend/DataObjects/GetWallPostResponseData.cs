@@ -21,7 +21,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.comments != null)
           return this.comments.items;
-        return (List<Comment>) null;
+        return  null;
       }
     }
 

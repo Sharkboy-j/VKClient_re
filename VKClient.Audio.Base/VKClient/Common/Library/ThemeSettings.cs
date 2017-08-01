@@ -13,7 +13,7 @@ namespace VKClient.Common.Library
       get
       {
         if (!ThemeSettings._isLightTheme.HasValue)
-          ThemeSettings._isLightTheme = new bool?((Visibility) Application.Current.Resources["PhoneLightThemeVisibility"] == Visibility.Visible);
+          ThemeSettings._isLightTheme = new bool?((Visibility) Application.Current.Resources["PhoneLightThemeVisibility"] == 0);
         return ThemeSettings._isLightTheme.Value;
       }
     }

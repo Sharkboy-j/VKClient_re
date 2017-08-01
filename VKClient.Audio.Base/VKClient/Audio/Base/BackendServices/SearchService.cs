@@ -34,7 +34,7 @@ namespace VKClient.Audio.Base.BackendServices
       int num1 = 0;
       int num2 = 1;
       CancellationToken? cancellationToken = new CancellationToken?();
-      VKRequestsDispatcher.DispatchRequestToVK<List<SearchHint>>(methodName, parameters, callback1, (Func<string, List<SearchHint>>) (s => JsonConvert.DeserializeObject<GenericRoot<List<SearchHint>>>(s).response), num1 != 0, num2 != 0, cancellationToken);
+      VKRequestsDispatcher.DispatchRequestToVK<List<SearchHint>>(methodName, parameters, callback1, (Func<string, List<SearchHint>>)(s => JsonConvert.DeserializeObject<GenericRoot<List<SearchHint>>>(s).response), num1 != 0, num2 != 0, cancellationToken, null);
     }
 
     public void GetTrends(Action<BackendResult<List<Trend>, ResultCode>> callback)
@@ -43,12 +43,12 @@ namespace VKClient.Audio.Base.BackendServices
       {
         GenericRoot<VKList<Trend>> genericRoot = JsonConvert.DeserializeObject<GenericRoot<VKList<Trend>>>(s);
         if (genericRoot == null)
-          return (List<Trend>) null;
+          return  null;
         VKList<Trend> response = genericRoot.response;
         if (response == null)
-          return (List<Trend>) null;
+          return  null;
         return response.items;
-      }), false, true, new CancellationToken?());
+      }), false, true, new CancellationToken?(),  null);
     }
   }
 }

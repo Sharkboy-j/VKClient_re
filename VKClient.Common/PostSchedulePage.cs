@@ -3,6 +3,8 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Common.Framework;
 using VKClient.Common.Framework.DatePicker;
@@ -14,41 +16,49 @@ namespace VKClient.Common
 {
   public class PostSchedulePage : PageBase
   {
-    private readonly ApplicationBarIconButton _appBarButtonCheck = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/check.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Save
-    };
-    private readonly ApplicationBarIconButton _appBarButtonCancel = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative),
-      Text = CommonResources.AppBar_Cancel
-    };
     private bool _isInitialized;
     private PostScheduleViewModel _viewModel;
+    private readonly ApplicationBarIconButton _appBarButtonCheck;
+    private readonly ApplicationBarIconButton _appBarButtonCancel;
     internal PostScheduleDatePicker datePicker;
     internal PostScheduleTimePicker timePicker;
     private bool _contentLoaded;
 
     public PostSchedulePage()
     {
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+      Uri uri1 = new Uri("/Resources/check.png", UriKind.Relative);
+      applicationBarIconButton1.IconUri = uri1;
+      string chatEditAppBarSave = CommonResources.ChatEdit_AppBar_Save;
+      applicationBarIconButton1.Text = chatEditAppBarSave;
+      this._appBarButtonCheck = applicationBarIconButton1;
+      ApplicationBarIconButton applicationBarIconButton2 = new ApplicationBarIconButton();
+      Uri uri2 = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative);
+      applicationBarIconButton2.IconUri = uri2;
+      string appBarCancel = CommonResources.AppBar_Cancel;
+      applicationBarIconButton2.Text = appBarCancel;
+      this._appBarButtonCancel = applicationBarIconButton2;
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.BuildAppBar();
     }
 
     private void BuildAppBar()
     {
-      ApplicationBar applicationBar = new ApplicationBar()
-      {
-        BackgroundColor = VKConstants.AppBarBGColor,
-        ForegroundColor = VKConstants.AppBarFGColor,
-        Opacity = 0.9
-      };
-      applicationBar.Buttons.Add((object) this._appBarButtonCheck);
-      applicationBar.Buttons.Add((object) this._appBarButtonCancel);
-      this._appBarButtonCheck.Click += new EventHandler(this.AppBarButtonCheck_Click);
-      this._appBarButtonCancel.Click += new EventHandler(this.AppBarButtonCancel_Click);
-      this.ApplicationBar = (IApplicationBar) applicationBar;
+      ApplicationBar applicationBar1 = new ApplicationBar();
+      Color appBarBgColor = VKConstants.AppBarBGColor;
+      applicationBar1.BackgroundColor = appBarBgColor;
+      Color appBarFgColor = VKConstants.AppBarFGColor;
+      applicationBar1.ForegroundColor = appBarFgColor;
+      double num = 0.9;
+      applicationBar1.Opacity = num;
+      ApplicationBar applicationBar2 = applicationBar1;
+      applicationBar2.Buttons.Add(this._appBarButtonCheck);
+      applicationBar2.Buttons.Add(this._appBarButtonCancel);
+      this._appBarButtonCheck.Click+=(new EventHandler(this.AppBarButtonCheck_Click));
+      this._appBarButtonCancel.Click+=(new EventHandler(this.AppBarButtonCancel_Click));
+      this.ApplicationBar = ((IApplicationBar) applicationBar2);
     }
 
     private void AppBarButtonCheck_Click(object sender, EventArgs e)
@@ -57,17 +67,13 @@ namespace VKClient.Common
       {
         ScheduledPublishDateTime = this._viewModel.GetScheduledDateTime()
       };
-      DateTime dateTime = timerAttachment.ScheduledPublishDateTime;
-      int year1 = dateTime.Year;
-      dateTime = DateTime.Now;
-      int year2 = dateTime.Year;
-      if (year1 - year2 > 0)
+      if (timerAttachment.ScheduledPublishDateTime > DateTime.Now.AddYears(1))
       {
-        int num = (int) MessageBox.Show(CommonResources.PostSchedule_InvalidPublishDate, CommonResources.Error, MessageBoxButton.OK);
+        MessageBox.Show(CommonResources.PostSchedule_InvalidPublishDate, CommonResources.Error, (MessageBoxButton) 0);
       }
       else
       {
-        ParametersRepository.SetParameterForId("PickedTimer", (object) timerAttachment);
+        ParametersRepository.SetParameterForId("PickedTimer", timerAttachment);
         Navigator.Current.GoBack();
       }
     }
@@ -82,20 +88,20 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      long ticks = long.Parse(this.NavigationContext.QueryString["PublishDateTime"]);
+      long ticks = long.Parse(((Page) this).NavigationContext.QueryString["PublishDateTime"]);
       this._viewModel = ticks > 0L ? new PostScheduleViewModel(new DateTime?(new DateTime(ticks))) : new PostScheduleViewModel(new DateTime?());
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
       this._isInitialized = true;
     }
 
     private void DatePicker_OnClicked(object sender, RoutedEventArgs e)
     {
-      typeof (Microsoft.Phone.Controls.DateTimePickerBase).InvokeMember("OpenPickerPage", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic, Type.DefaultBinder, (object) this.datePicker, (object[]) null);
+      typeof (Microsoft.Phone.Controls.DateTimePickerBase).InvokeMember("OpenPickerPage", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.InvokeMethod, Type.DefaultBinder, this.datePicker,  null);
     }
 
     private void TimePicker_OnClicked(object sender, RoutedEventArgs e)
     {
-      typeof (Microsoft.Phone.Controls.DateTimePickerBase).InvokeMember("OpenPickerPage", BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic, Type.DefaultBinder, (object) this.timePicker, (object[]) null);
+      typeof (Microsoft.Phone.Controls.DateTimePickerBase).InvokeMember("OpenPickerPage", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.InvokeMethod, Type.DefaultBinder, this.timePicker,  null);
     }
 
     [DebuggerNonUserCode]
@@ -104,9 +110,9 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/PostSchedulePage.xaml", UriKind.Relative));
-      this.datePicker = (PostScheduleDatePicker) this.FindName("datePicker");
-      this.timePicker = (PostScheduleTimePicker) this.FindName("timePicker");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/PostSchedulePage.xaml", UriKind.Relative));
+      this.datePicker = (PostScheduleDatePicker) base.FindName("datePicker");
+      this.timePicker = (PostScheduleTimePicker) base.FindName("timePicker");
     }
   }
 }

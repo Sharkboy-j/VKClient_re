@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
+using System.Windows.Navigation;
 using VKClient.Audio.Base;
 using VKClient.Common;
 using VKClient.Common.Backend;
@@ -17,216 +19,319 @@ using VKMessenger.Backend;
 
 namespace VKMessenger.Library
 {
-  public class ChatEditViewModel : ViewModelBase
+  public class ChatEditViewModel : ViewModelStatefulBase
   {
-    private string _chatName = string.Empty;
-    private string _initialChatName = string.Empty;
-    private ObservableCollection<ChatParticipant> _chatParticipants = new ObservableCollection<ChatParticipant>();
+    private bool _isTitleBoxEnabled = true;
     private long _chatId;
-    private ChatInfo _chatInfo;
-    private bool _addingChatUsers;
-    private bool _updatingChatPhoto;
+    private ChatInfo _chatInformation;
+    private NavigationService _navigationService;
+    private bool _isPhotoChanging;
+
+    public ObservableCollection<ChatMember> Members = new ObservableCollection<ChatMember>();
+
+    public long ChatId
+    {
+      get
+      {
+        return this._chatId;
+      }
+    }
+
+    public long PeerId
+    {
+      get
+      {
+        return 2000000000L + this._chatId;
+      }
+    }
 
     public string Title
     {
       get
       {
-        string str = "";
-        if (this._chatParticipants.Count > 0)
-          str = UIStringFormatterHelper.FormatNumberOfSomething(this._chatParticipants.Count, CommonResources.ChatEdit_OneParticipant, CommonResources.ChatEdit_TwoFourParticipantsFrm, CommonResources.ChatEdit_FiveMoreParticipantsFrm, true, null, false);
-        return str.ToUpperInvariant();
+        ChatInfo chatInformation = this._chatInformation;
+        return (chatInformation != null ? Extensions.ForUI(chatInformation.chat.title) :  null) ?? "";
       }
     }
 
-    public string ChatName
+    public string Photo
     {
       get
       {
-        return this._chatName;
+        ChatInfo chatInformation = this._chatInformation;
+        return (chatInformation != null ? chatInformation.chat.photo_200 :  null) ?? "";
+      }
+    }
+
+    public Visibility PhotoPlaceholderVisibility
+    {
+      get
+      {
+        if (!string.IsNullOrEmpty(this.Photo))
+          return Visibility.Collapsed;
+        return Visibility.Visible;
+      }
+    }
+
+    public bool IsPhotoMenuEnabled
+    {
+      get
+      {
+          if (this.PhotoPlaceholderVisibility == Visibility.Collapsed)
+          return !this.IsPhotoChanging;
+        return false;
+      }
+    }
+
+    public bool IsNotificationsSoundEnabled
+    {
+      get
+      {
+        ChatInfo chatInformation = this._chatInformation;
+        if (chatInformation == null)
+          return true;
+        return !chatInformation.chat.push_settings.AreDisabledNow;
+      }
+    }
+
+    public string NotificationsSoundMode
+    {
+      get
+      {
+        if (!this.IsNotificationsSoundEnabled)
+          return CommonResources.NotificationsSound_Disabled;
+        return CommonResources.NotificationsSound_Enabled;
+      }
+    }
+
+    public bool IsTitleBoxEnabled
+    {
+      get
+      {
+        return this._isTitleBoxEnabled;
       }
       set
       {
-        this._chatName = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.ChatName));
+        this._isTitleBoxEnabled = value;
+        this.NotifyPropertyChanged<bool>((Expression<Func<bool>>) (() => this.IsTitleBoxEnabled));
       }
     }
 
-    public ObservableCollection<ChatParticipant> ChatParticipants
+    public bool IsPhotoChanging
     {
       get
       {
-        return this._chatParticipants;
+        return this._isPhotoChanging;
       }
-    }
-
-    public Visibility DeletePhotoVisibility
-    {
-      get
+      set
       {
-        return this._chatInfo == null || string.IsNullOrWhiteSpace(this._chatInfo.chat.photo_200) ? Visibility.Collapsed : Visibility.Visible;
+        this._isPhotoChanging = value;
+        this.NotifyPropertyChanged<bool>((Expression<Func<bool>>) (() => this.IsPhotoChanging));
+        this.NotifyPropertyChanged<bool>((Expression<Func<bool>>) (() => this.IsPhotoMenuEnabled));
       }
     }
 
-    public string ChatImage
-    {
-      get
-      {
-        if (this._chatInfo == null)
-          return "";
-        if (string.IsNullOrWhiteSpace(this._chatInfo.chat.photo_200))
-          return "http://noimage.gif";
-        return this._chatInfo.chat.photo_200;
-      }
-    }
+    public bool IsNotificationsSoundModeSwitching { get; private set; }
 
-    public ChatEditViewModel(long chatId)
+    public bool IsMemberAdding { get; private set; }
+
+    public bool IsChatLeaving { get; private set; }
+
+    public ChatEditViewModel(long chatId, NavigationService navigationService)
     {
       this._chatId = chatId;
+      this._navigationService = navigationService;
     }
 
-    public void LoadChatInfoAsync()
+    public override void Load(Action<ResultCode> callback)
     {
       BackendServices.ChatService.GetChatInfo(this._chatId, (Action<BackendResult<ChatInfo, ResultCode>>) (result =>
       {
-        if (result.ResultCode != ResultCode.Succeeded)
-          return;
-        this._chatInfo = result.ResultData;
-        Deployment.Current.Dispatcher.BeginInvoke((Action) (() =>
+        if (result.ResultCode == ResultCode.Succeeded)
         {
-          this.ChatName = result.ResultData.chat.title;
-          this._initialChatName = this.ChatName;
-          this._chatParticipants.Clear();
-          foreach (ChatUser chatParticipant in result.ResultData.chat_participants)
-            this._chatParticipants.Add(new ChatParticipant(chatParticipant));
-          this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Title));
-          this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.ChatImage));
-          this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.DeletePhotoVisibility));
-        }));
+          this._chatInformation = result.ResultData;
+          Execute.ExecuteOnUIThread((Action) (() =>
+          {
+            long chatCreatorId = long.Parse(this._chatInformation.chat.admin_id);
+            foreach (ChatUser chatParticipant in this._chatInformation.chat_participants)
+            {
+              ChatUser member = chatParticipant;
+              User invitedByUser = this._chatInformation.invited_by_users.FirstOrDefault<User>((Func<User, bool>) (u => u.id == member.invited_by));
+              if (invitedByUser != null)
+                this.Members.Add(new ChatMember(member, invitedByUser, chatCreatorId));
+            }
+            this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.Title));
+            this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.Photo));
+            this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>) (() => this.PhotoPlaceholderVisibility));
+            this.NotifyPropertyChanged<bool>((Expression<Func<bool>>) (() => this.IsPhotoMenuEnabled));
+            this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.NotificationsSoundMode));
+          }));
+        }
+        callback(result.ResultCode);
       }));
     }
 
-    public void SaveChat()
+    public void ChangeTitle(string newTitle, Action errorAction)
     {
-      BackendServices.ChatService.EditChat(this._chatId, this.ChatName, (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (res => {}));
-      this._initialChatName = this.ChatName;
-      this._chatInfo.chat.title = this.ChatName;
-      ConversationHeader conversationHeader = ConversationsViewModel.Instance.Conversations.FirstOrDefault<ConversationHeader>((Func<ConversationHeader, bool>) (c => c.UserOrChatId == this._chatId));
-      if (conversationHeader == null)
-        return;
-      conversationHeader.UITitle = this.ChatName;
-    }
-
-    public List<ChatParticipant> ExcludeMembers(List<ChatParticipant> membersToBeExcluded)
-    {
-      List<ChatParticipant> chatParticipantList = new List<ChatParticipant>();
-      long loggedInUserId = AppGlobalStateManager.Current.LoggedInUserId;
-      long result = 0;
-      long.TryParse(this._chatInfo.chat.admin_id, out result);
-      foreach (ChatParticipant chatParticipant in membersToBeExcluded)
+      if (string.IsNullOrWhiteSpace(newTitle) || newTitle.Length < 2)
       {
-        if (loggedInUserId != result && chatParticipant.InvitedBy != loggedInUserId && (long) chatParticipant.ChatUser.uid != loggedInUserId)
-          chatParticipantList.Add(chatParticipant);
+        errorAction();
       }
-      foreach (ChatParticipant chatParticipant in chatParticipantList)
-        membersToBeExcluded.Remove(chatParticipant);
-      if (membersToBeExcluded.Count > 0)
-        BackendServices.ChatService.RemoveChatUsers(this._chatId, membersToBeExcluded.Select<ChatParticipant, long>((Func<ChatParticipant, long>) (m => (long) m.ChatUser.uid)).ToList<long>(), (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (res => {}));
-      foreach (ChatParticipant chatParticipant in membersToBeExcluded)
-        this._chatParticipants.Remove(chatParticipant);
-      this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Title));
-      return chatParticipantList;
-    }
-
-    public bool CanSaveChat()
-    {
-      if (!string.IsNullOrWhiteSpace(this.ChatName))
-        return this.ChatName != this._initialChatName;
-      return false;
-    }
-
-    internal void LeaveChat()
-    {
-      BackendServices.ChatService.RemoveChatUsers(this._chatId, new List<long>()
+      else
       {
-        AppGlobalStateManager.Current.LoggedInUserId
-      }, (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (res => {}));
-    }
-
-    internal void AddUsersToChat(List<User> selectedUsers)
-    {
-      if (selectedUsers == null)
-        return;
-      foreach (ChatParticipant chatParticipant in (Collection<ChatParticipant>) this._chatParticipants)
-      {
-        ChatParticipant chatPart = chatParticipant;
-        User user = selectedUsers.FirstOrDefault<User>((Func<User, bool>) (u => u.uid == (long) chatPart.ChatUser.uid));
-        if (user != null)
-          selectedUsers.Remove(user);
-      }
-      if (selectedUsers.Count == 0 || this._addingChatUsers)
-        return;
-      this._addingChatUsers = true;
-      this.SetInProgress(true, "");
-      BackendServices.ChatService.AddChatUsers(this._chatId, selectedUsers.Select<User, long>((Func<User, long>) (u => u.uid)).ToList<long>(), (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (res => Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        this._addingChatUsers = false;
-        this.SetInProgress(false, "");
-        if (res.ResultCode == ResultCode.Succeeded)
+        this.SetInProgress(true, "");
+        this.IsTitleBoxEnabled = false;
+        BackendServices.ChatService.EditChat(this._chatId, newTitle, (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
         {
-          foreach (User selectedUser in selectedUsers)
-            this._chatParticipants.Add(new ChatParticipant(new ChatUser()
-            {
-              uid = (int) selectedUser.uid,
-              photo_rec = selectedUser.photo_rec,
-              photo_max = selectedUser.photo_max,
-              first_name = selectedUser.first_name,
-              last_name = selectedUser.last_name,
-              online = selectedUser.online,
-              type = "profile",
-              invited_by = (int) AppGlobalStateManager.Current.LoggedInUserId
-            }));
-          this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Title));
+          if (result.ResultCode == ResultCode.Succeeded)
+          {
+            this._chatInformation.chat.title = newTitle;
+            this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.Title));
+          }
+          else
+          {
+            errorAction();
+            GenericInfoUC.ShowBasedOnResult(result.ResultCode, "", (VKRequestsDispatcher.Error) null);
+          }
+          this.SetInProgress(false, "");
+          this.IsTitleBoxEnabled = true;
+        }))));
+      }
+    }
+
+    public void UpdatePhoto(Stream photoStream, Rect crop)
+    {
+      this.IsPhotoChanging = true;
+      this.SetInProgress(true, "");
+      ImagePreprocessor.PreprocessImage(photoStream, VKConstants.ResizedImageSize, true, (Action<ImagePreprocessResult>) (resized =>
+      {
+        Stream stream = resized.Stream;
+        byte[] photoData = ImagePreprocessor.ReadFully(stream);
+        stream.Close();
+        BackendServices.MessagesService.UpdateChatPhoto(this.ChatId, photoData, ImagePreprocessor.GetThumbnailRect((double) resized.Width, (double) resized.Height, crop), (Action<BackendResult<ChatInfoWithMessageId, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
+        {
+          if (result.ResultCode == ResultCode.Succeeded)
+          {
+            this._chatInformation.chat.photo_200 = result.ResultData.chat.photo_200;
+            this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.Photo));
+            this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>) (() => this.PhotoPlaceholderVisibility));
+            this.NotifyPropertyChanged<bool>((Expression<Func<bool>>) (() => this.IsPhotoMenuEnabled));
+          }
+          else
+            GenericInfoUC.ShowBasedOnResult(result.ResultCode, "", (VKRequestsDispatcher.Error) null);
+          this.SetInProgress(false, "");
+          this.IsPhotoChanging = false;
+        }))));
+      }));
+    }
+
+    public void DeletePhoto()
+    {
+      this.IsPhotoChanging = true;
+      this.SetInProgress(true, "");
+      BackendServices.MessagesService.DeleteChatPhoto(this.ChatId, (Action<BackendResult<ChatInfoWithMessageId, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
+      {
+        if (result.ResultCode == ResultCode.Succeeded)
+        {
+          this._chatInformation.chat.photo_200 =  null;
+          this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.Photo));
+          this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>) (() => this.PhotoPlaceholderVisibility));
+          this.NotifyPropertyChanged<bool>((Expression<Func<bool>>) (() => this.IsPhotoMenuEnabled));
         }
         else
-          ExtendedMessageBox.ShowSafe(CommonResources.Error);
+          GenericInfoUC.ShowBasedOnResult(result.ResultCode, "", (VKRequestsDispatcher.Error) null);
+        this.SetInProgress(false, "");
+        this.IsPhotoChanging = false;
       }))));
     }
 
-    internal void UpdateChatPhoto(Stream photoStream, Rect rect)
+    public void SwitchNotificationsSoundMode()
     {
-      if (this._updatingChatPhoto)
-        return;
-      this._updatingChatPhoto = true;
+      this.IsNotificationsSoundModeSwitching = true;
       this.SetInProgress(true, "");
-      ImagePreprocessor.PreprocessImage(photoStream, VKConstants.ResizedImageSize, true, (Action<ImagePreprocessResult>) (pres =>
+      AccountService.Instance.SetSilenceMode(AppGlobalStateManager.Current.GlobalState.NotificationsUri, this.IsNotificationsSoundEnabled ? -1 : 0, (Action<BackendResult<object, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
       {
-        Stream stream = pres.Stream;
-        byte[] photoData = ImagePreprocessor.ReadFully(stream);
-        stream.Close();
-        BackendServices.MessagesService.UpdateChatPhoto(this._chatId, photoData, ImagePreprocessor.GetThumbnailRect((double) pres.Width, (double) pres.Height, rect), new Action<BackendResult<ChatInfoWithMessageId, ResultCode>>(this.ProcessUpdateDeleteResult));
-      }));
-    }
-
-    internal void DeleteChatPhoto()
-    {
-      if (this._updatingChatPhoto)
-        return;
-      this._updatingChatPhoto = true;
-      this.SetInProgress(true, "");
-      BackendServices.MessagesService.DeleteChatPhoto(this._chatId, new Action<BackendResult<ChatInfoWithMessageId, ResultCode>>(this.ProcessUpdateDeleteResult));
-    }
-
-    private void ProcessUpdateDeleteResult(BackendResult<ChatInfoWithMessageId, ResultCode> res)
-    {
-      Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        this.SetInProgress(false, "");
-        if (res.ResultCode == ResultCode.Succeeded)
-          this.LoadChatInfoAsync();
+        if (result.ResultCode == ResultCode.Succeeded)
+        {
+          this._chatInformation.chat.push_settings.disabled_until = this.IsNotificationsSoundEnabled ? -1 : 0;
+          this.NotifyPropertyChanged<bool>((Expression<Func<bool>>) (() => this.IsNotificationsSoundEnabled));
+          this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.NotificationsSoundMode));
+        }
         else
-          new GenericInfoUC().ShowAndHideLater(CommonResources.Error, null);
-        this._updatingChatPhoto = false;
-      }));
+          GenericInfoUC.ShowBasedOnResult(result.ResultCode, "", (VKRequestsDispatcher.Error) null);
+        this.SetInProgress(false, "");
+        this.IsNotificationsSoundModeSwitching = false;
+      }))), this.ChatId, 0L);
+    }
+
+    public void AddMember(User user)
+    {
+      this.IsMemberAdding = true;
+      this.SetInProgress(true, "");
+      IChatService chatService = BackendServices.ChatService;
+      long chatId = this._chatId;
+      List<long> userIds = new List<long>();
+      userIds.Add(user.id);
+      Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>> callback = (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
+      {
+        if (result.ResultCode == ResultCode.Succeeded)
+        {
+          User loggedInUser = AppGlobalStateManager.Current.GlobalState.LoggedInUser;
+          this.Members.Add(new ChatMember(new ChatUser(user, loggedInUser.id), loggedInUser, long.Parse(this._chatInformation.chat.admin_id)));
+        }
+        else
+          GenericInfoUC.ShowBasedOnResult(result.ResultCode, "", (VKRequestsDispatcher.Error) null);
+        this.SetInProgress(false, "");
+        this.IsMemberAdding = false;
+      })));
+      chatService.AddChatUsers(chatId, userIds, callback);
+    }
+
+    public void ExcludeMember(ChatMember member)
+    {
+      this.SetInProgress(true, "");
+      member.ExcludeButtonVisibility = Visibility.Collapsed;
+      IChatService chatService = BackendServices.ChatService;
+      long chatId = this._chatId;
+      List<long> usersToBeRemoved = new List<long>();
+      usersToBeRemoved.Add(member.Id);
+      Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>> callback = (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
+      {
+        if (result.ResultCode == ResultCode.Succeeded)
+        {
+          this.Members.Remove(member);
+        }
+        else
+        {
+          member.ExcludeButtonVisibility = Visibility.Visible;
+          GenericInfoUC.ShowBasedOnResult(result.ResultCode, "", (VKRequestsDispatcher.Error) null);
+        }
+        this.SetInProgress(false, "");
+      })));
+      chatService.RemoveChatUsers(chatId, usersToBeRemoved, callback);
+    }
+
+    public void LeaveChat()
+    {
+      this.IsChatLeaving = true;
+      this.SetInProgress(true, "");
+      IChatService chatService = BackendServices.ChatService;
+      long chatId = this._chatId;
+      List<long> usersToBeRemoved = new List<long>();
+      usersToBeRemoved.Add(AppGlobalStateManager.Current.LoggedInUserId);
+      Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>> callback = (Action<BackendResult<VKClient.Common.Backend.DataObjects.ResponseWithId, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
+      {
+        if (result.ResultCode == ResultCode.Succeeded)
+        {
+          this._navigationService.RemoveBackEntrySafe();
+          this._navigationService.GoBackSafe();
+        }
+        else
+          GenericInfoUC.ShowBasedOnResult(result.ResultCode, "", (VKRequestsDispatcher.Error) null);
+        this.SetInProgress(false, "");
+        this.IsChatLeaving = false;
+      })));
+      chatService.RemoveChatUsers(chatId, usersToBeRemoved, callback);
     }
   }
 }

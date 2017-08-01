@@ -77,8 +77,7 @@
 
             <Rectangle Height="16"
                        Margin="0 16 0 0"
-                       Fill="{StaticResource PhoneNewsDividerBrush}"
-                       Visibility="{Binding PostsVisibility}" />
+                       Fill="{StaticResource PhoneNewsDividerBrush}" />
 
         </StackPanel>
 

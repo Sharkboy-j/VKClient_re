@@ -28,7 +28,7 @@ namespace VKMessenger.Views
     {
       get
       {
-        return this.DataContext as ConversationSearchViewModel;
+        return base.DataContext as ConversationSearchViewModel;
       }
     }
 
@@ -36,8 +36,8 @@ namespace VKMessenger.Views
     {
       this.InitializeComponent();
       this._searchTimer = new DispatcherTimer();
-      this._searchTimer.Interval = TimeSpan.FromSeconds(1.0);
-      this._searchTimer.Tick += new EventHandler(this.searchTimer_Tick);
+      this._searchTimer.Interval=(TimeSpan.FromSeconds(1.0));
+      this._searchTimer.Tick+=(new EventHandler(this.searchTimer_Tick));
     }
 
     private void searchTimer_Tick(object sender, EventArgs e)
@@ -50,9 +50,9 @@ namespace VKMessenger.Views
       base.HandleOnNavigatedTo(e);
       if (e.NavigationMode != NavigationMode.New)
         return;
-      this.DataContext = (object) new ConversationSearchViewModel();
-      (this.DataContext as ConversationSearchViewModel).Conversations.Clear();
-      (this.DataContext as ConversationSearchViewModel).Messages.Clear();
+      base.DataContext = (new ConversationSearchViewModel());
+      (base.DataContext as ConversationSearchViewModel).Conversations.Clear();
+      (base.DataContext as ConversationSearchViewModel).Messages.Clear();
     }
 
     protected override void HandleOnNavigatedFrom(NavigationEventArgs e)
@@ -63,15 +63,15 @@ namespace VKMessenger.Views
 
     private void PageBase_Loaded(object sender, RoutedEventArgs e)
     {
-      ConversationSearchViewModel conversationSearchViewModel = this.DataContext as ConversationSearchViewModel;
-      if ((conversationSearchViewModel.Messages.Count != 0 || this.pivotControl.SelectedIndex != 1) && (conversationSearchViewModel.Conversations.Count != 0 || this.pivotControl.SelectedIndex != 0))
+      ConversationSearchViewModel dataContext = base.DataContext as ConversationSearchViewModel;
+      if ((dataContext.Messages.Count != 0 || this.pivotControl.SelectedIndex != 1) && (dataContext.Conversations.Count != 0 || this.pivotControl.SelectedIndex != 0))
         return;
-      this.searchTextBox.Focus();
+      ((Control) this.searchTextBox).Focus();
     }
 
     private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-      this.textBlockWatermarkText.Visibility = this.searchTextBox.Text == string.Empty ? Visibility.Visible : Visibility.Collapsed;
+      ((UIElement) this.textBlockWatermarkText).Visibility = (this.searchTextBox.Text == string.Empty ? Visibility.Visible : Visibility.Collapsed);
       this._searchTimer.Stop();
       this._searchTimer.Start();
     }
@@ -81,12 +81,12 @@ namespace VKMessenger.Views
       if (this.pivotControl.SelectedIndex == 0 && string.Compare(text, this.previousSearchStringConversations) != 0)
       {
         this.previousSearchStringConversations = text;
-        (this.DataContext as ConversationSearchViewModel).SearchConversations(text);
+        (base.DataContext as ConversationSearchViewModel).SearchConversations(text);
       }
       if (this.pivotControl.SelectedIndex != 1 || string.Compare(text, this.previousSearchStringMessages) == 0)
         return;
       this.previousSearchStringMessages = text;
-      (this.DataContext as ConversationSearchViewModel).SearchMessages(text);
+      (base.DataContext as ConversationSearchViewModel).SearchMessages(text);
     }
 
     private void pivotControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -96,19 +96,19 @@ namespace VKMessenger.Views
 
     private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      ConversationHeader conversationInfo = (sender as ExtendedLongListSelector).SelectedItem as ConversationHeader;
-      if (conversationInfo == null)
+      ConversationHeader selectedItem = (sender as ExtendedLongListSelector).SelectedItem as ConversationHeader;
+      if (selectedItem == null)
         return;
-      this.NavigateToConversation(conversationInfo, true);
+      this.NavigateToConversation(selectedItem, true);
       (sender as ExtendedLongListSelector).SelectedItem = null;
     }
 
     private void ListBox2_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      ConversationHeader conversationInfo = (sender as ExtendedLongListSelector).SelectedItem as ConversationHeader;
-      if (conversationInfo == null)
+      ConversationHeader selectedItem = (sender as ExtendedLongListSelector).SelectedItem as ConversationHeader;
+      if (selectedItem == null)
         return;
-      this.NavigateToConversation(conversationInfo, false);
+      this.NavigateToConversation(selectedItem, false);
       (sender as ExtendedLongListSelector).SelectedItem = null;
     }
 
@@ -129,27 +129,27 @@ namespace VKMessenger.Views
     private void ExtendedLongListSelector_Link_1(object sender, LinkUnlinkEventArgs e)
     {
       int count = this.VM.Messages.Count;
-      ConversationHeader conversationHeader = e.ContentPresenter.Content as ConversationHeader;
-      if (count < 10 || conversationHeader == null || this.VM.Messages[count - 10] != conversationHeader)
+      ConversationHeader content = e.ContentPresenter.Content as ConversationHeader;
+      if (count < 10 || content == null || this.VM.Messages[count - 10] != content)
         return;
       this.VM.LoadMoreMessages(this.previousSearchStringMessages, (Action) (() => {}));
     }
 
     private void searchDialogManipulationStarted(object sender, ManipulationStartedEventArgs e)
     {
-      this.listBoxSearchDialog.Focus();
+      ((Control) this.listBoxSearchDialog).Focus();
     }
 
     private void searchMessagesManipulationStarted(object sender, ManipulationStartedEventArgs e)
     {
-      this.listBoxSearchMessages.Focus();
+      ((Control) this.listBoxSearchMessages).Focus();
     }
 
     private void searchTextBox_KeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key != Key.Enter)
         return;
-      this.listBoxSearchMessages.Focus();
+      ((Control) this.listBoxSearchMessages).Focus();
     }
 
     [DebuggerNonUserCode]
@@ -158,13 +158,13 @@ namespace VKMessenger.Views
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKMessenger;component/Views/ConversationsSearch.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.searchTextBox = (TextBox) this.FindName("searchTextBox");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
-      this.pivotControl = (Pivot) this.FindName("pivotControl");
-      this.listBoxSearchDialog = (ExtendedLongListSelector) this.FindName("listBoxSearchDialog");
-      this.listBoxSearchMessages = (ExtendedLongListSelector) this.FindName("listBoxSearchMessages");
+      Application.LoadComponent(this, new Uri("/VKMessenger;component/Views/ConversationsSearch.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.searchTextBox = (TextBox) base.FindName("searchTextBox");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
+      this.pivotControl = (Pivot) base.FindName("pivotControl");
+      this.listBoxSearchDialog = (ExtendedLongListSelector) base.FindName("listBoxSearchDialog");
+      this.listBoxSearchMessages = (ExtendedLongListSelector) base.FindName("listBoxSearchMessages");
     }
   }
 }

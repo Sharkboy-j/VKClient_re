@@ -1,11 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.Web.Http;
@@ -21,32 +22,42 @@ namespace XamlAnimatedGif
         private static async Task<Stream> GetStreamFromUriCoreAsync(Uri uri)
         {
             string scheme = uri.Scheme;
+            Stream result;
             if (!(scheme == "ms-appx") && !(scheme == "ms-appdata"))
             {
                 if (!(scheme == "file"))
+                {
                     throw new NotSupportedException("Only ms-appx:, ms-appdata:, http:, https: and file: URIs are supported");
-                return await (await StorageFile.GetFileFromPathAsync(uri.LocalPath)).OpenStreamForReadAsync();
+                }
+                result = await (await StorageFile.GetFileFromPathAsync(uri.LocalPath)).OpenStreamForReadAsync();
             }
-            return await (await StorageFile.GetFileFromApplicationUriAsync(uri)).OpenStreamForReadAsync();
+            else
+            {
+                result = await (await StorageFile.GetFileFromApplicationUriAsync(uri)).OpenStreamForReadAsync();
+            }
+            return result;
         }
 
         private static async Task<Stream> OpenTempFileStreamAsync(string fileName)
         {
-            IStorageFile file;
+            IStorageFile windowsRuntimeFile;
+            Stream result;
             try
             {
-                file = (IStorageFile)await (await ApplicationData.Current.LocalFolder.CreateFolderAsync("GifCache", CreationCollisionOption.OpenIfExists)).GetFileAsync(fileName);
+                windowsRuntimeFile = await (await ApplicationData.Current.LocalFolder.CreateFolderAsync("GifCache", CreationCollisionOption.OpenIfExists)).GetFileAsync(fileName);
             }
-            catch
+            catch (FileNotFoundException)
             {
-                return null;
+                result = null;
+                return result;
             }
-            return await file.OpenStreamForReadAsync();
+            result = await windowsRuntimeFile.OpenStreamForReadAsync();
+            return result;
         }
 
         private static async Task<Stream> CreateTempFileStreamAsync(string fileName)
         {
-            return await ((IStorageFile)await (await ApplicationData.Current.LocalFolder.CreateFolderAsync("GifCache", (CreationCollisionOption)3)).CreateFileAsync(fileName, (CreationCollisionOption)1)).OpenStreamForWriteAsync();
+            return await (await (await ApplicationData.Current.LocalFolder.CreateFolderAsync("GifCache", CreationCollisionOption.OpenIfExists)).CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting)).OpenStreamForWriteAsync();
         }
 
         private static async Task DeleteTempFileAsync(string fileName)
@@ -55,7 +66,7 @@ namespace XamlAnimatedGif
             {
                 await (await (await ApplicationData.Current.LocalFolder.CreateFolderAsync("GifCache", CreationCollisionOption.OpenIfExists)).GetFileAsync(fileName)).DeleteAsync();
             }
-            catch
+            catch (FileNotFoundException)
             {
             }
         }
@@ -64,30 +75,35 @@ namespace XamlAnimatedGif
         {
             try
             {
-                IEnumerator<StorageFile> enumerator = ((IEnumerable<StorageFile>)await (await ApplicationData.Current.LocalFolder.CreateFolderAsync("GifCache", (CreationCollisionOption)3)).GetFilesAsync()).GetEnumerator();
+                IReadOnlyList<StorageFile> readOnlyList = await (await ApplicationData.Current.LocalFolder.CreateFolderAsync("GifCache", CreationCollisionOption.OpenIfExists)).GetFilesAsync();
+                IEnumerator<StorageFile> enumerator = readOnlyList.GetEnumerator();
                 try
                 {
-                    while (((IEnumerator)enumerator).MoveNext())
+                    while (enumerator.MoveNext())
+                    {
                         await enumerator.Current.DeleteAsync();
+                    }
                 }
                 finally
                 {
                     if (enumerator != null)
-                        ((IDisposable)enumerator).Dispose();
+                    {
+                        enumerator.Dispose();
+                    }
                 }
                 enumerator = null;
             }
-            catch
+            catch (FileNotFoundException)
             {
             }
         }
 
-        private static string GetCacheFileName(Uri uri)
+        private static string GetCacheFileName(System.Uri uri)
         {
             return uri.GetHashCode().ToString();
         }
 
-        public Task<Stream> GetStreamFromUriAsync(Uri uri, CancellationToken cancellationToken)
+        public Task<Stream> GetStreamFromUriAsync(System.Uri uri, CancellationToken cancellationToken)
         {
             if (uri.Scheme == "http" || uri.Scheme == "https")
                 return this.GetNetworkStreamAsync(uri, cancellationToken);
@@ -99,7 +115,7 @@ namespace XamlAnimatedGif
             await UriLoader.ClearCacheFolderAsync();
         }
 
-        private async Task<Stream> GetNetworkStreamAsync(Uri uri, CancellationToken cancellationToken)
+        private async Task<Stream> GetNetworkStreamAsync(System.Uri uri, CancellationToken cancellationToken)
         {
             string cacheFileName = UriLoader.GetCacheFileName(uri);
             if (await UriLoader.OpenTempFileStreamAsync(cacheFileName) == null)
@@ -109,67 +125,81 @@ namespace XamlAnimatedGif
 
         private async Task DownloadToCacheFileAsync(Uri uri, string fileName, CancellationToken cancellationToken)
         {
-            int num = 0;
             Exception obj = null;
+            int num = 0;
             try
             {
-                HttpClient client = new HttpClient();
+                HttpClient httpClient = new HttpClient();
                 try
                 {
-                    Stream responseStream = (await client.GetBufferAsync(uri).AsTask<IBuffer, HttpProgress>(cancellationToken, (IProgress<HttpProgress>)new Progress<HttpProgress>((Action<HttpProgress>)(progress =>
+                    IBuffer source = await httpClient.GetBufferAsync(uri).AsTask(cancellationToken, new Progress<HttpProgress>(delegate(HttpProgress progress)
                     {
-                        ulong? nullable = (ulong?)progress.TotalBytesToReceive;
-                        if (!nullable.HasValue)
-                            return;
-                        double percentage = Math.Round((double)progress.BytesReceived * 100.0 / (double)nullable.Value, 2);
-                        EventHandler<DownloadProgressChangedArgs> eventHandler = this.DownloadProgressChanged;
-                        if (eventHandler == null)
-                            return;
-                        DownloadProgressChangedArgs e = new DownloadProgressChangedArgs(uri, percentage);
-                        eventHandler((object)this, e);
-                    })))).AsStream();
+                        ulong? totalBytesToReceive = progress.TotalBytesToReceive;
+                        if (totalBytesToReceive.HasValue)
+                        {
+                            double percentage = Math.Round(progress.BytesReceived * 100.0 / totalBytesToReceive.Value, 2);
+                            EventHandler<DownloadProgressChangedArgs> expr_3E = this.DownloadProgressChanged;
+                            if (expr_3E == null)
+                            {
+                                return;
+                            }
+                            expr_3E.Invoke(this, new DownloadProgressChangedArgs(uri, percentage));
+                        }
+                    }));
+                    Stream stream = source.AsStream();
                     try
                     {
-                        Stream fileStream = await UriLoader.CreateTempFileStreamAsync(fileName);
+                        Stream stream2 = await UriLoader.CreateTempFileStreamAsync(fileName);
                         try
                         {
-                            await responseStream.CopyToAsync(fileStream);
+                            await stream.CopyToAsync(stream2);
                         }
                         finally
                         {
-                            if (fileStream != null)
-                                fileStream.Dispose();
+                            if (stream2 != null)
+                            {
+                                stream2.Dispose();
+                            }
                         }
-                        fileStream = null;
+                        stream2 = null;
                     }
                     finally
                     {
-                        if (responseStream != null)
-                            responseStream.Dispose();
+                        if (stream != null)
+                        {
+                            stream.Dispose();
+                        }
                     }
-                    responseStream = null;
+                    stream = null;
                 }
                 finally
                 {
-                    if (client != null)
-                        ((IDisposable)client).Dispose();
+                    if (httpClient != null)
+                    {
+                        httpClient.Dispose();
+                    }
                 }
-                client = null;
+                httpClient = null;
             }
-            catch (Exception ex)
+            catch (Exception obj_0)
             {
-                obj = ex;
                 num = 1;
+                obj = obj_0;
             }
+            
             if (num == 1)
             {
                 await UriLoader.DeleteTempFileAsync(fileName);
-                if (obj == null)//TODO: What????
+                Exception expr_2FC = obj as Exception;
+                if (expr_2FC == null)
+                {
                     throw obj;
-                ExceptionDispatchInfo.Capture(obj).Throw();
+                }
+                ExceptionDispatchInfo.Capture(expr_2FC).Throw();
             }
-            //obj = null;
+            obj = null;
         }
+
 
         private static Stream GenerateStreamFromString(string s)
         {

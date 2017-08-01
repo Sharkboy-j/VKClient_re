@@ -29,5 +29,8 @@ namespace VKClient.Common.Backend.DataObjects
     mention_comment_video,
     wall_publish,
     reply_comment_market,
+    money_transfer_received,
+    money_transfer_accepted,
+    money_transfer_declined,
   }
 }

@@ -38,12 +38,12 @@ namespace VKClient.Audio.Base.Social
       {
         BinaryWriter binaryWriter1 = writer;
         long num = photo.pid;
-        string string1 = num.ToString();
-        binaryWriter1.Write(string1);
+        string str1 = num.ToString();
+        binaryWriter1.Write(str1);
         BinaryWriter binaryWriter2 = writer;
         num = photo.owner_id;
-        string string2 = num.ToString();
-        binaryWriter2.Write(string2);
+        string str2 = num.ToString();
+        binaryWriter2.Write(str2);
         writer.WriteString(photo.access_key);
         if (!string.IsNullOrEmpty(photo.src_xbig))
           writer.WriteString(photo.src_xbig);
@@ -51,8 +51,8 @@ namespace VKClient.Audio.Base.Social
           writer.WriteString(photo.src_big);
         BinaryWriter binaryWriter3 = writer;
         num = photo.aid;
-        string string3 = num.ToString();
-        binaryWriter3.Write(string3);
+        string str3 = num.ToString();
+        binaryWriter3.Write(str3);
         writer.Write(photo.can_comment.ToString());
       }
     }

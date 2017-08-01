@@ -19,7 +19,9 @@ namespace VKMessenger.Framework
 
     public ExtendedListBox()
     {
-      this.Loaded += new RoutedEventHandler(this.ListBox_Loaded);
+      //base.\u002Ector();
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.ListBox_Loaded));
     }
 
     private void ListBox_Loaded(object sender, RoutedEventArgs e)
@@ -27,24 +29,24 @@ namespace VKMessenger.Framework
       if (this._alreadyHookedScrollEvents)
         return;
       this._alreadyHookedScrollEvents = true;
-      this.AddHandler(UIElement.ManipulationCompletedEvent, (Delegate) new EventHandler<ManipulationCompletedEventArgs>(this.LB_ManipulationCompleted), true);
-      ScrollBar scrollBar = (ScrollBar) this.FindElementRecursive((FrameworkElement) this, typeof (ScrollBar));
-      ScrollViewer scrollViewer = (ScrollViewer) this.FindElementRecursive((FrameworkElement) this, typeof (ScrollViewer));
-      if (scrollViewer == null)
+      base.AddHandler((RoutedEvent) UIElement.ManipulationCompletedEvent, (Delegate) new EventHandler<ManipulationCompletedEventArgs>(this.LB_ManipulationCompleted), true);
+      ScrollBar elementRecursive1 = (ScrollBar) this.FindElementRecursive((FrameworkElement) this, typeof (ScrollBar));
+      ScrollViewer elementRecursive2 = (ScrollViewer) this.FindElementRecursive((FrameworkElement) this, typeof (ScrollViewer));
+      if (elementRecursive2 == null)
         return;
-      FrameworkElement element = VisualTreeHelper.GetChild((DependencyObject) scrollViewer, 0) as FrameworkElement;
-      if (element == null)
+      FrameworkElement child = VisualTreeHelper.GetChild((DependencyObject) elementRecursive2, 0) as FrameworkElement;
+      if (child == null)
         return;
-      VisualStateGroup visualState1 = this.FindVisualState(element, "ScrollStates");
+      VisualStateGroup visualState1 = this.FindVisualState(child, "ScrollStates");
       if (visualState1 != null)
-        visualState1.CurrentStateChanging += new EventHandler<VisualStateChangedEventArgs>(this.group_CurrentStateChanging);
-      VisualStateGroup visualState2 = this.FindVisualState(element, "VerticalCompression");
-      VisualStateGroup visualState3 = this.FindVisualState(element, "HorizontalCompression");
+        visualState1.CurrentStateChanging+=(new EventHandler<VisualStateChangedEventArgs>(this.group_CurrentStateChanging));
+      VisualStateGroup visualState2 = this.FindVisualState(child, "VerticalCompression");
+      VisualStateGroup visualState3 = this.FindVisualState(child, "HorizontalCompression");
       if (visualState2 != null)
-        visualState2.CurrentStateChanging += new EventHandler<VisualStateChangedEventArgs>(this.vgroup_CurrentStateChanging);
+        visualState2.CurrentStateChanging+=(new EventHandler<VisualStateChangedEventArgs>(this.vgroup_CurrentStateChanging));
       if (visualState3 == null)
         return;
-      visualState3.CurrentStateChanging += new EventHandler<VisualStateChangedEventArgs>(this.hgroup_CurrentStateChanging);
+      visualState3.CurrentStateChanging+=(new EventHandler<VisualStateChangedEventArgs>(this.hgroup_CurrentStateChanging));
     }
 
     private void hgroup_CurrentStateChanging(object sender, VisualStateChangedEventArgs e)
@@ -52,17 +54,21 @@ namespace VKMessenger.Framework
       if (e.NewState.Name == "CompressionLeft")
       {
         this._isBouncy = true;
+        // ISSUE: reference to a compiler-generated field
         if (this.Compression != null)
         {
-          this.Compression((object) this, new CompressionEventArgs(CompressionType.Left));
+          // ISSUE: reference to a compiler-generated field
+          this.Compression(this, new CompressionEventArgs(CompressionType.Left));
         }
       }
       if (e.NewState.Name == "CompressionRight")
       {
         this._isBouncy = true;
+        // ISSUE: reference to a compiler-generated field
         if (this.Compression != null)
         {
-          this.Compression((object) this, new CompressionEventArgs(CompressionType.Right));
+          // ISSUE: reference to a compiler-generated field
+          this.Compression(this, new CompressionEventArgs(CompressionType.Right));
         }
       }
       if (!(e.NewState.Name == "NoHorizontalCompression"))
@@ -74,15 +80,19 @@ namespace VKMessenger.Framework
     {
       if (e.NewState.Name == "Scrolling")
       {
+        // ISSUE: reference to a compiler-generated field
         if (this.ScrollStateChanged == null)
           return;
-        this.ScrollStateChanged((object) this, new ScrollStateChangedEventArgs(true));
+        // ISSUE: reference to a compiler-generated field
+        this.ScrollStateChanged(this, new ScrollStateChangedEventArgs(true));
       }
       else
       {
+        // ISSUE: reference to a compiler-generated field
         if (this.ScrollStateChanged == null)
           return;
-        this.ScrollStateChanged((object) this, new ScrollStateChangedEventArgs(false));
+        // ISSUE: reference to a compiler-generated field
+        this.ScrollStateChanged(this, new ScrollStateChangedEventArgs(false));
       }
     }
 
@@ -91,17 +101,21 @@ namespace VKMessenger.Framework
       if (e.NewState.Name == "CompressionTop")
       {
         this._isBouncy = true;
+        // ISSUE: reference to a compiler-generated field
         if (this.Compression != null)
         {
-          this.Compression((object) this, new CompressionEventArgs(CompressionType.Top));
+          // ISSUE: reference to a compiler-generated field
+          this.Compression(this, new CompressionEventArgs(CompressionType.Top));
         }
       }
       if (e.NewState.Name == "CompressionBottom")
       {
         this._isBouncy = true;
+        // ISSUE: reference to a compiler-generated field
         if (this.Compression != null)
         {
-          this.Compression((object) this, new CompressionEventArgs(CompressionType.Bottom));
+          // ISSUE: reference to a compiler-generated field
+          this.Compression(this, new CompressionEventArgs(CompressionType.Bottom));
         }
       }
       if (!(e.NewState.Name == "NoVerticalCompression"))
@@ -119,15 +133,15 @@ namespace VKMessenger.Framework
     private UIElement FindElementRecursive(FrameworkElement parent, Type targetType)
     {
       int childrenCount = VisualTreeHelper.GetChildrenCount((DependencyObject) parent);
-      UIElement uiElement = null;
+      UIElement uiElement =  null;
       if (childrenCount > 0)
       {
-        for (int childIndex = 0; childIndex < childrenCount; ++childIndex)
+        for (int index = 0; index < childrenCount; ++index)
         {
-          object obj = (object) VisualTreeHelper.GetChild((DependencyObject) parent, childIndex);
-          if (obj.GetType() == targetType)
-            return obj as UIElement;
-          uiElement = this.FindElementRecursive(VisualTreeHelper.GetChild((DependencyObject) parent, childIndex) as FrameworkElement, targetType);
+          object child = VisualTreeHelper.GetChild((DependencyObject) parent, index);
+          if (child.GetType() == targetType)
+            return child as UIElement;
+          uiElement = this.FindElementRecursive(VisualTreeHelper.GetChild((DependencyObject) parent, index) as FrameworkElement, targetType);
         }
       }
       return uiElement;
@@ -136,13 +150,13 @@ namespace VKMessenger.Framework
     private VisualStateGroup FindVisualState(FrameworkElement element, string name)
     {
       if (element == null)
-        return (VisualStateGroup) null;
+        return  null;
       foreach (VisualStateGroup visualStateGroup in (IEnumerable) VisualStateManager.GetVisualStateGroups(element))
       {
         if (visualStateGroup.Name == name)
           return visualStateGroup;
       }
-      return (VisualStateGroup) null;
+      return  null;
     }
 
     public delegate void OnCompression(object sender, CompressionEventArgs e);

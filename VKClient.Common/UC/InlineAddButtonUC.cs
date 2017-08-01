@@ -28,10 +28,11 @@ namespace VKClient.Common.UC
 
     public InlineAddButtonUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
-    private void OnAddTap(object sender, GestureEventArgs e)
+    private void OnAddTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.OnAdd == null)
         return;
@@ -44,9 +45,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/InlineAddButtonUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.textBlock = (TextBlock) this.FindName("textBlock");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/InlineAddButtonUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.textBlock = (TextBlock) base.FindName("textBlock");
     }
   }
 }

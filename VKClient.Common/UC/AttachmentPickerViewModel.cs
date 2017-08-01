@@ -7,40 +7,18 @@ namespace VKClient.Common.UC
 {
   public class AttachmentPickerViewModel : ViewModelBase
   {
-    private readonly ObservableCollection<AttachmentPickerItem> _attachmentTypes;
-    private readonly IPhotoPickerPhotosViewModel _pppVM;
-    private int _maxCount;
+      public IPhotoPickerPhotosViewModel PhotosVM { get; private set; }
 
-    public ObservableCollection<AttachmentPickerItem> AttachmentTypes
-    {
-      get
-      {
-        return this._attachmentTypes;
-      }
-    }
+      public ObservableCollection<AttachmentPickerItemViewModel> AttachmentTypes { get; private set; }
 
-    public IPhotoPickerPhotosViewModel PPPVM
-    {
-      get
-      {
-        return this._pppVM;
-      }
-    }
+      public int MaxCount { get; private set; }
 
-    public int MaxCount
+    public AttachmentPickerViewModel(List<AttachmentPickerItemViewModel> attachmentTypes, int maxCount)
     {
-      get
-      {
-        return this._maxCount;
-      }
-    }
-
-    public AttachmentPickerViewModel(List<AttachmentPickerItem> attachmentTypes, int maxCount)
-    {
-      this._attachmentTypes = new ObservableCollection<AttachmentPickerItem>(attachmentTypes);
-      this._maxCount = maxCount;
-      this._pppVM = Navigator.Current.GetPhotoPickerPhotosViewModelInstance(maxCount);
-      this._pppVM.CountToLoad = 5;
+      this.AttachmentTypes = new ObservableCollection<AttachmentPickerItemViewModel>(attachmentTypes);
+      this.MaxCount = maxCount;
+      this.PhotosVM = Navigator.Current.GetPhotoPickerPhotosViewModelInstance(maxCount);
+      this.PhotosVM.CountToLoad = 5;
     }
   }
 }

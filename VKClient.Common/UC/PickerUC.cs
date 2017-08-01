@@ -24,7 +24,7 @@ namespace VKClient.Common.UC
     private bool _handleAsAttTypes;
     private Action<PickableItem> _itemSelectedCallback;
     private Action _mainButtonTapCallback;
-    //private Action<PickableItem> _toolButtonTapCallback;
+    private Action<PickableItem> _toolButtonTapCallback;
     private Action _beforeNavigateCallback;
     private Action _showPhotoPicker;
     private PickableItem _itemToSelect;
@@ -56,7 +56,7 @@ namespace VKClient.Common.UC
         this._items = value;
         if (this.PropertyChanged == null)
           return;
-        this.PropertyChanged((object) this, new PropertyChangedEventArgs("Items"));
+        this.PropertyChanged(this, new PropertyChangedEventArgs("Items"));
       }
     }
 
@@ -64,7 +64,9 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return this._mainButtonTapCallback == null ? Visibility.Collapsed : Visibility.Visible;
+        if (this._mainButtonTapCallback == null)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -82,8 +84,10 @@ namespace VKClient.Common.UC
 
     public PickerUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.Loaded += new RoutedEventHandler(this.PickerUC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.PickerUC_Loaded));
     }
 
     private void _items_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -95,7 +99,7 @@ namespace VKClient.Common.UC
     {
       PickerUC pickerUc = new PickerUC();
       pickerUc._handleAsAttTypes = true;
-      ObservableCollection<PickableItem> observableCollection = new ObservableCollection<PickableItem>(attTypes.Select<NamedAttachmentType, PickableItem>((Func<NamedAttachmentType, PickableItem>) (a => new PickableItem()
+      ObservableCollection<PickableItem> observableCollection = new ObservableCollection<PickableItem>((IEnumerable<PickableItem>)Enumerable.Select<NamedAttachmentType, PickableItem>(attTypes, (Func<NamedAttachmentType, PickableItem>)(a => new PickableItem()
       {
         ID = (long) a.AttachmentType,
         Name = a.Name
@@ -114,7 +118,7 @@ namespace VKClient.Common.UC
       new PickerUC()
       {
         _itemSelectedCallback = itemSelectedCallback,
-        //_toolButtonTapCallback = toolButtonTapCallback,
+        _toolButtonTapCallback = toolButtonTapCallback,
         _mainButtonTapCallback = mainToolButtonTapCallback,
         Items = items,
         _itemToSelect = selectedItem,
@@ -124,7 +128,7 @@ namespace VKClient.Common.UC
 
     public static void ShowPickerForReportReasons(Action<ReportReason> choosenReasonCallback)
     {
-      PickerUC.ShowPickerFor(ReportContentHelper.GetPredefinedReportReasons(), (PickableItem) null, (Action<PickableItem>) (pi => choosenReasonCallback((ReportReason) pi.ID)), (Action<PickableItem>) null, null, "");
+      PickerUC.ShowPickerFor(ReportContentHelper.GetPredefinedReportReasons(),  null,  (pi => choosenReasonCallback((ReportReason) pi.ID)),  null,  null, "");
     }
 
     private void PickerUC_Loaded(object sender, RoutedEventArgs e)
@@ -137,21 +141,21 @@ namespace VKClient.Common.UC
     {
       if (this._itemToSelect == null)
         return;
-      this.listPicker.SelectedItem = (object) this.Items.FirstOrDefault<PickableItem>((Func<PickableItem, bool>) (it => it.ID == this._itemToSelect.ID));
+      this.listPicker.SelectedItem = (Enumerable.FirstOrDefault<PickableItem>(this.Items, (Func<PickableItem, bool>)(it => it.ID == this._itemToSelect.ID)));
     }
 
     public void ShowPopup()
     {
-      this.DataContext = (object) this;
+      base.DataContext = this;
       this._ds = new DialogService();
       this._ds.Child = (FrameworkElement) this;
       this._ds.HideOnNavigation = true;
       this._ds.KeepAppBar = false;
-      this._ds.Show(null);
-      this.Focus();
+      this._ds.Show( null);
+      ((Control) this).Focus();
     }
 
-    private void StackPanel_Tap(object sender, GestureEventArgs e)
+    private void StackPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (!(sender is FrameworkElement))
         return;
@@ -170,13 +174,13 @@ namespace VKClient.Common.UC
         PickableItem pickableItem1 = pickableItem;
         long id = pickableItem1.ID;
         if (pickableItem1.ID == 1L)
-          Navigator.Current.NavigateToPhotoAlbums(true, 0L, false, 0);
+          Navigator.Current.NavigateToPhotoAlbums(true, 0, false, 0);
         if (id == 2L)
-          Navigator.Current.NavigateToVideo(true, 0L, false, false);
+          Navigator.Current.NavigateToVideo(true, 0, false, false);
         if (id == 3L)
-          Navigator.Current.NavigateToAudio(1, 0L, false, 0L, 0L, "");
+          Navigator.Current.NavigateToAudio(1, 0, false, 0, 0, "");
         if (id == 4L)
-          Navigator.Current.NavigateToDocumentsPicker();
+          Navigator.Current.NavigateToDocumentsPicker(1);
         if (id == 7L)
           Navigator.Current.NavigateToMap(true, 0.0, 0.0);
         if (id == 8L && this._showPhotoPicker != null)
@@ -188,9 +192,20 @@ namespace VKClient.Common.UC
           return;
         this._ds.Hide();
         FileOpenPicker fileOpenPicker = new FileOpenPicker();
-        foreach (string supportedVideoExtension in VKConstants.SupportedVideoExtensions)
-          fileOpenPicker.FileTypeFilter.Add(supportedVideoExtension);
-        ((IDictionary<string, object>) fileOpenPicker.ContinuationData)["Operation"] = (object) "VideoFromPhone";
+        List<string>.Enumerator enumerator = VKConstants.SupportedVideoExtensions.GetEnumerator();
+        try
+        {
+          while (enumerator.MoveNext())
+          {
+            string current = enumerator.Current;
+            fileOpenPicker.FileTypeFilter.Add(current);
+          }
+        }
+        finally
+        {
+          enumerator.Dispose();
+        }
+        ((IDictionary<string, object>) fileOpenPicker.ContinuationData)["Operation"] = "VideoFromPhone";
         fileOpenPicker.PickSingleFileAndContinue();
       }
       else
@@ -200,7 +215,7 @@ namespace VKClient.Common.UC
       }
     }
 
-    private void MainToolButton_Tap(object sender, GestureEventArgs e)
+    private void MainToolButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this._mainButtonTapCallback == null)
         return;
@@ -213,10 +228,10 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/PickerUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ApplicationTitle = (TextBlock) this.FindName("ApplicationTitle");
-      this.listPicker = (ExtendedLongListSelector) this.FindName("listPicker");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/PickerUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ApplicationTitle = (TextBlock) base.FindName("ApplicationTitle");
+      this.listPicker = (ExtendedLongListSelector) base.FindName("listPicker");
     }
   }
 }

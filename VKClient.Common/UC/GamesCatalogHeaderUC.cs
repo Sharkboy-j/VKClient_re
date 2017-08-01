@@ -14,12 +14,29 @@ namespace VKClient.Common.UC
 
     public GamesCatalogHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private void BorderNew_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-      this.textBlockTitle.MaxWidth = this.panelContent.ActualWidth - (this.borderNew.ActualWidth > 0.0 ? this.borderNew.ActualWidth + this.borderNew.Margin.Left : 0.0);
+      TextBlock textBlockTitle = this.textBlockTitle;
+      double actualWidth1 = ((FrameworkElement) this.panelContent).ActualWidth;
+      double num1;
+      if (((FrameworkElement) this.borderNew).ActualWidth <= 0.0)
+      {
+        num1 = 0.0;
+      }
+      else
+      {
+        double actualWidth2 = ((FrameworkElement) this.borderNew).ActualWidth;
+        Thickness margin = ((FrameworkElement) this.borderNew).Margin;
+        // ISSUE: explicit reference operation
+        double left = ((Thickness) @margin).Left;
+        num1 = actualWidth2 + left;
+      }
+      double num2 = actualWidth1 - num1;
+      ((FrameworkElement) textBlockTitle).MaxWidth = num2;
     }
 
     [DebuggerNonUserCode]
@@ -28,10 +45,10 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GamesCatalogHeaderUC.xaml", UriKind.Relative));
-      this.panelContent = (StackPanel) this.FindName("panelContent");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.borderNew = (Border) this.FindName("borderNew");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GamesCatalogHeaderUC.xaml", UriKind.Relative));
+      this.panelContent = (StackPanel) base.FindName("panelContent");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
+      this.borderNew = (Border) base.FindName("borderNew");
     }
   }
 }

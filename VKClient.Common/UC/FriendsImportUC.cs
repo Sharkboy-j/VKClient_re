@@ -8,7 +8,7 @@ namespace VKClient.Common.UC
 {
   public class FriendsImportUC : UserControl
   {
-    public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof (string), typeof (FriendsImportUC), new PropertyMetadata(new PropertyChangedCallback(FriendsImportUC.OnTitleChanged)));
+      public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(FriendsImportUC), new PropertyMetadata(new PropertyChangedCallback(FriendsImportUC.OnTitleChanged)));
     private FriendsImportViewModel _viewModel;
     internal GenericHeaderUC ucHeader;
     private bool _contentLoaded;
@@ -17,31 +17,33 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(FriendsImportUC.TitleProperty);
+        return (string) base.GetValue(FriendsImportUC.TitleProperty);
       }
       set
       {
-        this.SetValue(FriendsImportUC.TitleProperty, (object) value);
+        base.SetValue(FriendsImportUC.TitleProperty, value);
       }
     }
 
     public FriendsImportUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       FriendsImportUC friendsImportUc = (FriendsImportUC) d;
-      string str = e.NewValue as string;
-      friendsImportUc.ucHeader.TextBlockTitle.Text = !string.IsNullOrEmpty(str) ? str.ToUpperInvariant() : "";
+      // ISSUE: explicit reference operation
+      string newValue = e.NewValue as string;
+      friendsImportUc.ucHeader.TextBlockTitle.Text = (!string.IsNullOrEmpty(newValue) ? newValue.ToUpperInvariant() : "");
     }
 
     public void SetFriendsImportProvider(IFriendsImportProvider provider)
     {
       this._viewModel = new FriendsImportViewModel(provider);
       this._viewModel.LoadData();
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
     }
 
     [DebuggerNonUserCode]
@@ -50,8 +52,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/FriendsImportUC.xaml", UriKind.Relative));
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/FriendsImportUC.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
     }
   }
 }

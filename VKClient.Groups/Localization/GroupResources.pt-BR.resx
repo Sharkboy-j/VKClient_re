@@ -202,7 +202,7 @@
     <value>aceitar o convite</value>
   </data>
   <data name="NewsPage_EnterComment" xml:space="preserve">
-    <value>***Добавить комментарий</value>
+    <value>Adicionar comentário</value>
   </data>
   <data name="WallPost_Title" xml:space="preserve">
     <value>PUBLICAÇÃO</value>

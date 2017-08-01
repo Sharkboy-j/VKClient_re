@@ -54,21 +54,21 @@ namespace XamlAnimatedGif.Decoding
 
     private async Task ReadInternalAsync(Stream stream, IEnumerable<GifExtension> controlExtensions)
     {
-      byte[] bytes = new byte[13];
-      await stream.ReadAllAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
-      this.BlockSize = (int) bytes[0];
-      if (this.BlockSize != 12)
-        throw GifHelpers.InvalidBlockSizeException("Plain Text Extension", 12, this.BlockSize);
-      this.Left = (int) BitConverter.ToUInt16(bytes, 1);
-      this.Top = (int) BitConverter.ToUInt16(bytes, 3);
-      this.Width = (int) BitConverter.ToUInt16(bytes, 5);
-      this.Height = (int) BitConverter.ToUInt16(bytes, 7);
-      this.CellWidth = (int) bytes[9];
-      this.CellHeight = (int) bytes[10];
-      this.ForegroundColorIndex = (int) bytes[11];
-      this.BackgroundColorIndex = (int) bytes[12];
-      this.Text = GifHelpers.GetString(await GifHelpers.ReadDataBlocksAsync(stream, false).ConfigureAwait(false));
-      this.Extensions = (IList<GifExtension>) controlExtensions.ToList<GifExtension>().AsReadOnly();
+        byte[] bytes = new byte[13];
+        await stream.ReadAllAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
+        this.BlockSize = (int)bytes[0];
+        if (this.BlockSize != 12)
+            throw GifHelpers.InvalidBlockSizeException("Plain Text Extension", 12, this.BlockSize);
+        this.Left = (int)BitConverter.ToUInt16(bytes, 1);
+        this.Top = (int)BitConverter.ToUInt16(bytes, 3);
+        this.Width = (int)BitConverter.ToUInt16(bytes, 5);
+        this.Height = (int)BitConverter.ToUInt16(bytes, 7);
+        this.CellWidth = (int)bytes[9];
+        this.CellHeight = (int)bytes[10];
+        this.ForegroundColorIndex = (int)bytes[11];
+        this.BackgroundColorIndex = (int)bytes[12];
+        this.Text = GifHelpers.GetString(await GifHelpers.ReadDataBlocksAsync(stream, false).ConfigureAwait(false));
+        this.Extensions = (IList<GifExtension>)controlExtensions.ToList<GifExtension>().AsReadOnly();
     }
   }
 }

@@ -27,6 +27,8 @@
                      Width="62"
                      Height="62"
                      VerticalAlignment="Top"
+                     Name="mainUserImagePlaceholder"
+                     Tap="UserNotificationTemplateUC_Tap"
                      HorizontalAlignment="Left" />
             <Image Width="62"
                    Height="62"

@@ -24,22 +24,22 @@ namespace VKClient.Common
         {
             get
             {
-                return this.DataContext as SettingsGeneralViewModel;
+                return base.DataContext as SettingsGeneralViewModel;
             }
         }
 
         public SettingsGeneralPage()
         {
             this.InitializeComponent();
-            this.Header.textBlockTitle.Text = CommonResources.NewSettings_General.ToUpperInvariant();
+            this.Header.textBlockTitle.Text = (CommonResources.NewSettings_General.ToUpperInvariant());
         }
 
-        private async void ConfigureLockScreenTap(object sender, GestureEventArgs e)
+        private void ConfigureLockScreenTap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            await Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
+            Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
         }
 
-        private void ClearMusicCacheTap(object sender, GestureEventArgs e)
+        private void ClearMusicCacheTap(object sender, GestureEventArgs e)//mod
         {
             this.VM.ClearMusicCache();
         }
@@ -49,7 +49,7 @@ namespace VKClient.Common
             base.HandleOnNavigatedTo(e);
             if (this._isInitialized)
                 return;
-            this.DataContext = (object)new SettingsGeneralViewModel();
+            base.DataContext = (new SettingsGeneralViewModel());
             this._isInitialized = true;
         }
 
@@ -59,10 +59,23 @@ namespace VKClient.Common
             if (this._contentLoaded)
                 return;
             this._contentLoaded = true;
-            Application.LoadComponent((object)this, new Uri("/VKClient.Common;component/SettingsGeneralPage.xaml", UriKind.Relative));
-            this.LayoutRoot = (Grid)this.FindName("LayoutRoot");
-            this.Header = (GenericHeaderUC)this.FindName("Header");
-            this.ContentPanel = (Grid)this.FindName("ContentPanel");
+            Application.LoadComponent(this, new Uri("/VKClient.Common;component/SettingsGeneralPage.xaml", UriKind.Relative));
+            this.LayoutRoot = (Grid)base.FindName("LayoutRoot");
+            this.Header = (GenericHeaderUC)base.FindName("Header");
+            this.ContentPanel = (Grid)base.FindName("ContentPanel");
         }
+
+        //
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Slider s = sender as Slider;
+            VM.UserAvatarRadius = (int)s.Value;
+        }
+        private void Slider_ValueChangedNotify(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Slider s = sender as Slider;
+            VM.NotifyRadius = (int)s.Value;
+        }
+        //
     }
 }

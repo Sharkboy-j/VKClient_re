@@ -24,12 +24,12 @@
                 <StackPanel Margin="0,10"
                                 Orientation="Vertical"
                                 >
-                    <TextBlock Text="{Binding Track.title}" Margin="0 0 0 0" 
+                    <TextBlock Text="{Binding Title}" Margin="0 0 0 0" 
                                
                                    FontSize="36.67"
                                Foreground="{Binding TitleBrush}"
                                FontFamily="Segoe WP SemiLight"/>
-                    <TextBlock Text="{Binding Track.artist}"
+                    <TextBlock Text="{Binding Artist}"
                                    Margin="1, -8, 0, 0"
                                Foreground="{Binding SubtitleBrush}"
                                 

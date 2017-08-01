@@ -15,7 +15,9 @@
     
     Foreground="{StaticResource PhoneForegroundBrush}"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}">
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    xmlns:uc_w10m="clr-namespace:VKClient.Common.UC.w10m;assembly=VKClient.Common"
+    >
 
     <Grid>
         <Grid.RowDefinitions>
@@ -190,7 +192,7 @@
                            FontFamily="Segoe WP SemiBold"
                            Margin="16,17,0,0"/>
 
-                <uc:ToggleControl Margin="16,38,16,0"
+                <!--<uc:ToggleControl Margin="16,38,16,0"
                                   Title="{Binding Path=LocalizedResources.FilterStrongLanguage, Source={StaticResource LocalizedStrings}}"
                                   IsChecked="{Binding IsStrongLanguageFilterEnabled, Mode=TwoWay}"
                                   IsHitTestVisible="{Binding IsFormEnabled}"/>
@@ -198,13 +200,22 @@
                            Margin="16,17,16,0"
                            TextWrapping="Wrap"
                            Foreground="{StaticResource PhoneCaptionGrayBrush}"
-                           Text="{Binding Path=LocalizedResources.FilterStrongLanguage_Description, Source={StaticResource LocalizedStrings}}"/>
+                           Text="{Binding Path=LocalizedResources.FilterStrongLanguage_Description, Source={StaticResource LocalizedStrings}}"/>-->
+                <uc_w10m:ToggleSwitch Margin="16,0"
+                                      Title="{Binding Path=LocalizedResources.FilterStrongLanguage, Source={StaticResource LocalizedStrings}}"
+                                  IsChecked="{Binding IsStrongLanguageFilterEnabled, Mode=TwoWay}"
+                                  IsHitTestVisible="{Binding IsFormEnabled}"
+                                      Description="{Binding Path=LocalizedResources.FilterStrongLanguage_Description, Source={StaticResource LocalizedStrings}}"/>
 
-                <uc:ToggleControl Margin="16,54,16,25"
+                <!--<uc:ToggleControl Margin="16,54,16,25"
+                                  Title="{Binding Path=LocalizedResources.FilterByKeyWords, Source={StaticResource LocalizedStrings}}"
+                                  IsChecked="{Binding IsKeyWordsFilterEnabled, Mode=TwoWay}"
+                                  IsHitTestVisible="{Binding IsFormEnabled}"/>-->
+                <uc_w10m:ToggleSwitch Margin="16,16"
                                   Title="{Binding Path=LocalizedResources.FilterByKeyWords, Source={StaticResource LocalizedStrings}}"
                                   IsChecked="{Binding IsKeyWordsFilterEnabled, Mode=TwoWay}"
                                   IsHitTestVisible="{Binding IsFormEnabled}"/>
-
+                
                 <TextBlock Text="{Binding Path=LocalizedResources.FilterByKeyWordsHint, Source={StaticResource LocalizedStrings}}"
                            Foreground="{StaticResource PhoneCaptionGrayBrush}"
                            Visibility="{Binding KeyWordsFieldVisibility}"

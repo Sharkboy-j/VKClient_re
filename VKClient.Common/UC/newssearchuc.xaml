@@ -43,8 +43,8 @@
                          HorizontalContentAlignment="Stretch"
                          ManipulationStarted="scrollNews_ManipulationStarted_1">
 
-            <StackPanel x:Name="stackPanel"
-                        Visibility="{Binding NewsVisibility}">
+            <uc:MyVirtualizingStackPanel x:Name="stackPanel"
+                                         Visibility="{Binding NewsVisibility}">
 
                 <framework:MyVirtualizingPanel2 x:Name="panelNews"
                                                 VerticalAlignment="Top"
@@ -52,7 +52,7 @@
                                                 ItemsSource="{Binding Collection}" />
 
                 <uc:FooterUC DataContext="{Binding SearchVM}" />
-            </StackPanel>
+            </uc:MyVirtualizingStackPanel>
 
 
         </ViewportControl>

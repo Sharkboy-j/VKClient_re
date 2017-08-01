@@ -12,8 +12,8 @@ namespace VKClient.Common.UC
 {
   public class GameNewsHeaderUC : UserControl
   {
-    public static readonly DependencyProperty GameGroupIdProperty = DependencyProperty.Register("GameGroupId", typeof (long), typeof (GameNewsHeaderUC), new PropertyMetadata((object) 0L));
-    public static readonly DependencyProperty IsSubscribedProperty = DependencyProperty.Register("IsSubscribed", typeof (bool?), typeof (GameNewsHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameNewsHeaderUC.OnIsSubscribedChanged)));
+    public static readonly DependencyProperty GameGroupIdProperty = DependencyProperty.Register("GameGroupId", typeof (long), typeof (GameNewsHeaderUC), new PropertyMetadata(0L));
+    public static readonly DependencyProperty IsSubscribedProperty = DependencyProperty.Register("IsSubscribed", typeof(bool?), typeof(GameNewsHeaderUC), new PropertyMetadata(new PropertyChangedCallback(GameNewsHeaderUC.OnIsSubscribedChanged)));
     private bool _isLoading;
     internal TextBlock textBlockSubscribe;
     private bool _contentLoaded;
@@ -22,11 +22,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (long) this.GetValue(GameNewsHeaderUC.GameGroupIdProperty);
+        return (long) base.GetValue(GameNewsHeaderUC.GameGroupIdProperty);
       }
       set
       {
-        this.SetValue(GameNewsHeaderUC.GameGroupIdProperty, (object) value);
+        base.SetValue(GameNewsHeaderUC.GameGroupIdProperty, value);
       }
     }
 
@@ -34,16 +34,17 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return new bool?((bool) this.GetValue(GameNewsHeaderUC.IsSubscribedProperty));
+        return new bool?((bool) base.GetValue(GameNewsHeaderUC.IsSubscribedProperty));
       }
       set
       {
-        this.SetValue(GameNewsHeaderUC.IsSubscribedProperty, (object) value);
+        base.SetValue(GameNewsHeaderUC.IsSubscribedProperty, value);
       }
     }
 
     public GameNewsHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -52,19 +53,20 @@ namespace VKClient.Common.UC
       GameNewsHeaderUC gameNewsHeaderUc = d as GameNewsHeaderUC;
       if (gameNewsHeaderUc == null)
         return;
-      bool? nullable = (bool?) e.NewValue;
-      if (!nullable.HasValue)
+      // ISSUE: explicit reference operation
+      bool? newValue = (bool?) e.NewValue;
+      if (!newValue.HasValue)
       {
-        gameNewsHeaderUc.textBlockSubscribe.Visibility = Visibility.Collapsed;
+        ((UIElement) gameNewsHeaderUc.textBlockSubscribe).Visibility = Visibility.Collapsed;
       }
       else
       {
-        gameNewsHeaderUc.textBlockSubscribe.Visibility = Visibility.Visible;
-        gameNewsHeaderUc.textBlockSubscribe.Text = nullable.Value ? CommonResources.Games_NewsUnsubscribe : CommonResources.Games_NewsSubscribe;
+        ((UIElement) gameNewsHeaderUc.textBlockSubscribe).Visibility = Visibility.Visible;
+        gameNewsHeaderUc.textBlockSubscribe.Text = (newValue.Value ? CommonResources.Games_NewsUnsubscribe : CommonResources.Games_NewsSubscribe);
       }
     }
 
-    private void SubscribeUnsubscribe_OnTapped(object sender, GestureEventArgs e)
+    private void SubscribeUnsubscribe_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this.GameGroupId == 0L || (!this.IsSubscribed.HasValue || this._isLoading))
         return;
@@ -81,7 +83,7 @@ namespace VKClient.Common.UC
         {
           this.IsSubscribed = new bool?(true);
           this._isLoading = false;
-        }))));
+        }))),  null);
     }
 
     [DebuggerNonUserCode]
@@ -90,8 +92,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GameNewsHeaderUC.xaml", UriKind.Relative));
-      this.textBlockSubscribe = (TextBlock) this.FindName("textBlockSubscribe");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GameNewsHeaderUC.xaml", UriKind.Relative));
+      this.textBlockSubscribe = (TextBlock) base.FindName("textBlockSubscribe");
     }
   }
 }

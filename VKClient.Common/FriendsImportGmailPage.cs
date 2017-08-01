@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Navigation;
 using VKClient.Common.Framework;
 using VKClient.Common.Library.FriendsImport;
@@ -25,13 +26,13 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      IDictionary<string, string> queryString = this.NavigationContext.QueryString;
+      IDictionary<string, string> queryString = ((Page) this).NavigationContext.QueryString;
       if (queryString.ContainsKey("code"))
       {
         GmailFriendsImportProvider.Instance.SetCode(queryString["code"]);
         this.ucFriendsImport.SetFriendsImportProvider((IFriendsImportProvider) GmailFriendsImportProvider.Instance);
       }
-      this.DataContext = (object) new FriendsImportPageViewModel();
+      base.DataContext = (new FriendsImportPageViewModel());
       this._isInitialized = true;
     }
 
@@ -41,8 +42,8 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/FriendsImportGmailPage.xaml", UriKind.Relative));
-      this.ucFriendsImport = (FriendsImportUC) this.FindName("ucFriendsImport");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/FriendsImportGmailPage.xaml", UriKind.Relative));
+      this.ucFriendsImport = (FriendsImportUC) base.FindName("ucFriendsImport");
     }
   }
 }

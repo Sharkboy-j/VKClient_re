@@ -62,9 +62,12 @@
                            framework:ImageLoader.UriSource="{Binding Path=ImageUrl, Mode=OneWay}"
                            VerticalAlignment="Center">
                         <Image.Clip>
-                            <EllipseGeometry Center="31 31"
+                            <!--<EllipseGeometry Center="31 31"
                                              RadiusX="31"
-                                             RadiusY="31" />
+                                             RadiusY="31" />-->
+                            <RectangleGeometry Rect="0 0 62 62"
+							RadiusX="{Binding UserAvatarRadius}"
+							RadiusY="{Binding UserAvatarRadius}"/>
                         </Image.Clip>
                     </Image>
 
@@ -145,9 +148,12 @@
                            framework:ImageLoader.UriSource="{Binding Path=Src, Mode=OneWay}"
                            VerticalAlignment="Center">
                         <Image.Clip>
-                            <EllipseGeometry Center="31 31"
+                            <!--<EllipseGeometry Center="31 31"
                                              RadiusX="31"
-                                             RadiusY="31" />
+                                             RadiusY="31" />-->
+                            <RectangleGeometry Rect="0 0 62 62"
+							RadiusX="{Binding UserAvatarRadius}"
+							RadiusY="{Binding UserAvatarRadius}"/>
                         </Image.Clip>
                     </Image>
 

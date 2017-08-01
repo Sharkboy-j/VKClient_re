@@ -21,8 +21,9 @@ namespace VKClient.Common.UC
 
     public ShareContentUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.ucHeader.TextBlockTitle.Text = CommonResources.ShareWallPost_Share.ToUpperInvariant();
+      this.ucHeader.TextBlockTitle.Text = (CommonResources.ShareWallPost_Share.ToUpperInvariant());
       this.ucHeader.HideSandwitchButton = true;
       this.InitPageControls();
     }
@@ -32,12 +33,16 @@ namespace VKClient.Common.UC
       this._conversationsUC = ServiceLocator.Resolve<IConversationsUCFactory>().Create();
       this._conversationsUC.IsShareContentMode = true;
       Grid.SetRow((FrameworkElement) this._conversationsUC, 1);
-      this._conversationsUC.Loaded += (RoutedEventHandler) ((sender, args) => this._conversationsUC.PrepareForViewIfNeeded());
+      // ISSUE: method pointer
+      this._conversationsUC.Loaded+=(delegate(object sender, RoutedEventArgs args)
+      {
+          this._conversationsUC.PrepareForViewIfNeeded();
+      });
       this._conversationsUC.ConversationTap += new EventHandler<Action>(this.ConversationsUCOnConversationTap);
       ShareContentActionsUC contentActionsUc = new ShareContentActionsUC();
       contentActionsUc.ShareWallPostItemSelected += new EventHandler(this.ListHeader_OnShareWallPostItemSelected);
       contentActionsUc.ShareCommunityItemSelected += new EventHandler(this.ListHeader_OnShareCommunityItemSelected);
-      this.gridRoot.Children.Add((UIElement) this._conversationsUC);
+      ((PresentationFrameworkCollection<UIElement>) ((Panel) this.gridRoot).Children).Add((UIElement) this._conversationsUC);
       this._conversationsUC.SetListHeader((FrameworkElement) contentActionsUc);
     }
 
@@ -45,14 +50,14 @@ namespace VKClient.Common.UC
     {
       this.ShareContentDataProvider.StoreDataToRepository();
       ShareContentDataProviderManager.StoreDataProvider(this.ShareContentDataProvider);
-      Navigator.Current.NavigateToNewWallPost(0L, false, 0, false, false, false);
+      Navigator.Current.NavigateToNewWallPost(0, false, 0, false, false, false);
     }
 
     private void ListHeader_OnShareCommunityItemSelected(object sender, EventArgs eventArgs)
     {
       this.ShareContentDataProvider.StoreDataToRepository();
       ShareContentDataProviderManager.StoreDataProvider(this.ShareContentDataProvider);
-      Navigator.Current.NavigateToGroups(AppGlobalStateManager.Current.LoggedInUserId, "", false, 0L, 0L, "", false, "");
+      Navigator.Current.NavigateToGroups(AppGlobalStateManager.Current.LoggedInUserId, "", false, 0, 0, "", false, "", 0L);
     }
 
     private void ConversationsUCOnConversationTap(object sender, Action callback)
@@ -70,9 +75,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/ShareContentUC.xaml", UriKind.Relative));
-      this.gridRoot = (Grid) this.FindName("gridRoot");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/ShareContentUC.xaml", UriKind.Relative));
+      this.gridRoot = (Grid) base.FindName("gridRoot");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
     }
   }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.CommonExtensions;
@@ -13,7 +14,7 @@ namespace VKClient.Groups.Management.Information.Library
     private bool? _from18Only;
     private Visibility _fullFormVisibility;
 
-    public InformationViewModel ParentViewModel { get; set; }
+    public InformationViewModel ParentViewModel { get; private set; }
 
     public bool? IsNoLimits
     {
@@ -24,7 +25,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._isNoLimits = value;
-        this.NotifyPropertyChanged<bool?>((System.Linq.Expressions.Expression<Func<bool?>>) (() => this.IsNoLimits));
+        this.NotifyPropertyChanged<bool?>((() => this.IsNoLimits));
       }
     }
 
@@ -37,7 +38,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._from16Only = value;
-        this.NotifyPropertyChanged<bool?>((System.Linq.Expressions.Expression<Func<bool?>>) (() => this.From16Only));
+        this.NotifyPropertyChanged<bool?>((() => this.From16Only));
       }
     }
 
@@ -50,7 +51,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._from18Only = value;
-        this.NotifyPropertyChanged<bool?>((System.Linq.Expressions.Expression<Func<bool?>>) (() => this.From18Only));
+        this.NotifyPropertyChanged<bool?>((() => this.From18Only));
       }
     }
 
@@ -63,8 +64,8 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._fullFormVisibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.FullFormVisibility));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.SetAgeLimitsButtonVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.FullFormVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.SetAgeLimitsButtonVisibility));
       }
     }
 
@@ -72,7 +73,7 @@ namespace VKClient.Groups.Management.Information.Library
     {
       get
       {
-        return (this.FullFormVisibility == Visibility.Collapsed).ToVisiblity();
+          return (this.FullFormVisibility == Visibility.Collapsed).ToVisiblity();
       }
     }
 

@@ -30,7 +30,8 @@
         <!--Pivot Control-->
         <controls:Pivot Margin="0 67 0 0"
                         Foreground="White"
-                       Style="{StaticResource PivotStyleNoHeader}"                 
+                        Style="{StaticResource PivotStyleNoHeader}"  
+                        SelectionChanged="Pivot_OnSelectionChanged"
                         Name="pivot">
             <controls:Pivot.HeaderTemplate>
                 <DataTemplate>
@@ -42,16 +43,17 @@
                 </DataTemplate>
             </controls:Pivot.HeaderTemplate>
 
-            <controls:PivotItem Header="{Binding Path=LocalizedResources.GroupsListPage_All, Source={StaticResource LocStr}}"
+            <controls:PivotItem Header="{Binding LocalizedResources.GroupsListPage_All, Source={StaticResource LocStr}}"
                                 Background="{Binding AllListBackground}"
                                 Name="pivotItemAll">
                 <framework:ExtendedLongListSelector x:Name="communitiesListBox"
                                                     SelectionChanged="GroupsListBox_SelectionChanged"
-                                                    DataContext="{Binding AllGroupsVM}"
+                                                    DataContext="{Binding AllVM}"
                                                     ItemsSource="{Binding Collection}"    
                                                     ItemTemplate="{StaticResource VKGroupTemplate}"                                                
                                                     ListFooter="{Binding}"
                                                     ListFooterTemplate="{StaticResource FooterNewTemplate}"
+                                                    Link="communitiesListBox_Link_1"
                                                     IsFlatList="True">
                     <framework:ExtendedLongListSelector.ListHeader>
                         <StackPanel Margin="0,9,0,0">
@@ -68,12 +70,13 @@
                 </framework:ExtendedLongListSelector>
             </controls:PivotItem>
 
-            <controls:PivotItem Name="pivotItemEvents" Header="{Binding Path=LocalizedResources.GroupsListPage_Events, Source={StaticResource LocStr}}">
+            <controls:PivotItem Name="pivotItemEvents" Header="{Binding LocalizedResources.GroupsListPage_Events, Source={StaticResource LocStr}}">
                 <framework:ExtendedLongListSelector x:Name="eventsListBox"
                                                     SelectionChanged="GroupsListBox_SelectionChanged"
                                                     DataContext="{Binding EventsVM}"
                                                     ItemsSource="{Binding Collection}"
                                                     ItemTemplate="{StaticResource VKGroupTemplate}"
+                                                    Link="eventsListBox_Link"
                                                     IsFlatList="False"                                                 
                                                     ListFooter="{Binding}">
                     
@@ -112,7 +115,7 @@
 
             <controls:PivotItem Name="pivotItemManage"
                                 Background="{Binding ManageListBackground}"
-                                Header="{Binding Path=LocalizedResources.GroupsListPage_Manage, Source={StaticResource LocStr}}">
+                                Header="{Binding LocalizedResources.GroupsListPage_Manage, Source={StaticResource LocStr}}">
                 <framework:ExtendedLongListSelector x:Name="manageListBox"
                                                     SelectionChanged="GroupsListBox_SelectionChanged"
                                                     DataContext="{Binding ManagedVM}"
@@ -120,6 +123,7 @@
                                                     ItemTemplate="{StaticResource VKGroupTemplate}"
                                                     ListFooterTemplate="{StaticResource FooterNewTemplate}"                                                       
                                                     ListFooter="{Binding}"
+                                                    Link="managedListBox_Link_1"
                                                     IsFlatList="True">
                     <framework:ExtendedLongListSelector.ListHeader>
                         <TextBlock Text="{Binding FooterText}"

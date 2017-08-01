@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,12 +41,12 @@ namespace XamlAnimatedGif.Decoding
 
     private async Task ReadInternalAsync(Stream stream, IEnumerable<GifExtension> controlExtensions)
     {
-      this.Descriptor = await GifImageDescriptor.ReadAsync(stream).ConfigureAwait(false);
-      if (this.Descriptor.HasLocalColorTable)
-        this.LocalColorTable = await GifHelpers.ReadColorTableAsync(stream, this.Descriptor.LocalColorTableSize).ConfigureAwait(false);
-      this.ImageData = await GifImageData.ReadAsync(stream).ConfigureAwait(false);
-      this.Extensions = (IList<GifExtension>) controlExtensions.ToList<GifExtension>().AsReadOnly();
-      this.GraphicControl = this.Extensions.OfType<GifGraphicControlExtension>().FirstOrDefault<GifGraphicControlExtension>();
+        this.Descriptor = await GifImageDescriptor.ReadAsync(stream).ConfigureAwait(false);
+        if (this.Descriptor.HasLocalColorTable)
+            this.LocalColorTable = await GifHelpers.ReadColorTableAsync(stream, this.Descriptor.LocalColorTableSize).ConfigureAwait(false);
+        this.ImageData = await GifImageData.ReadAsync(stream).ConfigureAwait(false);
+        this.Extensions = (IList<GifExtension>)controlExtensions.ToList<GifExtension>().AsReadOnly();
+        this.GraphicControl = this.Extensions.OfType<GifGraphicControlExtension>().FirstOrDefault<GifGraphicControlExtension>();
     }
   }
 }

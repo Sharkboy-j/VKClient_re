@@ -17,39 +17,41 @@ namespace VKClient.Common.UC.Registration
 
     public RegistrationStep3UC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.Loaded += new RoutedEventHandler(this.RegistrationStep3UC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.RegistrationStep3UC_Loaded));
     }
 
     private void RegistrationStep3UC_Loaded(object sender, RoutedEventArgs e)
     {
-      this.textBlockConfirmationCodeWatermark.Visibility = this.textBoxConfirmationCode.Text == string.Empty ? Visibility.Visible : Visibility.Collapsed;
+      ((UIElement) this.textBlockConfirmationCodeWatermark).Visibility = (this.textBoxConfirmationCode.Text == string.Empty ? Visibility.Visible : Visibility.Collapsed);
     }
 
     private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
       this.UpdateSource(sender as TextBox);
-      this.textBlockConfirmationCodeWatermark.Visibility = this.textBoxConfirmationCode.Text == string.Empty ? Visibility.Visible : Visibility.Collapsed;
+      ((UIElement) this.textBlockConfirmationCodeWatermark).Visibility = (this.textBoxConfirmationCode.Text == string.Empty ? Visibility.Visible : Visibility.Collapsed);
     }
 
-    private void GridCallTap(object sender, GestureEventArgs e)
+    private void GridCallTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      (this.DataContext as RegistrationConfirmationCodeViewModel).RequestCall();
+      (base.DataContext as RegistrationConfirmationCodeViewModel).RequestCall();
     }
 
     private void UpdateSource(TextBox textBox)
     {
-      textBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+      ((FrameworkElement) textBox).GetBindingExpression((DependencyProperty) TextBox.TextProperty).UpdateSource();
     }
 
     private void textBoxConfirmationCode_KeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key != Key.Enter)
         return;
-      RegistrationPage registrationPage = FramePageUtils.CurrentPage as RegistrationPage;
-      if (registrationPage == null)
+      RegistrationPage currentPage = FramePageUtils.CurrentPage as RegistrationPage;
+      if (currentPage == null)
         return;
-      registrationPage.RegistrationVM.CompleteCurrentStep();
+      currentPage.RegistrationVM.CompleteCurrentStep();
     }
 
     [DebuggerNonUserCode]
@@ -58,10 +60,10 @@ namespace VKClient.Common.UC.Registration
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep3UC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.textBoxConfirmationCode = (TextBox) this.FindName("textBoxConfirmationCode");
-      this.textBlockConfirmationCodeWatermark = (TextBlock) this.FindName("textBlockConfirmationCodeWatermark");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep3UC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.textBoxConfirmationCode = (TextBox) base.FindName("textBoxConfirmationCode");
+      this.textBlockConfirmationCodeWatermark = (TextBlock) base.FindName("textBlockConfirmationCodeWatermark");
     }
   }
 }

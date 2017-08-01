@@ -7,7 +7,7 @@ namespace VKClient.Common.Backend
   {
     public int count { get; set; }
 
-    public List<VKClient.Common.Backend.DataObjects.Video> items { get; set; }
+    public List<Video> items { get; set; }
 
     public List<User> profiles { get; set; }
 

@@ -69,6 +69,6 @@ namespace VKClient.Common.Backend.DataObjects
 
     public UserLikedInfo userLiked { get; set; }
 
-    public VKList<VKClient.Common.Backend.DataObjects.Video> VideoRecommendations { get; set; }
+    public VKList<Video> VideoRecommendations { get; set; }
   }
 }

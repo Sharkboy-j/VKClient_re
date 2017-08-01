@@ -9,38 +9,38 @@ using VKClient.Common.Utils;
 
 namespace VKMessenger.Library
 {
-    public class DeviceManager
+  public class DeviceManager
+  {
+    private static SoundEffect soundEffect;
+
+    public static void Vibrate()
     {
-        private static SoundEffect soundEffect;
-
-        public static void Vibrate()
-        {
-            VibrateController.Default.Start(TimeSpan.FromMilliseconds(100.0));
-        }
-
-        public static void PlaySound()
-        {
-            if (!AppGlobalStateManager.Current.GlobalState.SoundEnabled)
-                return;
-            DeviceManager.LoadSound("Resources/New/chat_sound.wav", out DeviceManager.soundEffect);
-            if (DeviceManager.soundEffect == null)
-                return;
-            FrameworkDispatcher.Update();
-            DeviceManager.soundEffect.Play();
-        }
-
-        private static void LoadSound(string SoundFilePath, out SoundEffect Sound)
-        {
-            Sound = null;
-            try
-            {
-                StreamResourceInfo resourceStream = Application.GetResourceStream(new Uri(SoundFilePath, UriKind.Relative));
-                Sound = SoundEffect.FromStream(resourceStream.Stream);
-            }
-            catch (NullReferenceException ex)
-            {
-                Logger.Instance.Error("Failed to load sound", (Exception)ex);
-            }
-        }
+      VibrateController.Default.Start(TimeSpan.FromMilliseconds(100.0));
     }
+
+    public static void PlaySound()
+    {
+      if (!AppGlobalStateManager.Current.GlobalState.SoundEnabled)
+        return;
+      DeviceManager.LoadSound("Resources/New/chat_sound.wav", out DeviceManager.soundEffect);
+      if (DeviceManager.soundEffect == null)
+        return;
+      FrameworkDispatcher.Update();
+      DeviceManager.soundEffect.Play();
+    }
+
+    private static void LoadSound(string SoundFilePath, out SoundEffect Sound)
+    {
+      Sound =  null;
+      try
+      {
+        StreamResourceInfo resourceStream = Application.GetResourceStream(new Uri(SoundFilePath, UriKind.Relative));
+        Sound = SoundEffect.FromStream(resourceStream.Stream);
+      }
+      catch (NullReferenceException ex)
+      {
+        Logger.Instance.Error("Failed to load sound", (Exception) ex);
+      }
+    }
+  }
 }

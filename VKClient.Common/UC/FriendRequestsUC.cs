@@ -13,7 +13,7 @@ namespace VKClient.Common.UC
 {
   public class FriendRequestsUC : UserControl
   {
-    public static readonly DependencyProperty ModelProperty = DependencyProperty.Register("Model", typeof (FriendRequests), typeof (FriendRequestsUC), new PropertyMetadata(new PropertyChangedCallback(FriendRequestsUC.OnModelChanged)));
+      public static readonly DependencyProperty ModelProperty = DependencyProperty.Register("Model", typeof(FriendRequests), typeof(FriendRequestsUC), new PropertyMetadata(new PropertyChangedCallback(FriendRequestsUC.OnModelChanged)));
     private FriendRequests _model;
     internal TextBlock TitleBlock;
     internal Border ShowAllBlock;
@@ -24,21 +24,23 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (FriendRequests) this.GetValue(FriendRequestsUC.ModelProperty);
+        return (FriendRequests) base.GetValue(FriendRequestsUC.ModelProperty);
       }
       set
       {
-        this.SetValue(FriendRequestsUC.ModelProperty, (object) value);
+        base.SetValue(FriendRequestsUC.ModelProperty, value);
       }
     }
 
     public FriendRequestsUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private static void OnModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
+      // ISSUE: explicit reference operation
       ((FriendRequestsUC) d).UpdateDataView((FriendRequests) e.NewValue);
     }
 
@@ -47,23 +49,26 @@ namespace VKClient.Common.UC
       this._model = model;
       if (this._model == null || model.count == 0)
         return;
-      this.TitleBlock.Text = model.are_suggested_friends ? UIStringFormatterHelper.FormatNumberOfSomething(model.count, CommonResources.SuggestedFriendOneFrm, CommonResources.SuggestedFriendTwoFrm, CommonResources.SuggestedFriendFiveFrm, true, null, false) : UIStringFormatterHelper.FormatNumberOfSomething(model.count, CommonResources.OneFriendRequestFrm, CommonResources.TwoFourFriendRequestsFrm, CommonResources.FiveFriendRequestsFrm, true, null, false);
-      this.ShowAllBlock.Visibility = model.count > 1 ? Visibility.Visible : Visibility.Collapsed;
+      if (!model.are_suggested_friends)
+        this.TitleBlock.Text = (UIStringFormatterHelper.FormatNumberOfSomething(model.count, CommonResources.OneFriendRequestFrm, CommonResources.TwoFourFriendRequestsFrm, CommonResources.FiveFriendRequestsFrm, true,  null, false));
+      else
+        this.TitleBlock.Text = (UIStringFormatterHelper.FormatNumberOfSomething(model.count, CommonResources.SuggestedFriendOneFrm, CommonResources.SuggestedFriendTwoFrm, CommonResources.SuggestedFriendFiveFrm, true,  null, false));
+      ((UIElement) this.ShowAllBlock).Visibility = (model.count > 1 ? Visibility.Visible : Visibility.Collapsed);
       if (model.requests[0].RequestHandledAction == null)
-        model.requests[0].RequestHandledAction = (Action<FriendRequests>) (requests => ((FriendsViewModel) this.DataContext).RequestsViewModel = requests);
-      this.RequestView.Content = (object) new FriendRequestUC()
+        model.requests[0].RequestHandledAction = (Action<FriendRequests>) (requests => ((FriendsViewModel) base.DataContext).RequestsViewModel = requests);
+      this.RequestView.Content=(new FriendRequestUC()
       {
         Model = model.requests[0],
         Profiles = model.profiles.ToArray(),
         IsSuggestedFriend = new bool?(model.are_suggested_friends)
-      };
+      });
     }
 
-    private void ShowAllBlock_OnTapped(object sender, GestureEventArgs e)
+    private void ShowAllBlock_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (this._model == null)
         return;
-      ParametersRepository.SetParameterForId("FriendRequestsUC", (object) this);
+      ParametersRepository.SetParameterForId("FriendRequestsUC", this);
       Navigator.Current.NavigateToFriendRequests(this._model.are_suggested_friends);
     }
 
@@ -73,10 +78,10 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/FriendRequestsUC.xaml", UriKind.Relative));
-      this.TitleBlock = (TextBlock) this.FindName("TitleBlock");
-      this.ShowAllBlock = (Border) this.FindName("ShowAllBlock");
-      this.RequestView = (ContentControl) this.FindName("RequestView");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/FriendRequestsUC.xaml", UriKind.Relative));
+      this.TitleBlock = (TextBlock) base.FindName("TitleBlock");
+      this.ShowAllBlock = (Border) base.FindName("ShowAllBlock");
+      this.RequestView = (ContentControl) base.FindName("RequestView");
     }
   }
 }

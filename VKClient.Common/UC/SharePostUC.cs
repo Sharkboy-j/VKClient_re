@@ -13,6 +13,7 @@ namespace VKClient.Common.UC
   public class SharePostUC : UserControl
   {
     private double _savedHeight;
+    private long _excludedCommunityId;
     internal TextBlock textBlockTitle;
     internal ScrollViewer scroll;
     internal TextBox textBoxText;
@@ -35,23 +36,29 @@ namespace VKClient.Common.UC
 
     public event EventHandler SendTap;
 
-    public SharePostUC()
+    public SharePostUC(long excludedCommunityId = 0)
     {
+      //this.\u002Ector();
       this.InitializeComponent();
-      this.textBlockTitle.Text = CommonResources.ShareWallPost_Share.ToUpperInvariant();
+      this.textBlockTitle.Text = (CommonResources.ShareWallPost_Share.ToUpperInvariant());
+      this._excludedCommunityId = excludedCommunityId;
     }
 
     private void TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-      this.textBlockWatermarkText.Opacity = this.textBoxText.Text == "" ? 1.0 : 0.0;
+      ((UIElement) this.textBlockWatermarkText).Opacity = (this.textBoxText.Text == "" ? 1.0 : 0.0);
       this.ScrollToCursor();
     }
 
     private void ScrollToCursor()
     {
-      this.Dispatcher.BeginInvoke((Action) (() =>
+      base.Dispatcher.BeginInvoke((Action) (() =>
       {
-        double num = this.textBoxText.ActualHeight - this.textBoxText.Padding.Bottom;
+        double actualHeight = ((FrameworkElement) this.textBoxText).ActualHeight;
+        Thickness padding = ((Control) this.textBoxText).Padding;
+        // ISSUE: explicit reference operation
+        double bottom = ((Thickness) @padding).Bottom;
+        double num = actualHeight - bottom;
         if (this._savedHeight > 0.0)
         {
           bool flag = false;
@@ -66,40 +73,46 @@ namespace VKClient.Common.UC
 
     public void SetShareEnabled(bool isEnabled)
     {
-      this.buttonShare.IsEnabled = isEnabled;
-      this.buttonShare.Opacity = isEnabled ? 1.0 : 0.4;
+      ((Control) this.buttonShare).IsEnabled = isEnabled;
+      ((UIElement) this.buttonShare).Opacity = (isEnabled ? 1.0 : 0.4);
     }
 
     public void SetShareCommunityEnabled(bool isEnabled)
     {
-      this.buttonShareCommunity.IsEnabled = isEnabled;
-      this.buttonShareCommunity.Opacity = isEnabled ? 1.0 : 0.4;
+      ((Control) this.buttonShareCommunity).IsEnabled = isEnabled;
+      ((UIElement) this.buttonShareCommunity).Opacity = (isEnabled ? 1.0 : 0.4);
     }
 
-    private void ButtonShare_OnTap(object sender, GestureEventArgs e)
+    private void ButtonShare_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.ShareTap == null)
         return;
-      this.ShareTap((object) this, EventArgs.Empty);
+      // ISSUE: reference to a compiler-generated field
+      this.ShareTap(this, EventArgs.Empty);
     }
 
     private void ShareWithCommunity_OnTap(object sender, RoutedEventArgs e)
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.ShareCommunityTap == null)
       {
-        Navigator.Current.NavigateToGroups(AppGlobalStateManager.Current.LoggedInUserId, "", true, 0L, 0L, "", false, "");
+        Navigator.Current.NavigateToGroups(AppGlobalStateManager.Current.LoggedInUserId, "", true, 0, 0, "", false, "", this._excludedCommunityId);
       }
       else
       {
-        this.ShareCommunityTap((object) this, EventArgs.Empty);
+        // ISSUE: reference to a compiler-generated field
+        this.ShareCommunityTap(this, EventArgs.Empty);
       }
     }
 
-    private void ButtonSend_OnTap(object sender, GestureEventArgs e)
+    private void ButtonSend_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.SendTap == null)
         return;
-      this.SendTap((object) this, EventArgs.Empty);
+      // ISSUE: reference to a compiler-generated field
+      this.SendTap(this, EventArgs.Empty);
     }
 
     [DebuggerNonUserCode]
@@ -108,13 +121,13 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/SharePostUC.xaml", UriKind.Relative));
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.scroll = (ScrollViewer) this.FindName("scroll");
-      this.textBoxText = (TextBox) this.FindName("textBoxText");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
-      this.buttonShare = (ShareActionUC) this.FindName("buttonShare");
-      this.buttonShareCommunity = (ShareActionUC) this.FindName("buttonShareCommunity");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/SharePostUC.xaml", UriKind.Relative));
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
+      this.scroll = (ScrollViewer) base.FindName("scroll");
+      this.textBoxText = (TextBox) base.FindName("textBoxText");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
+      this.buttonShare = (ShareActionUC) base.FindName("buttonShare");
+      this.buttonShareCommunity = (ShareActionUC) base.FindName("buttonShareCommunity");
     }
   }
 }

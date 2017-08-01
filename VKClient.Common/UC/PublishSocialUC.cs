@@ -9,8 +9,8 @@ namespace VKClient.Common.UC
 {
   public class PublishSocialUC : UserControl
   {
-    public static readonly DependencyProperty TypeProperty = DependencyProperty.Register("Type", typeof (PublishSocialType), typeof (PublishSocialUC), new PropertyMetadata(new PropertyChangedCallback(PublishSocialUC.OnTypeChanged)));
-    public static readonly DependencyProperty IsCheckedProperty = DependencyProperty.Register("IsChecked", typeof (bool), typeof (PublishSocialUC), new PropertyMetadata(new PropertyChangedCallback(PublishSocialUC.OnIsCheckedChanged)));
+      public static readonly DependencyProperty TypeProperty = DependencyProperty.Register("Type", typeof(PublishSocialType), typeof(PublishSocialUC), new PropertyMetadata(new PropertyChangedCallback(PublishSocialUC.OnTypeChanged)));
+      public static readonly DependencyProperty IsCheckedProperty = DependencyProperty.Register("IsChecked", typeof(bool), typeof(PublishSocialUC), new PropertyMetadata(new PropertyChangedCallback(PublishSocialUC.OnIsCheckedChanged)));
     internal Image imageIcon;
     private bool _contentLoaded;
 
@@ -18,11 +18,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (PublishSocialType) this.GetValue(PublishSocialUC.TypeProperty);
+        return (PublishSocialType) base.GetValue(PublishSocialUC.TypeProperty);
       }
       set
       {
-        this.SetValue(PublishSocialUC.TypeProperty, (object) value);
+        base.SetValue(PublishSocialUC.TypeProperty, value);
       }
     }
 
@@ -30,24 +30,27 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (bool) this.GetValue(PublishSocialUC.IsCheckedProperty);
+        return (bool) base.GetValue(PublishSocialUC.IsCheckedProperty);
       }
       set
       {
-        this.SetValue(PublishSocialUC.IsCheckedProperty, (object) value);
+        base.SetValue(PublishSocialUC.IsCheckedProperty, value);
       }
     }
 
     public PublishSocialUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
     private static void OnTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       PublishSocialUC publishSocialUc = d as PublishSocialUC;
+      // ISSUE: explicit reference operation
       if (publishSocialUc == null || !(e.NewValue is PublishSocialType))
         return;
+      // ISSUE: explicit reference operation
       switch ((PublishSocialType) e.NewValue)
       {
         case PublishSocialType.Twitter:
@@ -64,11 +67,12 @@ namespace VKClient.Common.UC
       PublishSocialUC publishSocialUc = d as PublishSocialUC;
       if (publishSocialUc == null)
         return;
-      bool flag = (bool) e.NewValue;
-      publishSocialUc.imageIcon.Opacity = flag ? 1.0 : 0.5;
+      // ISSUE: explicit reference operation
+      bool newValue = (bool) e.NewValue;
+      ((UIElement) publishSocialUc.imageIcon).Opacity = (newValue ? 1.0 : 0.5);
     }
 
-    private void OnTapped(object sender, GestureEventArgs e)
+    private void OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       this.IsChecked = !this.IsChecked;
     }
@@ -79,8 +83,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/PublishSocialUC.xaml", UriKind.Relative));
-      this.imageIcon = (Image) this.FindName("imageIcon");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/PublishSocialUC.xaml", UriKind.Relative));
+      this.imageIcon = (Image) base.FindName("imageIcon");
     }
   }
 }

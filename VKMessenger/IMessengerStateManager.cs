@@ -5,22 +5,22 @@ using VKMessenger.Library;
 
 namespace VKMessenger
 {
-    public interface IMessengerStateManager
-    {
-        List<string> ConversationSearchStrings { get; }
+  public interface IMessengerStateManager
+  {
+    List<string> ConversationSearchStrings { get; }
 
-        List<string> FriendsSearchStrings { get; }
+    List<string> FriendsSearchStrings { get; }
 
-        DateTime AppStartedTime { get; set; }
+    DateTime AppStartedTime { get; set; }
 
-        ConversationSearchViewModel ConversationSearchVM { get; }
+    ConversationSearchViewModel ConversationSearchVM { get; }
 
-        PhoneApplicationFrame RootFrame { get; }
+    PhoneApplicationFrame RootFrame { get; }
 
-        long HandleInAppNotification(string title, string message, long lUid, string isChat, string imageSrc);
+    long HandleInAppNotification(string title, string message, long lUid, string isChat, string imageSrc);
 
-        void EnsureOnlineStatusIsSet(bool p);
+    void EnsureOnlineStatusIsSet(bool p);
 
-        void IncreaseNumberOfUnreadMessagesBy(int number);
-    }
+    void IncreaseNumberOfUnreadMessagesBy(int number);
+  }
 }

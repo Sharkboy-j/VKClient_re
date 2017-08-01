@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
 using VKClient.Audio.Base;
 using VKClient.Audio.Base.Events;
@@ -73,7 +75,9 @@ namespace VKClient.Groups.Library
     {
       get
       {
-        return this._group.verified != 1 ? Visibility.Collapsed : Visibility.Visible;
+        if (this._group.verified != 1)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -81,7 +85,9 @@ namespace VKClient.Groups.Library
     {
       get
       {
-        return string.IsNullOrEmpty(this.Subtitle) ? Visibility.Collapsed : Visibility.Visible;
+        if (string.IsNullOrEmpty(this.Subtitle))
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -89,7 +95,9 @@ namespace VKClient.Groups.Library
     {
       get
       {
-        return string.IsNullOrEmpty(this.Subtitle2) ? Visibility.Collapsed : Visibility.Visible;
+        if (string.IsNullOrEmpty(this.Subtitle2))
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -123,9 +131,9 @@ namespace VKClient.Groups.Library
         {
           case GroupType.Group:
           case GroupType.Event:
-            return UIStringFormatterHelper.FormatNumberOfSomething(this._group.members_count, CommonResources.OneMemberFrm, CommonResources.TwoFourMembersFrm, CommonResources.FiveMembersFrm, true, null, false);
+            return UIStringFormatterHelper.FormatNumberOfSomething(this._group.members_count, CommonResources.OneMemberFrm, CommonResources.TwoFourMembersFrm, CommonResources.FiveMembersFrm, true,  null, false);
           case GroupType.PublicPage:
-            return UIStringFormatterHelper.FormatNumberOfSomething(this._group.members_count, CommonResources.OneSubscriberFrm, CommonResources.TwoFourSubscribersFrm, CommonResources.FiveSubscribersFrm, true, null, false);
+            return UIStringFormatterHelper.FormatNumberOfSomething(this._group.members_count, CommonResources.OneSubscriberFrm, CommonResources.TwoFourSubscribersFrm, CommonResources.FiveSubscribersFrm, true,  null, false);
           default:
             return "";
         }
@@ -143,7 +151,7 @@ namespace VKClient.Groups.Library
         if (this._isSelected == value)
           return;
         this._isSelected = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsSelected));
+        this.NotifyPropertyChanged<bool>(() => this.IsSelected);
       }
     }
 
@@ -157,7 +165,7 @@ namespace VKClient.Groups.Library
 
     public GroupHeader()
     {
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
     }
 
     public GroupHeader(Group group, User invitedBy = null)
@@ -169,7 +177,10 @@ namespace VKClient.Groups.Library
       if (this._group.name == null)
         strArray = new string[0];
       else
-        strArray = this._group.name.Split(' ');
+        strArray = this._group.name.Split((char[]) new char[1]
+        {
+          ' '
+        });
       this._groupNameSplit = strArray;
       this.CreateMenuItems();
     }
@@ -211,21 +222,31 @@ namespace VKClient.Groups.Library
 
     private bool Matches(List<string> searchStrings)
     {
-      if (searchStrings.Count == 0 || searchStrings.All<string>(new Func<string, bool>(string.IsNullOrWhiteSpace)))
+      // ISSUE: method pointer
+        if (searchStrings.Count == 0 || Enumerable.All<string>(searchStrings, (Func<string, bool>)new Func<string, bool>(string.IsNullOrWhiteSpace)))
         return false;
       bool flag1 = true;
-      foreach (string searchString in searchStrings)
+      List<string>.Enumerator enumerator = searchStrings.GetEnumerator();
+      try
       {
-        bool flag2 = false;
-        foreach (string str in this._groupNameSplit)
+        while (enumerator.MoveNext())
         {
-          flag2 = str.StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase);
-          if (flag2)
+          string current = enumerator.Current;
+          bool flag2 = false;
+          foreach (string str in this._groupNameSplit)
+          {
+            flag2 = str.StartsWith(current, (StringComparison) 3);
+            if (flag2)
+              break;
+          }
+          flag1 &= flag2;
+          if (!flag1)
             break;
         }
-        flag1 &= flag2;
-        if (!flag1)
-          break;
+      }
+      finally
+      {
+        enumerator.Dispose();
       }
       return flag1;
     }
@@ -234,17 +255,17 @@ namespace VKClient.Groups.Library
     {
       if (this._group.GroupType == GroupType.Event)
       {
-        this._acceptDeclineMenuItems.Add(new MenuItemData()
+        ((Collection<MenuItemData>) this._acceptDeclineMenuItems).Add(new MenuItemData()
         {
           Title = CommonResources.EventJoin,
           Tag = "2"
         });
-        this._acceptDeclineMenuItems.Add(new MenuItemData()
+        ((Collection<MenuItemData>) this._acceptDeclineMenuItems).Add(new MenuItemData()
         {
           Title = CommonResources.EventMaybe,
           Tag = "1"
         });
-        this._acceptDeclineMenuItems.Add(new MenuItemData()
+        ((Collection<MenuItemData>) this._acceptDeclineMenuItems).Add(new MenuItemData()
         {
           Title = CommonResources.EventDecline,
           Tag = "0"
@@ -252,12 +273,12 @@ namespace VKClient.Groups.Library
       }
       else
       {
-        this._acceptDeclineMenuItems.Add(new MenuItemData()
+        ((Collection<MenuItemData>) this._acceptDeclineMenuItems).Add(new MenuItemData()
         {
           Title = CommonResources.AcceptInvitation,
           Tag = "2"
         });
-        this._acceptDeclineMenuItems.Add(new MenuItemData()
+        ((Collection<MenuItemData>) this._acceptDeclineMenuItems).Add(new MenuItemData()
         {
           Title = CommonResources.DeclineInvitation,
           Tag = "0"
@@ -280,8 +301,10 @@ namespace VKClient.Groups.Library
       this._group.activity = message.SubcategoryName ?? message.CategoryName;
       this._group.start_date = Extensions.DateTimeToUnixTimestamp(message.EventStartDate.ToUniversalTime(), false);
       this._group.Privacy = message.Privacy;
-      this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Title));
-      this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Subtitle));
+      // ISSUE: method reference
+      this.NotifyPropertyChanged<string>(() => this.Title);
+      // ISSUE: method reference
+      this.NotifyPropertyChanged<string>(() => this.Subtitle);
     }
 
     public void Handle(CommunityPhotoChanged message)
@@ -289,7 +312,20 @@ namespace VKClient.Groups.Library
       if (message.CommunityId != this._group.id)
         return;
       this._group.photo_200 = message.PhotoMax;
-      this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Src));
+      // ISSUE: method reference
+      this.NotifyPropertyChanged<string>(() => this.Src);
     }
+      //
+    //
+    internal double px_per_tick = 64.0 / 10.0 / 2.0;
+
+    public double UserAvatarRadius
+    {
+        get
+        {
+            return AppGlobalStateManager.Current.GlobalState.UserAvatarRadius * px_per_tick;
+        }
+    }
+      //
   }
 }

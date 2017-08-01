@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace VKClient.Common.UC
 {
   public class GamesCatalogBannersContainer : UserControl
   {
-    public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof (List<GameHeader>), typeof (GamesCatalogBannersContainer), new PropertyMetadata(new PropertyChangedCallback(GamesCatalogBannersContainer.OnItemsSourceChanged)));
+      public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(List<GameHeader>), typeof(GamesCatalogBannersContainer), new PropertyMetadata(new PropertyChangedCallback(GamesCatalogBannersContainer.OnItemsSourceChanged)));
     internal StackPanel panelCatalogBanners;
     internal GamesCatalogBannersSlideView slideView;
     internal GroupHeaderUC groupHeader;
@@ -24,18 +25,19 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (List<GameHeader>) this.GetValue(GamesCatalogBannersContainer.ItemsSourceProperty);
+        return (List<GameHeader>) base.GetValue(GamesCatalogBannersContainer.ItemsSourceProperty);
       }
       set
       {
-        this.SetValue(GamesCatalogBannersContainer.ItemsSourceProperty, (object) value);
+        base.SetValue(GamesCatalogBannersContainer.ItemsSourceProperty, value);
       }
     }
 
     public GamesCatalogBannersContainer()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.panelCatalogBanners.Visibility = Visibility.Collapsed;
+      ((UIElement) this.panelCatalogBanners).Visibility = Visibility.Collapsed;
       this.slideView.CreateSingleElement = (Func<Control>) (() => (Control) new CatalogBannerUC());
       this.slideView.NextElementSwipeDelay = TimeSpan.FromSeconds(5.0);
       this.slideView.IsCycled = true;
@@ -46,26 +48,27 @@ namespace VKClient.Common.UC
       GamesCatalogBannersContainer bannersContainer = d as GamesCatalogBannersContainer;
       if (bannersContainer == null)
         return;
-      List<GameHeader> gameHeaderList = e.NewValue as List<GameHeader>;
-      if (gameHeaderList == null)
+      // ISSUE: explicit reference operation
+      List<GameHeader> newValue = e.NewValue as List<GameHeader>;
+      if (newValue == null)
       {
-        bannersContainer.panelCatalogBanners.Visibility = Visibility.Collapsed;
-        bannersContainer.groupHeader.Visibility = Visibility.Visible;
+        ((UIElement) bannersContainer.panelCatalogBanners).Visibility = Visibility.Collapsed;
+        ((UIElement) bannersContainer.groupHeader).Visibility = Visibility.Visible;
       }
       else
       {
-        bannersContainer.groupHeader.Visibility = Visibility.Collapsed;
-        bannersContainer.panelCatalogBanners.Visibility = Visibility.Visible;
-        bannersContainer.slideView.Items = new ObservableCollection<object>((IEnumerable<object>) gameHeaderList);
+        ((UIElement) bannersContainer.groupHeader).Visibility = Visibility.Collapsed;
+        ((UIElement) bannersContainer.panelCatalogBanners).Visibility = Visibility.Visible;
+        bannersContainer.slideView.Items = new ObservableCollection<object>((IEnumerable<object>) newValue);
       }
     }
 
-    private void BorderCatalog_OnTap(object sender, GestureEventArgs e)
+    private void BorderCatalog_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       GameHeader currentGame = this.slideView.GetCurrentGame();
       if (currentGame == null || this.ItemsSource == null)
         return;
-      FramePageUtils.CurrentPage.OpenGamesPopup(this.ItemsSource.Cast<object>().ToList<object>(), GamesClickSource.catalog, "", this.ItemsSource.IndexOf(currentGame), null);
+      FramePageUtils.CurrentPage.OpenGamesPopup((List<object>) Enumerable.ToList<object>(Enumerable.Cast<object>((IEnumerable) this.ItemsSource)), GamesClickSource.catalog, "", this.ItemsSource.IndexOf(currentGame),  null);
     }
 
     [DebuggerNonUserCode]
@@ -74,10 +77,10 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GamesCatalogBannersContainer.xaml", UriKind.Relative));
-      this.panelCatalogBanners = (StackPanel) this.FindName("panelCatalogBanners");
-      this.slideView = (GamesCatalogBannersSlideView) this.FindName("slideView");
-      this.groupHeader = (GroupHeaderUC) this.FindName("groupHeader");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GamesCatalogBannersContainer.xaml", UriKind.Relative));
+      this.panelCatalogBanners = (StackPanel) base.FindName("panelCatalogBanners");
+      this.slideView = (GamesCatalogBannersSlideView) base.FindName("slideView");
+      this.groupHeader = (GroupHeaderUC) base.FindName("groupHeader");
     }
   }
 }

@@ -2,6 +2,7 @@ using Microsoft.Phone.Maps;
 using Microsoft.Phone.Maps.Controls;
 using Microsoft.Phone.Shell;
 using System;
+using System.Collections.ObjectModel;
 using System.Device.Location;
 using System.Diagnostics;
 using System.Globalization;
@@ -9,6 +10,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Common.Framework;
 using VKClient.Common.Library;
@@ -19,15 +21,12 @@ namespace VKClient.Common
 {
   public class MapAttachmentPage : PageBase
   {
-    private readonly MapLayer _mapLayerPushpin = new MapLayer();
-    private readonly MapOverlay _mapOverlayPushpin = new MapOverlay()
-    {
-      PositionOrigin = new Point(0.5, 1.0)
-    };
-    private readonly GeoCoordinateWatcher _watcher = new GeoCoordinateWatcher();
     private bool _isInitialized;
     private bool _shouldPick;
-    private Image _pinImage;
+    private readonly MapLayer _mapLayerPushpin;
+    private readonly MapOverlay _mapOverlayPushpin;
+    private readonly Image _pinImage;
+    private GeoCoordinateWatcher _watcher;
     private GeoCoordinate _lastPosition;
     internal ProgressIndicator progressIndicator;
     internal Map map;
@@ -35,23 +34,22 @@ namespace VKClient.Common
 
     public MapAttachmentPage()
     {
+      MapOverlay mapOverlay = new MapOverlay();
+      Point point = new Point(0.5, 1.0);
+      mapOverlay.PositionOrigin = point;
+      this._mapOverlayPushpin = mapOverlay;
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       try
       {
         this.InitializeComponent();
         Image image = new Image();
         double num1 = 44.0;
-        image.Height = num1;
+        ((FrameworkElement) image).Height = num1;
         double num2 = 28.0;
-        image.Width = num2;
+        ((FrameworkElement) image).Width = num2;
         this._pinImage = image;
         MultiResImageLoader.SetUriSource(this._pinImage, "Resources/MapPin.png");
-        this._watcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(this._watcher_PositionChanged);
-        this._watcher.StatusChanged += (EventHandler<GeoPositionStatusChangedEventArgs>) ((sender, args) =>
-        {
-          if (args.Status != GeoPositionStatus.Disabled)
-            return;
-          GeolocationHelper.HandleDisabledLocationSettings();
-        });
       }
       catch (Exception ex)
       {
@@ -61,19 +59,10 @@ namespace VKClient.Common
 
     private void Map_OnLoaded(object sender, RoutedEventArgs e)
     {
-      MapsSettings.ApplicationContext.ApplicationId = "55677f7c-3dab-4a57-95b2-4efd44a0e692";
-      MapsSettings.ApplicationContext.AuthenticationToken = "1jh4FPILRSo9J1ADKx2CgA";
-      this._mapLayerPushpin.Add(this._mapOverlayPushpin);
+      MapsSettings.ApplicationContext.ApplicationId=("55677f7c-3dab-4a57-95b2-4efd44a0e692");
+      MapsSettings.ApplicationContext.AuthenticationToken=("1jh4FPILRSo9J1ADKx2CgA");
+      ((Collection<MapOverlay>) this._mapLayerPushpin).Add(this._mapOverlayPushpin);
       this.map.Layers.Add(this._mapLayerPushpin);
-    }
-
-    private void _watcher_PositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
-    {
-      Logger.Instance.Info("WatcherPositionChanged Enter");
-      this.MoveMapToPosition(e.Position.Location);
-      this._watcher.Stop();
-      this.SetProgressIndicator(false);
-      Logger.Instance.Info("WatcherPositionChanged Exit");
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -81,37 +70,53 @@ namespace VKClient.Common
       try
       {
         base.HandleOnNavigatedTo(e);
-        if (this._isInitialized)
+        if (!this._isInitialized)
+        {
+          base.DataContext = (new ViewModelBase());
+          this._shouldPick = ((Page) this).NavigationContext.QueryString.ContainsKey("Pick") && ((Page) this).NavigationContext.QueryString["Pick"] == true.ToString();
+          if (!this._shouldPick)
+          {
+            this.MoveMapToPosition(new GeoCoordinate(double.Parse(((Page) this).NavigationContext.QueryString["latitude"], (IFormatProvider) CultureInfo.InvariantCulture), double.Parse(((Page) this).NavigationContext.QueryString["longitude"], (IFormatProvider) CultureInfo.InvariantCulture)));
+            return;
+          }
+          if (!AppGlobalStateManager.Current.GlobalState.AllowUseLocationQuestionAsked || !AppGlobalStateManager.Current.GlobalState.AllowUseLocation)
+          {
+            bool flag = MessageBox.Show(CommonResources.MapAttachment_AllowUseLocation, CommonResources.AccessToLocation, (MessageBoxButton) 1) == MessageBoxResult.OK;
+            AppGlobalStateManager.Current.GlobalState.AllowUseLocationQuestionAsked = true;
+            AppGlobalStateManager.Current.GlobalState.AllowUseLocation = flag;
+          }
+          this.InitializeAppBar();
+          this._isInitialized = true;
+        }
+        if (!(this._lastPosition ==  null))
           return;
-        this.DataContext = (object) new ViewModelBase();
-        this._shouldPick = this.NavigationContext.QueryString.ContainsKey("Pick") && this.NavigationContext.QueryString["Pick"] == true.ToString();
-        if (!this._shouldPick)
+        if (!AppGlobalStateManager.Current.GlobalState.AllowUseLocation)
+          return;
+        try
         {
-          this.MoveMapToPosition(new GeoCoordinate(double.Parse(this.NavigationContext.QueryString["latitude"], (IFormatProvider) CultureInfo.InvariantCulture), double.Parse(this.NavigationContext.QueryString["longitude"], (IFormatProvider) CultureInfo.InvariantCulture)));
+          if (this._watcher != null)
+          {
+            this._watcher.PositionChanged -= new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(this.Watcher_OnPositionChanged);
+            this._watcher.StatusChanged -= new EventHandler<GeoPositionStatusChangedEventArgs>(this.Watcher_OnStatusChanged);
+          }
+          this._watcher = new GeoCoordinateWatcher();
+          this._watcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(this.Watcher_OnPositionChanged);
+          this._watcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(this.Watcher_OnStatusChanged);
+          GeoCoordinateWatcher watcher = this._watcher;
+          if (watcher != null)
+          {
+            // ISSUE: explicit non-virtual call
+            watcher.Start();
+          }
+          this.SetProgressIndicator(true);
         }
-        else
+        catch (Exception ex)
         {
-          try
-          {
-            if (!AppGlobalStateManager.Current.GlobalState.AllowUseLocationQuestionAsked || !AppGlobalStateManager.Current.GlobalState.AllowUseLocation)
-            {
-              bool flag = MessageBox.Show(CommonResources.MapAttachment_AllowUseLocation, CommonResources.AccessToLocation, MessageBoxButton.OKCancel) == MessageBoxResult.OK;
-              AppGlobalStateManager.Current.GlobalState.AllowUseLocationQuestionAsked = true;
-              AppGlobalStateManager.Current.GlobalState.AllowUseLocation = flag;
-            }
-            if (!AppGlobalStateManager.Current.GlobalState.AllowUseLocation)
-              return;
-            this._watcher.Start();
-            this.SetProgressIndicator(true);
-          }
-          catch (Exception ex)
-          {
-            if (ex.HResult == -2147467260)
-              GeolocationHelper.HandleDisabledLocationSettings();
-          }
+          this.SetProgressIndicator(false);
+          if (ex.HResult != -2147467260)
+            return;
+          GeolocationHelper.HandleDisabledLocationSettings();
         }
-        this.InitializeAppBar();
-        this._isInitialized = true;
       }
       catch (Exception ex)
       {
@@ -119,15 +124,46 @@ namespace VKClient.Common
       }
     }
 
+    private void Watcher_OnPositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
+    {
+      Logger.Instance.Info("WatcherPositionChanged Enter");
+      this.MoveMapToPosition(e.Position.Location);
+      this.StopGeoWatcher();
+      Logger.Instance.Info("WatcherPositionChanged Exit");
+    }
+
+    private void Watcher_OnStatusChanged(object sender, GeoPositionStatusChangedEventArgs args)
+    {
+      if (args.Status != GeoPositionStatus.Ready)
+        return;
+      this.SetProgressIndicator(false);
+      GeolocationHelper.HandleDisabledLocationSettings();
+    }
+
+    private void StopGeoWatcher()
+    {
+      GeoCoordinateWatcher watcher = this._watcher;
+      if (watcher != null)
+      {
+        // ISSUE: explicit non-virtual call
+        watcher.Stop();
+      }
+      this.SetProgressIndicator(false);
+    }
+
     protected override void HandleOnNavigatingFrom(NavigatingCancelEventArgs e)
     {
       Logger.Instance.Info("MapAttachmentHandleOnNavigatingFrom Enter");
       base.HandleOnNavigatingFrom(e);
-      ThreadPool.QueueUserWorkItem((WaitCallback) (o =>
+      ThreadPool.QueueUserWorkItem((WaitCallback) (callback =>
       {
         try
         {
-          this._watcher.Stop();
+          GeoCoordinateWatcher watcher = this._watcher;
+          if (watcher == null)
+            return;
+          // ISSUE: explicit non-virtual call
+          watcher.Stop();
         }
         catch (Exception ex)
         {
@@ -149,7 +185,7 @@ namespace VKClient.Common
       {
         this.map.Center = geoCoordinate;
         this.map.ZoomLevel = 16.0;
-        this._mapOverlayPushpin.Content = (object) this._pinImage;
+        this._mapOverlayPushpin.Content = this._pinImage;
         this._mapOverlayPushpin.GeoCoordinate = geoCoordinate;
         this._lastPosition = geoCoordinate;
       }
@@ -163,50 +199,49 @@ namespace VKClient.Common
     {
       if (this._shouldPick)
       {
-        ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton()
-        {
-          IconUri = new Uri("/Resources/check.png", UriKind.Relative),
-          Text = CommonResources.Conversation_AppBar_AttachLocation
-        };
-        applicationBarIconButton1.Click += new EventHandler(this._appBarButtonSave_Click);
-        ApplicationBarIconButton applicationBarIconButton2 = new ApplicationBarIconButton()
-        {
-          IconUri = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative),
-          Text = CommonResources.ChatEdit_AppBar_Cancel
-        };
-        applicationBarIconButton2.Click += new EventHandler(this._appBarButtonCancel_Click);
-        ApplicationBar applicationBar = new ApplicationBar()
-        {
-          BackgroundColor = VKConstants.AppBarBGColor,
-          ForegroundColor = VKConstants.AppBarFGColor
-        };
-        applicationBar.Buttons.Add((object) applicationBarIconButton1);
-        applicationBar.Buttons.Add((object) applicationBarIconButton2);
-        this.ApplicationBar = (IApplicationBar) applicationBar;
+        ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+        Uri uri1 = new Uri("/Resources/check.png", UriKind.Relative);
+        applicationBarIconButton1.IconUri = uri1;
+        string barAttachLocation = CommonResources.Conversation_AppBar_AttachLocation;
+        applicationBarIconButton1.Text = barAttachLocation;
+        ApplicationBarIconButton applicationBarIconButton2 = applicationBarIconButton1;
+        applicationBarIconButton2.Click+=(new EventHandler(this.AppBarButtonSave_OnClick));
+        ApplicationBarIconButton applicationBarIconButton3 = new ApplicationBarIconButton();
+        Uri uri2 = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative);
+        applicationBarIconButton3.IconUri = uri2;
+        string editAppBarCancel = CommonResources.ChatEdit_AppBar_Cancel;
+        applicationBarIconButton3.Text = editAppBarCancel;
+        ApplicationBarIconButton applicationBarIconButton4 = applicationBarIconButton3;
+        applicationBarIconButton4.Click+=(new EventHandler(this.AppBarButtonCancel_OnClick));
+        ApplicationBar applicationBar = ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
+        applicationBar.Buttons.Add(applicationBarIconButton2);
+        applicationBar.Buttons.Add(applicationBarIconButton4);
+        this.ApplicationBar = ((IApplicationBar) applicationBar);
       }
       else
-        this.ApplicationBar = (IApplicationBar) null;
+        this.ApplicationBar = ( null);
     }
 
-    private void _appBarButtonCancel_Click(object sender, EventArgs e)
+    private void AppBarButtonCancel_OnClick(object sender, EventArgs e)
     {
-      this.NavigationService.GoBackSafe();
+      ((Page) this).NavigationService.GoBackSafe();
     }
 
-    private void _appBarButtonSave_Click(object sender, EventArgs e)
+    private void AppBarButtonSave_OnClick(object sender, EventArgs e)
     {
-      ParametersRepository.SetParameterForId("NewPositionToBeAttached", (object) this._lastPosition);
-      this.NavigationService.GoBackSafe();
+      ParametersRepository.SetParameterForId("NewPositionToBeAttached", this._lastPosition);
+      ((Page) this).NavigationService.GoBackSafe();
     }
 
-    private void Map_OnTap(object sender, GestureEventArgs e)
+    private void Map_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       if (!this._shouldPick)
         return;
       GeoCoordinate geoCoordinate = this.map.ConvertViewportPointToGeoCoordinate(e.GetPosition((UIElement) this.map));
-      this._mapOverlayPushpin.Content = (object) this._pinImage;
+      this._mapOverlayPushpin.Content = this._pinImage;
       this._mapOverlayPushpin.GeoCoordinate = geoCoordinate;
       this._lastPosition = geoCoordinate;
+      this.StopGeoWatcher();
     }
 
     [DebuggerNonUserCode]
@@ -215,9 +250,9 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/MapAttachmentPage.xaml", UriKind.Relative));
-      this.progressIndicator = (ProgressIndicator) this.FindName("progressIndicator");
-      this.map = (Map) this.FindName("map");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/MapAttachmentPage.xaml", UriKind.Relative));
+      this.progressIndicator = (ProgressIndicator) base.FindName("progressIndicator");
+      this.map = (Map) base.FindName("map");
     }
   }
 }

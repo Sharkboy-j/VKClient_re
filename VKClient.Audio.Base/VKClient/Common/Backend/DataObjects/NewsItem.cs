@@ -89,7 +89,9 @@ namespace VKClient.Common.Backend.DataObjects
 
     public long? signer_id { get; set; }
 
-    public VKList<VKClient.Common.Backend.DataObjects.Video> video { get; set; }
+    public int? marked_as_ads { get; set; }
+
+    public VKList<Video> video { get; set; }
 
     public int PhotosCount
     {
@@ -107,7 +109,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.photos != null)
           return this.photos.items;
-        return (List<Photo>) null;
+        return  null;
       }
     }
 
@@ -129,7 +131,7 @@ namespace VKClient.Common.Backend.DataObjects
       {
         if (this.photo_tags != null)
           return this.photo_tags.items;
-        return (List<Photo>) null;
+        return  null;
       }
     }
 
@@ -272,6 +274,10 @@ namespace VKClient.Common.Backend.DataObjects
     public int availability { get; set; }
 
     public string thumb_photo { get; set; }
+
+    public NewsActivity activity { get; set; }
+
+    public NewsCaption caption { get; set; }
 
     public NewsItem()
     {

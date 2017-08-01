@@ -1,9 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using VKClient.Common.Framework;
 using VKClient.Common.Library;
-using VKClient.Common.Utils;
 using VKMessenger.Backend;
 
 namespace VKMessenger.Library
@@ -32,7 +32,7 @@ namespace VKMessenger.Library
 
     private void ReceivedUpdates(List<LongPollServerUpdateData> updates)
     {
-      List<ConversationViewModel> source = new List<ConversationViewModel>();
+      List<ConversationViewModel> conversationViewModelList = new List<ConversationViewModel>();
       foreach (LongPollServerUpdateData update in updates)
       {
         bool isChat = update.isChat;
@@ -42,11 +42,14 @@ namespace VKMessenger.Library
           bool onlyInMemoryCache = update.UpdateType != LongPollServerUpdateType.MessageHasBeenAdded;
           ConversationViewModel vm = this.GetVM(userOrCharId, isChat, onlyInMemoryCache);
           if (vm != null)
-            source.Add(vm);
+            conversationViewModelList.Add(vm);
         }
       }
-      foreach (ConversationViewModel conversationViewModel in source.Distinct<ConversationViewModel>())
-        conversationViewModel.ProcessInstantUpdates(updates);
+      using (IEnumerator<ConversationViewModel> enumerator = ((IEnumerable<ConversationViewModel>) Enumerable.Distinct<ConversationViewModel>(conversationViewModelList)).GetEnumerator())
+      {
+        while (((IEnumerator) enumerator).MoveNext())
+          enumerator.Current.ProcessInstantUpdates(updates);
+      }
     }
 
     public void ClearInMemoryCacheImmediately()
@@ -56,40 +59,36 @@ namespace VKMessenger.Library
 
     public void FlushToPersistentStorage()
     {
-      Stopwatch stopwatch = new Stopwatch();
-      stopwatch.Start();
-      Dictionary<string, ConversationViewModel> dictionary = new Dictionary<string, ConversationViewModel>();
-      lock (this._lockObj)
-      {
-        foreach (KeyValuePair<string, ConversationViewModel> item_0 in this._inMemoryCachedData)
-          dictionary[item_0.Key] = item_0.Value;
-        this._inMemoryCachedData.Clear();
-      }
-      foreach (KeyValuePair<string, ConversationViewModel> keyValuePair in dictionary)
-        CacheManager.TrySerialize((IBinarySerializable) keyValuePair.Value, keyValuePair.Key, true, CacheManager.DataType.CachedData);
-      stopwatch.Stop();
-      Logger.Instance.Info("ConversationVMCach.SaveToPersistentStorage saved {0} viewmodels in {1} ms.", (object) dictionary.Count, (object) stopwatch.ElapsedMilliseconds);
+      // ISSUE: unable to decompile the method.
     }
 
     public ConversationViewModel GetVM(long userOrCharId, bool isChatId, bool onlyInMemoryCache = false)
     {
-      lock (this._lockObj)
+      object lockObj = this._lockObj;
+      bool lockTaken = false;
+      try
       {
-        string local_2 = ConversationViewModelCache.GetKey(userOrCharId, isChatId);
-        if (this._inMemoryCachedData.ContainsKey(local_2))
-          return this._inMemoryCachedData[local_2];
+        Monitor.Enter(lockObj, ref lockTaken);
+        string key = ConversationViewModelCache.GetKey(userOrCharId, isChatId);
+        if (this._inMemoryCachedData.ContainsKey(key))
+          return this._inMemoryCachedData[key];
         if (onlyInMemoryCache)
-          return (ConversationViewModel) null;
-        ConversationViewModel local_3 = new ConversationViewModel();
-        if (!CacheManager.TryDeserialize((IBinarySerializable) local_3, local_2, CacheManager.DataType.CachedData))
-          local_3.InitializeWith(userOrCharId, isChatId);
-        if (local_3.OutboundMessageVm == null || local_3.Messages == null)
+          return  null;
+        ConversationViewModel conversationVM = new ConversationViewModel();
+        if (!CacheManager.TryDeserialize((IBinarySerializable) conversationVM, key, CacheManager.DataType.CachedData))
+          conversationVM.InitializeWith(userOrCharId, isChatId);
+        if (conversationVM.OutboundMessageVM == null || conversationVM.Messages == null)
         {
-          local_3 = new ConversationViewModel();
-          local_3.InitializeWith(userOrCharId, isChatId);
+          conversationVM = new ConversationViewModel();
+          conversationVM.InitializeWith(userOrCharId, isChatId);
         }
-        this.SetVM(local_3, false);
-        return local_3;
+        this.SetVM(conversationVM, false);
+        return conversationVM;
+      }
+      finally
+      {
+        if (lockTaken)
+          Monitor.Exit(lockObj);
       }
     }
 
@@ -97,12 +96,20 @@ namespace VKMessenger.Library
     {
       if (conversationVM == null)
         return;
-      lock (this._lockObj)
+      object lockObj = this._lockObj;
+      bool lockTaken = false;
+      try
       {
+        Monitor.Enter(lockObj, ref lockTaken);
         this._inMemoryCachedData[ConversationViewModelCache.GetKey(conversationVM.UserOrCharId, conversationVM.IsChat)] = conversationVM;
         if (!(this._inMemoryCachedData.Count > this._maxNumberOfInMemoryItems & allowFlush))
           return;
         this.FlushToPersistentStorage();
+      }
+      finally
+      {
+        if (lockTaken)
+          Monitor.Exit(lockObj);
       }
     }
 
@@ -113,7 +120,7 @@ namespace VKMessenger.Library
 
     private static string GetKey(long userOrChatId, bool isChatId)
     {
-      return "MSG" + AppGlobalStateManager.Current.LoggedInUserId.ToString() + "_" + userOrChatId.ToString() + isChatId.ToString();
+      return string.Concat((string[]) new string[5]{ (string) "MSG", (string) AppGlobalStateManager.Current.LoggedInUserId.ToString(), (string) "_", (string) userOrChatId.ToString(), (string) isChatId.ToString() });
     }
   }
 }

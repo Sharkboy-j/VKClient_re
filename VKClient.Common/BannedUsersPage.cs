@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.Backend;
@@ -32,42 +34,47 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as BannedUsersViewModel;
+        return base.DataContext as BannedUsersViewModel;
       }
     }
 
     public BannedUsersPage()
     {
       ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton();
-      applicationBarIconButton.Text = CommonResources.Delete;
+      string delete = CommonResources.Delete;
+      applicationBarIconButton.Text = delete;
       Uri uri = new Uri("Resources/minus.png", UriKind.Relative);
       applicationBarIconButton.IconUri = uri;
       int num = 0;
-      applicationBarIconButton.IsEnabled = num != 0;
+      applicationBarIconButton.IsEnabled = (num != 0);
       this._appBarButtonDelete = applicationBarIconButton;
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.ucHeader.OnHeaderTap = (Action) (() => this.listBoxBanned.ScrollToTop());
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.listBoxBanned);
-      this.listBoxBanned.OnRefresh = (Action) (() => this.BannedUsersVM.BannedVM.LoadData(true, false, (Action<BackendResult<VKList<User>, ResultCode>>) null, false));
+      this.listBoxBanned.OnRefresh = (Action) (() => this.BannedUsersVM.BannedVM.LoadData(true, false,  null, false));
       this.BuildAppBar();
     }
 
     private void BuildAppBar()
     {
-      this._defaultAppBar = new ApplicationBar()
-      {
-        BackgroundColor = VKConstants.AppBarBGColor,
-        ForegroundColor = VKConstants.AppBarFGColor,
-        Opacity = 0.9
-      };
-      this._appBarButtonDelete.Click += new EventHandler(this._appBarButtonDelete_Click);
-      this._defaultAppBar.Buttons.Add((object) this._appBarButtonDelete);
-      this.ApplicationBar = (IApplicationBar) this._defaultAppBar;
+      ApplicationBar applicationBar = new ApplicationBar();
+      Color appBarBgColor = VKConstants.AppBarBGColor;
+      applicationBar.BackgroundColor = appBarBgColor;
+      Color appBarFgColor = VKConstants.AppBarFGColor;
+      applicationBar.ForegroundColor = appBarFgColor;
+      double num = 0.9;
+      applicationBar.Opacity = num;
+      this._defaultAppBar = applicationBar;
+      this._appBarButtonDelete.Click+=(new EventHandler(this._appBarButtonDelete_Click));
+      this._defaultAppBar.Buttons.Add(this._appBarButtonDelete);
+      this.ApplicationBar = ((IApplicationBar) this._defaultAppBar);
     }
 
     private void UpdateAppBar()
     {
-      this._appBarButtonDelete.IsEnabled = this.BannedUsersVM.SelectedCount > 0;
+      this._appBarButtonDelete.IsEnabled = (this.BannedUsersVM.SelectedCount > 0);
     }
 
     private void _appBarButtonDelete_Click(object sender, EventArgs e)
@@ -81,8 +88,8 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       BannedUsersViewModel bannedUsersViewModel = new BannedUsersViewModel();
-      bannedUsersViewModel.BannedVM.LoadData(false, false, (Action<BackendResult<VKList<User>, ResultCode>>) null, false);
-      this.DataContext = (object) bannedUsersViewModel;
+      bannedUsersViewModel.BannedVM.LoadData(false, false,  null, false);
+      base.DataContext = bannedUsersViewModel;
       bannedUsersViewModel.PropertyChanged += new PropertyChangedEventHandler(this.vm_PropertyChanged);
       this._isInitialized = true;
     }
@@ -108,10 +115,10 @@ namespace VKClient.Common
     {
       if (!(sender is FrameworkElement))
         return;
-      FriendHeader friendHeader = (sender as FrameworkElement).DataContext as FriendHeader;
-      if (friendHeader == null)
+      FriendHeader dataContext = (sender as FrameworkElement).DataContext as FriendHeader;
+      if (dataContext == null)
         return;
-      Navigator.Current.NavigateToUserProfile(friendHeader.UserId, friendHeader.User.Name, "", false);
+      Navigator.Current.NavigateToUserProfile(dataContext.UserId, dataContext.User.Name, "", false);
     }
 
     private void CheckBox_Tap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -125,12 +132,12 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/BannedUsersPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
-      this.ContentPanel = (Grid) this.FindName("ContentPanel");
-      this.listBoxBanned = (ExtendedLongListSelector) this.FindName("listBoxBanned");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/BannedUsersPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
+      this.ContentPanel = (Grid) base.FindName("ContentPanel");
+      this.listBoxBanned = (ExtendedLongListSelector) base.FindName("listBoxBanned");
     }
   }
 }

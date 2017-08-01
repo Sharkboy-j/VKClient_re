@@ -53,6 +53,20 @@ namespace VKClient.Audio.Base.DataObjects
       }
     }
 
+    public int can_purchase_for { get; set; }
+
+    public bool CanPurchaseFor
+    {
+      get
+      {
+        return this.can_purchase_for == 1;
+      }
+      set
+      {
+        this.can_purchase_for = value ? 1 : 0;
+      }
+    }
+
     public int free { get; set; }
 
     public bool IsFree

@@ -53,7 +53,7 @@ namespace VKClient.Common.Backend
         {
           return DeviceStatus.DeviceManufacturer;
         }
-        catch
+        catch (Exception )
         {
           return "";
         }
@@ -71,7 +71,7 @@ namespace VKClient.Common.Backend
             return advertisingId;
           return AdvertisingDeviceInfo.ADV_ID_USE_IS_FORBIDDEN;
         }
-        catch
+        catch (Exception ex)
         {
           return AdvertisingDeviceInfo.ERROR_READING_ADV_ID;
         }
@@ -94,7 +94,7 @@ namespace VKClient.Common.Backend
 
     public string ToJsonString()
     {
-      return JsonConvert.SerializeObject((object) this);
+      return JsonConvert.SerializeObject(this);
     }
   }
 }

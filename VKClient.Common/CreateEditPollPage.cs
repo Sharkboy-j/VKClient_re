@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Emoji;
@@ -20,24 +21,11 @@ namespace VKClient.Common
 {
   public class CreateEditPollPage : PageBase
   {
-    private ApplicationBarIconButton _appBarButtonCheck = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/check.png", UriKind.Relative),
-      Text = CommonResources.AppBarMenu_Save
-    };
-    private ApplicationBarIconButton _appBarButtonCancel = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative),
-      Text = CommonResources.AppBar_Cancel
-    };
-    private ApplicationBar _mainAppBar = new ApplicationBar()
-    {
-      BackgroundColor = VKConstants.AppBarBGColor,
-      ForegroundColor = VKConstants.AppBarFGColor,
-      Opacity = 0.9
-    };
-    private readonly DelayedExecutor _de = new DelayedExecutor(100);
     private bool _isInitialized;
+    private ApplicationBarIconButton _appBarButtonCheck;
+    private ApplicationBarIconButton _appBarButtonCancel;
+    private ApplicationBar _mainAppBar;
+    private readonly DelayedExecutor _de;
     internal Grid LayoutRoot;
     internal GenericHeaderUC ucHeader;
     internal ScrollViewer scrollViewer;
@@ -51,25 +39,49 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as CreateEditPollViewModel;
+        return base.DataContext as CreateEditPollViewModel;
       }
     }
 
     public CreateEditPollPage()
     {
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+      Uri uri1 = new Uri("/Resources/check.png", UriKind.Relative);
+      applicationBarIconButton1.IconUri = uri1;
+      string appBarMenuSave = CommonResources.AppBarMenu_Save;
+      applicationBarIconButton1.Text = appBarMenuSave;
+      this._appBarButtonCheck = applicationBarIconButton1;
+      ApplicationBarIconButton applicationBarIconButton2 = new ApplicationBarIconButton();
+      Uri uri2 = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative);
+      applicationBarIconButton2.IconUri = uri2;
+      string appBarCancel = CommonResources.AppBar_Cancel;
+      applicationBarIconButton2.Text = appBarCancel;
+      this._appBarButtonCancel = applicationBarIconButton2;
+      ApplicationBar applicationBar = new ApplicationBar();
+      Color appBarBgColor = VKConstants.AppBarBGColor;
+      applicationBar.BackgroundColor = appBarBgColor;
+      Color appBarFgColor = VKConstants.AppBarFGColor;
+      applicationBar.ForegroundColor = appBarFgColor;
+      double num = 0.9;
+      applicationBar.Opacity = num;
+      this._mainAppBar = applicationBar;
+      this._de = new DelayedExecutor(100);
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.ucAddOption.Text = CommonResources.Poll_AddAnOption;
       this.ucAddOption.OnAdd = new Action(this.AddOption);
-      this.Loaded += new RoutedEventHandler(this.CreateEditPollPage_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.CreateEditPollPage_Loaded));
     }
 
     private void BuildAppBar()
     {
-      this._appBarButtonCheck.Click += new EventHandler(this._appBarButtonCheck_Click);
-      this._appBarButtonCancel.Click += new EventHandler(this._appBarButtonCancel_Click);
-      this._mainAppBar.Buttons.Add((object) this._appBarButtonCheck);
-      this._mainAppBar.Buttons.Add((object) this._appBarButtonCancel);
-      this.ApplicationBar = (IApplicationBar) this._mainAppBar;
+      this._appBarButtonCheck.Click+=(new EventHandler(this._appBarButtonCheck_Click));
+      this._appBarButtonCancel.Click+=(new EventHandler(this._appBarButtonCancel_Click));
+      this._mainAppBar.Buttons.Add(this._appBarButtonCheck);
+      this._mainAppBar.Buttons.Add(this._appBarButtonCancel);
+      this.ApplicationBar = ((IApplicationBar) this._mainAppBar);
     }
 
     private void UpdateAppBar()
@@ -86,7 +98,7 @@ namespace VKClient.Common
     {
       this.VM.SavePoll((Action<Poll>) (poll =>
       {
-        ParametersRepository.SetParameterForId("UpdatedPoll", (object) poll);
+        ParametersRepository.SetParameterForId("UpdatedPoll", poll);
         Navigator.Current.GoBack();
       }));
     }
@@ -94,8 +106,9 @@ namespace VKClient.Common
     private void CreateEditPollPage_Loaded(object sender, RoutedEventArgs e)
     {
       if (this.VM != null && this.VM.CurrentMode == CreateEditPollViewModel.Mode.Create)
-        this.textBoxQuestion.Focus();
-      this.Loaded -= new RoutedEventHandler(this.CreateEditPollPage_Loaded);
+        ((Control) this.textBoxQuestion).Focus();
+      // ISSUE: method pointer
+      base.Loaded-=(new RoutedEventHandler( this.CreateEditPollPage_Loaded));
     }
 
     private void AddOption()
@@ -103,22 +116,22 @@ namespace VKClient.Common
       this.VM.AddPollOption();
       this._de.AddToDelayedExecution((Action) (() => Execute.ExecuteOnUIThread((Action) (() =>
       {
-        List<TextBox> source = FramePageUtils.AllTextBoxes((DependencyObject) this.LayoutRoot);
-        if (!source.Any<TextBox>())
+        List<TextBox> textBoxList = FramePageUtils.AllTextBoxes((DependencyObject) this.LayoutRoot);
+        if (!Enumerable.Any<TextBox>(textBoxList))
           return;
-        source.Last<TextBox>((Func<TextBox, bool>) (t =>
+        ((Control)Enumerable.Last<TextBox>(textBoxList, (Func<TextBox, bool>)(t =>
         {
-          if (t.Tag != null)
-            return t.Tag.ToString() == "RemovableTextBox";
+          if (((FrameworkElement) t).Tag != null)
+            return ((FrameworkElement) t).Tag.ToString() == "RemovableTextBox";
           return false;
-        })).Focus();
+        }))).Focus();
       }))));
-      Deployment.Current.Dispatcher.BeginInvoke((Action) (() => {}));
+      ((DependencyObject) Deployment.Current).Dispatcher.BeginInvoke((Action) (() => {}));
     }
 
     private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-      this.textBoxQuestion.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+      ((FrameworkElement) this.textBoxQuestion).GetBindingExpression((DependencyProperty) TextBox.TextProperty).UpdateSource();
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -126,13 +139,13 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (!this._isInitialized)
       {
-        long ownerId = long.Parse(this.NavigationContext.QueryString["OwnerId"]);
-        long pollId = long.Parse(this.NavigationContext.QueryString["PollId"]);
-        Poll poll = ParametersRepository.GetParameterForIdAndReset("Poll") as Poll;
+        long ownerId = long.Parse(((Page) this).NavigationContext.QueryString["OwnerId"]);
+        long pollId = long.Parse(((Page) this).NavigationContext.QueryString["PollId"]);
+        Poll parameterForIdAndReset = ParametersRepository.GetParameterForIdAndReset("Poll") as Poll;
         if (pollId != 0L)
-          this.DataContext = (object) CreateEditPollViewModel.CreateForEditPoll(ownerId, pollId, poll);
+          base.DataContext = (CreateEditPollViewModel.CreateForEditPoll(ownerId, pollId, parameterForIdAndReset));
         else
-          this.DataContext = (object) CreateEditPollViewModel.CreateForNewPoll(ownerId);
+          base.DataContext = (CreateEditPollViewModel.CreateForNewPoll(ownerId));
         this.VM.PropertyChanged += new PropertyChangedEventHandler(this.vm_PropertyChanged);
         this.BuildAppBar();
         this._isInitialized = true;
@@ -155,20 +168,22 @@ namespace VKClient.Common
       TextBox nextTextBox = FramePageUtils.FindNextTextBox((DependencyObject) this.LayoutRoot, textbox);
       if (nextTextBox == null)
         return;
-      nextTextBox.Focus();
+      ((Control) nextTextBox).Focus();
     }
 
     private void TextBox_OnGotFocus(object sender, RoutedEventArgs e)
     {
       this.textBoxPanel.IsOpen = true;
-      FrameworkElement element = (FrameworkElement) sender;
-      if (element.Name == this.textBoxQuestion.Name)
+      FrameworkElement frameworkElement = (FrameworkElement) sender;
+      if (frameworkElement.Name == ((FrameworkElement) this.textBoxQuestion).Name)
       {
         this.scrollViewer.ScrollToVerticalOffset(0.0);
-        this.UpdateLayout();
+        base.UpdateLayout();
       }
       StackPanel stackPanel = this.stackPanel;
-      this.scrollViewer.ScrollToOffsetWithAnimation(element.GetRelativePosition((UIElement) stackPanel).Y - 38.0, 0.2, false);
+      Point relativePosition = ((UIElement) frameworkElement).GetRelativePosition((UIElement) stackPanel);
+      // ISSUE: explicit reference operation
+      this.scrollViewer.ScrollToOffsetWithAnimation(((Point) @relativePosition).Y - 38.0, 0.2, false);
     }
 
     private void TextBox_OnLostFocus(object sender, RoutedEventArgs e)
@@ -182,14 +197,14 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/CreateEditPollPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.scrollViewer = (ScrollViewer) this.FindName("scrollViewer");
-      this.stackPanel = (StackPanel) this.FindName("stackPanel");
-      this.textBoxQuestion = (TextBox) this.FindName("textBoxQuestion");
-      this.ucAddOption = (InlineAddButtonUC) this.FindName("ucAddOption");
-      this.textBoxPanel = (TextBoxPanelControl) this.FindName("textBoxPanel");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/CreateEditPollPage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.scrollViewer = (ScrollViewer) base.FindName("scrollViewer");
+      this.stackPanel = (StackPanel) base.FindName("stackPanel");
+      this.textBoxQuestion = (TextBox) base.FindName("textBoxQuestion");
+      this.ucAddOption = (InlineAddButtonUC) base.FindName("ucAddOption");
+      this.textBoxPanel = (TextBoxPanelControl) base.FindName("textBoxPanel");
     }
   }
 }

@@ -23,7 +23,7 @@ namespace Microsoft.Phone.Applications.Common
       {
         if (IsolatedStorageSettings.ApplicationSettings[key] != value)
         {
-          IsolatedStorageSettings.ApplicationSettings[key] = value;
+          IsolatedStorageSettings.ApplicationSettings[key]= value;
           flag = true;
         }
       }

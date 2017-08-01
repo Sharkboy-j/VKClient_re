@@ -9,7 +9,7 @@ namespace VKClient.Common.UC
 {
   public class PollAnswerUC : UserControl
   {
-    public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof (double), typeof (PollAnswerUC), new PropertyMetadata(new PropertyChangedCallback(PollAnswerUC.Value_OnChanged)));
+      public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(double), typeof(PollAnswerUC), new PropertyMetadata(new PropertyChangedCallback(PollAnswerUC.Value_OnChanged)));
     internal Storyboard StoryboardAnimationUpdateValue;
     internal DoubleAnimation AnimationUpdateValue;
     internal RectangleGeometry clipRectangleFill;
@@ -20,21 +20,23 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (double) this.GetValue(PollAnswerUC.ValueProperty);
+        return (double) base.GetValue(PollAnswerUC.ValueProperty);
       }
       set
       {
-        this.SetValue(PollAnswerUC.ValueProperty, (object) value);
+        base.SetValue(PollAnswerUC.ValueProperty, value);
       }
     }
 
     public PollAnswerUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.SizeChanged += (SizeChangedEventHandler) ((sender, args) =>
+      // ISSUE: method pointer
+      base.SizeChanged+=(delegate(object sender, SizeChangedEventArgs args)
       {
-        this.clipRectangleFill.Rect = new Rect(0.0, 0.0, this.ActualWidth, this.ActualHeight);
-        this.UpdateValue(false);
+          this.clipRectangleFill.Rect=(new Rect(0.0, 0.0, base.ActualWidth, base.ActualHeight));
+          this.UpdateValue(false);
       });
     }
 
@@ -45,16 +47,16 @@ namespace VKClient.Common.UC
 
     private void UpdateValue(bool animated = true)
     {
-      double num1 = this.ActualWidth * this.Value / 100.0;
-      double num2 = -this.ActualWidth + num1;
+      double num1 = base.ActualWidth * this.Value / 100.0;
+      double num2 = -base.ActualWidth + num1;
       if (num1 == 0.0 || !animated)
       {
         this.transformRectangleFill.X = num2;
       }
       else
       {
-        this.transformRectangleFill.X = -this.ActualWidth;
-        this.AnimationUpdateValue.To = new double?(num2);
+        this.transformRectangleFill.X=(-base.ActualWidth);
+        this.AnimationUpdateValue.To=(new double?(num2));
         this.StoryboardAnimationUpdateValue.Begin();
       }
     }
@@ -65,11 +67,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/PollAnswerUC.xaml", UriKind.Relative));
-      this.StoryboardAnimationUpdateValue = (Storyboard) this.FindName("StoryboardAnimationUpdateValue");
-      this.AnimationUpdateValue = (DoubleAnimation) this.FindName("AnimationUpdateValue");
-      this.clipRectangleFill = (RectangleGeometry) this.FindName("clipRectangleFill");
-      this.transformRectangleFill = (TranslateTransform) this.FindName("transformRectangleFill");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/PollAnswerUC.xaml", UriKind.Relative));
+      this.StoryboardAnimationUpdateValue = (Storyboard) base.FindName("StoryboardAnimationUpdateValue");
+      this.AnimationUpdateValue = (DoubleAnimation) base.FindName("AnimationUpdateValue");
+      this.clipRectangleFill = (RectangleGeometry) base.FindName("clipRectangleFill");
+      this.transformRectangleFill = (TranslateTransform) base.FindName("transformRectangleFill");
     }
   }
 }

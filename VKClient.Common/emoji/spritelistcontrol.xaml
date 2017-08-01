@@ -53,7 +53,7 @@
         <TextBlock x:Name="textBlockNoStickers"
                    Grid.Row="1"
                    Margin="32 -64 32 0"
-                   Visibility="{Binding NoStickersVisibility}"
+                   Visibility="{Binding NoStickersVisibility, FallbackValue=Collapsed}"
                    Foreground="{StaticResource PhoneGray400Brush}"
                    VerticalAlignment="Center"
                    TextAlignment="Center"

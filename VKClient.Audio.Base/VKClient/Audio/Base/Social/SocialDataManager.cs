@@ -88,7 +88,8 @@ namespace VKClient.Audio.Base.Social
                         switch (operation.Type)
                         {
                             case SocialOperationType.DownloadHomeFeed:
-                                /*int num1 = */await this.ProcessHomeFeed(operation as DownloadHomeFeedOperation);// ? 1 : 0;
+                                /*int num1 = */
+                                await this.ProcessHomeFeed(operation as DownloadHomeFeedOperation);// ? 1 : 0;
                                 break;
                             case SocialOperationType.DownloadContactFeed:
                                 await this.ProcessContactFeed(operation as DownloadFeedOperation);
@@ -97,7 +98,8 @@ namespace VKClient.Audio.Base.Social
                                 this.ProcessDashboard(operation as DownloadDashboardFeedOperation);
                                 break;
                             case SocialOperationType.DownloadRichConnectData:
-                                /*int num2 = */await this.ProcessConnectData(operation as DownloadRichConnectDataOperation);// ? 1 : 0;
+                                /*int num2 = */
+                                await this.ProcessConnectData(operation as DownloadRichConnectDataOperation);// ? 1 : 0;
                                 break;
                         }
                         operation.NotifyCompletion();
@@ -264,7 +266,7 @@ namespace VKClient.Audio.Base.Social
 
         private void SetRequiredOffset(FeedItem feedItem, int nextOffset)
         {
-            feedItem.Timestamp=feedItem.Timestamp.AddTicks(-(feedItem.Timestamp.Ticks % 10000L) + (long) nextOffset);
+            feedItem.Timestamp = feedItem.Timestamp.AddTicks(-(feedItem.Timestamp.Ticks % 10000L) + (long)nextOffset);
         }
 
         private int GetRequiredOffset(FeedOperationDetails fod)
@@ -389,16 +391,16 @@ namespace VKClient.Audio.Base.Social
                 feedItem.ChildItem.SecondaryContent.Target = str2;
                 bool isMale = false;
                 if (wallPost.IsProfilePhotoUpdatePost(profiles, out isMale))
-                    feedItem.ChildItem.PrimaryContent.Title=isMale ? BaseResources.Photo_UpdatedProfileMale : BaseResources.Photo_UpdatedProfileFemale;
-                feedItem.ChildItem.Timestamp=feedItem.Timestamp;
-                feedItem.ChildItem.Author.DisplayName=wallPost.GetChildAuthorDisplayName(groups, profiles);
+                    feedItem.ChildItem.PrimaryContent.Title = isMale ? BaseResources.Photo_UpdatedProfileMale : BaseResources.Photo_UpdatedProfileFemale;
+                feedItem.ChildItem.Timestamp = feedItem.Timestamp;
+                feedItem.ChildItem.Author.DisplayName = wallPost.GetChildAuthorDisplayName(groups, profiles);
                 Actor author2 = feedItem.ChildItem.Author;
                 num3 = wallPost.GetChildItemFromId();
                 string uniqueRemoteId2 = RemoteIdHelper.GenerateUniqueRemoteId(num3.ToString(), RemoteIdHelper.RemoteIdItemType.UserOrGroup);
                 author2.RemoteId = uniqueRemoteId2;
-                feedItem.ChildItem.DefaultTarget=str2;
+                feedItem.ChildItem.DefaultTarget = str2;
                 if (!string.IsNullOrWhiteSpace(wallPost.copy_history[0].text))
-                    feedItem.ChildItem.PrimaryContent.Message=TextPreprocessor.PreprocessText(wallPost.copy_history[0].text);
+                    feedItem.ChildItem.PrimaryContent.Message = TextPreprocessor.PreprocessText(wallPost.copy_history[0].text);
                 if (wallPost.copy_history[0].attachments != null)
                 {
                     List<Attachment> attachments = wallPost.copy_history[0].attachments;
@@ -422,13 +424,13 @@ namespace VKClient.Audio.Base.Social
                         {
                             FeedItemSharedStory sharedStoryFromLink = SocialDataManager.TryCreateSharedStoryFromLink(feedItem.Timestamp, attachment.link);
                             if (sharedStoryFromLink != null)
-                                feedItem.ChildItem.SharedStory=sharedStoryFromLink;
+                                feedItem.ChildItem.SharedStory = sharedStoryFromLink;
                         }
                         if (attachment.Page != null)
                         {
                             FeedItemSharedStory sharedStoryFromPage = this.TryCreateSharedStoryFromPage(feedItem.Timestamp, attachment.Page);
                             if (sharedStoryFromPage != null)
-                                feedItem.ChildItem.SharedStory=sharedStoryFromPage;
+                                feedItem.ChildItem.SharedStory = sharedStoryFromPage;
                         }
                     }
                 }
@@ -442,7 +444,7 @@ namespace VKClient.Audio.Base.Social
                     string titleIfNecessary = this.GenerateTitleIfNecessary(wallPost.copy_history[0]);
                     if (!string.IsNullOrEmpty(titleIfNecessary))
                     {
-                        feedItem.ChildItem.PrimaryContent.Title=titleIfNecessary;
+                        feedItem.ChildItem.PrimaryContent.Title = titleIfNecessary;
                     }
                     else
                     {
@@ -793,8 +795,8 @@ namespace VKClient.Audio.Base.Social
         private NewsFeedGetParams CreateNewsFeedGetParams(FeedOperationDetails op)
         {
             NewsFeedGetParams newsFeedGetParams = new NewsFeedGetParams();
-            if (op.Direction == null)
-                Debugger.Break();
+            //if (op.Direction == null)
+            //    Debugger.Break();
             if (!string.IsNullOrEmpty(op.FeedItemRemoteId))
                 newsFeedGetParams = RemoteIdHelper.GetNewsFeedGetParamsBy(op.FeedItemRemoteId, op.ItemCount);
             newsFeedGetParams.NewsListId = -10;

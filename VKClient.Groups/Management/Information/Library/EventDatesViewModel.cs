@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.Backend.DataObjects;
@@ -17,7 +18,7 @@ namespace VKClient.Groups.Management.Information.Library
     private DateTime _finishDate;
     private DateTime _finishTime;
 
-    public InformationViewModel ParentViewModel { get; set; }
+    public InformationViewModel ParentViewModel { get; private set; }
 
     public Visibility Visibility
     {
@@ -28,7 +29,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._visibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.Visibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.Visibility));
       }
     }
 
@@ -41,8 +42,8 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._finishFieldsVisibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.FinishFieldsVisibility));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.SetFinishTimeButtonVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.FinishFieldsVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.SetFinishTimeButtonVisibility));
       }
     }
 
@@ -50,7 +51,7 @@ namespace VKClient.Groups.Management.Information.Library
     {
       get
       {
-        return (this.FinishFieldsVisibility == Visibility.Collapsed).ToVisiblity();
+          return (this.FinishFieldsVisibility == Visibility.Collapsed).ToVisiblity();
       }
     }
 
@@ -63,8 +64,8 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._startDate = value;
-        this.NotifyPropertyChanged<DateTime>((System.Linq.Expressions.Expression<Func<DateTime>>) (() => this.StartDate));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.StartDateString));
+        this.NotifyPropertyChanged<DateTime>((Expression<Func<DateTime>>) (() => this.StartDate));
+        this.NotifyPropertyChanged<string>((() => this.StartDateString));
       }
     }
 
@@ -77,8 +78,8 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._startTime = value;
-        this.NotifyPropertyChanged<DateTime>((System.Linq.Expressions.Expression<Func<DateTime>>) (() => this.StartTime));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.StartTimeString));
+        this.NotifyPropertyChanged<DateTime>((Expression<Func<DateTime>>) (() => this.StartTime));
+        this.NotifyPropertyChanged<string>((() => this.StartTimeString));
       }
     }
 
@@ -91,8 +92,8 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._finishDate = value;
-        this.NotifyPropertyChanged<DateTime>((System.Linq.Expressions.Expression<Func<DateTime>>) (() => this.FinishDate));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.FinishDateString));
+        this.NotifyPropertyChanged<DateTime>((Expression<Func<DateTime>>) (() => this.FinishDate));
+        this.NotifyPropertyChanged<string>((() => this.FinishDateString));
       }
     }
 
@@ -105,8 +106,8 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._finishTime = value;
-        this.NotifyPropertyChanged<DateTime>((System.Linq.Expressions.Expression<Func<DateTime>>) (() => this.FinishTime));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.FinishTimeString));
+        this.NotifyPropertyChanged<DateTime>((Expression<Func<DateTime>>) (() => this.FinishTime));
+        this.NotifyPropertyChanged<string>((() => this.FinishTimeString));
       }
     }
 

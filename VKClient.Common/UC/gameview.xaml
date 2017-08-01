@@ -146,7 +146,7 @@
                         Margin="0 182 0 0"
                         Background="{StaticResource PhoneBackgroundBrush}" />
 
-                <StackPanel x:Name="ContentPanel">
+                <uc:MyVirtualizingStackPanel x:Name="ContentPanel">
 
                     <StackPanel x:Name="HeaderContentPanel"
                                 SizeChanged="HeaderPanel_OnSizeChanged">
@@ -197,7 +197,7 @@
 
                     <uc:FooterUC DataContext="{Binding WallVM}" />
 
-                </StackPanel>
+                </uc:MyVirtualizingStackPanel>
 
             </Grid>
         </ViewportControl>

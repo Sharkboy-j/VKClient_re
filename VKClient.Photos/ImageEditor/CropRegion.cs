@@ -12,7 +12,7 @@ namespace VKClient.Photos.ImageEditor
 
     public override string ToString()
     {
-      return this.X.ToString() + "_" + (object) this.Y + "_" + (object) this.Width + "_" + (object) this.Height;
+      return this.X.ToString() + "_" + this.Y + "_" + this.Width + "_" + this.Height;
     }
   }
 }

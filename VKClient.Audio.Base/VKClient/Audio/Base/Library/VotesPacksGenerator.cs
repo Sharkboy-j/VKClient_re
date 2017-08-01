@@ -17,7 +17,7 @@ namespace VKClient.Audio.Base.Library
           VotesPacksGenerator.CreateVotesPacks((IEnumerable<StockItem>) stockItems, (IDictionary<string, string>) votesPrices, callback);
         }));
       else
-        VotesPacksGenerator.CreateVotesPacks((IEnumerable<StockItem>) stockItems, (IDictionary<string, string>) null, callback);
+        VotesPacksGenerator.CreateVotesPacks((IEnumerable<StockItem>) stockItems,  null, callback);
     }
 
     private static void CreateVotesPacks(IEnumerable<StockItem> stockItems, IDictionary<string, string> inAppPrices = null, Action<List<VotesPack>> callback = null)

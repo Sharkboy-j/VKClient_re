@@ -46,35 +46,48 @@ namespace VKClient.Common.UC
 
     public GenericSearchUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.Loaded += new RoutedEventHandler(this.GenericSearchUC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.GenericSearchUC_Loaded));
     }
 
     private void GenericSearchUC_Loaded(object sender, RoutedEventArgs e)
     {
-      Deployment.Current.Dispatcher.BeginInvoke((Action) (() => this.searchTextBox.Focus()));
+      Execute.ExecuteOnUIThread((Action) (() =>
+      {
+        try
+        {
+          if (!string.IsNullOrEmpty(this.searchTextBox.Text))
+            return;
+          ((Control) this.searchTextBox).Focus();
+        }
+        catch
+        {
+        }
+      }));
     }
 
     private ApplicationBar GetSearchParamsAppBar()
     {
       ApplicationBar applicationBar = ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
-      ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton(new Uri("/Resources/search_refine.png", UriKind.Relative))
-      {
-        Text = CommonResources.AppBar_SearchFilter
-      };
-      applicationBarIconButton.Click += new EventHandler(this.SetFiltersButton_OnClick);
-      applicationBar.Buttons.Add((object) applicationBarIconButton);
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton(new Uri("/Resources/search_refine.png", UriKind.Relative));
+      string appBarSearchFilter = CommonResources.AppBar_SearchFilter;
+      applicationBarIconButton1.Text = appBarSearchFilter;
+      ApplicationBarIconButton applicationBarIconButton2 = applicationBarIconButton1;
+      applicationBarIconButton2.Click+=(new EventHandler(this.SetFiltersButton_OnClick));
+      applicationBar.Buttons.Add(applicationBarIconButton2);
       return applicationBar;
     }
 
     private ApplicationBar GetSearchParamsUCAppBar(SearchParamsUCBase paramsUC)
     {
       ApplicationBar applicationBar = ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
-      ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton(new Uri("/Resources/check.png", UriKind.Relative))
-      {
-        Text = CommonResources.AppBarMenu_Save
-      };
-      applicationBarIconButton.Click += (EventHandler) ((sender, args) =>
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton(new Uri("/Resources/check.png", UriKind.Relative));
+      string appBarMenuSave = CommonResources.AppBarMenu_Save;
+      applicationBarIconButton1.Text = appBarMenuSave;
+      ApplicationBarIconButton applicationBarIconButton2 = applicationBarIconButton1;
+      applicationBarIconButton2.Click+=((EventHandler) ((sender, args) =>
       {
         if (this._searchParamsDialogService != null && this._searchParamsDialogService.IsOpen)
           this._searchParamsDialogService.Hide();
@@ -83,8 +96,8 @@ namespace VKClient.Common.UC
           parameters["offset"] = "0";
         this.ViewModel.Parameters = parameters;
         this.ViewModel.LoadData(true, false, true, false, true);
-      });
-      applicationBar.Buttons.Add((object) applicationBarIconButton);
+      }));
+      applicationBar.Buttons.Add(applicationBarIconButton2);
       return applicationBar;
     }
 
@@ -100,7 +113,7 @@ namespace VKClient.Common.UC
       dialogService1.AnimationType = (DialogService.AnimationTypes) num3;
       DialogService dialogService2 = dialogService1;
       GenericSearchUC genericSearchUc = new GenericSearchUC();
-      genericSearchUc.LayoutRootGrid.Margin = margin ?? new Thickness();
+      ((FrameworkElement) genericSearchUc.LayoutRootGrid).Margin=(margin ??  new Thickness());
       genericSearchUc._textChangedCallback = textChangedCallback;
       genericSearchUc.Initialize<B, T>(searchDataProvider, selectedItemCallback, itemTemplate);
       genericSearchUc._createParamsUCFunc = createParamsUCFunc;
@@ -125,21 +138,21 @@ namespace VKClient.Common.UC
       SearchParamsUCBase searchParamsUcBase = paramsUC;
       dialogService.Child = (FrameworkElement) searchParamsUcBase;
       this._searchParamsDialogService = dialogService;
-      this._searchParamsDialogService.Show(null);
+      this._searchParamsDialogService.Show( null);
     }
 
     private void LoseTextBoxFocus()
     {
-      this.searchTextBox.IsTabStop = false;
-      this.searchTextBox.IsEnabled = false;
-      this.searchTextBox.IsEnabled = true;
-      this.searchTextBox.IsTabStop = true;
+      ((Control) this.searchTextBox).IsTabStop = false;
+      ((Control) this.searchTextBox).IsEnabled = false;
+      ((Control) this.searchTextBox).IsEnabled = true;
+      ((Control) this.searchTextBox).IsTabStop = true;
     }
 
     public void Initialize<B, T>(ISearchDataProvider<B, T> searchDataProvider, Action<object, object> selectedItemCallback, DataTemplate itemTemplate) where B : class where T : class, ISearchableItemHeader<B>
     {
       GenericSearchViewModel<B, T> genericSearchViewModel = new GenericSearchViewModel<B, T>(searchDataProvider);
-      this.DataContext = (object) genericSearchViewModel.SearchVM;
+      base.DataContext = genericSearchViewModel.SearchVM;
       this.ViewModel = (GenericSearchViewModelBase) genericSearchViewModel;
       this._selectedItemCallback = selectedItemCallback;
       this.searchResultsListBox.ItemTemplate = itemTemplate;
@@ -147,7 +160,7 @@ namespace VKClient.Common.UC
 
     private void SearchResultsListBox_OnManipulationStarted(object sender, ManipulationStartedEventArgs e)
     {
-      this.searchResultsListBox.Focus();
+      ((Control) this.searchResultsListBox).Focus();
     }
 
     private void SearchTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -155,28 +168,28 @@ namespace VKClient.Common.UC
       this.ViewModel.SearchString = this.searchTextBox.Text;
       if (this.searchTextBox.Text != "")
       {
-        this.textBlockWatermarkText.Visibility = Visibility.Collapsed;
-        this.VerticalAlignment = VerticalAlignment.Stretch;
-        this.searchResultsListBox.Visibility = Visibility.Visible;
+        ((UIElement) this.textBlockWatermarkText).Visibility = Visibility.Collapsed;
+        base.VerticalAlignment = ((VerticalAlignment) 3);
+        ((UIElement) this.searchResultsListBox).Visibility = Visibility.Visible;
       }
       else
       {
-        this.textBlockWatermarkText.Visibility = Visibility.Visible;
-        this.VerticalAlignment = VerticalAlignment.Top;
-        this.searchResultsListBox.Visibility = Visibility.Collapsed;
+        ((UIElement) this.textBlockWatermarkText).Visibility = Visibility.Visible;
+        base.VerticalAlignment = ((VerticalAlignment) 0);
+        ((UIElement) this.searchResultsListBox).Visibility = Visibility.Collapsed;
       }
-      Action<string> action = this._textChangedCallback;
-      if (action == null)
+      Action<string> textChangedCallback = this._textChangedCallback;
+      if (textChangedCallback == null)
         return;
       string text = this.searchTextBox.Text;
-      action(text);
+      textChangedCallback(text);
     }
 
     private void SearchTextBox_OnKeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key != Key.Enter || !(this.searchTextBox.Text != string.Empty))
         return;
-      this.searchResultsListBox.Focus();
+      ((Control) this.searchResultsListBox).Focus();
     }
 
     private void SearchTextBox_OnGotFocus(object sender, RoutedEventArgs e)
@@ -194,12 +207,12 @@ namespace VKClient.Common.UC
       object selectedItem = this.searchResultsListBox.SelectedItem;
       if (selectedItem == null)
         return;
-      Action<object, object> action = this._selectedItemCallback;
-      if (action != null)
+      Action<object, object> selectedItemCallback = this._selectedItemCallback;
+      if (selectedItemCallback != null)
       {
-        ExtendedLongListSelector longListSelector = this.searchResultsListBox;
+        ExtendedLongListSelector searchResultsListBox = this.searchResultsListBox;
         object obj = selectedItem;
-        action((object) longListSelector, obj);
+        selectedItemCallback(searchResultsListBox, obj);
       }
       this.searchResultsListBox.SelectedItem = null;
     }
@@ -210,11 +223,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GenericSearchUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.searchTextBox = (TextBox) this.FindName("searchTextBox");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
-      this.searchResultsListBox = (ExtendedLongListSelector) this.FindName("searchResultsListBox");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GenericSearchUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.searchTextBox = (TextBox) base.FindName("searchTextBox");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
+      this.searchResultsListBox = (ExtendedLongListSelector) base.FindName("searchResultsListBox");
     }
   }
 }

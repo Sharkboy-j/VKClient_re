@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
@@ -54,7 +55,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._name = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Name));
+        this.NotifyPropertyChanged<string>((() => this.Name));
       }
     }
 
@@ -67,7 +68,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._description = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Description));
+        this.NotifyPropertyChanged<string>((() => this.Description));
       }
     }
 
@@ -90,7 +91,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._accessType = value;
-        this.NotifyPropertyChanged<AccessType>((System.Linq.Expressions.Expression<Func<AccessType>>) (() => this.AccessType));
+        this.NotifyPropertyChanged<AccessType>((Expression<Func<AccessType>>) (() => this.AccessType));
       }
     }
 
@@ -103,7 +104,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._accessTypeComments = value;
-        this.NotifyPropertyChanged<AccessType>((System.Linq.Expressions.Expression<Func<AccessType>>) (() => this.AccessTypeComments));
+        this.NotifyPropertyChanged<AccessType>((Expression<Func<AccessType>>) (() => this.AccessTypeComments));
       }
     }
 
@@ -111,7 +112,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this._gid != 0L ? Visibility.Collapsed : Visibility.Visible;
+        if (this._gid != 0L)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -119,7 +122,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this._gid == 0L ? Visibility.Collapsed : Visibility.Visible;
+        if (this._gid == 0L)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -132,20 +137,20 @@ namespace VKClient.Photos.Library
       set
       {
         this._privacyViewVM = value;
-        this.NotifyPropertyChanged<EditPrivacyViewModel>((System.Linq.Expressions.Expression<Func<EditPrivacyViewModel>>) (() => this.PrivacyViewVM));
+        this.NotifyPropertyChanged<EditPrivacyViewModel>((Expression<Func<EditPrivacyViewModel>>) (() => this.PrivacyViewVM));
       }
     }
 
     public CreateEditAlbumViewModel(Album album, Action<Album> notifyOnCompletion, long gid = 0)
     {
-      this._album = album;
-      this._isNewMode = string.IsNullOrEmpty(album.aid);
-      this.Name = this._album.title ?? "";
-      this.Description = this._album.description ?? "";
-      this.AccessTypeComments = AccessTypesList.AccessTypes.FirstOrDefault<AccessType>((Func<AccessType, bool>) (a => a.Id == this._album.comment_privacy));
-      this._notifyOnCompletion = notifyOnCompletion;
-      this._gid = gid;
-      this._privacyViewVM = new EditPrivacyViewModel(PhotoResources.CreateAlbumUC_Access, this._album.PrivacyViewInfo, "", (List<string>) null);
+        this._album = album;
+        this._isNewMode = string.IsNullOrEmpty(album.aid);
+        this.Name = this._album.title ?? "";
+        this.Description = this._album.description ?? "";
+        this.AccessTypeComments = AccessTypesList.AccessTypes.FirstOrDefault<AccessType>((Func<AccessType, bool>)(a => a.Id == this._album.comment_privacy));
+        this._notifyOnCompletion = notifyOnCompletion;
+        this._gid = gid;
+        this._privacyViewVM = new EditPrivacyViewModel(PhotoResources.CreateAlbumUC_Access, this._album.PrivacyViewInfo, "", (List<string>)null);
     }
 
     public void Save()

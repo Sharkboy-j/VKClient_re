@@ -322,11 +322,11 @@
                                                
                                                Text="{Binding DateStr}"
                                                Margin="12, 1, 54, 0" />
-                                <TextBlock Text="{Binding Description}"
-                                               Foreground="{StaticResource PhoneVKSubtleBrush}"
-                                               Grid.Column="1"
-                                               Margin="12,32, 54, 0"
-                                               VerticalAlignment="Top" />
+                                <framework:ScrollableTextBlock Text="{Binding Description}"
+                                                               Foreground="{StaticResource PhoneVKSubtleBrush}"
+                                                               Grid.Column="1"
+                                                               Margin="12,32, 54, 2"
+                                                               VerticalAlignment="Top" />
                             </Grid>
                         </DataTemplate>
                     

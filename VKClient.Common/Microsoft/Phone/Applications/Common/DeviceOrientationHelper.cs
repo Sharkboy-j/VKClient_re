@@ -123,9 +123,11 @@ namespace Microsoft.Phone.Applications.Common
       DeviceOrientationChangedEventArgs e = new DeviceOrientationChangedEventArgs();
       e.CurrentOrientation = deviceOrientation1;
       e.PreviousOrientation = deviceOrientation2;
+      // ISSUE: reference to a compiler-generated field
       if (this.OrientationChanged == null)
         return;
-      this.OrientationChanged((object) this, e);
+      // ISSUE: reference to a compiler-generated field
+      this.OrientationChanged(this, e);
     }
   }
 }

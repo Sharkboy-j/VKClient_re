@@ -30,8 +30,8 @@ namespace VKClient.Common.UC.MapAttachments
     public MapPointFullAttachmentUC()
     {
       this.InitializeComponent();
-      this.textBlockTitle.Text = "";
-      this.textBlockSubtitle.Text = "";
+      this.textBlockTitle.Text = ("");
+      this.textBlockSubtitle.Text = ("");
     }
 
     public static double CalculateTotalHeight(double width)
@@ -41,25 +41,25 @@ namespace VKClient.Common.UC.MapAttachments
 
     public override void OnReady()
     {
-      double mapHeight = MapAttachmentUCBase.GetMapHeight(this.Width);
-      double totalHeight = MapPointFullAttachmentUC.CalculateTotalHeight(this.Width);
+      double mapHeight = MapAttachmentUCBase.GetMapHeight(base.Width);
+      double totalHeight = MapPointFullAttachmentUC.CalculateTotalHeight(base.Width);
       this._mapUri = this.GetMapUri();
-      this.canvas.Width = this.Width;
-      this.canvas.Height = totalHeight;
-      this.rectBorder.Width = this.Width;
-      this.rectBorder.Height = totalHeight;
-      this.rectanglePlaceholder.Width = this.Width;
-      this.rectanglePlaceholder.Height = mapHeight;
-      this.imageMap.Width = this.Width;
-      this.imageMap.Height = mapHeight;
-      Canvas.SetLeft((UIElement) this.imageMapIcon, this.Width / 2.0 - this.imageMapIcon.Width / 2.0);
-      Canvas.SetTop((UIElement) this.imageMapIcon, mapHeight / 2.0 - this.imageMapIcon.Height);
-      this.rectMapBorderBottom.Width = this.Width - 2.0;
+      ((FrameworkElement) this.canvas).Width=(base.Width);
+      ((FrameworkElement) this.canvas).Height = totalHeight;
+      ((FrameworkElement) this.rectBorder).Width=(base.Width);
+      ((FrameworkElement) this.rectBorder).Height = totalHeight;
+      ((FrameworkElement) this.rectanglePlaceholder).Width=(base.Width);
+      ((FrameworkElement) this.rectanglePlaceholder).Height = mapHeight;
+      ((FrameworkElement) this.imageMap).Width=(base.Width);
+      ((FrameworkElement) this.imageMap).Height = mapHeight;
+      Canvas.SetLeft((UIElement) this.imageMapIcon, base.Width / 2.0 - ((FrameworkElement) this.imageMapIcon).Width / 2.0);
+      Canvas.SetTop((UIElement) this.imageMapIcon, mapHeight / 2.0 - ((FrameworkElement) this.imageMapIcon).Height);
+      ((FrameworkElement) this.rectMapBorderBottom).Width=(base.Width - 2.0);
       Canvas.SetTop((UIElement) this.rectMapBorderBottom, mapHeight - 1.0);
       Canvas.SetTop((UIElement) this.textBlockTitle, mapHeight + 9.0);
       Canvas.SetTop((UIElement) this.textBlockSubtitle, mapHeight + 24.0 + 9.0);
       this.UpdateTitleSubtitle();
-      double maxWidth = this.Width - 32.0;
+      double maxWidth = base.Width - 32.0;
       this.textBlockTitle.CorrectText(maxWidth);
       this.textBlockSubtitle.CorrectText(maxWidth);
     }
@@ -99,8 +99,8 @@ namespace VKClient.Common.UC.MapAttachments
             return;
           }
         }
-        this.textBlockTitle.Text = "...";
-        this.textBlockSubtitle.Text = "...";
+        this.textBlockTitle.Text = ("...");
+        this.textBlockSubtitle.Text = ("...");
         this.ReverseGeocode((Action<string, string>) ((title, subtitle) => Execute.ExecuteOnUIThread((Action) (() =>
         {
           if (string.IsNullOrEmpty(title))
@@ -122,12 +122,12 @@ namespace VKClient.Common.UC.MapAttachments
 
     public override void ReleaseResources()
     {
-      VeryLowProfileImageLoader.SetUriSource(this.imageMap, (Uri) null);
+      VeryLowProfileImageLoader.SetUriSource(this.imageMap,  null);
     }
 
     public override void ShownOnScreen()
     {
-      if (!(this._mapUri != (Uri) null) || !this._mapUri.IsAbsoluteUri)
+      if (!(this._mapUri !=  null) || !this._mapUri.IsAbsoluteUri)
         return;
       VeryLowProfileImageLoader.SetPriority(this._mapUri.OriginalString, DateTime.Now.Ticks);
     }
@@ -138,15 +138,15 @@ namespace VKClient.Common.UC.MapAttachments
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPointFullAttachmentUC.xaml", UriKind.Relative));
-      this.canvas = (Canvas) this.FindName("canvas");
-      this.rectanglePlaceholder = (Rectangle) this.FindName("rectanglePlaceholder");
-      this.imageMap = (Image) this.FindName("imageMap");
-      this.imageMapIcon = (Image) this.FindName("imageMapIcon");
-      this.rectMapBorderBottom = (Rectangle) this.FindName("rectMapBorderBottom");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.textBlockSubtitle = (TextBlock) this.FindName("textBlockSubtitle");
-      this.rectBorder = (Rectangle) this.FindName("rectBorder");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPointFullAttachmentUC.xaml", UriKind.Relative));
+      this.canvas = (Canvas) base.FindName("canvas");
+      this.rectanglePlaceholder = (Rectangle) base.FindName("rectanglePlaceholder");
+      this.imageMap = (Image) base.FindName("imageMap");
+      this.imageMapIcon = (Image) base.FindName("imageMapIcon");
+      this.rectMapBorderBottom = (Rectangle) base.FindName("rectMapBorderBottom");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
+      this.textBlockSubtitle = (TextBlock) base.FindName("textBlockSubtitle");
+      this.rectBorder = (Rectangle) base.FindName("rectBorder");
     }
   }
 }

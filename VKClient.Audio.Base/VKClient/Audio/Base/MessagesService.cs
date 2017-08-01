@@ -36,7 +36,7 @@ namespace VKClient.Audio.Base
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["user_ids"] = userIds.GetCommaSeparated();
-      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.createChat", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.createChat", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?(),  null);
     }
 
     public void SearchDialogs(string query, Action<BackendResult<List<object>, ResultCode>> callback)
@@ -54,12 +54,17 @@ namespace VKClient.Audio.Base
           if (dictionary.ContainsKey("type"))
           {
             if (dictionary["type"].ToString() == "profile")
-              objectList.Add((object) new User()
-              {
-                uid = (long) int.Parse(dictionary["id"].ToString()),
-                last_name = dictionary["last_name"].ToString(),
-                first_name = dictionary["first_name"].ToString()
-              });
+            {
+              User user1 = new User();
+              user1.uid = (long) int.Parse(dictionary["id"].ToString());
+              user1.last_name = dictionary["last_name"].ToString();
+              user1.first_name = dictionary["first_name"].ToString();
+              User user2 = user1;
+              object obj = dictionary["photo_max"];
+              string str = obj != null ? obj.ToString() :  null;
+              user2.photo_max = str;
+              objectList.Add(user1);
+            }
             if (dictionary["type"].ToString() == "chat")
             {
               Chat chat = new Chat();
@@ -77,10 +82,10 @@ namespace VKClient.Audio.Base
                 longList.Add(long.Parse(s));
               }
               chat.users = longList;
-              objectList.Add((object) chat);
+              objectList.Add(chat);
             }
             if (dictionary["type"].ToString() == "group")
-              objectList.Add((object) new User()
+              objectList.Add(new User()
               {
                 id = -long.Parse(dictionary["id"].ToString()),
                 first_name = dictionary["name"].ToString(),
@@ -91,7 +96,7 @@ namespace VKClient.Audio.Base
           }
         }
         return objectList;
-      }), false, true, new CancellationToken?());
+      }), false, true, new CancellationToken?(),  null);
     }
 
     public void GetHistory(long userOrChatId, bool isChat, int offset, int count, int? startMessageId, Action<BackendResult<MessageListResponse, ResultCode>> callback)
@@ -102,7 +107,7 @@ namespace VKClient.Audio.Base
         parameters["start_message_id"] = startMessageId.Value.ToString();
       parameters["offset"] = offset.ToString();
       parameters["count"] = count.ToString();
-      parameters["fields"] = "first_name_acc, last_name_acc, online, online_mobile, photo_max, sex, friend_status,photo_200";
+      parameters["fields"] = "first_name_acc,last_name_acc,online,online_mobile,photo_max,sex,friend_status,photo_200,first_name_dat,is_messages_blocked";
       parameters["extended"] = "1";
       VKRequestsDispatcher.DispatchRequestToVK<MessageListResponse>("messages.getHistory", parameters, (Action<BackendResult<MessageListResponse, ResultCode>>) (res =>
       {
@@ -128,7 +133,7 @@ namespace VKClient.Audio.Base
         }
         else
           callback(new BackendResult<MessageListResponse, ResultCode>(res.ResultCode));
-      }), new Func<string, MessageListResponse>(this.GetMessageHistoryDataForJson), false, true, new CancellationToken?());
+      }), new Func<string, MessageListResponse>(this.GetMessageHistoryDataForJson), false, true, new CancellationToken?(),  null);
     }
 
     public long GetPeerId(long userOrChatId, bool isChat)
@@ -148,9 +153,9 @@ namespace VKClient.Audio.Base
         },
         {
           "fields",
-          "photo_200,photo_max"
+          "photo_200,photo_max,domain"
         }
-      }, callback, (Func<string, ChatExtended>) null, false, true, new CancellationToken?());
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetDialogs(GetDialogsRequest request, Action<BackendResult<MessageListResponse, ResultCode>> callback)
@@ -159,7 +164,7 @@ namespace VKClient.Audio.Base
       parameters["offset"] = request.Offset.ToString();
       parameters["count"] = request.Count.ToString();
       parameters["preview_length"] = request.PreviewLength.ToString();
-      parameters["fields"] = "first_name_acc, last_name_acc, online, online_mobile, photo_max, sex, friend_status,photo_200";
+      parameters["fields"] = "first_name_acc,last_name_acc,online,online_mobile,photo_max,sex,friend_status,photo_200,first_name_dat,is_messages_blocked";
       parameters["extended"] = "1";
       VKRequestsDispatcher.DispatchRequestToVK<MessageListResponse>("messages.getDialogs", parameters, (Action<BackendResult<MessageListResponse, ResultCode>>) (res =>
       {
@@ -185,7 +190,7 @@ namespace VKClient.Audio.Base
         }
         else
           callback(new BackendResult<MessageListResponse, ResultCode>(res.ResultCode));
-      }), new Func<string, MessageListResponse>(this.GetDialogInfoDataForJson), false, true, new CancellationToken?());
+      }), new Func<string, MessageListResponse>(this.GetDialogInfoDataForJson), false, true, new CancellationToken?(),  null);
     }
 
     public void GetMessages(List<long> messageIds, Action<BackendResult<MessageListResponse, ResultCode>> callback)
@@ -202,7 +207,7 @@ namespace VKClient.Audio.Base
       {
         Dictionary<string, string> parameters = new Dictionary<string, string>();
         parameters["message_ids"] = messageIds.GetCommaSeparated();
-        parameters["fields"] = "first_name_acc, last_name_acc, online, online_mobile, photo_max, sex, friend_status,photo_200";
+        parameters["fields"] = "first_name_acc,last_name_acc,online,online_mobile,photo_max,sex,friend_status,photo_200,is_messages_blocked";
         parameters["extended"] = "1";
         VKRequestsDispatcher.DispatchRequestToVK<MessageListResponse>("messages.getById", parameters, (Action<BackendResult<MessageListResponse, ResultCode>>) (res =>
         {
@@ -228,7 +233,7 @@ namespace VKClient.Audio.Base
           }
           else
             callback(new BackendResult<MessageListResponse, ResultCode>(res.ResultCode));
-        }), new Func<string, MessageListResponse>(this.GetMessageHistoryDataForJson), false, true, new CancellationToken?());
+        }), new Func<string, MessageListResponse>(this.GetMessageHistoryDataForJson), false, true, new CancellationToken?(),  null);
       }
     }
 
@@ -292,11 +297,11 @@ namespace VKClient.Audio.Base
     {
       Dictionary<string, string> dictionary = new Dictionary<string, string>();
       string index1 = "peer_id";
-      string string1 = this.GetPeerId(request.UserOrCharId, request.IsChat).ToString();
-      dictionary[index1] = string1;
+      string str1 = this.GetPeerId(request.UserOrCharId, request.IsChat).ToString();
+      dictionary[index1] = str1;
       string index2 = "random_id";
-      string string2 = Convert.ToInt32((DateTime.Now.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds).ToString();
-      dictionary[index2] = string2;
+      string str2 = Convert.ToInt32((DateTime.Now.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds).ToString();
+      dictionary[index2] = str2;
       string index3 = "message";
       string messageBody = request.MessageBody;
       dictionary[index3] = messageBody;
@@ -315,7 +320,7 @@ namespace VKClient.Audio.Base
         parameters["lat"] = request.Latitude.ToString((IFormatProvider) CultureInfo.InvariantCulture);
         parameters["long"] = request.Longitude.ToString((IFormatProvider) CultureInfo.InvariantCulture);
       }
-      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.send", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.send", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?(),  null);
     }
 
     private void ProcessCommands(string command)
@@ -330,6 +335,12 @@ namespace VKClient.Audio.Base
         AppGlobalStateManager.Current.GlobalState.GifAutoplayManualSetting = new bool?(false);
       else if (command == "%gif_default%")
         AppGlobalStateManager.Current.GlobalState.GifAutoplayManualSetting = new bool?();
+      else if (command == "%ads_demo_enable%")
+        AppGlobalStateManager.Current.GlobalState.AdsDemoManualSetting = new bool?(true);
+      else if (command == "%ads_demo_disable%")
+        AppGlobalStateManager.Current.GlobalState.AdsDemoManualSetting = new bool?(false);
+      else if (command == "%ads_demo_default%")
+        AppGlobalStateManager.Current.GlobalState.AdsDemoManualSetting = new bool?();
       else if (command.StartsWith("%set_domain="))
       {
         string str = command.Substring(12);
@@ -344,12 +355,20 @@ namespace VKClient.Audio.Base
           return;
         AppGlobalStateManager.Current.GlobalState.BaseLoginDomain = str.Substring(0, str.Length - 1);
       }
-      else
+      else if (command == "%reset_domain%")
       {
-        if (!(command == "%reset_domain%"))
-          return;
         AppGlobalStateManager.Current.GlobalState.BaseDomain = "";
         AppGlobalStateManager.Current.GlobalState.BaseLoginDomain = "";
+      }
+      else if (command == "%max_rec_demo%")
+      {
+        AppGlobalStateManager.Current.GlobalState.AudioRecordingMaxDemo = true;
+      }
+      else
+      {
+        if (!(command == "%max_rec_demo_reset%"))
+          return;
+        AppGlobalStateManager.Current.GlobalState.AudioRecordingMaxDemo = false;
       }
     }
 
@@ -364,7 +383,7 @@ namespace VKClient.Audio.Base
         Dictionary<string, string> parameters = new Dictionary<string, string>();
         parameters["peer_id"] = peerId.ToString();
         parameters["start_message_id"] = messageIds.Max().ToString();
-        VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.markAsRead", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?());
+        VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.markAsRead", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?(),  null);
       }
     }
 
@@ -373,7 +392,7 @@ namespace VKClient.Audio.Base
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["peer_id"] = this.GetPeerId(userOrChatId, isChatId).ToString();
       parameters["type"] = "typing";
-      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.setActivity", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.setActivity", parameters, callback, new Func<string, ResponseWithId>(JsonConvert.DeserializeObject<ResponseWithId>), false, true, new CancellationToken?(),  null);
     }
 
     public void DeleteMessages(List<int> messageIds, Action<BackendResult<ResponseWithId, ResultCode>> callback)
@@ -388,12 +407,12 @@ namespace VKClient.Audio.Base
       if (messageIds.Count == 0)
         callback(new BackendResult<ResponseWithId, ResultCode>(ResultCode.Succeeded, new ResponseWithId()));
       else
-        VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>(methodName, parameters, callback, (Func<string, ResponseWithId>) null, false, true, new CancellationToken?());
+        VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>(methodName, parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetPhotoUploadServer(Action<BackendResult<UploadServerAddress, ResultCode>> callback)
     {
-      VKRequestsDispatcher.DispatchRequestToVK<UploadServerAddress>("photos.getMessagesUploadServer", new Dictionary<string, string>(), callback, (Func<string, UploadServerAddress>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<UploadServerAddress>("photos.getMessagesUploadServer", new Dictionary<string, string>(), callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void SavePhoto(UploadResponseData uploadData, Action<BackendResult<Photo, ResultCode>> callback)
@@ -408,7 +427,9 @@ namespace VKClient.Audio.Base
       int num1 = 0;
       int num2 = 1;
       CancellationToken? cancellationToken = new CancellationToken?();
-      VKRequestsDispatcher.DispatchRequestToVK<Photo>(methodName, parameters, callback1, (Func<string, Photo>) (jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<List<Photo>>>(jsonStr).response.First<Photo>()), num1 != 0, num2 != 0, cancellationToken);
+      // ISSUE: variable of the null type
+      
+      VKRequestsDispatcher.DispatchRequestToVK<Photo>(methodName, parameters, callback1, (Func<string, Photo>) (jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<List<Photo>>>(jsonStr).response.First<Photo>()), num1 != 0, num2 != 0, cancellationToken, null);
     }
 
     public void SearchMessages(string query, int count, int offset, Action<BackendResult<MessageListResponse, ResultCode>> callback)
@@ -424,7 +445,7 @@ namespace VKClient.Audio.Base
           this.GetMessages(res.ResultData.Messages.Select<Message, long>((Func<Message, long>) (m => (long) m.id)).ToList<long>(), callback);
         else
           callback(res);
-      }), new Func<string, MessageListResponse>(this.GetMessageDataForJson), false, true, new CancellationToken?());
+      }), new Func<string, MessageListResponse>(this.GetMessageDataForJson), false, true, new CancellationToken?(),  null);
     }
 
     public void UploadPhoto(byte[] photoData, Action<BackendResult<Photo, ResultCode>> callback, Action<double> progressCallback = null, Cancellation c = null)
@@ -455,11 +476,11 @@ namespace VKClient.Audio.Base
         {
           return JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<List<VideoData>>>(jsonStr).response.FirstOrDefault<VideoData>();
         }
-        catch
+        catch (Exception )
         {
           return new VideoData();
         }
-      }), false, true, new CancellationToken?());
+      }), false, true, new CancellationToken?(),  null);
     }
 
     public void GetAudio(long ownerId, long audioId, Action<BackendResult<AudioObj, ResultCode>> callback)
@@ -472,14 +493,16 @@ namespace VKClient.Audio.Base
       int num1 = 0;
       int num2 = 1;
       CancellationToken? cancellationToken = new CancellationToken?();
-      VKRequestsDispatcher.DispatchRequestToVK<AudioObj>(methodName, parameters, callback1, (Func<string, AudioObj>) (jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<List<AudioObj>>>(jsonStr).response.First<AudioObj>()), num1 != 0, num2 != 0, cancellationToken);
+      // ISSUE: variable of the null type
+      
+      VKRequestsDispatcher.DispatchRequestToVK<AudioObj>(methodName, parameters, callback1, (Func<string, AudioObj>) (jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<List<AudioObj>>>(jsonStr).response.First<AudioObj>()), num1 != 0, num2 != 0, cancellationToken, null);
     }
 
     public void DeleteDialog(long userOrChatId, bool isChat, Action<BackendResult<ResponseWithId, ResultCode>> callback)
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["peer_id"] = this.GetPeerId(userOrChatId, isChat).ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.deleteDialog", parameters, callback, (Func<string, ResponseWithId>) (jsonStr => new ResponseWithId()), false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ResponseWithId>("messages.deleteDialog", parameters, callback, (Func<string, ResponseWithId>) (jsonStr => new ResponseWithId()), false, true, new CancellationToken?(),  null);
     }
 
     private string RemoveCountOfRecords(string jsonStr)
@@ -494,14 +517,14 @@ namespace VKClient.Audio.Base
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["chat_id"] = chatId.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<UploadServerAddress>("photos.getChatUploadServer", parameters, callback, (Func<string, UploadServerAddress>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<UploadServerAddress>("photos.getChatUploadServer", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void SetChatPhoto(UploadResponseData uploadData, Action<BackendResult<ChatInfoWithMessageId, ResultCode>> callback)
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["file"] = uploadData.response;
-      VKRequestsDispatcher.DispatchRequestToVK<ChatInfoWithMessageId>("messages.setChatPhoto", parameters, callback, (Func<string, ChatInfoWithMessageId>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ChatInfoWithMessageId>("messages.setChatPhoto", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void UpdateChatPhoto(long chatId, byte[] photoData, Rect thumbnailRect, Action<BackendResult<ChatInfoWithMessageId, ResultCode>> callback)
@@ -515,9 +538,13 @@ namespace VKClient.Audio.Base
         else
         {
           string uploadUrl = getUplResp.ResultData.upload_url;
-          if (thumbnailRect.Width != 0.0)
+          // ISSUE: explicit reference operation
+          if (((Rect) @thumbnailRect).Width != 0.0)
           {
-            string str = string.Format("&_square_crop={0},{1},{2}&_full={0},{1},{2},{2}", (object) (int) thumbnailRect.X, (object) (int) thumbnailRect.Y, (object) (int) thumbnailRect.Width);
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            string str = string.Format("&_square_crop={0},{1},{2}&_full={0},{1},{2},{2}", (int) ((Rect) @thumbnailRect).X, (int) ((Rect) @thumbnailRect).Y, (int) ((Rect) @thumbnailRect).Width);
             uploadUrl += str;
           }
           MemoryStream memoryStream = new MemoryStream(photoData);
@@ -527,7 +554,7 @@ namespace VKClient.Audio.Base
               callback(new BackendResult<ChatInfoWithMessageId, ResultCode>(ResultCode.UnknownError));
             else
               this.SetChatPhoto(JsonConvert.DeserializeObject<UploadResponseData>(jsonResult.JsonString), callback);
-          }), "MyImage.jpg", (Action<double>) null, (Cancellation) null);
+          }), "MyImage.jpg",  null,  null);
         }
       }));
     }
@@ -536,10 +563,10 @@ namespace VKClient.Audio.Base
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["chat_id"] = chatId.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<ChatInfoWithMessageId>("messages.deleteChatPhoto", parameters, callback, (Func<string, ChatInfoWithMessageId>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<ChatInfoWithMessageId>("messages.deleteChatPhoto", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
-    public void GetConversationMaterials(long peerId, string mediaType, string startFrom, int count, Action<BackendResult<VKList<Attachment>, ResultCode>> callback)
+    public void GetConversationMaterials(long peerId, string mediaType, string startFrom, int count, Action<BackendResult<VKList<ConversationMaterial>, ResultCode>> callback)
     {
       Dictionary<string, string> parameters = new Dictionary<string, string>()
       {
@@ -558,7 +585,17 @@ namespace VKClient.Audio.Base
       };
       if (startFrom != null)
         parameters.Add("start_from", startFrom);
-      VKRequestsDispatcher.DispatchRequestToVK<VKList<Attachment>>("messages.getHistoryAttachments", parameters, callback, (Func<string, VKList<Attachment>>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<VKList<ConversationMaterial>>("messages.getHistoryAttachments", parameters, callback,  null, false, true, new CancellationToken?(),  null);
+    }
+
+    public void AllowDenyMessagesFromGroup(long groupId, bool allow, Action<BackendResult<int, ResultCode>> callback)
+    {
+      Dictionary<string, string> dictionary = new Dictionary<string, string>();
+      string index = "group_id";
+      string str = groupId.ToString();
+      dictionary[index] = str;
+      Dictionary<string, string> parameters = dictionary;
+      VKRequestsDispatcher.DispatchRequestToVK<int>(allow ? "messages.allowMessagesFromGroup" : "messages.denyMessagesFromGroup", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public class RootObject

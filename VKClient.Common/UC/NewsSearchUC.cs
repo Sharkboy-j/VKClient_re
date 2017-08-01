@@ -17,13 +17,13 @@ namespace VKClient.Common.UC
 {
   public class NewsSearchUC : UserControl
   {
-    private readonly DelayedExecutor _de = new DelayedExecutor(300);
+    private readonly DelayedExecutor _de;
     private bool _focusOnLoad;
     private ISearchWallPostsViewModel _viewModel;
     internal TextBox textBoxSearch;
     internal TextBlock textBlockWatermarkText;
     internal ViewportControl scrollNews;
-    internal StackPanel stackPanel;
+    internal MyVirtualizingStackPanel stackPanel;
     internal MyVirtualizingPanel2 panelNews;
     internal PullToRefreshUC ucPullToRefresh;
     private bool _contentLoaded;
@@ -38,13 +38,15 @@ namespace VKClient.Common.UC
 
     public NewsSearchUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.textBlockWatermarkText.Text = CommonResources.NewsSearch.ToLowerInvariant();
+      this.textBlockWatermarkText.Text = (CommonResources.NewsSearch.ToLowerInvariant());
     }
 
     public void Init(long ownerId = 0, string query = "", bool focusOnLoad = true)
     {
-      this.Loaded += new RoutedEventHandler(this.NewsSearchUC_Loaded);
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.NewsSearchUC_Loaded));
       if (ownerId == 0L)
       {
         string tag;
@@ -58,7 +60,7 @@ namespace VKClient.Common.UC
         else
         {
           this._viewModel = (ISearchWallPostsViewModel) new NewsSearchViewModel();
-          EventAggregator.Current.Publish((object) new DiscoverActionEvent()
+          EventAggregator.Current.Publish(new DiscoverActionEvent()
           {
             ActionType = DiscoverActionType.view
           });
@@ -66,7 +68,7 @@ namespace VKClient.Common.UC
       }
       else
         this._viewModel = (ISearchWallPostsViewModel) new PostsSearchViewModel(ownerId);
-      this.DataContext = (object) this._viewModel;
+      base.DataContext = this._viewModel;
       this.scrollNews.BindViewportBoundsTo((FrameworkElement) this.stackPanel);
       this.panelNews.InitializeWithScrollViewer((IScrollableArea) new ViewportScrollableAreaAdapter(this.scrollNews), false);
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.panelNews);
@@ -76,9 +78,10 @@ namespace VKClient.Common.UC
       {
         this.TextBoxSearch.Text = query;
         this.TextBoxSearch.SelectionStart = query.Length;
-        this.textBoxSearch_TextChanged_1((object) this, (TextChangedEventArgs) null);
+        this.textBoxSearch_TextChanged_1(this,  null);
       }
-      this.TextBoxSearch.TextChanged += new TextChangedEventHandler(this.textBoxSearch_TextChanged_1);
+      // ISSUE: method pointer
+      this.TextBoxSearch.TextChanged += (new TextChangedEventHandler( this.textBoxSearch_TextChanged_1));
     }
 
     private static void TryGetProfileDomain(string str, out string tag, out string domain)
@@ -100,25 +103,25 @@ namespace VKClient.Common.UC
     {
       if (this._viewModel.ItemsCount != 0 || !string.IsNullOrEmpty(this.TextBoxSearch.Text) || !this._focusOnLoad)
         return;
-      this._de.AddToDelayedExecution((Action) (() => Execute.ExecuteOnUIThread((Action) (() => this.textBoxSearch.Focus()))));
+      this._de.AddToDelayedExecution((Action) (() => Execute.ExecuteOnUIThread((Action) (() => ((Control) this.textBoxSearch).Focus()))));
     }
 
     private void textBoxSearch_TextChanged_1(object sender, TextChangedEventArgs e)
     {
       this._viewModel.Search(this.textBoxSearch.Text);
-      this.textBlockWatermarkText.Visibility = string.IsNullOrEmpty(this.textBoxSearch.Text).ToVisiblity();
+      ((UIElement) this.textBlockWatermarkText).Visibility = (string.IsNullOrEmpty(this.textBoxSearch.Text).ToVisiblity());
     }
 
     private void scrollNews_ManipulationStarted_1(object sender, ManipulationStartedEventArgs e)
     {
-      this.scrollNews.Focus();
+      ((Control) this.scrollNews).Focus();
     }
 
     private void TextBoxSearch_KeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key != Key.Enter || !(this.textBoxSearch.Text != string.Empty))
         return;
-      this.scrollNews.Focus();
+      ((Control) this.scrollNews).Focus();
       this._viewModel.Refresh();
     }
 
@@ -127,7 +130,7 @@ namespace VKClient.Common.UC
       this.TextBoxSearch.SelectAll();
     }
 
-    private void Trend_OnTap(object sender, GestureEventArgs e)
+    private void Trend_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       FrameworkElement frameworkElement = sender as FrameworkElement;
       Trend trend = (frameworkElement != null ? frameworkElement.DataContext : null) as Trend;
@@ -135,7 +138,7 @@ namespace VKClient.Common.UC
         return;
       string name = trend.name;
       this.TextBoxSearch.Text = name;
-      EventAggregator.Current.Publish((object) new DiscoverActionEvent()
+      EventAggregator.Current.Publish(new DiscoverActionEvent()
       {
         ActionType = DiscoverActionType.click_trending,
         ActionParam = name
@@ -148,13 +151,13 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/NewsSearchUC.xaml", UriKind.Relative));
-      this.textBoxSearch = (TextBox) this.FindName("textBoxSearch");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
-      this.scrollNews = (ViewportControl) this.FindName("scrollNews");
-      this.stackPanel = (StackPanel) this.FindName("stackPanel");
-      this.panelNews = (MyVirtualizingPanel2) this.FindName("panelNews");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/NewsSearchUC.xaml", UriKind.Relative));
+      this.textBoxSearch = (TextBox) base.FindName("textBoxSearch");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
+      this.scrollNews = (ViewportControl) base.FindName("scrollNews");
+      this.stackPanel = (MyVirtualizingStackPanel) base.FindName("stackPanel");
+      this.panelNews = (MyVirtualizingPanel2) base.FindName("panelNews");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
     }
   }
 }

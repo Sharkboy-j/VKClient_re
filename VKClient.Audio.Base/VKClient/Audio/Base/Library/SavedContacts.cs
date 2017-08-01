@@ -21,7 +21,7 @@ namespace VKClient.Audio.Base.Library
     {
       this.SavedUsers = new List<User>();
       this.SyncedDate = DateTime.MinValue;
-      this.Requests = (FriendRequests) null;
+      this.Requests =  null;
     }
 
     public void Write(BinaryWriter writer)

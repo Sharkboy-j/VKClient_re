@@ -5,9 +5,9 @@ namespace VKClient.Audio.Base.DataObjects
 {
   public class VideoSearchResponse
   {
-    public List<VKClient.Common.Backend.DataObjects.Video> MyVideos { get; set; }
+    public List<Video> MyVideos { get; set; }
 
-    public List<VKClient.Common.Backend.DataObjects.Video> GlobalVideos { get; set; }
+    public List<Video> GlobalVideos { get; set; }
 
     public int TotalCount { get; set; }
   }

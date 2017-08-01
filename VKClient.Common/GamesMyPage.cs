@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Navigation;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Events;
@@ -28,16 +30,16 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as GamesMyViewModel;
+        return base.DataContext as GamesMyViewModel;
       }
     }
 
     public GamesMyPage()
     {
       this.InitializeComponent();
-      this.ucHeader.textBlockTitle.Text = CommonResources.PageTitle_Games_MyGames.ToUpperInvariant();
+      this.ucHeader.textBlockTitle.Text = (CommonResources.PageTitle_Games_MyGames.ToUpperInvariant());
       this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh) this.listBoxMyGames);
-      this.listBoxMyGames.OnRefresh = (Action) (() => this.VM.MyGamesVM.LoadData(true, false, (Action<BackendResult<VKList<Game>, ResultCode>>) null, false));
+      this.listBoxMyGames.OnRefresh = (Action) (() => this.VM.MyGamesVM.LoadData(true, false,  null, false));
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -46,15 +48,15 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       GamesMyViewModel gamesMyViewModel = new GamesMyViewModel();
-      gamesMyViewModel.MyGamesVM.LoadData(false, false, (Action<BackendResult<VKList<Game>, ResultCode>>) null, false);
+      gamesMyViewModel.MyGamesVM.LoadData(false, false,  null, false);
       gamesMyViewModel.ItemsCleared += new EventHandler(this.ViewModel_OnItemsCleared);
-      this.DataContext = (object) gamesMyViewModel;
+      base.DataContext = gamesMyViewModel;
       this._isInitialized = true;
     }
 
     private void ViewModel_OnItemsCleared(object sender, EventArgs eventArgs)
     {
-      this.NavigationService.RemoveBackEntrySafe();
+      ((Page) this).NavigationService.RemoveBackEntrySafe();
     }
 
     private void ExtendedLongListSelector_Link(object sender, LinkUnlinkEventArgs e)
@@ -64,10 +66,10 @@ namespace VKClient.Common
 
     private void Game_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      GameHeader gameHeader = this.listBoxMyGames.SelectedItem as GameHeader;
-      if (gameHeader == null)
+      GameHeader selectedItem = this.listBoxMyGames.SelectedItem as GameHeader;
+      if (selectedItem == null)
         return;
-      FramePageUtils.CurrentPage.OpenGamesPopup(new List<object>((IEnumerable<object>) this.VM.MyGamesVM.Collection), GamesClickSource.catalog, "", this.VM.MyGamesVM.Collection.IndexOf(gameHeader), null);
+      FramePageUtils.CurrentPage.OpenGamesPopup(new List<object>((IEnumerable<object>) this.VM.MyGamesVM.Collection), GamesClickSource.catalog, "", this.VM.MyGamesVM.Collection.IndexOf(selectedItem),  null);
     }
 
     [DebuggerNonUserCode]
@@ -76,10 +78,10 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/GamesMyPage.xaml", UriKind.Relative));
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.ucPullToRefresh = (PullToRefreshUC) this.FindName("ucPullToRefresh");
-      this.listBoxMyGames = (ExtendedLongListSelector) this.FindName("listBoxMyGames");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/GamesMyPage.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.ucPullToRefresh = (PullToRefreshUC) base.FindName("ucPullToRefresh");
+      this.listBoxMyGames = (ExtendedLongListSelector) base.FindName("listBoxMyGames");
     }
   }
 }

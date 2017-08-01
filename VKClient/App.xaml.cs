@@ -5,15 +5,19 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO.IsolatedStorage;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Audio.Base;
 using VKClient.Audio.Base.AudioCache;
+using VKClient.Audio.Base.Core;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Library;
 using VKClient.Common.AudioManager;
@@ -30,7 +34,6 @@ using VKClient.Library;
 using VKClient.Video.VideoCatalog;
 using VKMessenger;
 using VKMessenger.Library;
-using VKMessenger.Views;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.DataTransfer.ShareTarget;
 
@@ -42,7 +45,7 @@ namespace VKClient
         public static TelemetryClient TelemetryClient;
         private static CustomUriMapper _uriMapper;
         private bool phoneApplicationInitialized;
-        //private bool _wasReset;
+    //    private bool _wasReset;
         private bool _handlingPreLoginNavigation;
         private App.SessionType sessionType;
         private bool wasRelaunched;
@@ -63,9 +66,10 @@ namespace VKClient
 
         public App()
         {
+            //base.\u002Ector();
             //this.InitializeTelemetry();
             Logger.Instance.Info("App() check 1");
-            this.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(this.App_UnhandledException);
+            this.UnhandledException += (new EventHandler<ApplicationUnhandledExceptionEventArgs>(this.App_UnhandledException));
             this.InitializeComponent();
             Logger.Instance.Info("App() check 2");
             ThemeSettings themeSettings = ThemeSettingsManager.GetThemeSettings();
@@ -85,24 +89,24 @@ namespace VKClient
         {
             try
             {
-                bool flag = true;
-                //if (1 != 0)
-                //{
-                TelemetryConfiguration.Active.InstrumentationKey = "0e558d17-1207-46e2-a99d-f3224bfef5ba";
-                flag = (DateTime.Now.Ticks / 10L ^ 7L) % 10L == 0L;
-                //}
-                //else
-                //{
-                //  PageViewTelemetryModule viewTelemetryModule = new PageViewTelemetryModule();
-                //  viewTelemetryModule.Initialize(TelemetryConfiguration.Active);
-                //  TelemetryConfiguration.Active.TelemetryModules.Add((object) viewTelemetryModule);
-                //}
-                if (!flag)
+                bool Telemetry = false;
+                if (!Telemetry)
+                {
+                    TelemetryConfiguration.Active.InstrumentationKey = "0e558d17-1207-46e2-a99d-f3224bfef5ba";
+                    Telemetry = (DateTime.Now.Ticks / 10L ^ 7L) % 10L == 0L;
+                }
+                else
+                {
+                    PageViewTelemetryModule viewTelemetryModule = new PageViewTelemetryModule();
+                    viewTelemetryModule.Initialize(TelemetryConfiguration.Active);
+                    TelemetryConfiguration.Active.TelemetryModules.Add(viewTelemetryModule);
+                }
+                if (!Telemetry)
                     TelemetryConfiguration.Active.DisableTelemetry = true;
                 TelemetryConfiguration.Active.TelemetryInitializers.Add((ITelemetryInitializer)new VKTelemetryInitializer());
                 App.TelemetryClient = new TelemetryClient();
             }
-            catch
+            catch (Exception )
             {
             }
         }
@@ -116,8 +120,8 @@ namespace VKClient
                 {
                     Thread.CurrentThread.CurrentCulture = new CultureInfo(languageCultureString);
                     Thread.CurrentThread.CurrentUICulture = new CultureInfo(languageCultureString);
-                    CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(languageCultureString);
-                    CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(languageCultureString);
+                    CultureInfo.DefaultThreadCurrentCulture = (new CultureInfo(languageCultureString));
+                    CultureInfo.DefaultThreadCurrentUICulture = (new CultureInfo(languageCultureString));
                 }
                 AppliedSettingsInfo.AppliedLanguageSetting = settings.LanguageSettings;
             }
@@ -161,10 +165,12 @@ namespace VKClient
         private void InitializeServiceLocator()
         {
             ServiceLocator.Register<IAppStateInfo>((IAppStateInfo)this);
-            ServiceLocator.Register<IVideoCatalogItemUCFactory>((IVideoCatalogItemUCFactory) new VideoCatalogItemUCFactory());
+            ServiceLocator.Register<IVideoCatalogItemUCFactory>((IVideoCatalogItemUCFactory)new VideoCatalogItemUCFactory());
             ServiceLocator.Register<IConversationsUCFactory>((IConversationsUCFactory)new ConversationsUCFactory());
             ServiceLocator.Register<IBackendConfirmationHandler>((IBackendConfirmationHandler)new MessageBoxBackendConfirmationHandler());
             ServiceLocator.Register<IBackendNotEnoughMoneyHandler>((IBackendNotEnoughMoneyHandler)new BackendNotEnoughMoneyHandler());
+            ServiceLocator.Register<IMediaPlayerWrapper>((IMediaPlayerWrapper)MediaPlayerWrapper.Instance);
+            ServiceLocator.Register<IGZipEncoder>((IGZipEncoder)new GZipEncoder());
         }
 
         private void App_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
@@ -186,6 +192,8 @@ namespace VKClient
             Logger.Instance.Info("App.Application_Launching check 5");
             PlaylistManager.Initialize();
             Logger.Instance.Info("App.Application_Launching check 6");
+            //AudioCacheManager.Instance.ClearCache(null);
+            //Logger.Instance.Info("App.Application_Launching check 7");
             BaseDataManager.Instance.NeedRefreshBaseData = true;
             App._uriMapper.NeedHandleActivation = true;
             ContactsManager.Instance.EnsureInSyncAsync(false);
@@ -200,8 +208,9 @@ namespace VKClient
         {
             MemoryInfo.Initialize();
             Navigator.Current = (INavigator)new NavigatorImpl();
-            JsonWebRequest.GetCurrentPageDataRequestee = (Func<IPageDataRequesteeInfo>)(() => PageBase.CurrentPageDataRequestee);
-            BirthdaysNotificationManager.Instance.Initialize();
+            Func<IPageDataRequesteeInfo> arg_2E_0 = new Func<IPageDataRequesteeInfo>(() => { return PageBase.CurrentPageDataRequestee; });
+
+            JsonWebRequest.GetCurrentPageDataRequestee = arg_2E_0; BirthdaysNotificationManager.Instance.Initialize();
             TileManager.Instance.Initialize();
             TileScheduledUpdate.Instance.Initialize();
             TileManager.Instance.ResetContent();
@@ -209,7 +218,7 @@ namespace VKClient
             SubscriptionFromPostManager.Instance.Restore();
             MessengerStateManagerInstance.Current.AppStartedTime = DateTime.Now;
             AudioEventTranslator.Initialize();
-            IsolatedStorageSettings.ApplicationSettings["ScaleFactor"] = (object)Application.Current.Host.Content.ScaleFactor;
+            IsolatedStorageSettings.ApplicationSettings["ScaleFactor"] = Application.Current.Host.Content.ScaleFactor;
             BGAudioPlayerWrapper.InitializeInstance();
             InstalledPackagesFinder.Instance.Initialize();
         }
@@ -248,7 +257,7 @@ namespace VKClient
             this.SaveCurrentDeactivationSettings();
             this.RespondToDeactivationOrClose();
             Logger.Instance.Info("App.Application_Deactivated check 2");
-            EventAggregator.Current.Publish((object)new ApplicationDeactivatedEvent());
+            EventAggregator.Current.Publish(new ApplicationDeactivatedEvent());
         }
 
         private void Application_Closing(object sender, ClosingEventArgs e)
@@ -305,16 +314,16 @@ namespace VKClient
                 return;
             TransitionFrame transitionFrame = new TransitionFrame();
             SolidColorBrush solidColorBrush = new SolidColorBrush(Colors.Transparent);
-            transitionFrame.Background = (Brush)solidColorBrush;
+            ((Control)transitionFrame).Background = ((Brush)solidColorBrush);
             this.RootFrame = (PhoneApplicationFrame)transitionFrame;
-            this.RootFrame.Navigated += new NavigatedEventHandler(this.CompleteInitializePhoneApplication);
-            this.RootFrame.Navigated += new NavigatedEventHandler(this.RootFrame_Navigated);
-            this.RootFrame.NavigationStopped += new NavigationStoppedEventHandler(this.RootFrame_NavigationStopped);
+            this.RootFrame.Navigated += (new NavigatedEventHandler(this.CompleteInitializePhoneApplication));
+            this.RootFrame.Navigated += (new NavigatedEventHandler(this.RootFrame_Navigated));
+            this.RootFrame.NavigationStopped += (new NavigationStoppedEventHandler(this.RootFrame_NavigationStopped));
             App._uriMapper = new CustomUriMapper();
-            this.RootFrame.UriMapper = (UriMapperBase)App._uriMapper;
-            this.RootFrame.NavigationFailed += new NavigationFailedEventHandler(this.RootFrame_NavigationFailed);
-            this.RootFrame.Navigating += new NavigatingCancelEventHandler(this.RootFrame_Navigating);
-            PhoneApplicationService.Current.ContractActivated += new EventHandler<IActivatedEventArgs>(this.Application_ContractActivated);
+            this.RootFrame.UriMapper = ((UriMapperBase)App._uriMapper);
+            this.RootFrame.NavigationFailed += (new NavigationFailedEventHandler(this.RootFrame_NavigationFailed));
+            this.RootFrame.Navigating += (new NavigatingCancelEventHandler(this.RootFrame_Navigating));
+            PhoneApplicationService.Current.ContractActivated += (new EventHandler<IActivatedEventArgs>(this.Application_ContractActivated));
             this.phoneApplicationInitialized = true;
         }
 
@@ -324,21 +333,23 @@ namespace VKClient
             if (continuationEventArgs == null)
                 return;
             if (((IDictionary<string, object>)continuationEventArgs.ContinuationData).ContainsKey("FilePickedType"))
-                ParametersRepository.SetParameterForId("FilePickedType", (object)(AttachmentType)((IDictionary<string, object>)continuationEventArgs.ContinuationData)["FilePickedType"]);
-            ParametersRepository.SetParameterForId("FilePicked", (object)continuationEventArgs);
+                ParametersRepository.SetParameterForId("FilePickedType", (AttachmentType)((IDictionary<string, object>)continuationEventArgs.ContinuationData)["FilePickedType"]);
+            ParametersRepository.SetParameterForId("FilePicked", continuationEventArgs);
         }
 
         private void RootFrame_NavigationStopped(object sender, NavigationEventArgs e)
         {
-            Logger.Instance.Info("App.RootFrame_NavigationStopped Mode={1}, Uri={0}", (object)e.Uri.ToString(), (object)e.NavigationMode);
+            Logger.Instance.Info("App.RootFrame_NavigationStopped Mode={1}, Uri={0}", e.Uri.ToString(), e.NavigationMode);
         }
 
         private void RootFrame_Navigated(object sender, NavigationEventArgs e)
         {
-            Logger.Instance.Info("App.RootFrame_Navigated Mode={1}, Uri={0}", (object)e.Uri.ToString(), (object)e.NavigationMode);
+            Logger.Instance.Info("App.RootFrame_Navigated Mode={1}, Uri={0}", e.Uri.ToString(), e.NavigationMode);
             if (e.NavigationMode == NavigationMode.Reset)
-                this.RootFrame.Navigated += new NavigatedEventHandler(this.ClearBackStackAfterReset);
-            EventAggregator.Current.Publish((object)new RootFrameNavigatedEvent()
+            {
+                this.RootFrame.Navigated += (new NavigatedEventHandler(this.ClearBackStackAfterReset));
+            }
+            EventAggregator.Current.Publish(new RootFrameNavigatedEvent()
             {
                 Uri = e.Uri
             });
@@ -346,26 +357,33 @@ namespace VKClient
 
         private void RootFrame_Navigating(object sender, NavigatingCancelEventArgs e)
         {
-            Logger.Instance.Info("App.RootFrame_Navigating Mode={1}, Uri={0}", (object)e.Uri.ToString(), (object)e.NavigationMode);
-            string @string = e.Uri.ToString();
-            if (@string == "app://external/")
+            Logger.Instance.Info("App.RootFrame_Navigating Mode={1}, Uri={0}", e.Uri.ToString(), e.NavigationMode);
+            string str = e.Uri.ToString();
+            if (str == "app://external/")
                 return;
-            if (!@string.Contains("/LoginPage.xaml") && !@string.Contains("/ValidatePage.xaml") && (!@string.Contains("/WelcomePage.xaml") && !@string.Contains("/RegistrationPage.xaml")) && (!@string.Contains("/Auth2FAPage.xaml") && !@string.Contains("/PhotoPickerPhotos.xaml")))
+            if (!str.Contains("/LoginPage.xaml") && !str.Contains("/ValidatePage.xaml") && (!str.Contains("/WelcomePage.xaml") && !str.Contains("/RegistrationPage.xaml")) && (!str.Contains("/Auth2FAPage.xaml") && !str.Contains("/PhotoPickerPhotos.xaml")))
             {
                 if (AppGlobalStateManager.Current.IsUserLoginRequired() && !this._handlingPreLoginNavigation)
                 {
-                    e.Cancel = true;
-                    this.RootFrame.Dispatcher.BeginInvoke((Action)(() => this.RootFrame.Navigate(new Uri("/WelcomePage.xaml", UriKind.Relative))));
+                    ((CancelEventArgs)e).Cancel = true;
+                    this.RootFrame.Dispatcher.BeginInvoke(delegate
+                      {
+                          this.RootFrame.Navigate(new Uri("/WelcomePage.xaml", UriKind.Relative));
+                      });
                 }
-                else if (@string.Contains("TileLoggedInUserId") && @string.Contains("IsChat=True"))
+                else if (str.Contains("TileLoggedInUserId") && str.Contains("IsChat=True"))
                 {
-                    int startIndex1 = @string.IndexOf("TileLoggedInUserId");
-                    int startIndex2 = @string.IndexOf("=", startIndex1) + 1;
+                    int startIndex1 = str.IndexOf("TileLoggedInUserId");
+                    int startIndex2 = str.IndexOf("=", startIndex1) + 1;
                     long result = 0;
-                    if (long.TryParse(@string.Substring(startIndex2), out result) && result != AppGlobalStateManager.Current.LoggedInUserId)
+                    if (long.TryParse(str.Substring(startIndex2), out result) && result != AppGlobalStateManager.Current.LoggedInUserId)
                     {
                         e.Cancel = true;
-                        this.RootFrame.Dispatcher.BeginInvoke((Action)(() => this.RootFrame.Navigate(new Uri("/VKClient.Common;component/NewsPage.xaml", UriKind.Relative))));
+                        // ISSUE: method pointer
+                        this.RootFrame.Dispatcher.BeginInvoke(delegate
+                        {
+                            this.RootFrame.Navigate(new Uri("/VKClient.Common;component/NewsPage.xaml", UriKind.Relative));
+                        });
                     }
                 }
             }
@@ -400,12 +418,12 @@ namespace VKClient
                     {
                         this.sessionType = App.SessionType.Home;
                         e.Cancel = true;
-                        this.RootFrame.Navigated -= new NavigatedEventHandler(this.ClearBackStackAfterReset);
+                        this.RootFrame.Navigated -= (new NavigatedEventHandler(this.ClearBackStackAfterReset));
                     }
                     else
                     {
                         e.Cancel = true;
-                        this.RootFrame.Navigated -= new NavigatedEventHandler(this.ClearBackStackAfterReset);
+                        this.RootFrame.Navigated -= (new NavigatedEventHandler(this.ClearBackStackAfterReset));
                     }
                 }
             }
@@ -414,8 +432,9 @@ namespace VKClient
         private void CompleteInitializePhoneApplication(object sender, NavigationEventArgs e)
         {
             if (this.RootVisual != this.RootFrame)
-                this.RootVisual = (UIElement)this.RootFrame;
-            this.RootFrame.Navigated -= new NavigatedEventHandler(this.CompleteInitializePhoneApplication);
+                this.RootVisual = ((UIElement)this.RootFrame);
+            
+            this.RootFrame.Navigated -= (new NavigatedEventHandler(this.CompleteInitializePhoneApplication));
         }
 
         private void MenuItem_Click_1(object sender, RoutedEventArgs e)
@@ -465,7 +484,7 @@ namespace VKClient
 
         public void SaveCurrentDeactivationSettings()
         {
-            if (!this.AddOrUpdateValue("SessionType", (object)this.sessionType))
+            if (!this.AddOrUpdateValue("SessionType", this.sessionType))
                 return;
             this.Settings.Save();
         }
@@ -485,7 +504,7 @@ namespace VKClient
 
         private void ClearBackStackAfterReset(object sender, NavigationEventArgs e)
         {
-            this.RootFrame.Navigated -= new NavigatedEventHandler(this.ClearBackStackAfterReset);
+            this.RootFrame.Navigated -= (new NavigatedEventHandler(this.ClearBackStackAfterReset));
         }
 
         private bool IsDeepLink(string uri)
@@ -505,33 +524,35 @@ namespace VKClient
             {
                 App.TelemetryClient.TrackException(exc);
             }
-            catch
+            catch (Exception )
             {
             }
         }
 
         public void HandleSuccessfulLogin(AutorizationData logInInfo, bool navigate = true)
         {
-            Execute.ExecuteOnUIThread((Action)(() =>
+            Execute.ExecuteOnUIThread(delegate
             {
                 AppGlobalStateManager.Current.HandleUserLogin(logInInfo);
                 ConversationsViewModel.Instance = new ConversationsViewModel();
-                ConversationsPage.ConversationsUCInstance = (ConversationsUC)null;
+                ConversationsPage.ConversationsUCInstance = null;
                 ContactsManager.Instance.EnsureInSyncAsync(false);
-                if (!navigate)
-                    return;
-                Navigator.Current.NavigateToMainPage();
-            }));
+                if (navigate)
+                {
+                    Navigator.Current.NavigateToMainPage();
+                }
+            });
         }
 
         private void ButtonTryAgain_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             e.Handled = true;
-            ISupportReload supportReload = ((FrameworkElement)sender).DataContext as ISupportReload;
-            if (supportReload == null)
+            ISupportReload dataContext = ((FrameworkElement)sender).DataContext as ISupportReload;
+            if (dataContext == null)
                 return;
-            supportReload.Reload();
+            dataContext.Reload();
         }
+
 
         private enum SessionType
         {

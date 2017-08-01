@@ -36,6 +36,8 @@ namespace VKClient.Audio.Base.DataObjects
 
     public VKList<SubscriptionObj> subscriptions { get; set; }
 
+    public VKList<GiftItemData> gifts { get; set; }
+
     public long Id
     {
       get
@@ -53,7 +55,7 @@ namespace VKClient.Audio.Base.DataObjects
       {
         User user = this.user;
         if (user == null)
-          return (Counters) null;
+          return  null;
         return user.counters;
       }
     }
@@ -66,7 +68,7 @@ namespace VKClient.Audio.Base.DataObjects
 
     public List<Topic> topics { get; set; }
 
-    public List<VKClient.Common.Backend.DataObjects.Video> videos { get; set; }
+    public List<Video> videos { get; set; }
 
     public List<Product> products { get; set; }
 
@@ -193,7 +195,7 @@ namespace VKClient.Audio.Base.DataObjects
       get
       {
         User user = this.user;
-        return !string.IsNullOrEmpty(user != null ? user.deactivated : null);
+        return !string.IsNullOrEmpty(user != null ? user.deactivated :  null);
       }
     }
 
@@ -301,7 +303,7 @@ namespace VKClient.Audio.Base.DataObjects
     {
       get
       {
-        return (MediaSectionsSettings) null;
+        return  null;
       }
     }
 
@@ -309,7 +311,7 @@ namespace VKClient.Audio.Base.DataObjects
     {
       get
       {
-        return (VKList<Group>) null;
+        return  null;
       }
     }
 

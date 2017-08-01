@@ -1,4 +1,6 @@
 using System;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
 using VKClient.Audio.Base.Events;
 using VKClient.Audio.Base.Utils;
@@ -55,7 +57,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return string.IsNullOrWhiteSpace(this.UIDuration) ? Visibility.Collapsed : Visibility.Visible;
+        if (string.IsNullOrWhiteSpace(this.UIDuration))
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -70,7 +74,7 @@ namespace VKClient.Video.Library
         if (this._isSelected == value)
           return;
         this._isSelected = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsSelected));
+        base.NotifyPropertyChanged<bool>(() => this.IsSelected);
       }
     }
 
@@ -80,7 +84,7 @@ namespace VKClient.Video.Library
       {
         if (this._va.count <= 0)
           return CommonResources.VideoCatalog_Album_NoVideos;
-        return UIStringFormatterHelper.FormatNumberOfSomething(this._va.count, CommonResources.OneVideoFrm, CommonResources.TwoFourVideosFrm, CommonResources.FiveVideosFrm, true, null, false);
+        return UIStringFormatterHelper.FormatNumberOfSomething(this._va.count, CommonResources.OneVideoFrm, CommonResources.TwoFourVideosFrm, CommonResources.FiveVideosFrm, true,  null, false);
       }
     }
 
@@ -96,22 +100,22 @@ namespace VKClient.Video.Library
             str = CommonResources.VideoCatalog_AlbumUpdated_AMomentAgo;
             break;
           case DateTimeDiffType.Seconds:
-            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneSecondAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourSecondsAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveSecondsAgoFrm, true, null, false);
+            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneSecondAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourSecondsAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveSecondsAgoFrm, true,  null, false);
             break;
           case DateTimeDiffType.Minutes:
-            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneMinuteAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourMinutesAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveMinutesAgoFrm, true, null, false);
+            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneMinuteAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourMinutesAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveMinutesAgoFrm, true,  null, false);
             break;
           case DateTimeDiffType.Hours:
-            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneHourAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourHoursAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveHoursAgoFrm, true, null, false);
+            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneHourAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourHoursAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveHoursAgoFrm, true,  null, false);
             break;
           case DateTimeDiffType.Days:
-            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneDayAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourDaysAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveDaysAgoFrm, true, null, false);
+            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneDayAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourDaysAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveDaysAgoFrm, true,  null, false);
             break;
           case DateTimeDiffType.Months:
-            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneMonthAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourMonthsAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveMonthsAgoFrm, true, null, false);
+            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneMonthAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourMonthsAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveMonthsAgoFrm, true,  null, false);
             break;
           case DateTimeDiffType.Years:
-            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneYearAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourYearsAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveYearsAgoFrm, true, null, false);
+            str = UIStringFormatterHelper.FormatNumberOfSomething(dateTimeDiff.Value, CommonResources.VideoCatalog_AlbumUpdated_OneYearAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_TwoFourYearsAgoFrm, CommonResources.VideoCatalog_AlbumUpdated_FiveYearsAgoFrm, true,  null, false);
             break;
         }
         return str;
@@ -122,7 +126,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return !this.CanEditOrDelete ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.CanEditOrDelete)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -130,7 +136,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return !this.CanEditOrDelete ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.CanEditOrDelete)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -138,7 +146,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return !this.CanEditOrDelete ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.CanEditOrDelete)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -180,7 +190,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return this._va.count > 0 ? Visibility.Collapsed : Visibility.Visible;
+        if (this._va.count > 0)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -213,7 +225,7 @@ namespace VKClient.Video.Library
       this._va = va;
       this._pickMode = pickMode;
       this._forceAllowEditDelete = forceAllowEditDelete;
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
     }
 
     public void HandleTap()
@@ -223,12 +235,12 @@ namespace VKClient.Video.Library
 
     internal void HandleEdit()
     {
-      Navigator.Current.NavigateToCreateEditVideoAlbum(this._va.id, this._va.owner_id < 0L ? -this._va.owner_id : 0L, this._va.title, this._va.PrivacyInfo);
+      Navigator.Current.NavigateToCreateEditVideoAlbum(this._va.id, this._va.owner_id < 0L ? -this._va.owner_id : 0, this._va.title, this._va.PrivacyInfo);
     }
 
     internal void HandleDelete()
     {
-      if (MessageBox.Show(CommonResources.GenericConfirmation, CommonResources.VideoCatalog_DeleteAlbum, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+        if (MessageBox.Show(CommonResources.GenericConfirmation, CommonResources.VideoCatalog_DeleteAlbum, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
         return;
       VideoService.Instance.DeleteAlbum(this._va.album_id, (Action<BackendResult<object, ResultCode>>) (res =>
       {
@@ -240,10 +252,10 @@ namespace VKClient.Video.Library
           addedDeletedEvent.OwnerId = this._va.owner_id;
           int num = 0;
           addedDeletedEvent.IsAdded = num != 0;
-          current.Publish((object) addedDeletedEvent);
+          current.Publish(addedDeletedEvent);
         }
         else
-          GenericInfoUC.ShowBasedOnResult((int) res.ResultCode, "", (VKRequestsDispatcher.Error) null);
+          GenericInfoUC.ShowBasedOnResult((int) res.ResultCode, "", null);
       }), new long?(this._va.owner_id < 0L ? -this._va.owner_id : 0L));
     }
 
@@ -251,9 +263,10 @@ namespace VKClient.Video.Library
     {
       if (message.OwnerId != this._va.owner_id || message.AlbumId != this._va.album_id)
         return;
-      this.VideoAlbum.privacy = message.Privacy.ToStringList();
+      this.VideoAlbum.privacy=(message.Privacy.ToStringList());
       this.VideoAlbum.title = message.Name;
-      this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Title));
+      // ISSUE: method reference
+      base.NotifyPropertyChanged<string>(() => this.Title);
     }
   }
 }

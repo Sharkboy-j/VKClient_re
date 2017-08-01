@@ -55,7 +55,11 @@ namespace VKClient.Audio.Base.AudioCache
       {
         RemoteFileInfo remoteFileInfo2 = new RemoteFileInfo();
         remoteFileInfo2.UriStr = uri.OriginalString;
-        string[] strArray = uniqueId.Split(new char[2]{ '_', '|' });
+        string[] strArray = uniqueId.Split(new char[2]
+        {
+          '_',
+          '|'
+        });
         remoteFileInfo2.ownerId = long.Parse(strArray[0]);
         remoteFileInfo2.audioId = long.Parse(strArray[1]);
         this.PlayedFiles.Add(remoteFileInfo2);

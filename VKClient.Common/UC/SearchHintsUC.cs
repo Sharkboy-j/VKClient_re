@@ -27,6 +27,7 @@ namespace VKClient.Common.UC
 
     public SearchHintsUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -49,19 +50,19 @@ namespace VKClient.Common.UC
       }
       SearchHintsUC searchHintsUc = new SearchHintsUC();
       GenericCollectionViewModel2<VKList<SearchHint>, SearchHintHeader> searchVm = SearchHintsUC._viewModel.SearchVM;
-      searchHintsUc.DataContext = (object) searchVm;
-      searchHintsUc.searchTextBox.Text = SearchHintsUC._viewModel.SearchString ?? "";
+      ((FrameworkElement) searchHintsUc).DataContext = searchVm;
+      searchHintsUc.searchTextBox.Text = (SearchHintsUC._viewModel.SearchString ?? "");
       SearchHintsUC uc = searchHintsUc;
-      uc.textBlockWatermarkText.Opacity = string.IsNullOrEmpty(uc.searchTextBox.Text) ? 1.0 : 0.0;
+      ((UIElement) uc.textBlockWatermarkText).Opacity = (string.IsNullOrEmpty(uc.searchTextBox.Text) ? 1.0 : 0.0);
       SearchHintsUC._flyout.Child = (FrameworkElement) uc;
       SearchHintsUC._flyout.Opened += (EventHandler) ((sender, args) => Execute.ExecuteOnUIThread((Action) (() =>
       {
         if (!string.IsNullOrWhiteSpace(uc.searchTextBox.Text))
           return;
-        uc.searchTextBox.Focus();
+        ((Control) uc.searchTextBox).Focus();
       })));
-      SearchHintsUC._flyout.Closed += (EventHandler) ((sender, args) => uc.DataContext = null);
-      SearchHintsUC._flyout.Show(null);
+      SearchHintsUC._flyout.Closed += (EventHandler) ((sender, args) => ((FrameworkElement) uc).DataContext = null);
+      SearchHintsUC._flyout.Show( null);
     }
 
     public static void Reset()
@@ -71,24 +72,24 @@ namespace VKClient.Common.UC
 
     private void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-      this.textBlockWatermarkText.Opacity = string.IsNullOrEmpty(this.searchTextBox.Text) ? 1.0 : 0.0;
+      ((UIElement) this.textBlockWatermarkText).Opacity = (string.IsNullOrEmpty(this.searchTextBox.Text) ? 1.0 : 0.0);
       SearchHintsUC._viewModel.SearchString = this.searchTextBox.Text;
     }
 
     private void SearchBox_OnGotFocus(object sender, RoutedEventArgs e)
     {
-      this.searchTextBox.Foreground = (Brush) Application.Current.Resources["PhoneTextBoxSearchMenuForegroundFocusedBrush"];
+      ((Control) this.searchTextBox).Foreground = ((Brush) Application.Current.Resources["PhoneTextBoxSearchMenuForegroundFocusedBrush"]);
       this.searchTextBox.SelectAll();
     }
 
     private void SearchBox_OnLostFocus(object sender, RoutedEventArgs e)
     {
-      this.searchTextBox.Foreground = (Brush) Application.Current.Resources["PhoneTextBoxSearchMenuForegroundBrush"];
+      ((Control) this.searchTextBox).Foreground = ((Brush) Application.Current.Resources["PhoneTextBoxSearchMenuForegroundBrush"]);
     }
 
     private void SearchResultsListBox_OnManipulationStarted(object sender, ManipulationStartedEventArgs e)
     {
-      this.searchResultsListBox.Focus();
+      ((Control) this.searchResultsListBox).Focus();
     }
 
     private void SearchResultsListBox_OnLink(object sender, LinkUnlinkEventArgs e)
@@ -103,7 +104,7 @@ namespace VKClient.Common.UC
         return;
       FramePageUtils.CurrentPage.OpenCloseMenu(false, (Action) (() =>
       {
-        this.UpdateLayout();
+        base.UpdateLayout();
         if (searchHint.IsCommunityType)
           Navigator.Current.NavigateToGroup(searchHint.Id, searchHint.Title, false);
         else if (searchHint.IsUserType)
@@ -128,7 +129,7 @@ namespace VKClient.Common.UC
     {
       if (e.Key != Key.Enter)
         return;
-      this.searchResultsListBox.Focus();
+      ((Control) this.searchResultsListBox).Focus();
     }
 
     [DebuggerNonUserCode]
@@ -137,11 +138,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/SearchHintsUC.xaml", UriKind.Relative));
-      this.gridRoot = (Grid) this.FindName("gridRoot");
-      this.searchTextBox = (TextBox) this.FindName("searchTextBox");
-      this.textBlockWatermarkText = (TextBlock) this.FindName("textBlockWatermarkText");
-      this.searchResultsListBox = (ExtendedLongListSelector) this.FindName("searchResultsListBox");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/SearchHintsUC.xaml", UriKind.Relative));
+      this.gridRoot = (Grid) base.FindName("gridRoot");
+      this.searchTextBox = (TextBox) base.FindName("searchTextBox");
+      this.textBlockWatermarkText = (TextBlock) base.FindName("textBlockWatermarkText");
+      this.searchResultsListBox = (ExtendedLongListSelector) base.FindName("searchResultsListBox");
     }
   }
 }

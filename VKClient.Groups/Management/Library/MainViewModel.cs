@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.CommonExtensions;
@@ -11,15 +12,17 @@ namespace VKClient.Groups.Management.Library
   {
     private bool _isAdministrator;
 
-    public long Id { get; set; }
+    public long Id { get; private set; }
 
-    public GroupType Type { get; set; }
+    public GroupType Type { get; private set; }
 
     public Visibility RequestsVisibility
     {
       get
       {
-        return this.Type != GroupType.Group ? Visibility.Collapsed : Visibility.Visible;
+        if (this.Type != GroupType.Group)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -27,7 +30,9 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        return this.Type == GroupType.PublicPage ? Visibility.Collapsed : Visibility.Visible;
+        if (this.Type == GroupType.PublicPage)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -54,7 +59,7 @@ namespace VKClient.Groups.Management.Library
       this.Id = id;
       this.Type = type;
       this._isAdministrator = isAdministrator;
-      this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.AdministrationSectionsVisibility));
+      this.NotifyPropertyChanged<Visibility>((() => this.AdministrationSectionsVisibility));
     }
   }
 }

@@ -242,7 +242,7 @@
                                 VerticalAlignment="Top">
 
                             <Border.OpacityMask>
-                                <ImageBrush   framework:ImageLoader.ImageBrushMultiResSource="/Resources/OnlineMark.png" />
+                                <ImageBrush   framework:ImageLoader.ImageBrushMultiResSource="/VKClient.Common;component/Resources/OnlineMark.png" />
                             </Border.OpacityMask>
 
                         </Border>
@@ -257,7 +257,7 @@
                                 VerticalAlignment="Top">
 
                             <Border.OpacityMask>
-                                <ImageBrush  framework:ImageLoader.ImageBrushMultiResSource="/Resources/OnlineMobileMark.png" />
+                                <ImageBrush  framework:ImageLoader.ImageBrushMultiResSource="/VKClient.Common;component/Resources/OnlineMobileMark.png" />
                             </Border.OpacityMask>
 
                         </Border>
@@ -272,7 +272,7 @@
                                 VerticalAlignment="Top">
 
                             <Border.OpacityMask>
-                                <ImageBrush ImageSource="/Resources/mute-WXGA.png" />
+                                <ImageBrush ImageSource="/VKClient.Common;component/Resources/mute-WXGA.png" />
                             </Border.OpacityMask>
 
                         </Border>
@@ -292,7 +292,7 @@
                 <!-- Body Text-->
                 <framework:ScrollableTextBlock DisableHyperlinks="True"
                                                TextWrapping="Wrap"
-                                               Margin="96 23 60 0"
+                                               Margin="96 28 60 0"
                                                Height="54"
                                                Visibility="{Binding NoUserThumbVisibility}"
                                                Foreground="{Binding TextForegroundBrush}"
@@ -358,6 +358,15 @@
                     </Border>
 
                 </Grid>
+
+                <Border Margin="96 28 0 0"
+                        Height="54"
+                        Background="{Binding MainBackgroundBrush}"
+                        Visibility="{Binding TypingVisibility}">
+                    <TextBlock VerticalAlignment="Top"
+                               Foreground="{StaticResource PhoneGray400_Gray500Brush}"
+                               Text="{Binding TypingStr, FallbackValue='is typing...'}" />
+                </Border>
             </Grid>
         </Border>
         <Rectangle Height="2"

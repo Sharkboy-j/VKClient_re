@@ -23,23 +23,24 @@
             <Grid Background="Transparent"
                   framework:MetroInMotion.Tilt="1.5"
                   Tap="NewPost_OnTap">
-                <Ellipse Width="56"
+                <Rectangle Width="56"
                          Height="56"
                          HorizontalAlignment="Left"
                          VerticalAlignment="Top"
-                         Style="{StaticResource PhotoPlaceholderEllipse}"
-                         Margin="16 12 0 0" />
+                         Fill="{StaticResource PhoneChromeBrush}"
+                         Margin="16 12 0 0"
+                           RadiusX="5" RadiusY="5" Name="rectangle"/>
 
-                <Image framework:ImageLoader.UriSource="{Binding UserPic}"
+                <Image framework:ImageLoader.UriSource="{Binding UserPhoto}"
                        Width="56"
                        Height="56"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
                        Margin="16 12 0 0">
                     <Image.Clip>
-                        <EllipseGeometry Center="28 28"
-                                         RadiusX="28"
-                                         RadiusY="28" />
+                        <RectangleGeometry Rect="0 0 56 56" x:Name="RectangleGeometry1"
+                                         RadiusX="5"
+                                         RadiusY="5" />
                     </Image.Clip>
                 </Image>
 

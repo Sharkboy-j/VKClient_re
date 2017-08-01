@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
 using VKClient.Common.Framework;
 using VKClient.Common.ImageViewer;
 using VKClient.Common.Library;
@@ -19,30 +19,34 @@ namespace VKClient.Common.UC
 
     public NewsfeedTopToggleUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      EventAggregator.Current.Subscribe((object) this);
-      this.borderFadeOut.Opacity = 0.0;
-      this.Loaded += (RoutedEventHandler) ((sender, args) =>
+      EventAggregator.Current.Subscribe(this);
+      ((UIElement) this.borderFadeOut).Opacity = 0.0;
+      // ISSUE: method pointer
+      base.Loaded+=(delegate(object sender, RoutedEventArgs args)
       {
-        PickableNewsfeedSourceItemViewModel sourceItemViewModel = this.DataContext as PickableNewsfeedSourceItemViewModel;
-        if (sourceItemViewModel == null || !sourceItemViewModel.FadeOutToggleEnabled)
-          return;
-        this.borderFadeOut.Animate(1.0, 0.0, (object) UIElement.OpacityProperty, 2000, new int?(), null, null);
+          PickableNewsfeedSourceItemViewModel pickableNewsfeedSourceItemViewModel = base.DataContext as PickableNewsfeedSourceItemViewModel;
+          if (pickableNewsfeedSourceItemViewModel != null && pickableNewsfeedSourceItemViewModel.FadeOutToggleEnabled)
+          {
+              this.borderFadeOut.Animate(1.0, 0.0, UIElement.OpacityProperty, 2000, default(int?), null, null);
+          }
       });
     }
 
-    private void ToggleTopNewsContainer_OnTap(object sender, GestureEventArgs e)
+    private void ToggleTopNewsContainer_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       e.Handled = true;
     }
 
     public void Handle(NewsfeedTopEnabledDisabledEvent message)
     {
-      EventHandler eventHandler = this.ToggleControlTap;
-      if (eventHandler == null)
+      // ISSUE: reference to a compiler-generated field
+      EventHandler toggleControlTap = this.ToggleControlTap;
+      if (toggleControlTap == null)
         return;
-      EventArgs e = EventArgs.Empty;
-      eventHandler((object) this, e);
+      EventArgs empty = EventArgs.Empty;
+      toggleControlTap(this, empty);
     }
 
     [DebuggerNonUserCode]
@@ -51,8 +55,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/NewsfeedTopToggleUC.xaml", UriKind.Relative));
-      this.borderFadeOut = (Border) this.FindName("borderFadeOut");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/NewsfeedTopToggleUC.xaml", UriKind.Relative));
+      this.borderFadeOut = (Border) base.FindName("borderFadeOut");
     }
   }
 }

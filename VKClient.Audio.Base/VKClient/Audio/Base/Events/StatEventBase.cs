@@ -8,7 +8,7 @@ namespace VKClient.Audio.Base.Events
 
     public override string ToString()
     {
-      return JsonConvert.SerializeObject((object) this);
+      return JsonConvert.SerializeObject(this);
     }
   }
 }

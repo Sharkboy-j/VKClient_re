@@ -17,8 +17,7 @@
           framework:MetroInMotion.Tilt="1.2"
           Background="Transparent"
           VerticalAlignment="Top"
-          MinHeight="100"
-          MaxHeight="150">
+          MinHeight="100">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150" />
@@ -27,30 +26,41 @@
 
         <Rectangle Style="{StaticResource PhotoPlaceholderRectangle}" />
 
-        <Canvas x:Name="canvasImageContainer"
-                Grid.Column="0"
-                Width="150">
+        <Grid x:Name="canvasImageContainer"
+              Grid.Column="0"
+              Width="150">
             <Image x:Name="imagePreview"
-                   Width="150"
                    Stretch="UniformToFill"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
-        </Canvas>
+        </Grid>
 
         <Grid x:Name="gridContent"
               Grid.Column="1"
               Margin="16 9">
             <StackPanel VerticalAlignment="Center">
-                <TextBlock x:Name="textBlockContent"
-                           Width="282"
-                           TextWrapping="Wrap"
+                <TextBlock x:Name="titleBlock"
                            Foreground="{StaticResource PhoneAlmostBlackBrush}"
                            LineStackingStrategy="BlockLineHeight"
+                           FontFamily="Segoe WP SemiBold"
+                           TextWrapping="Wrap"
                            LineHeight="25"
-                           MaxHeight="100">
-                        <Run Text="Titley"
-                             FontFamily="{StaticResource PhoneFontFamilySemiBold}" />
-                </TextBlock>
+                           MaxHeight="75"
+                           Width="282"/>
+                <TextBlock x:Name="priceBlock"
+                           Foreground="{StaticResource PhoneAlmostBlackBrush}"
+                           LineStackingStrategy="BlockLineHeight"
+                           Visibility="Collapsed"
+                           LineHeight="25"
+                           Width="282"/>
+                <TextBlock x:Name="descriptionBlock"
+                           Foreground="{StaticResource PhoneAlmostBlackBrush}"
+                           LineStackingStrategy="BlockLineHeight"
+                           Visibility="Collapsed"
+                           TextWrapping="Wrap"
+                           LineHeight="25"
+                           MaxHeight="50"
+                           Width="282"/>
                 <StackPanel x:Name="panelProductRating"
                             Visibility="Visible"
                             Orientation="Horizontal"
@@ -61,7 +71,7 @@
                                Margin="0 0 8 0"
                                Foreground="{StaticResource PhoneAlmostBlackBrush}"
                                LineStackingStrategy="BlockLineHeight"
-                               LineHeight="26"
+                               LineHeight="25"
                                Text="1 000 rub." />
                     <toolkit:Rating x:Name="ucRating"
                                     Visibility="Visible"

@@ -10,6 +10,13 @@
              Foreground="{StaticResource PhoneForegroundBrush}"
              d:DesignHeight="480"
              d:DesignWidth="480">
+    
+    <UserControl.Resources>
+        <Style TargetType="uc:ToggleSwitchControl">
+            <Setter Property="Fill"
+                    Value="{StaticResource PhoneToggleControlThumbFillBrush}" />
+        </Style>
+    </UserControl.Resources>
 
     <StackPanel>
         <uc:NewsSourceListItemUC />
@@ -21,8 +28,7 @@
                         Background="{StaticResource PhoneNewsfeedPromoToggleFadeOutBrush}"
                         Opacity="1" />
 
-                <uc:ToggleControl Height="56"
-                                  Margin="64 0 16 0"
+                <uc:ToggleControl Margin="64 -4 16 -4"
                                   Title="{Binding LocalizedResources.OnlyInterestingNews, Source={StaticResource LocalizedStrings}}"
                                   IsChecked="{Binding IsTopNewsToggleChecked, Mode=TwoWay}" />
             </Grid>

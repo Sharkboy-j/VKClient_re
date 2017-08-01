@@ -55,6 +55,11 @@
                             <views:MediaListItemProductUC Title="{Binding Title}" />
                         </DataTemplate>
                     </viewModels:ProfileMediaListItemTemplateSelector.ProductTemplate>
+                    <viewModels:ProfileMediaListItemTemplateSelector.GiftsTemplate>
+                        <DataTemplate>
+                            <views:MediaListItemGiftsUC />
+                        </DataTemplate>
+                    </viewModels:ProfileMediaListItemTemplateSelector.GiftsTemplate>
                     <viewModels:ProfileMediaListItemTemplateSelector.EmptyDataTemplate>
                         <DataTemplate>
                             <views:MediaListItemEmptyDataUC />

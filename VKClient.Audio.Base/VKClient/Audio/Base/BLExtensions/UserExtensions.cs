@@ -55,11 +55,17 @@ namespace VKClient.Audio.Base.BLExtensions
       return 0;
     }
 
+    public static BirthDate GetBirthDate(this User user)
+    {
+      return new BirthDate(user);
+    }
+
     public static void InitFromGroup(this User user, Group group)
     {
       user.id = -group.id;
       user.first_name = group.name;
       user.photo_max = group.photo_200;
+      user.is_messages_blocked = group.is_messages_blocked;
     }
   }
 }

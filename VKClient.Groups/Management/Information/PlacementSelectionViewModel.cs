@@ -1,5 +1,6 @@
 using System;
 using System.Device.Location;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Events;
@@ -31,7 +32,7 @@ namespace VKClient.Groups.Management.Information
       set
       {
         this._isFormEnabled = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormEnabled));
       }
     }
 
@@ -44,10 +45,10 @@ namespace VKClient.Groups.Management.Information
       set
       {
         this._country = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Country));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.CityFieldVisibility));
+        this.NotifyPropertyChanged<string>((() => this.Country));
+        this.NotifyPropertyChanged<Visibility>((() => this.CityFieldVisibility));
         this._cityId = 0L;
-        this.City = null;
+        this.City =  null;
       }
     }
 
@@ -60,8 +61,8 @@ namespace VKClient.Groups.Management.Information
       set
       {
         this._city = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.City));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.AddressFieldVisibility));
+        this.NotifyPropertyChanged<string>((() => this.City));
+        this.NotifyPropertyChanged<Visibility>((() => this.AddressFieldVisibility));
       }
     }
 
@@ -74,8 +75,8 @@ namespace VKClient.Groups.Management.Information
       set
       {
         this._address = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Address));
-        this.NotifyPropertyChanged<double>((System.Linq.Expressions.Expression<Func<double>>) (() => this.AddressPlaceholderOpacity));
+        this.NotifyPropertyChanged<string>((() => this.Address));
+        this.NotifyPropertyChanged<double>((() => this.AddressPlaceholderOpacity));
       }
     }
 
@@ -88,7 +89,7 @@ namespace VKClient.Groups.Management.Information
       set
       {
         this._place = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Place));
+        this.NotifyPropertyChanged<string>((() => this.Place));
       }
     }
 
@@ -146,10 +147,11 @@ namespace VKClient.Groups.Management.Information
       Action<VKClient.Common.Backend.DataObjects.Country> countryPickedCallback = (Action<VKClient.Common.Backend.DataObjects.Country>) (c =>
       {
         this._countryId = c.id;
-        this.Country = c.id != 0L ? c.name : null;
+        this.Country = c.id != 0L ? c.name :  null;
       });
-      object local = null;
-      CountryPickerUC.Show(selectedCountry, num != 0, countryPickedCallback, (Action) local);
+      // ISSUE: variable of the null type
+      
+      CountryPickerUC.Show(selectedCountry, num != 0, countryPickedCallback, null);
     }
 
     public void ChooseCity()
@@ -161,56 +163,57 @@ namespace VKClient.Groups.Management.Information
       Action<VKClient.Common.Backend.DataObjects.City> cityPickedCallback = (Action<VKClient.Common.Backend.DataObjects.City>) (c =>
       {
         this._cityId = c.id;
-        this.City = c.id != 0L ? c.name : null;
+        this.City = c.id != 0L ? c.name :  null;
       });
-      object local = null;
-      CityPickerUC.Show(countryId, selectedCity, num != 0, cityPickedCallback, (Action) local);
+      // ISSUE: variable of the null type
+      
+      CityPickerUC.Show(countryId, selectedCity, num != 0, cityPickedCallback, null);
     }
 
     public void SaveChanges()
     {
-      this.SetInProgress(true, "");
-      this.IsFormEnabled = false;
-      GroupsService current = GroupsService.Current;
-      long communityId = this._communityId;
-      long countryId = this._countryId;
-      long cityId = this._cityId;
-      string address = this.Address;
-      string place1 = this.Place;
-      GeoCoordinate geoCoordinate1 = this.GeoCoordinate;
-      double latitude = geoCoordinate1 != null ? geoCoordinate1.Latitude : 0.0;
-      GeoCoordinate geoCoordinate2 = this.GeoCoordinate;
-      double longitude = geoCoordinate2 != null ? geoCoordinate2.Longitude : 0.0;
-      Action<BackendResult<PlacementEditingResult, ResultCode>> callback = (Action<BackendResult<PlacementEditingResult, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        if (result.ResultCode == ResultCode.Succeeded)
+        this.SetInProgress(true, "");
+        this.IsFormEnabled = false;
+        GroupsService current = GroupsService.Current;
+        long communityId = this._communityId;
+        long countryId = this._countryId;
+        long cityId = this._cityId;
+        string address = this.Address;
+        string place1 = this.Place;
+        GeoCoordinate geoCoordinate1 = this.GeoCoordinate;
+        double latitude = (object)geoCoordinate1 != null ? geoCoordinate1.Latitude : 0.0;
+        GeoCoordinate geoCoordinate2 = this.GeoCoordinate;
+        double longitude = (object)geoCoordinate2 != null ? geoCoordinate2.Longitude : 0.0;
+        Action<BackendResult<PlacementEditingResult, ResultCode>> callback = (Action<BackendResult<PlacementEditingResult, ResultCode>>)(result => Execute.ExecuteOnUIThread((Action)(() =>
         {
-          VKClient.Common.Backend.DataObjects.Place place2 = new VKClient.Common.Backend.DataObjects.Place()
-          {
-            country_id = this._countryId,
-            country_name = this.Country,
-            city_id = this._cityId,
-            city_name = this.City,
-            address = this.Address,
-            title = this.Place,
-            latitude = this.GeoCoordinate.Latitude,
-            longitude = this.GeoCoordinate.Longitude,
-            group_id = this._communityId
-          };
-          Navigator.Current.GoBack();
-          EventAggregator.Current.Publish((object) new CommunityPlacementEdited()
-          {
-            Place = place2
-          });
-        }
-        else
-        {
-          this.SetInProgress(false, "");
-          this.IsFormEnabled = true;
-          GenericInfoUC.ShowBasedOnResult((int) result.ResultCode, "", (VKRequestsDispatcher.Error) null);
-        }
-      })));
-      current.SetCommunityPlacement(communityId, countryId, cityId, address, place1, latitude, longitude, callback);
+            if (result.ResultCode == ResultCode.Succeeded)
+            {
+                VKClient.Common.Backend.DataObjects.Place place2 = new VKClient.Common.Backend.DataObjects.Place()
+                {
+                    country_id = this._countryId,
+                    country_name = this.Country,
+                    city_id = this._cityId,
+                    city_name = this.City,
+                    address = this.Address,
+                    title = this.Place,
+                    latitude = this.GeoCoordinate.Latitude,
+                    longitude = this.GeoCoordinate.Longitude,
+                    group_id = this._communityId
+                };
+                Navigator.Current.GoBack();
+                EventAggregator.Current.Publish((object)new CommunityPlacementEdited()
+                {
+                    Place = place2
+                });
+            }
+            else
+            {
+                this.SetInProgress(false, "");
+                this.IsFormEnabled = true;
+                GenericInfoUC.ShowBasedOnResult((int)result.ResultCode, "", null);
+            }
+        })));
+        current.SetCommunityPlacement(communityId, countryId, cityId, address, place1, latitude, longitude, callback);
     }
   }
 }

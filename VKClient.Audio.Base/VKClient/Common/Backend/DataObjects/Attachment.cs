@@ -10,7 +10,7 @@ namespace VKClient.Common.Backend.DataObjects
 
     public AudioObj audio { get; set; }
 
-    public VKClient.Common.Backend.DataObjects.Video video { get; set; }
+    public Video video { get; set; }
 
     public Photo photo { get; set; }
 
@@ -36,6 +36,8 @@ namespace VKClient.Common.Backend.DataObjects
 
     public Album album { get; set; }
 
+    public MoneyTransfer money_transfer { get; set; }
+
     public Wiki Page { get; set; }
 
     public void Write(BinaryWriter writer)
@@ -45,10 +47,10 @@ namespace VKClient.Common.Backend.DataObjects
 
     private void SerializeForVersion2(BinaryWriter writer)
     {
-      writer.Write(6);
+      writer.Write(7);
       writer.WriteString(this.type);
       writer.Write<AudioObj>(this.audio, false);
-      writer.Write<VKClient.Common.Backend.DataObjects.Video>(this.video, false);
+      writer.Write<Video>(this.video, false);
       writer.Write<Photo>(this.photo, false);
       writer.Write<Doc>(this.doc, false);
       writer.Write<WallPost>(this.wall, false);
@@ -61,6 +63,7 @@ namespace VKClient.Common.Backend.DataObjects
       writer.Write<Product>(this.market, false);
       writer.Write<MarketAlbum>(this.market_album, false);
       writer.Write<Album>(this.album, false);
+      writer.Write<MoneyTransfer>(this.money_transfer, false);
     }
 
     public void Read(BinaryReader reader)
@@ -68,7 +71,7 @@ namespace VKClient.Common.Backend.DataObjects
       int num1 = reader.ReadInt32();
       this.type = reader.ReadString();
       this.audio = reader.ReadGeneric<AudioObj>();
-      this.video = reader.ReadGeneric<VKClient.Common.Backend.DataObjects.Video>();
+      this.video = reader.ReadGeneric<Video>();
       this.photo = reader.ReadGeneric<Photo>();
       this.doc = reader.ReadGeneric<Doc>();
       this.wall = reader.ReadGeneric<WallPost>();
@@ -87,11 +90,16 @@ namespace VKClient.Common.Backend.DataObjects
       if (num1 >= num4)
         this.wall_reply = reader.ReadGeneric<Comment>();
       int num5 = 6;
-      if (num1 < num5)
+      if (num1 >= num5)
+      {
+        this.market = reader.ReadGeneric<Product>();
+        this.market_album = reader.ReadGeneric<MarketAlbum>();
+        this.album = reader.ReadGeneric<Album>();
+      }
+      int num6 = 7;
+      if (num1 < num6)
         return;
-      this.market = reader.ReadGeneric<Product>();
-      this.market_album = reader.ReadGeneric<MarketAlbum>();
-      this.album = reader.ReadGeneric<Album>();
+      this.money_transfer = reader.ReadGeneric<MoneyTransfer>();
     }
   }
 }

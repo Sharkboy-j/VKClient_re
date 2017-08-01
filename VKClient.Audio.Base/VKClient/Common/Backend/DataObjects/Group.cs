@@ -5,7 +5,7 @@ using VKClient.Common.Framework;
 
 namespace VKClient.Common.Backend.DataObjects
 {
-  public class Group : IBinarySerializable
+  public class Group : IProfile, IBinarySerializable
   {
     private string _description = "";
     private Counters _counters = new Counters();
@@ -27,6 +27,22 @@ namespace VKClient.Common.Backend.DataObjects
       set
       {
         this._name = (value ?? "").ForUI();
+      }
+    }
+
+    public string first_name_gen
+    {
+      get
+      {
+        return this.name;
+      }
+    }
+
+    public string first_name
+    {
+      get
+      {
+        return this.name;
       }
     }
 
@@ -77,12 +93,12 @@ namespace VKClient.Common.Backend.DataObjects
         this._type = value;
         if (!string.IsNullOrEmpty(this._type))
         {
-          string str = this._type;
-          if (!(str == "group"))
+          string type = this._type;
+          if (!(type == "group"))
           {
-            if (!(str == "page"))
+            if (!(type == "page"))
             {
-              if (str == "event")
+              if (type == "event")
               {
                 this.GroupType = GroupType.Event;
                 return;
@@ -234,6 +250,14 @@ namespace VKClient.Common.Backend.DataObjects
       }
     }
 
+    public int can_see_gifts
+    {
+      get
+      {
+        return 0;
+      }
+    }
+
     public int is_closed { get; set; }
 
     public GroupPrivacy Privacy
@@ -308,6 +332,8 @@ namespace VKClient.Common.Backend.DataObjects
 
     public int can_message { get; set; }
 
+    public int is_messages_blocked { get; set; }
+
     public BanInfo ban_info { get; set; }
 
     public string site { get; set; }
@@ -327,6 +353,10 @@ namespace VKClient.Common.Backend.DataObjects
     public ProfileMainSectionType MainSection { get; set; }
 
     public Market market { get; set; }
+
+    public AppButton app_button { get; set; }
+
+    public Cover cover { get; set; }
 
     public void Write(BinaryWriter writer)
     {

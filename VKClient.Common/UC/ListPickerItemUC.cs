@@ -15,6 +15,7 @@ namespace VKClient.Common.UC
 
     public ListPickerItemUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -24,11 +25,11 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/ListPickerItemUC.xaml", UriKind.Relative));
-      this.CommonStates = (VisualStateGroup) this.FindName("CommonStates");
-      this.Normal = (VisualState) this.FindName("Normal");
-      this.Selected = (VisualState) this.FindName("Selected");
-      this.textBlock = (TextBlock) this.FindName("textBlock");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/ListPickerItemUC.xaml", UriKind.Relative));
+      this.CommonStates = (VisualStateGroup) base.FindName("CommonStates");
+      this.Normal = (VisualState) base.FindName("Normal");
+      this.Selected = (VisualState) base.FindName("Selected");
+      this.textBlock = (TextBlock) base.FindName("textBlock");
     }
   }
 }

@@ -7,22 +7,34 @@ using VKClient.Common.Library;
 
 namespace VKClient.Groups.UC
 {
-    public partial class LinkUC : UserControl
+  public class LinkUC : UserControl
   {
+    private bool _contentLoaded;
+
     public LinkUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
-    private void ActionButton_OnClicked(object sender, GestureEventArgs e)
+    private void ActionButton_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
       e.Handled = true;
-      ((LinkHeader) this.DataContext).ActionButtonAction((FrameworkElement) this);
+      ((LinkHeader) base.DataContext).ActionButtonAction((FrameworkElement) this);
     }
 
     private void ActionButton_OnPressed(object sender, MouseButtonEventArgs e)
     {
       e.Handled = true;
+    }
+
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Groups;component/UC/LinkUC.xaml", UriKind.Relative));
     }
   }
 }

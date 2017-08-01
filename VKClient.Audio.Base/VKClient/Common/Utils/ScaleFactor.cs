@@ -30,16 +30,20 @@ namespace VKClient.Common.Utils
     public static bool IsFullHD()
     {
       if (!ScaleFactor._isFullHD.HasValue)
-        ScaleFactor._isFullHD = ScaleFactor.GetPhysicalScreenSize().Width <= 1000.0 ? new bool?(false) : new bool?(true);
+      {
+        Size physicalScreenSize = ScaleFactor.GetPhysicalScreenSize();
+        // ISSUE: explicit reference operation
+        ScaleFactor._isFullHD = ((Size) @physicalScreenSize).Width <= 1000.0 ? new bool?(false) : new bool?(true);
+      }
       return ScaleFactor._isFullHD.Value;
     }
 
     private static Size GetPhysicalScreenSize()
     {
-      object propertyValue;
-      if (!DeviceExtendedProperties.TryGetValue("PhysicalScreenResolution", out propertyValue))
-        return new Size();
-      return (Size) propertyValue;
+      object obj;
+      if (!DeviceExtendedProperties.TryGetValue("PhysicalScreenResolution", out obj))
+        return default(Size);
+      return (Size) obj;
     }
 
     public static void GetScaleFactorLowestFraction(out int divident, out int divisor, bool isRealScaleFactor = false)

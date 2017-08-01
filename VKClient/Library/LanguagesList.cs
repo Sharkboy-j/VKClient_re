@@ -17,31 +17,11 @@ namespace VKClient.Library
             id = 0,
             name = CommonResources.AccentChoiceSystem
           },
-          new BGType()
-          {
-            id = 1,
-            name = "English"
-          },
-          new BGType()
-          {
-            id = 2,
-            name = "русский"
-          },
-          new BGType()
-          {
-            id = 3,
-            name = "українська"
-          },
-          new BGType()
-          {
-            id = 4,
-            name = "беларуская"
-          },
-          new BGType()
-          {
-            id = 5,
-            name = "português brasileiro"
-          }
+          new BGType() { id = 1, name = "English" },
+          new BGType() { id = 2, name = "русский" },
+          new BGType() { id = 3, name = "українська" },
+          new BGType() { id = 4, name = "беларуская" },
+          new BGType() { id = 5, name = "português brasileiro" }
         };
       return LanguagesList._list;
     }

@@ -38,7 +38,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._isFormEnabled = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormEnabled));
       }
     }
 
@@ -51,9 +51,9 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._wallOrComments = value;
-        this.NotifyPropertyChanged<CommunityServiceState>((System.Linq.Expressions.Expression<Func<CommunityServiceState>>) (() => this.WallOrComments));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsCommentsChecked));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.WallStateString));
+        this.NotifyPropertyChanged<CommunityServiceState>((() => this.WallOrComments));
+        this.NotifyPropertyChanged<bool>((() => this.IsCommentsChecked));
+        this.NotifyPropertyChanged<string>((() => this.WallStateString));
       }
     }
 
@@ -66,9 +66,9 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._photos = value;
-        this.NotifyPropertyChanged<CommunityServiceState>((System.Linq.Expressions.Expression<Func<CommunityServiceState>>) (() => this.Photos));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsPhotosChecked));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.PhotosStateString));
+        this.NotifyPropertyChanged<CommunityServiceState>((() => this.Photos));
+        this.NotifyPropertyChanged<bool>((() => this.IsPhotosChecked));
+        this.NotifyPropertyChanged<string>((() => this.PhotosStateString));
       }
     }
 
@@ -81,9 +81,9 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._videos = value;
-        this.NotifyPropertyChanged<CommunityServiceState>((System.Linq.Expressions.Expression<Func<CommunityServiceState>>) (() => this.Videos));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsVideosChecked));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.VideosStateString));
+        this.NotifyPropertyChanged<CommunityServiceState>((() => this.Videos));
+        this.NotifyPropertyChanged<bool>((() => this.IsVideosChecked));
+        this.NotifyPropertyChanged<string>((() => this.VideosStateString));
       }
     }
 
@@ -96,9 +96,9 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._audios = value;
-        this.NotifyPropertyChanged<CommunityServiceState>((System.Linq.Expressions.Expression<Func<CommunityServiceState>>) (() => this.Audios));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsAudiosChecked));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.AudiosStateString));
+        this.NotifyPropertyChanged<CommunityServiceState>((() => this.Audios));
+        this.NotifyPropertyChanged<bool>((() => this.IsAudiosChecked));
+        this.NotifyPropertyChanged<string>((() => this.AudiosStateString));
       }
     }
 
@@ -111,8 +111,8 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._documents = value;
-        this.NotifyPropertyChanged<CommunityServiceState>((System.Linq.Expressions.Expression<Func<CommunityServiceState>>) (() => this.Documents));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.DocumentsStateString));
+        this.NotifyPropertyChanged<CommunityServiceState>((() => this.Documents));
+        this.NotifyPropertyChanged<string>((() => this.DocumentsStateString));
       }
     }
 
@@ -125,9 +125,9 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._discussions = value;
-        this.NotifyPropertyChanged<CommunityServiceState>((System.Linq.Expressions.Expression<Func<CommunityServiceState>>) (() => this.Discussions));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsDiscussionsChecked));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.DiscussionsStateString));
+        this.NotifyPropertyChanged<CommunityServiceState>((() => this.Discussions));
+        this.NotifyPropertyChanged<bool>((() => this.IsDiscussionsChecked));
+        this.NotifyPropertyChanged<string>((() => this.DiscussionsStateString));
       }
     }
 
@@ -140,7 +140,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._links = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.Links));
+        this.NotifyPropertyChanged<bool>((() => this.Links));
       }
     }
 
@@ -153,7 +153,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._events = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.Events));
+        this.NotifyPropertyChanged<bool>((() => this.Events));
       }
     }
 
@@ -166,7 +166,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._contacts = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.Contacts));
+        this.NotifyPropertyChanged<bool>((() => this.Contacts));
       }
     }
 
@@ -174,8 +174,8 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        CommunitySettings communitySettings = this._information;
-        return (communitySettings == null || communitySettings.Type != GroupType.PublicPage).ToVisiblity();
+        CommunitySettings information = this._information;
+        return (information == null || information.Type != GroupType.PublicPage).ToVisiblity();
       }
     }
 
@@ -183,8 +183,8 @@ namespace VKClient.Groups.Management.Library
     {
       get
       {
-        CommunitySettings communitySettings = this._information;
-        return (communitySettings != null && communitySettings.Type == GroupType.PublicPage).ToVisiblity();
+        CommunitySettings information = this._information;
+        return (information != null && information.Type == GroupType.PublicPage).ToVisiblity();
       }
     }
 
@@ -305,7 +305,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._isStrongLanguageFilterEnabled = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsStrongLanguageFilterEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsStrongLanguageFilterEnabled));
       }
     }
 
@@ -318,8 +318,8 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._isKeyWordsFilterEnabled = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsKeyWordsFilterEnabled));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.KeyWordsFieldVisibility));
+        this.NotifyPropertyChanged<bool>((() => this.IsKeyWordsFilterEnabled));
+        this.NotifyPropertyChanged<Visibility>((() => this.KeyWordsFieldVisibility));
       }
     }
 
@@ -332,7 +332,7 @@ namespace VKClient.Groups.Management.Library
       set
       {
         this._keyWords = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.KeyWords));
+        this.NotifyPropertyChanged<string>((() => this.KeyWords));
       }
     }
 
@@ -349,65 +349,64 @@ namespace VKClient.Groups.Management.Library
       this._communityId = communityId;
     }
 
-    public override void Load(Action<bool> callback)
+    public override void Load(Action<ResultCode> callback)
     {
-      GroupsService.Current.GetCommunitySettings(this._communityId, (Action<BackendResult<CommunitySettings, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        if (result.ResultCode == ResultCode.Succeeded)
+        GroupsService.Current.GetCommunitySettings(this._communityId, (Action<BackendResult<CommunitySettings, ResultCode>>)(result => Execute.ExecuteOnUIThread((Action)(() =>
         {
-          this._information = result.ResultData;
-          this.WallOrComments = (CommunityServiceState) this._information.wall;
-          if (this._information.Type != GroupType.PublicPage)
-          {
-            this.Documents = (CommunityServiceState) this._information.docs;
-          }
-          else
-          {
-            this.Links = this._information.links == 1;
-            this.Events = this._information.events == 1;
-            this.Contacts = this._information.contacts == 1;
-          }
-          this.Photos = (CommunityServiceState) this._information.photos;
-          this.Videos = (CommunityServiceState) this._information.video;
-          this.Audios = (CommunityServiceState) this._information.audio;
-          this.Discussions = (CommunityServiceState) this._information.topics;
-          this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.DetailedFormVisibility));
-          this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.SimpleFormVisibility));
-          this.IsStrongLanguageFilterEnabled = this._information.obscene_filter == 1;
-          this.IsKeyWordsFilterEnabled = this._information.obscene_stopwords == 1;
-          if (this._information.obscene_words != null)
-          {
-            foreach (string obsceneWord in this._information.obscene_words)
-              this.KeyWords = !(this.KeyWords == "") ? this.KeyWords + ", " + obsceneWord : obsceneWord;
-          }
-          callback(true);
-        }
-        else
-          callback(false);
-      }))));
+            ResultCode resultCode = result.ResultCode;
+            if (resultCode == ResultCode.Succeeded)
+            {
+                this._information = result.ResultData;
+                this.WallOrComments = (CommunityServiceState)this._information.wall;
+                if (this._information.Type != GroupType.PublicPage)
+                {
+                    this.Documents = (CommunityServiceState)this._information.docs;
+                }
+                else
+                {
+                    this.Links = this._information.links == 1;
+                    this.Events = this._information.events == 1;
+                    this.Contacts = this._information.contacts == 1;
+                }
+                this.Photos = (CommunityServiceState)this._information.photos;
+                this.Videos = (CommunityServiceState)this._information.video;
+                this.Audios = (CommunityServiceState)this._information.audio;
+                this.Discussions = (CommunityServiceState)this._information.topics;
+                this.NotifyPropertyChanged<Visibility>((() => this.DetailedFormVisibility));
+                this.NotifyPropertyChanged<Visibility>((() => this.SimpleFormVisibility));
+                this.IsStrongLanguageFilterEnabled = this._information.obscene_filter == 1;
+                this.IsKeyWordsFilterEnabled = this._information.obscene_stopwords == 1;
+                if (this._information.obscene_words != null)
+                {
+                    foreach (string obsceneWord in this._information.obscene_words)
+                        this.KeyWords = !(this.KeyWords == "") ? this.KeyWords + ", " + obsceneWord : obsceneWord;
+                }
+            }
+            callback(resultCode);
+        }))));
     }
 
     public void SaveChanges()
     {
-      this.SetInProgress(true, "");
-      this.IsFormEnabled = false;
-      GroupsService.Current.SetCommunityServices(this._communityId, (int) this.WallOrComments, (int) this.Photos, (int) this.Videos, (int) this.Audios, (int) this.Documents, (int) this.Discussions, this.Links ? 1 : 0, this.Events ? 1 : 0, this.Contacts ? 1 : 0, this.IsStrongLanguageFilterEnabled ? 1 : 0, this.IsKeyWordsFilterEnabled ? 1 : 0, this.KeyWords, (Action<BackendResult<int, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        if (result.ResultCode == ResultCode.Succeeded)
+        this.SetInProgress(true, "");
+        this.IsFormEnabled = false;
+        GroupsService.Current.SetCommunityServices(this._communityId, (int)this.WallOrComments, (int)this.Photos, (int)this.Videos, (int)this.Audios, (int)this.Documents, (int)this.Discussions, this.Links ? 1 : 0, this.Events ? 1 : 0, this.Contacts ? 1 : 0, this.IsStrongLanguageFilterEnabled ? 1 : 0, this.IsKeyWordsFilterEnabled ? 1 : 0, this.KeyWords, (Action<BackendResult<int, ResultCode>>)(result => Execute.ExecuteOnUIThread((Action)(() =>
         {
-          EventAggregator.Current.Publish((object) new CommunityServicesChanged()
-          {
-            Id = this._communityId
-          });
-          Navigator.Current.GoBack();
-        }
-        else
-        {
-          this.SetInProgress(false, "");
-          this.IsFormEnabled = true;
-          GenericInfoUC.ShowBasedOnResult((int) result.ResultCode, "", (VKRequestsDispatcher.Error) null);
-        }
-      }))));
+            if (result.ResultCode == ResultCode.Succeeded)
+            {
+                EventAggregator.Current.Publish((object)new CommunityServicesChanged()
+                {
+                    Id = this._communityId
+                });
+                Navigator.Current.GoBack();
+            }
+            else
+            {
+                this.SetInProgress(false, "");
+                this.IsFormEnabled = true;
+                GenericInfoUC.ShowBasedOnResult((int)result.ResultCode, "", null);
+            }
+        }))));
     }
 
     private static string GetStateString(CommunityServiceState state, bool isWall)

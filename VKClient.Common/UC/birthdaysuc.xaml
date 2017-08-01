@@ -3,98 +3,73 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
              xmlns:framework="clr-namespace:VKClient.Common.Framework"
+             xmlns:uc="clr-namespace:VKClient.Common.UC"
+             mc:Ignorable="d"
              FontFamily="{StaticResource PhoneFontFamilyNormal}"
              FontSize="{StaticResource PhoneFontSizeNormal}"
-             Foreground="{StaticResource PhoneForegroundBrush}"
-             d:DesignHeight="480"
-             d:DesignWidth="480">
+             Foreground="{StaticResource PhoneForegroundBrush}">
 
-    <UserControl.Resources>
-        <DataTemplate x:Key="BirthdayRecordTemplate">
-            <Grid  Height="62"
-                   Background="Transparent"
-                   framework:MetroInMotion.Tilt="2.5"
-                   Margin="16,6,16,6"
-                   Tap="Grid_Tap"
-                   Hold="Grid_Hold">
-                <Grid HorizontalAlignment="Left">
-                    <Ellipse Fill="{StaticResource PhoneMenuImagePlaceholderBackgroundBrush}"
-                             Width="62"
-                             HorizontalAlignment="Left"
-                             Height="62" />
-
-                    <Image framework:ImageLoader.UriSource="{Binding ImageSrc}"
-                           Stretch="UniformToFill"
-                           Width="62"
-                           Height="62">
-                        <Image.Clip>
-                            <EllipseGeometry Center="31 31"
-                                             RadiusX="31"
-                                             RadiusY="31" />
-                        </Image.Clip>
-                    </Image>
-                </Grid>
-
-                <StackPanel Margin="72,0,0,0"
-                            Orientation="Vertical">
-                    <TextBlock Text="{Binding Title}"
-                               Margin="5 0 0 0"
-                               Style="{StaticResource ItemHeader1Text}"
-                               Foreground="White" />
-                    <TextBlock Text="{Binding Subtitle}"
-                               Margin="6, -3, 0, 0"
-                               Foreground="{StaticResource PhoneSidebarSubtleBrush}" />
-                </StackPanel>
-            </Grid>
-        </DataTemplate>
-    </UserControl.Resources>
-
-    <Grid x:Name="LayoutRoot"
-          Background="Transparent"
-          Visibility="{Binding HaveAnyVisibility}">
+    <Grid Background="Transparent"
+          Visibility="{Binding BlockVisibility}">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid x:Name="gridHeader"
-              Background="Transparent"
-              framework:MetroInMotion.Tilt="2.1"
-              VerticalAlignment="Top"
-              Tap="HeaderTap"
-              Hold="HeaderHold">
+
+        <Rectangle Fill="White"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Top"
+                   Opacity="0.1"
+                   Height="1" />
+
+        <Grid Background="Transparent"
+              Height="64">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Margin="15 24 0 0"
-                       FontFamily="Segoe WP Semibold"
-                       Foreground="{StaticResource PhoneSidebarSubtleBrush}"
-                       Text="{Binding Source={StaticResource LocalizedStrings}, Path=LocalizedResources.Birthdays_Title}" />
+            <Border Background="Transparent"
+                    framework:MetroInMotion.Tilt="1.5"
+                    Tap="Header_OnClicked"
+                    Hold="Header_OnHolding">
 
-            <Border Width="11"
-                    Height="16"
-                    Grid.Column="1"
-                    VerticalAlignment="Top"
-                    Margin="0 31 20 0"
-                    Background="{StaticResource PhoneSidebarSubtleBrush}">
-                <Border.OpacityMask>
-                    <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/Chevron.png" />
-                </Border.OpacityMask>
+                <TextBlock Margin="16 16 0 0"
+                           FontFamily="Segoe WP SemiBold"
+                           Foreground="{StaticResource PhoneMainMenuStatusForegroundBrush}"
+                           Text="{Binding Path=LocalizedResources.MainMenu_Birthdays, Source={StaticResource LocalizedStrings}}"
+                           FontSize="20" />
             </Border>
 
-
+            <Border Grid.Column="1"
+                    Background="Transparent"
+                    framework:MetroInMotion.Tilt="1.5"
+                    Tap="Header_OnClicked"
+                    Hold="Header_OnHolding">
+                <TextBlock Margin="16 16 16 0"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Right"
+                           Foreground="{StaticResource PhoneMainMenuStatusForegroundBrush}"
+                           Text="{Binding Path=LocalizedResources.ShowAll, Source={StaticResource LocalizedStrings}}" />
+            </Border>
         </Grid>
+
         <ItemsControl Grid.Row="1"
-                      VerticalAlignment="Top"
-                      ItemsSource="{Binding Birthdays}"
-                      Margin="0 11 0 0"
-                      ItemTemplate="{StaticResource BirthdayRecordTemplate}">
-
-
+                      ItemsSource="{Binding Birthdays}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <uc:BirthdayListItemUC UserName="{Binding UserName}"
+                                           Description="{Binding Description}"
+                                           GiftVisibility="{Binding GiftVisibility}"
+                                           ItemTap="Birthday_OnClicked"
+                                           ItemHold="Birthday_OnHolding"
+                                           GiftTap="SendGift_OnTap"
+                                           GiftHold="SendGift_OnHold" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
         </ItemsControl>
     </Grid>
+
 </UserControl>

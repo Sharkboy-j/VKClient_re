@@ -7,6 +7,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using VKClient.Audio.Base.BackendServices;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Audio.Base.Events;
 using VKClient.Audio.Base.Library;
@@ -23,6 +24,7 @@ using VKClient.Common.Stickers.Views;
 using VKClient.Common.UC;
 using VKClient.Common.Utils;
 using VKClient.Photos.Library;
+using Windows.Storage;
 using Windows.System;
 
 namespace VKClient.Library
@@ -37,7 +39,8 @@ namespace VKClient.Library
         private static readonly Regex _feedWallReg = new Regex("/feed?w=wall[-0-9]+_[0-9]+");
         private static readonly Regex _audiosReg = new Regex("/audios[-0-9]+");
         private static readonly Regex _newsReg = new Regex("/feed(\\s|$)");
-        private static readonly Regex _feedbackReg = new Regex("/feed?section=notifications");
+        private static readonly Regex _recommendedNewsReg = new Regex("/feed\\?section=recommended(\\s|$)");
+        private static readonly Regex _feedbackReg = new Regex("/feed\\?section=notifications(\\s|$)");
         private static readonly Regex _profileReg = new Regex("/(id|wall)[0-9]+");
         private static readonly Regex _communityReg = new Regex("/(club|event|public|wall)[-0-9]+");
         private static readonly Regex _photosReg = new Regex("/(photos|albums)[-0-9]+");
@@ -50,13 +53,16 @@ namespace VKClient.Library
         private static readonly Regex _topicReg = new Regex("/topic[-0-9]+_[0-9]+");
         private static readonly Regex _stickersSettingsReg = new Regex("/stickers/settings(\\s|$)");
         private static readonly Regex _settingsReg = new Regex("/settings(\\s|$)");
-        private static readonly Regex _stickersReg = new Regex("/stickers(\\s|$)");
+        private static readonly Regex _stickersReg = new Regex("/stickers(\\s|\\?|$)");
         private static readonly Regex _stickersPackReg = new Regex("/stickers([\\/A-Za-z0-9]+)");
         private static readonly Regex _faveReg = new Regex("/fave(\\s|$)");
         private static readonly Regex _appsReg = new Regex("/apps(\\s|$)");
+        private static readonly Regex _appReg = new Regex("/app[-0-9]+_[-0-9]+");
         private static readonly Regex _marketAlbumReg = new Regex("/market[-0-9]+\\?section=album_[-0-9]+");
         private static readonly Regex _marketReg = new Regex("/market[-0-9]+");
         private static readonly Regex _productReg = new Regex("/product[-0-9]+_[0-9]+");
+        private static readonly Regex _giftsReg = new Regex("/gifts[0-9]+");
+        private static readonly Regex _giftsCatalog = new Regex("/gifts(\\s|$)");
         private static readonly Regex _namedObjReg = new Regex("/[A-Za-z0-9\\\\._-]+");
         private readonly List<NavigatorImpl.NavigationTypeMatch> _navTypesList = new List<NavigatorImpl.NavigationTypeMatch>()
     {
@@ -68,6 +74,7 @@ namespace VKClient.Library
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._feedWallReg, NavigatorImpl.NavType.wallPost),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._audiosReg, NavigatorImpl.NavType.audios),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._newsReg, NavigatorImpl.NavType.news),
+      new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._recommendedNewsReg, NavigatorImpl.NavType.recommendedNews),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._feedbackReg, NavigatorImpl.NavType.feedback),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._profileReg, NavigatorImpl.NavType.profile),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._communityReg, NavigatorImpl.NavType.community),
@@ -83,16 +90,20 @@ namespace VKClient.Library
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._settingsReg, NavigatorImpl.NavType.settings),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._faveReg, NavigatorImpl.NavType.fave),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._appsReg, NavigatorImpl.NavType.apps),
+      new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._appReg, NavigatorImpl.NavType.app),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._marketAlbumReg, NavigatorImpl.NavType.marketAlbum),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._marketReg, NavigatorImpl.NavType.market),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._productReg, NavigatorImpl.NavType.product),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._stickersReg, NavigatorImpl.NavType.stickers),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._stickersPackReg, NavigatorImpl.NavType.stickersPack),
+      new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._giftsReg, NavigatorImpl.NavType.gifts),
+      new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._giftsCatalog, NavigatorImpl.NavType.giftsCatalog),
       new NavigatorImpl.NavigationTypeMatch(NavigatorImpl._namedObjReg, NavigatorImpl.NavType.namedObject)
     };
         private List<string> _history = new List<string>();
         private const string VK_ME_DOMAIN = "vk.me/";
         private bool _isResolvingScreenName;
+        private bool _isNavigatingToGame;
 
         private static Frame NavigationService
         {
@@ -117,7 +128,7 @@ namespace VKClient.Library
             if (!NavigatorImpl.NavigationService.CanGoBack)
             {
                 FramePageUtils.CurrentPage.SwitchNavigationEffects();
-                ParametersRepository.SetParameterForId("SwitchNavigationEffects", (object)true);
+                ParametersRepository.SetParameterForId("SwitchNavigationEffects", true);
                 Navigator.Current.NavigateToMainPage();
             }
             else
@@ -128,19 +139,35 @@ namespace VKClient.Library
         {
             if (string.IsNullOrWhiteSpace(uri))
                 return;
-            if (!uri.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) && !uri.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
-                uri = "http://" + uri;
-            Logger.Instance.Info("Navigator.NavigateToWebUri, uri={0}, forceWebNavigation={1}", (object)uri, (object)forceWebNavigation);
-            bool flag = false;
-            if (!forceWebNavigation)
-                flag = this.GetWithinAppNavigationUri(uri, fromPush);
-            if (flag)
-                return;
-            uri = this.PrepareWebUri(uri);
-            new WebBrowserTask()
+            if (uri.StartsWith("tel:"))
             {
-                Uri = new Uri(uri, UriKind.Absolute)
-            }.Show();
+                try
+                {
+                    PhoneCallTask phoneCallTask = new PhoneCallTask();
+                    string str = uri.Substring(4);
+                    phoneCallTask.PhoneNumber = str;
+                    phoneCallTask.Show();
+                }
+                catch
+                {
+                }
+            }
+            else
+            {
+                if (!uri.StartsWith("http://", (StringComparison)3) && !uri.StartsWith("https://", (StringComparison)3))
+                    uri = "http://" + uri;
+                Logger.Instance.Info("Navigator.NavigateToWebUri, uri={0}, forceWebNavigation={1}", uri, forceWebNavigation);
+                bool flag = false;
+                if (!forceWebNavigation)
+                    flag = this.GetWithinAppNavigationUri(uri, fromPush, null);
+                if (flag)
+                    return;
+                uri = this.PrepareWebUri(uri);
+                WebBrowserTask webBrowserTask = new WebBrowserTask();
+                Uri uri1 = new Uri(uri, UriKind.Absolute);
+                webBrowserTask.Uri = uri1;
+                webBrowserTask.Show();
+            }
         }
 
         private string PrepareWebUri(string uri)
@@ -150,15 +177,15 @@ namespace VKClient.Library
             return uri;
         }
 
-        private bool GetWithinAppNavigationUri(string uri, bool fromPush = false)
+        public bool GetWithinAppNavigationUri(string uri, bool fromPush = false, Action<bool> customCallback = null)
         {
             if (!NavigatorImpl.IsVKUri(uri))
                 return false;
             string uri1 = uri;
-            int num = uri1.IndexOf("://", StringComparison.InvariantCulture);
+            int num = uri1.IndexOf("://", (StringComparison)2);
             if (num > -1)
                 uri1 = uri1.Remove(0, num + 3);
-            int count = uri1.IndexOf("/", StringComparison.InvariantCulture);
+            int count = uri1.IndexOf("/", (StringComparison)2);
             if (count > -1)
                 uri1 = uri1.Remove(0, count);
             if (uri1.StartsWith("dev/") || uri1.StartsWith("dev") && uri1.Length == 3)
@@ -187,7 +214,7 @@ namespace VKClient.Library
                     this.NavigateToFriends(id1, "", false, FriendsPageMode.Default);
                     break;
                 case NavigatorImpl.NavType.communities:
-                    this.NavigateToGroups(AppGlobalStateManager.Current.LoggedInUserId, "", false, 0L, 0L, "", false, "");
+                    this.NavigateToGroups(AppGlobalStateManager.Current.LoggedInUserId, "", false, 0, 0, "", false, "", 0L);
                     break;
                 case NavigatorImpl.NavType.dialogs:
                     this.NavigateToConversations();
@@ -196,16 +223,16 @@ namespace VKClient.Library
                     this.NavigateToNewsFeed(0, false);
                     break;
                 case NavigatorImpl.NavType.tagPhoto:
-                    this.NavigateToPhotoAlbum(Math.Abs(id1), id1 < 0L, "2", "0", "", 0, "", "", false, 0);
+                    this.NavigateToPhotoAlbum(Math.Abs(id1), id1 < 0, "2", "0", "", 0, "", "", false, 0, false);
                     break;
                 case NavigatorImpl.NavType.albums:
-                    this.NavigateToPhotoAlbums(false, Math.Abs(id1), id1 < 0L, 0);
+                    this.NavigateToPhotoAlbums(false, Math.Abs(id1), id1 < 0, 0);
                     break;
                 case NavigatorImpl.NavType.profile:
                     this.NavigateToUserProfile(id1, "", "", false);
                     break;
                 case NavigatorImpl.NavType.dialog:
-                    this.NavigateToConversation(id1, false, false, "", 0L, false);
+                    this.NavigateToConversation(id1, false, false, "", 0, false);
                     break;
                 case NavigatorImpl.NavType.community:
                     this.NavigateToGroup(id1, "", false);
@@ -216,25 +243,25 @@ namespace VKClient.Library
                 case NavigatorImpl.NavType.album:
                     long albumIdLong = AlbumTypeHelper.GetAlbumIdLong(id2String);
                     AlbumType albumType = AlbumTypeHelper.GetAlbumType(albumIdLong);
-                    this.NavigateToPhotoAlbum(Math.Abs(id1), id1 < 0L, albumType.ToString(), albumIdLong.ToString(), "", 0, "", "", false, 0);
+                    this.NavigateToPhotoAlbum(Math.Abs(id1), id1 < 0, albumType.ToString(), albumIdLong.ToString(), "", 0, "", "", false, 0, false);
                     break;
                 case NavigatorImpl.NavType.video:
-                    this.NavigateToVideoWithComments((VKClient.Common.Backend.DataObjects.Video)null, id1, id2, "");
+                    this.NavigateToVideoWithComments(null, id1, id2, "");
                     break;
                 case NavigatorImpl.NavType.audios:
-                    this.NavigateToAudio(0, Math.Abs(id1), id1 < 0L, 0L, 0L, "");
+                    this.NavigateToAudio(0, Math.Abs(id1), id1 < 0, 0, 0, "");
                     break;
                 case NavigatorImpl.NavType.topic:
                     flag = false;
                     break;
                 case NavigatorImpl.NavType.photo:
-                    this.NavigateToPhotoWithComments(null, (PhotoWithFullInfo)null, id1, id2, "", false, false);
+                    this.NavigateToPhotoWithComments(null, null, id1, id2, "", false, false);
                     break;
                 case NavigatorImpl.NavType.wallPost:
-                    this.NavigateToWallPostComments(id2, id1, false, 0L, 0L, "");
+                    this.NavigateToWallPostComments(id2, id1, false, 0, 0, "");
                     break;
                 case NavigatorImpl.NavType.namedObject:
-                    this.ResolveScreenNameNavigationObject(uri, objName, fromPush);
+                    this.ResolveScreenNameNavigationObject(uri, objName, fromPush, customCallback);
                     break;
                 case NavigatorImpl.NavType.stickersSettings:
                     this.NavigateToStickersManage();
@@ -246,7 +273,7 @@ namespace VKClient.Library
                     this.NavigateToFeedback();
                     break;
                 case NavigatorImpl.NavType.videos:
-                    this.NavigateToVideo(false, Math.Abs(id1), id1 < 0L, false);
+                    this.NavigateToVideo(false, Math.Abs(id1), id1 < 0, false);
                     break;
                 case NavigatorImpl.NavType.fave:
                     this.NavigateToFavorites();
@@ -254,7 +281,7 @@ namespace VKClient.Library
                 case NavigatorImpl.NavType.apps:
                     if (AppGlobalStateManager.Current.GlobalState.GamesSectionEnabled)
                     {
-                        this.NavigateToGames(0L, fromPush);
+                        this.NavigateToGames(0, fromPush);
                         break;
                     }
                     flag = false;
@@ -269,10 +296,24 @@ namespace VKClient.Library
                     this.NavigateToProduct(id1, id2);
                     break;
                 case NavigatorImpl.NavType.stickers:
-                    this.NavigateToStickersStore();
+                    this.NavigateToStickersStore(0, false);
                     break;
                 case NavigatorImpl.NavType.stickersPack:
                     NavigatorImpl.ShowStickersPack(objSub);
+                    break;
+                case NavigatorImpl.NavType.recommendedNews:
+                    this.NavigateToNewsFeed(NewsSources.Suggestions.PickableItem.ID, false);
+                    break;
+                case NavigatorImpl.NavType.app:
+                    this.NavigateToGame(id1, id2, uri, fromPush, customCallback);
+                    break;
+                case NavigatorImpl.NavType.gifts:
+                    EventAggregator.Current.Publish(new GiftsPurchaseStepsEvent(GiftPurchaseStepsSource.link, GiftPurchaseStepsAction.gifts_page));
+                    this.NavigateToGifts(id1, "", "");
+                    break;
+                case NavigatorImpl.NavType.giftsCatalog:
+                    EventAggregator.Current.Publish(new GiftsPurchaseStepsEvent(GiftPurchaseStepsSource.link, GiftPurchaseStepsAction.store));
+                    this.NavigateToGiftsCatalog(0, false);
                     break;
             }
             return flag;
@@ -340,103 +381,214 @@ namespace VKClient.Library
             StickersPackView.Show(stickersPackName, "link");
         }
 
-        private void ResolveScreenNameNavigationObject(string uri, string objName, bool fromPush)
+        private void ResolveScreenNameNavigationObject(string uri, string objName, bool fromPush, Action<bool> customCallback = null)
         {
             if (this._isResolvingScreenName)
+            {
                 return;
+            }
             this._isResolvingScreenName = true;
-            AccountService.Instance.ResolveScreenName(objName.Replace("/", ""), (Action<BackendResult<ResolvedData, ResultCode>>)(res =>
+            AccountService.Instance.ResolveScreenName(objName.Replace("/", ""), delegate(BackendResult<ResolvedData, ResultCode> res)
             {
                 this._isResolvingScreenName = false;
                 if (res.ResultCode == ResultCode.Succeeded)
-                    Execute.ExecuteOnUIThread((Action)(() =>
+                {
+                    Execute.ExecuteOnUIThread(delegate
                     {
-                        ResolvedData resultData = res.ResultData;
-                        if ((resultData != null ? resultData.resolvedObject : (ResolvedObject)null) != null)
+                        ResolvedData expr_0B = res.ResultData;
+                        if (((expr_0B != null) ? expr_0B.resolvedObject : null) != null)
                         {
                             ResolvedObject resolvedObject = res.ResultData.resolvedObject;
                             bool flag = false;
-                            int num = uri.IndexOf("://", StringComparison.InvariantCulture);
+                            int num = uri.IndexOf("://", 2);
                             if (num > -1)
                             {
-                                string str = uri.Remove(0, num + "://".Length);
-                                if (!string.IsNullOrEmpty(str) && str.StartsWith("vk.me/"))
+                                string text = uri.Remove(0, num + "://".Length);
+                                if (!string.IsNullOrEmpty(text) && text.StartsWith("vk.me/"))
+                                {
                                     flag = true;
+                                }
                             }
                             if (resolvedObject.type == "user")
                             {
                                 if (flag)
-                                    this.NavigateToConversation(resolvedObject.object_id, false, false, "", 0L, false);
+                                {
+                                    this.NavigateToConversation(resolvedObject.object_id, false, false, "", 0, false);
+                                }
                                 else
+                                {
                                     this.NavigateToUserProfile(resolvedObject.object_id, "", "", false);
+                                }
+                                Action<bool> expr_E3 = customCallback;
+                                if (expr_E3 == null)
+                                {
+                                    return;
+                                }
+                                expr_E3.Invoke(true);
+                                return;
                             }
                             else if (resolvedObject.type == "group")
                             {
                                 if (flag)
-                                    this.NavigateToConversation(-resolvedObject.object_id, false, false, "", 0L, false);
+                                {
+                                    this.NavigateToConversation(-resolvedObject.object_id, false, false, "", 0, false);
+                                }
                                 else
+                                {
                                     this.NavigateToGroup(resolvedObject.object_id, "", false);
-                            }
-                            else if (resolvedObject.type == "application" && res.ResultData.app != null && AppGlobalStateManager.Current.GlobalState.GamesSectionEnabled)
-                            {
-                                if (this.TryOpenGame(new List<Game>()
-                {
-                  res.ResultData.app
-                }, fromPush))
+                                }
+                                Action<bool> expr_14F = customCallback;
+                                if (expr_14F == null)
+                                {
                                     return;
-                                this.NavigateToWebUri(uri, true, false);
+                                }
+                                expr_14F.Invoke(true);
+                                return;
                             }
                             else
-                                this.NavigateToWebUri(uri, true, false);
+                            {
+                                if (resolvedObject.type == "application" && res.ResultData.app != null && AppGlobalStateManager.Current.GlobalState.GamesSectionEnabled)
+                                {
+                                    Game app = res.ResultData.app;
+                                    this.NavigateToGame(app, 0, uri, fromPush, customCallback);
+                                    return;
+                                }
+                                if (customCallback == null)
+                                {
+                                    this.NavigateToWebUri(uri, true, false);
+                                    return;
+                                }
+                                customCallback.Invoke(false);
+                                return;
+                            }
                         }
                         else
-                            this.NavigateToWebUri(uri, true, false);
-                    }));
+                        {
+                            if (customCallback == null)
+                            {
+                                this.NavigateToWebUri(uri, true, false);
+                                return;
+                            }
+                            customCallback.Invoke(false);
+                            return;
+                        }
+                    });
+                    return;
+                }
+                if (customCallback == null)
+                {
+                    GenericInfoUC.ShowBasedOnResult((int)res.ResultCode, "", null);
+                    return;
+                }
+                customCallback.Invoke(false);
+            });
+        }
+
+
+        private void NavigateToGame(long appId, long sourceId, string uri, bool fromPush, Action<bool> customCallback)
+        {
+            if (this._isNavigatingToGame)
+                return;
+            this._isNavigatingToGame = true;
+            AppsService.Instance.GetApp(appId, (Action<BackendResult<VKList<Game>, ResultCode>>)(result =>
+            {
+                this._isNavigatingToGame = false;
+                if (result.ResultCode == ResultCode.Succeeded)
+                {
+                    VKList<Game> resultData = result.ResultData;
+                    Game app;
+                    if (resultData == null)
+                    {
+                        app = null;
+                    }
+                    else
+                    {
+                        List<Game> items = resultData.items;
+                        app = items != null ? items.FirstOrDefault<Game>() : null;
+                    }
+                    this.NavigateToGame(app, sourceId, uri, fromPush, customCallback);
+                }
                 else
-                    GenericInfoUC.ShowBasedOnResult((int)res.ResultCode, "", (VKRequestsDispatcher.Error)null);
+                    GenericInfoUC.ShowBasedOnResult((int)result.ResultCode, "", null);
             }));
+        }
+
+        private void NavigateToGame(Game app, long sourceId, string uri, bool fromPush, Action<bool> customCallback)
+        {
+            if (app == null)
+                return;
+            long id = app.id;
+            int num1 = this.TryOpenGame(new List<Game>() { app }, fromPush) ? 1 : 0;
+            string utmParamsStr = "";
+            if (!string.IsNullOrEmpty(uri))
+            {
+                int num2 = uri.IndexOf("?", (StringComparison)2);
+                int num3 = uri.IndexOf("#", (StringComparison)2);
+                if (num2 > -1 || num3 > -1)
+                {
+                    int startIndex = -1;
+                    if (num2 > -1)
+                    {
+                        if (num3 > -1)
+                            startIndex = num2 >= num3 ? num3 : num2 + 1;
+                    }
+                    else
+                        startIndex = num3;
+                    if (startIndex > -1)
+                        utmParamsStr = uri.Substring(startIndex);
+                }
+            }
+            if (num1 == 0 && id != 0L)
+            {
+                if (customCallback == null)
+                    this.NavigateToProfileAppPage(id, sourceId, utmParamsStr);
+                else
+                    customCallback(false);
+            }
+            else
+            {
+                if (customCallback == null)
+                    return;
+                customCallback(true);
+            }
         }
 
         private bool TryOpenGame(List<Game> games, bool fromPush)
         {
-            bool flag = false;
+            bool result = false;
             if (games.Count > 0)
             {
                 Game game = games[0];
                 if (!string.IsNullOrEmpty(game.platform_id) && game.is_in_catalog == 1)
                 {
-                    flag = true;
-                    Execute.ExecuteOnUIThread((Action)(() =>
+                    result = true;
+                    Execute.ExecuteOnUIThread(delegate
                     {
                         PageBase currentPage = FramePageUtils.CurrentPage;
                         if (currentPage == null || currentPage is OpenUrlPage)
                         {
                             this.NavigateToGames(game.id, false);
+                            return;
                         }
-                        else
+                        Grid grid = currentPage.Content as Grid;
+                        FrameworkElement root = null;
+                        if (((grid != null) ? grid.Children : null) != null && grid.Children.Count > 0)
                         {
-                            Grid grid = currentPage.Content as Grid;
-                            FrameworkElement frameworkElement = null;
-                            if ((grid != null ? grid.Children : (UIElementCollection)null) != null && grid.Children.Count > 0)
-                                frameworkElement = grid.Children[0] as FrameworkElement;
-                            PageBase page = currentPage;
-                            List<object> games1 = new List<object>();
-                            games1.Add((object)game);
-                            int num = fromPush ? 4 : 3;
-                            string requestName = "";
-                            int selectedIndex = 0;
-                            FrameworkElement root = frameworkElement;
-                            page.OpenGamesPopup(games1, (GamesClickSource)num, requestName, selectedIndex, root);
+                            root = (grid.Children[0] as FrameworkElement);
                         }
-                    }));
+                        PageBase arg_94_0 = currentPage;
+                        List<object> expr_70 = new List<object>();
+                        expr_70.Add(game);
+                        arg_94_0.OpenGamesPopup(expr_70, fromPush ? GamesClickSource.push : GamesClickSource.catalog, "", 0, root);
+                    });
                 }
             }
-            return flag;
+            return result;
         }
 
         private static string GetNavigateToUserProfileString(long uid, string userName = "", string source = "")
         {
-            if (((App)Application.Current).RootFrame.Content is ProfilePage && (((App)Application.Current).RootFrame.Content as ProfilePage).ViewModel.Id == Math.Abs(uid))
+            if (((ContentControl)((App)Application.Current).RootFrame).Content is ProfilePage && (((ContentControl)((App)Application.Current).RootFrame).Content as ProfilePage).ViewModel.Id == Math.Abs(uid))
                 return null;
             if (uid < 0L)
                 return null;
@@ -458,12 +610,12 @@ namespace VKClient.Library
         {
             if (userName == null)
                 userName = "";
-            return string.Format("/VKClient.Common;component/Profiles/Shared/Views/ProfilePage.xaml?UserOrGroupId={0}&Name={1}&ForbidOverrideGoBack={2}&Source={3}", (object)uid, (object)Extensions.ForURL(userName), (object)forbidOverrideGoBack, (object)source);
+            return string.Format("/VKClient.Common;component/Profiles/Shared/Views/ProfilePage.xaml?UserOrGroupId={0}&Name={1}&ForbidOverrideGoBack={2}&Source={3}", uid, Extensions.ForURL(userName), forbidOverrideGoBack, source);
         }
 
         private static string GetNavigateTrGroupString(long groupId, string name = "")
         {
-            if (((App)Application.Current).RootFrame.Content is ProfilePage && (((App)Application.Current).RootFrame.Content as ProfilePage).ViewModel.Id == -Math.Abs(groupId))
+            if (((ContentControl)((App)Application.Current).RootFrame).Content is ProfilePage && (((ContentControl)((App)Application.Current).RootFrame).Content as ProfilePage).ViewModel.Id == -Math.Abs(groupId))
                 return null;
             return NavigatorImpl.GetNavigateToGroupNavStr(groupId, name, false);
         }
@@ -482,18 +634,18 @@ namespace VKClient.Library
         public static string GetNavigateToGroupNavStr(long groupId, string name = "", bool forbidOverrideGoBack = false)
         {
             groupId = -Math.Abs(groupId);
-            return string.Format("/VKClient.Common;component/Profiles/Shared/Views/ProfilePage.xaml?UserOrGroupId={0}&Name={1}&ForbidOverrideGoBack={2}&Source={3}", (object)groupId, (object)Extensions.ForURL(name), (object)forbidOverrideGoBack, (object)CurrentCommunitySource.ToString(CurrentCommunitySource.Source));
+            return string.Format("/VKClient.Common;component/Profiles/Shared/Views/ProfilePage.xaml?UserOrGroupId={0}&Name={1}&ForbidOverrideGoBack={2}&Source={3}", groupId, Extensions.ForURL(name), forbidOverrideGoBack, CurrentCommunitySource.ToString(CurrentCommunitySource.Source));
         }
 
         public void NavigateToPostsSearch(long ownerId, string nameGen = "")
         {
-            this.Navigate(string.Format("/VKClient.Common;component/Profiles/Shared/Views/PostsSearchPage.xaml?OwnerId={0}&NameGen={1}", ownerId, (object)nameGen));
+            this.Navigate(string.Format("/VKClient.Common;component/Profiles/Shared/Views/PostsSearchPage.xaml?OwnerId={0}&NameGen={1}", ownerId, nameGen));
         }
 
         private static string GetNavigateToPhotoAlbumsString(bool pickMode = false, long userOrGroupId = 0, bool isGroup = false, int adminLevel = 0)
         {
             userOrGroupId = userOrGroupId != 0L ? userOrGroupId : AppGlobalStateManager.Current.LoggedInUserId;
-            string str = string.Format("/VKClient.Photos;component/PhotosMainPage.xaml?PickMode={0}&UserOrGroupId={1}&IsGroup={2}&AdminLevel={3}", (object)pickMode, (object)userOrGroupId, isGroup, (object)adminLevel);
+            string str = string.Format("/VKClient.Photos;component/PhotosMainPage.xaml?PickMode={0}&UserOrGroupId={1}&IsGroup={2}&AdminLevel={3}", pickMode, userOrGroupId, isGroup, adminLevel);
             if (pickMode)
                 str += "&IsPopupNavigation=True";
             return str;
@@ -537,7 +689,7 @@ namespace VKClient.Library
             if (ParametersRepository.Contains(mode2.ToString()))
                 mode1 = WallPostViewModel.Mode.PublishWallPost;
             bool flag = FramePageUtils.CurrentPage is PostCommentsPage;
-            return string.Format("/VKClient.Common;component/NewPost.xaml?UserOrGroupId={0}&IsGroup={1}&AdminLevel={2}&IsPublicPage={3}&IsNewTopicMode={4}&Mode={5}&FromWallPostPage={6}&IsPostponed={7}&IsPopupNavigation=True", (object)userOrGroupId, isGroup, (object)adminLevel, (object)isPublicPage, (object)isNewTopicMode, (object)mode1, (object)flag, (object)isPostponed);
+            return string.Format("/VKClient.Common;component/NewPost.xaml?UserOrGroupId={0}&IsGroup={1}&AdminLevel={2}&IsPublicPage={3}&IsNewTopicMode={4}&Mode={5}&FromWallPostPage={6}&IsPostponed={7}&IsPopupNavigation=True", userOrGroupId, isGroup, adminLevel, isPublicPage, isNewTopicMode, mode1, flag, isPostponed);
         }
 
         public static string GetShareExternalContentpageNavStr()
@@ -548,11 +700,11 @@ namespace VKClient.Library
         private static string GetNavigateToVideoString(bool pickMode = false, long userOrGroupId = 0, bool isGroup = false, bool forceAllowVideoUpload = false)
         {
             if (!pickMode && isGroup)
-                return string.Format("/VKClient.Video;component/VideoCatalog/GroupVideosPage.xaml?OwnerId={0}", (object)-userOrGroupId);
+                return string.Format("/VKClient.Video;component/VideoCatalog/GroupVideosPage.xaml?OwnerId={0}", -userOrGroupId);
             userOrGroupId = userOrGroupId != 0L ? userOrGroupId : AppGlobalStateManager.Current.LoggedInUserId;
             if (!pickMode && userOrGroupId == AppGlobalStateManager.Current.LoggedInUserId)
                 return NavigatorImpl.GetNavigateToVideoCatalogString();
-            string str = string.Format("/VKClient.Video;component/VideoPage.xaml?PickMode={0}&UserOrGroupId={1}&IsGroup={2}&ForceAllowVideoUpload={3}", (object)pickMode.ToString(), (object)(userOrGroupId == 0L ? AppGlobalStateManager.Current.LoggedInUserId : userOrGroupId), isGroup, (object)forceAllowVideoUpload);
+            string str = string.Format("/VKClient.Video;component/VideoPage.xaml?PickMode={0}&UserOrGroupId={1}&IsGroup={2}&ForceAllowVideoUpload={3}", pickMode.ToString(), (userOrGroupId == 0L ? AppGlobalStateManager.Current.LoggedInUserId : userOrGroupId), isGroup, forceAllowVideoUpload);
             if (pickMode)
                 str += "&IsPopupNavigation=True";
             return str;
@@ -575,7 +727,7 @@ namespace VKClient.Library
         private static string GetNavigateToAudioString(int pickMode = 0, long userOrGroupId = 0, bool isGroup = false, long albumId = 0, long excludeAlbumId = 0, string albumName = "")
         {
             userOrGroupId = userOrGroupId != 0L ? userOrGroupId : AppGlobalStateManager.Current.LoggedInUserId;
-            string str = string.Format("/VKClient.Audio;component/AudioPage.xaml?PageMode={0}&UserOrGroupId={1}&IsGroup={2}&AlbumId={3}&ExcludeAlbumId={4}&AlbumName={5}", pickMode, userOrGroupId, isGroup, albumId, (object)excludeAlbumId, (object)Extensions.ForURL(albumName));
+            string str = string.Format("/VKClient.Audio;component/AudioPage.xaml?PageMode={0}&UserOrGroupId={1}&IsGroup={2}&AlbumId={3}&ExcludeAlbumId={4}&AlbumName={5}", pickMode, userOrGroupId, isGroup, albumId, excludeAlbumId, Extensions.ForURL(albumName));
             if (pickMode != 0)
                 str += "&IsPopupNavigation=True";
             return str;
@@ -588,7 +740,7 @@ namespace VKClient.Library
 
         public void NavigateToDocuments(long ownerId = 0, bool isOwnerCommunityAdmined = false)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/DocumentsPage.xaml?OwnerId={0}&IsOwnerCommunityAdmined={1}", ownerId, (object)isOwnerCommunityAdmined));
+            this.Navigate(string.Format("/VKClient.Common;component/DocumentsPage.xaml?OwnerId={0}&IsOwnerCommunityAdmined={1}", ownerId, isOwnerCommunityAdmined));
         }
 
         public void NavigateToPostponedPosts(long groupId = 0)
@@ -603,27 +755,27 @@ namespace VKClient.Library
 
         public static string GetNavigateToPostCommentsNavStr(long postId, long ownerId, bool focusCommentsField, long pollId = 0, long pollOwnerId = 0, string adData = "")
         {
-            return string.Format("/VKClient.Common;component/PostCommentsPage.xaml?PostId={0}&OwnerId={1}&FocusComments={2}&PollId={3}&PollOwnerId={4}&AdData={5}", (object)postId, ownerId, (object)focusCommentsField, (object)pollId, (object)pollOwnerId, (object)adData);
+            return string.Format("/VKClient.Common;component/PostCommentsPage.xaml?PostId={0}&OwnerId={1}&FocusComments={2}&PollId={3}&PollOwnerId={4}&AdData={5}", postId, ownerId, focusCommentsField, pollId, pollOwnerId, adData);
         }
 
         public void NavigateToFriendsList(long lid, string listName)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/FriendsPage.xaml?ListId={0}&ListName={1}", (object)lid.ToString(), (object)Extensions.ForURL(listName)));
+            this.Navigate(string.Format("/VKClient.Common;component/FriendsPage.xaml?ListId={0}&ListName={1}", lid.ToString(), Extensions.ForURL(listName)));
         }
 
         public void NavigateToFollowers(long userOrGroupId, bool isGroup, string name)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/FollowersPage.xaml?UserOrGroupId={0}&IsGroup={1}&Name={2}", (object)userOrGroupId, isGroup, (object)Extensions.ForURL(name)));
+            this.Navigate(string.Format("/VKClient.Common;component/FollowersPage.xaml?UserOrGroupId={0}&IsGroup={1}&Name={2}", userOrGroupId, isGroup, Extensions.ForURL(name)));
         }
 
         public void NavigateToSubscriptions(long userId)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/Profiles/Users/Views/SubscriptionsPage.xaml?UserId={0}", (object)userId));
+            this.Navigate(string.Format("/VKClient.Common;component/Profiles/Users/Views/SubscriptionsPage.xaml?UserId={0}", userId));
         }
 
         private static string GetNavigateToFriendsString(long userId, string name, bool mutual, FriendsPageMode mode = FriendsPageMode.Default)
         {
-            return string.Format("/VKClient.Common;component/FriendsPage.xaml?UserId={0}&Name={1}&Mutual={2}&Mode={3}", (object)userId, (object)Extensions.ForURL(name), (object)mutual.ToString(), (object)mode.ToString());
+            return string.Format("/VKClient.Common;component/FriendsPage.xaml?UserId={0}&Name={1}&Mutual={2}&Mode={3}", userId, Extensions.ForURL(name), mutual.ToString(), mode.ToString());
         }
 
         public void NavigateToFriends(long userId, string name, bool mutual, FriendsPageMode mode = FriendsPageMode.Default)
@@ -633,12 +785,12 @@ namespace VKClient.Library
 
         public void NavigateToFriendRequests(bool areSuggestedFriends)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/FriendRequestsPage.xaml?AreSuggestedFriends={0}", (object)areSuggestedFriends));
+            this.Navigate(string.Format("/VKClient.Common;component/FriendRequestsPage.xaml?AreSuggestedFriends={0}", areSuggestedFriends));
         }
 
         public static string GetNavigateToSettingsStr()
         {
-            return "/VKClient.Common;component/SettingsNewPage.xaml";
+            return "/VKClient.Common;component/SettingsPage.xaml";
         }
 
         public void NavigateToSettings()
@@ -668,9 +820,9 @@ namespace VKClient.Library
 
         private static string GetNavigateToPhotoWithComments(Photo photo, PhotoWithFullInfo photoWithFullInfo, long ownerId, long pid, string accessKey, bool fromDialog = false, bool friendsOnly = false)
         {
-            ParametersRepository.SetParameterForId("Photo", (object)photo);
-            ParametersRepository.SetParameterForId("PhotoWithFullInfo", (object)photoWithFullInfo);
-            return string.Format("/VKClient.Photos;component/PhotoCommentsPage.xaml?ownerId={0}&pid={1}&accessKey={2}&FromDialog={3}&FriendsOnly={4}", ownerId, (object)pid, (object)Extensions.ForURL(accessKey), (object)fromDialog, (object)friendsOnly);
+            ParametersRepository.SetParameterForId("Photo", photo);
+            ParametersRepository.SetParameterForId("PhotoWithFullInfo", photoWithFullInfo);
+            return string.Format("/VKClient.Photos;component/PhotoCommentsPage.xaml?ownerId={0}&pid={1}&accessKey={2}&FromDialog={3}&FriendsOnly={4}", ownerId, pid, Extensions.ForURL(accessKey), fromDialog, friendsOnly);
         }
 
         public void NavigateToPhotoWithComments(Photo photo, PhotoWithFullInfo photoWithFullInfo, long ownerId, long pid, string accessKey, bool fromDialog = false, bool friendsOnly = false)
@@ -678,34 +830,34 @@ namespace VKClient.Library
             this.Navigate(NavigatorImpl.GetNavigateToPhotoWithComments(photo, photoWithFullInfo, ownerId, pid, accessKey, fromDialog, friendsOnly));
         }
 
-        public void NavigateToLikesPage(long ownerId, long itemId, int type, int knownCount = 0)
+        public void NavigateToLikesPage(long ownerId, long itemId, int type, int knownCount = 0, bool selectFriendLikes = false)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/LikesPage.xaml?OwnerId={0}&ItemId={1}&Type={2}&knownCount={3}", ownerId, (object)itemId, (object)type, (object)knownCount));
+            this.Navigate(string.Format("/VKClient.Common;component/LikesPage.xaml?OwnerId={0}&ItemId={1}&Type={2}&knownCount={3}&SelectFriendLikes={4}", ownerId, itemId, type, knownCount, selectFriendLikes));
         }
 
         public void PickAlbumToMovePhotos(long userOrGroupId, bool isGroup, string excludeAid, List<long> list, int adminLevel = 0)
         {
             userOrGroupId = userOrGroupId != 0L ? userOrGroupId : AppGlobalStateManager.Current.LoggedInUserId;
-            this.Navigate(string.Format("/VKClient.Photos;component/PhotosMainPage.xaml?UserOrGroupId={0}&IsGroup={1}&SelectForMove=True&ExcludeId={2}&SelectedPhotos={3}&AdminLevel={4}", (object)userOrGroupId, isGroup, (object)excludeAid, (object)list.GetCommaSeparated(), (object)adminLevel) + "&IsPopupNavigation=True");
+            this.Navigate(string.Format("/VKClient.Photos;component/PhotosMainPage.xaml?UserOrGroupId={0}&IsGroup={1}&SelectForMove=True&ExcludeId={2}&SelectedPhotos={3}&AdminLevel={4}", userOrGroupId, isGroup, excludeAid, list.GetCommaSeparated(), adminLevel) + "&IsPopupNavigation=True");
         }
 
-        private static string GetNavigateToGroupsString(long userId, string name = "", bool pickManaged = false, long owner_id = 0, long pic_id = 0, string text = "", bool isGif = false, string accessKey = "")
+        private static string GetNavigateToGroupsString(long userId, string name = "", bool pickManaged = false, long owner_id = 0, long pic_id = 0, string text = "", bool isGif = false, string accessKey = "", long excludedId = 0)
         {
-            ParametersRepository.SetParameterForId("ShareText", (object)text);
-            string str = string.Format("/VKClient.Groups;component/GroupsListPage.xaml?UserId={0}&Name={1}&PickManaged={2}&OwnerId={3}&PicId={4}&IsGif={5}&AccessKey={6}", (object)userId, (object)name, (object)pickManaged, (object)owner_id, pic_id, (object)isGif, (object)Extensions.ForURL(accessKey));
+            ParametersRepository.SetParameterForId("ShareText", text);
+            string str = string.Format("/VKClient.Groups;component/GroupsListPage.xaml?UserId={0}&Name={1}&PickManaged={2}&OwnerId={3}&PicId={4}&IsGif={5}&AccessKey={6}&ExcludedId={7}", userId, name, pickManaged, owner_id, pic_id, isGif, Extensions.ForURL(accessKey), excludedId);
             if (pickManaged)
                 str += "&IsPopupNavigation=True";
             return str;
         }
 
-        public void NavigateToGroups(long userId, string name = "", bool pickManaged = false, long owner_id = 0, long pic_id = 0, string text = "", bool isGif = false, string accessKey = "")
+        public void NavigateToGroups(long userId, string name = "", bool pickManaged = false, long owner_id = 0, long pic_id = 0, string text = "", bool isGif = false, string accessKey = "", long excludedId = 0)
         {
-            this.Navigate(NavigatorImpl.GetNavigateToGroupsString(userId, name, pickManaged, owner_id, pic_id, text, isGif, accessKey));
+            this.Navigate(NavigatorImpl.GetNavigateToGroupsString(userId, name, pickManaged, owner_id, pic_id, text, isGif, accessKey, excludedId));
         }
 
         public void NavigateToMap(bool pick, double latitude, double longitude)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/MapAttachmentPage.xaml?latitude={0}&longitude={1}&Pick={2}", (object)latitude.ToString((IFormatProvider)CultureInfo.InvariantCulture), (object)longitude.ToString((IFormatProvider)CultureInfo.InvariantCulture), (object)pick.ToString()));
+            this.Navigate(string.Format("/VKClient.Common;component/MapAttachmentPage.xaml?latitude={0}&longitude={1}&Pick={2}", latitude.ToString((IFormatProvider)CultureInfo.InvariantCulture), longitude.ToString((IFormatProvider)CultureInfo.InvariantCulture), pick.ToString()));
         }
 
         public void NavigateToPostSchedule(DateTime? dateTime = null)
@@ -713,12 +865,12 @@ namespace VKClient.Library
             long num = 0;
             if (dateTime.HasValue)
                 num = dateTime.Value.Ticks;
-            this.Navigate(string.Format("/VKClient.Common;component/PostSchedulePage.xaml?PublishDateTime={0}", (object)num) + "&IsPopupNavigation=True");
+            this.Navigate(string.Format("/VKClient.Common;component/PostSchedulePage.xaml?PublishDateTime={0}", num) + "&IsPopupNavigation=True");
         }
 
         private static string GetNavigateToGroupDiscussionsString(long gid, string name, int adminLevel, bool isPublicPage, bool canCreateTopic)
         {
-            return string.Format("/VKClient.Groups;component/GroupDiscussionsPage.xaml?GroupId={0}&Name={1}&AdminLevel={2}&IsPublicPage={3}&CanCreateTopic={4}", gid, (object)name, (object)adminLevel, (object)isPublicPage, (object)canCreateTopic);
+            return string.Format("/VKClient.Groups;component/GroupDiscussionsPage.xaml?GroupId={0}&Name={1}&AdminLevel={2}&IsPublicPage={3}&CanCreateTopic={4}", gid, name, adminLevel, isPublicPage, canCreateTopic);
         }
 
         public void NavigateToGroupDiscussions(long gid, string name, int adminLevel, bool isPublicPage, bool canCreateTopic)
@@ -728,7 +880,7 @@ namespace VKClient.Library
 
         public void NavigateToGroupDiscussion(long gid, long tid, string topicName, int knownCommentsCount, bool loadFromEnd, bool canComment)
         {
-            this.Navigate(string.Format("/VKClient.Groups;component/GroupDiscussionPage.xaml?GroupId={0}&TopicId={1}&TopicName={2}&KnownCommentsCount={3}&LoadFromTheEnd={4}&CanComment={5}", gid, (object)tid, (object)Extensions.ForURL(topicName), (object)knownCommentsCount, (object)loadFromEnd, (object)canComment));
+            this.Navigate(string.Format("/VKClient.Groups;component/GroupDiscussionPage.xaml?GroupId={0}&TopicId={1}&TopicName={2}&KnownCommentsCount={3}&LoadFromTheEnd={4}&CanComment={5}", gid, tid, Extensions.ForURL(topicName), knownCommentsCount, loadFromEnd, canComment));
         }
 
         public static string GetNavToFeedbackStr()
@@ -761,13 +913,13 @@ namespace VKClient.Library
 
         public static string GetNavToConversationStr(long userOrChatId, bool isChat, bool fromLookup = false, string newMessageContents = "", long messageId = 0, bool isContactSellerMode = false)
         {
-            return string.Format("/VKMessenger;component/Views/ConversationPage.xaml?UserOrChatId={0}&IsChat={1}&FromLookup={2}&NewMessageContents={3}&MessageId={4}&IsContactProductSellerMode={5}", (object)userOrChatId, (object)isChat, (object)fromLookup, (object)!string.IsNullOrEmpty(newMessageContents), (object)messageId, (object)isContactSellerMode);
+            return string.Format("/VKMessenger;component/Views/ConversationPage.xaml?UserOrChatId={0}&IsChat={1}&FromLookup={2}&NewMessageContents={3}&MessageId={4}&IsContactProductSellerMode={5}", userOrChatId, isChat, fromLookup, !string.IsNullOrEmpty(newMessageContents), messageId, isContactSellerMode);
         }
 
         public void NavigateToConversation(long userOrChatId, bool isChat, bool fromLookup = false, string newMessageContents = "", long messageId = 0, bool isContactSellerMode = false)
         {
             if (!string.IsNullOrEmpty(newMessageContents))
-                ParametersRepository.SetParameterForId("NewMessageContents", (object)newMessageContents);
+                ParametersRepository.SetParameterForId("NewMessageContents", newMessageContents);
             this.Navigate(NavigatorImpl.GetNavToConversationStr(userOrChatId, isChat, fromLookup, newMessageContents, messageId, isContactSellerMode));
         }
 
@@ -778,21 +930,35 @@ namespace VKClient.Library
 
         private void Navigate(string navStr)
         {
-            Logger.Instance.Info("Navigator.Navigate, navStr={0}", (object)navStr);
+            Logger.Instance.Info("Navigator.Navigate, navStr={0}", new object[]
+	{
+		navStr
+	});
             this._history.Add(navStr);
             if (this._history.Count > 100)
-                this._history = this._history.Skip<string>(Math.Max(0, this._history.Count<string>() - 10)).Take<string>(10).ToList<string>();
+            {
+                this._history = Enumerable.ToList<string>(Enumerable.Take<string>(Enumerable.Skip<string>(this._history, Math.Max(0, Enumerable.Count<string>(this._history) - 10)), 10));
+            }
             this.HandleIsPopupAnimationIfNeeded(navStr);
-            Execute.ExecuteOnUIThread((Action)(() => NavigatorImpl.NavigationService.Navigate(new Uri(navStr, UriKind.Relative))));
+            Execute.ExecuteOnUIThread(delegate
+            {
+                NavigatorImpl.NavigationService.Navigate(new Uri(navStr, UriKind.Relative));
+            });
         }
+
 
         private void HandleIsPopupAnimationIfNeeded(string navStr)
         {
         }
 
-        public void NavigateToPickUser(bool createChat, long initialUserId, bool goBackOnResult, int currentCountInChat = 0, PickUserMode mode = PickUserMode.PickForMessage, string customTitle = "", int sexFilter = 0)
+        public void NavigateToPickUser(bool createChat, long initialUserId, bool goBackOnResult, int currentCountInChat = 0, PickUserMode mode = PickUserMode.PickForMessage, string customTitle = "", int sexFilter = 0, bool isGlobalSearchForbidden = false)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/PickUserForNewMessagePage.xaml?CreateChat={0}&InitialUserId={1}&GoBackOnResult={2}&CurrentCountInChat={3}&PickMode={4}&CustomTitle={5}&SexFilter={6}", (object)createChat, (object)initialUserId, (object)goBackOnResult, (object)currentCountInChat, (object)mode, (object)customTitle, (object)sexFilter) + "&IsPopupNavigation=True");
+            this.Navigate(string.Format("/VKClient.Common;component/PickUserForNewMessagePage.xaml?CreateChat={0}&InitialUserId={1}&GoBackOnResult={2}&CurrentCountInChat={3}&PickMode={4}&CustomTitle={5}&SexFilter={6}&IsGlobalSearchForbidden={7}", createChat, initialUserId, goBackOnResult, currentCountInChat, mode, customTitle, sexFilter, isGlobalSearchForbidden) + "&IsPopupNavigation=True");
+        }
+
+        public void NavigateToPickUser(long productId)
+        {
+            this.Navigate(string.Format("/VKClient.Common;component/PickUserForNewMessagePage.xaml?ProductId={0}&GoBackOnResult={1}&PickMode={2}&IsGlobalSearchForbidden={3}", productId, true, PickUserMode.PickForStickerPackGift, false) + "&IsPopupNavigation=True");
         }
 
         public void NavigateToPickConversation()
@@ -802,7 +968,7 @@ namespace VKClient.Library
 
         public void NavigateToAudioPlayer(bool startPlaying = false)
         {
-            this.Navigate(string.Format("/VKClient.Audio;component/Views/AudioPlayer.xaml?startPlaying={0}", (object)startPlaying) + "&IsPopupNavigation=True");
+            this.Navigate(string.Format("/VKClient.Audio;component/Views/AudioPlayer.xaml?startPlaying={0}", startPlaying) + "&IsPopupNavigation=True");
         }
 
         public void NavigateToGroupInvitations()
@@ -810,17 +976,17 @@ namespace VKClient.Library
             this.Navigate("/VKClient.Groups;component/GroupInvitationsPage.xaml");
         }
 
-        private static string GetNavigateToPhotoAlbumString(long userOrGroupId, bool isGroup, string type, string aid, string albumName = "", int photosCount = 0, string title = "", string description = "", bool pickMode = false, int adminLevel = 0)
+        private static string GetNavigateToPhotoAlbumString(long userOrGroupId, bool isGroup, string type, string aid, string albumName = "", int photosCount = 0, string title = "", string description = "", bool pickMode = false, int adminLevel = 0, bool forceCanUpload = false)
         {
-            string str = string.Format("/VKClient.Photos;component/PhotoAlbumPage.xaml?userOrGroupId={0}&isGroup={1}&albumType={2}&albumId={3}&albumName={4}&photosCount={5}&pageTitle={6}&albumDesc={7}&PickMode={8}&AdminLevel={9}", (object)userOrGroupId, isGroup, (object)type, (object)aid, (object)Extensions.ForURL(albumName), (object)photosCount, (object)Extensions.ForURL(title), (object)Extensions.ForURL(description), (object)pickMode, (object)adminLevel);
+            string str = string.Format("/VKClient.Photos;component/PhotoAlbumPage.xaml?userOrGroupId={0}&isGroup={1}&albumType={2}&albumId={3}&albumName={4}&photosCount={5}&pageTitle={6}&albumDesc={7}&PickMode={8}&AdminLevel={9}&ForceCanUpload={10}", userOrGroupId, isGroup, type, aid, Extensions.ForURL(albumName), photosCount, Extensions.ForURL(title), Extensions.ForURL(description), pickMode, adminLevel, forceCanUpload);
             if (pickMode)
                 str += "&IsPopupNavigation=True";
             return str;
         }
 
-        public void NavigateToPhotoAlbum(long userOrGroupId, bool isGroup, string type, string aid, string albumName = "", int photosCount = 0, string title = "", string description = "", bool pickMode = false, int adminLevel = 0)
+        public void NavigateToPhotoAlbum(long userOrGroupId, bool isGroup, string type, string aid, string albumName = "", int photosCount = 0, string title = "", string description = "", bool pickMode = false, int adminLevel = 0, bool forceCanUpload = false)
         {
-            this.Navigate(NavigatorImpl.GetNavigateToPhotoAlbumString(userOrGroupId, isGroup, type, aid, albumName, photosCount, title, description, pickMode, adminLevel));
+            this.Navigate(NavigatorImpl.GetNavigateToPhotoAlbumString(userOrGroupId, isGroup, type, aid, albumName, photosCount, title, description, pickMode, adminLevel, forceCanUpload));
         }
 
         public void NavigateToMainPage()
@@ -845,7 +1011,7 @@ namespace VKClient.Library
 
         public static string GetGamesNavStr(long gameId = 0, bool fromPush = false)
         {
-            return string.Format("/VKClient.Common;component/GamesMainPage.xaml?GameId={0}&FromPush={1}", (object)gameId, (object)fromPush);
+            return string.Format("/VKClient.Common;component/GamesMainPage.xaml?GameId={0}&FromPush={1}", gameId, fromPush);
         }
 
         public void NavigateToMyGames()
@@ -855,7 +1021,7 @@ namespace VKClient.Library
 
         public void NavigateToGamesFriendsActivity(long gameId = 0, string gameName = "")
         {
-            this.Navigate(string.Format("/VKClient.Common;component/GamesFriendsActivityPage.xaml?GameId={0}&GameName={1}", (object)gameId, (object)gameName));
+            this.Navigate(string.Format("/VKClient.Common;component/GamesFriendsActivityPage.xaml?GameId={0}&GameName={1}", gameId, gameName));
         }
 
         public void NavigateToGamesInvites()
@@ -868,74 +1034,99 @@ namespace VKClient.Library
             if (game == null)
                 return;
             if (InstalledPackagesFinder.Instance.IsPackageInstalled(game.platform_id))
+            {
                 this.OpenGame(game.id);
+            }
             else
-                new MarketplaceDetailTask()
-                {
-                    ContentIdentifier = game.platform_id,
-                    ContentType = MarketplaceContentType.Applications
-                }.Show();
+            {
+                MarketplaceDetailTask marketplaceDetailTask = new MarketplaceDetailTask();
+                string platformId = game.platform_id;
+                marketplaceDetailTask.ContentIdentifier = platformId;
+                int num = 1;
+                marketplaceDetailTask.ContentType = ((MarketplaceContentType)num);
+                marketplaceDetailTask.Show();
+            }
         }
 
-        public async void OpenGame(long gameId)
+        public void OpenGame(long gameId)
         {
-            if (gameId <= 0)
+            if (gameId <= 0L)
                 return;
-            await Launcher.LaunchUriAsync(new Uri(string.Format("vk{0}://", (object)gameId)));
+            Launcher.LaunchUriAsync(new Uri(string.Format("vk{0}://", gameId)));
         }
 
         public void NavigateToGameSettings(long gameId)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/GameSettingsPage.xaml?GameId={0}", (object)gameId));
+            this.Navigate(string.Format("/VKClient.Common;component/GameSettingsPage.xaml?GameId={0}", gameId));
         }
 
         public void NavigateToManageSources(ManageSourcesMode mode = ManageSourcesMode.ManageHiddenNewsSources)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/ManageSourcesPage.xaml?Mode={0}", (object)mode));
+            this.Navigate(string.Format("/VKClient.Common;component/ManageSourcesPage.xaml?Mode={0}", mode));
         }
 
         public void NavigateToPhotoPickerPhotos(int maxAllowedToSelect, bool ownPhotoPick = false, bool pickToStorageFile = false)
         {
-            this.Navigate(string.Format("/VKClient.Photos;component/PhotoPickerPhotos.xaml?MaxAllowedToSelect={0}&OwnPhotoPick={1}&PickToStorageFile={2}&IsPopupNavigation=True", (object)maxAllowedToSelect, (object)ownPhotoPick, (object)pickToStorageFile));
+            this.Navigate(string.Format("/VKClient.Photos;component/PhotoPickerPhotos.xaml?MaxAllowedToSelect={0}&OwnPhotoPick={1}&PickToStorageFile={2}&IsPopupNavigation=True", maxAllowedToSelect, ownPhotoPick, pickToStorageFile));
         }
 
         public void NavigationToValidationPage(string validationUri)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/ValidatePage.xaml?ValidationUri={0}", (object)Extensions.ForURL(validationUri)) + "&IsPopupNavigation=True");
+            this.Navigate(string.Format("/VKClient.Common;component/ValidatePage.xaml?ValidationUri={0}", Extensions.ForURL(validationUri)) + "&IsPopupNavigation=True");
+        }
+
+        public void NavigateToMoneyTransferAcceptConfirmation(string url, long transferId, long fromId, long toId)
+        {
+            this.Navigate(string.Format("/VKClient.Common;component/ValidatePage.xaml?ValidationUri={0}&IsAcceptMoneyTransfer={1}&TransferId={2}&FromId={3}&ToId={4}", Extensions.ForURL(url), true, transferId, fromId, toId) + "&IsPopupNavigation=True");
+        }
+
+        public void NavigateToMoneyTransferSendConfirmation(string url)
+        {
+            this.Navigate(string.Format("/VKClient.Common;component/ValidatePage.xaml?ValidationUri={0}&IsMoneyTransfer={1}", Extensions.ForURL(url), true) + "&IsPopupNavigation=True");
         }
 
         public void NavigateTo2FASecurityCheck(string username, string password, string phoneMask, string validationType, string validationSid)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/Auth2FAPage.xaml?username={0}&password={1}&phoneMask={2}&validationType={3}&validationSid={4}&IsPopupNavigation=True", (object)Extensions.ForURL(username), (object)Extensions.ForURL(password), (object)Extensions.ForURL(phoneMask), (object)Extensions.ForURL(validationType), (object)Extensions.ForURL(validationSid)));
+            this.Navigate(string.Format("/VKClient.Common;component/Auth2FAPage.xaml?username={0}&password={1}&phoneMask={2}&validationType={3}&validationSid={4}&IsPopupNavigation=True", Extensions.ForURL(username), Extensions.ForURL(password), Extensions.ForURL(phoneMask), Extensions.ForURL(validationType), Extensions.ForURL(validationSid)));
         }
 
         public void NavigateToAddNewVideo(string filePath, long ownerId)
         {
-            //this.Navigate(string.Format("/VKClient.VKClient.Common.Backend.DataObjects.Video;component/AddEditVideoPage.xaml?VideoToUploadPath={0}&OwnerId={1}", (object)Extensions.ForURL(filePath), ownerId) + "&IsPopupNavigation=True");
-            this.Navigate(string.Format("/VKClient.Video;component/AddEditVideoPage.xaml?VideoToUploadPath={0}&OwnerId={1}", (object)Extensions.ForURL(filePath), ownerId) + "&IsPopupNavigation=True");
+            this.Navigate(string.Format("/VKClient.Video;component/AddEditVideoPage.xaml?VideoToUploadPath={0}&OwnerId={1}", Extensions.ForURL(filePath), ownerId) + "&IsPopupNavigation=True");
+        }
+
+        public void NavigateToAddNewAudio(StorageFile file)
+        {
+            ParametersRepository.SetParameterForId("AudioForUpload", file);
+            this.Navigate("/VKClient.Audio;component/AddEditAudioPage.xaml?IsPopupNavigation=True");
         }
 
         public void NavigateToEditVideo(long ownerId, long videoId, VKClient.Common.Backend.DataObjects.Video video = null)
         {
             if (video != null)
-                ParametersRepository.SetParameterForId("VideoForEdit", (object)video);///VKClient.Video;component/VideoCatalog/
-            //this.Navigate(string.Format("/VKClient.VKClient.Common.Backend.DataObjects.Video;component/AddEditVideoPage.xaml?OwnerId={0}&VideoId={1}", ownerId, videoId) + "&IsPopupNavigation=True");
+                ParametersRepository.SetParameterForId("VideoForEdit", video);
             this.Navigate(string.Format("/VKClient.Video;component/AddEditVideoPage.xaml?OwnerId={0}&VideoId={1}", ownerId, videoId) + "&IsPopupNavigation=True");
         }
 
-        private static string GetNavigateToNewsFeedString(int newsSourceId = 0, bool photoFeedMoveTutorial = false)
+        public void NavigateToEditAudio(AudioObj audio = null)
         {
-            return string.Format("/VKClient.Common;component/NewsPage.xaml?NewsSourceId={0}&PhotoFeedMoveTutorial={1}", (object)newsSourceId, (object)photoFeedMoveTutorial);
+            ParametersRepository.SetParameterForId("AudioForEdit", audio);
+            this.Navigate("/VKClient.Audio;component/AddEditAudioPage.xaml?IsPopupNavigation=True");
         }
 
-        public void NavigateToNewsFeed(int newsSourceId = 0, bool photoFeedMoveTutorial = false)
+        private static string GetNavigateToNewsFeedString(long newsSourceId = 0, bool photoFeedMoveTutorial = false)
+        {
+            return string.Format("/VKClient.Common;component/NewsPage.xaml?NewsSourceId={0}&PhotoFeedMoveTutorial={1}", newsSourceId, photoFeedMoveTutorial);
+        }
+
+        public void NavigateToNewsFeed(long newsSourceId = 0, bool photoFeedMoveTutorial = false)
         {
             this.Navigate(NavigatorImpl.GetNavigateToNewsFeedString(newsSourceId, photoFeedMoveTutorial));
         }
 
         private string GetNavigateToNewsSearchString(string query = "")
         {
-            return string.Format("/VKClient.Common;component/NewsSearchPage.xaml?Query={0}", (object)HttpUtility.UrlEncode(query));
+            return string.Format("/VKClient.Common;component/NewsSearchPage.xaml?Query={0}", HttpUtility.UrlEncode(query));
         }
 
         public void NavigateToNewsSearch(string query = "")
@@ -958,19 +1149,24 @@ namespace VKClient.Library
             return (IPhotoPickerPhotosViewModel)new PhotoPickerPhotosViewModel(maxAllowedToSelect, false);
         }
 
-        public void NavigateToBlackList()
+        public void NavigateToBlacklist()
         {
             this.Navigate("/VKClient.Common;component/BannedUsersPage.xaml");
         }
 
         public void NavigateToBirthdaysPage()
         {
-            this.Navigate("/VKClient.Common;component/BirthdaysPage.xaml");
+            this.Navigate(NavigatorImpl.GetNavToBirthdaysStr());
+        }
+
+        public static string GetNavToBirthdaysStr()
+        {
+            return "/VKClient.Common;component/BirthdaysPage.xaml";
         }
 
         public void NavigateToSuggestedPostponedPostsPage(long userOrGroupId, bool isGroup, int mode)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/SuggestedPostponedPostsPage.xaml?UserOrGroupId={0}&IsGroup={1}&Mode={2}", (object)userOrGroupId, isGroup, (object)mode));
+            this.Navigate(string.Format("/VKClient.Common;component/SuggestedPostponedPostsPage.xaml?UserOrGroupId={0}&IsGroup={1}&Mode={2}", userOrGroupId, isGroup, mode));
         }
 
         public void NavigateToHelpPage()
@@ -985,13 +1181,13 @@ namespace VKClient.Library
 
         public void NavigateFromSDKAuthPage(string callbackUriToLaunch)
         {
-            ParametersRepository.SetParameterForId("CallbackUriToLaunch", (object)callbackUriToLaunch);
+            ParametersRepository.SetParameterForId("CallbackUriToLaunch", callbackUriToLaunch);
             this.GoBack();
         }
 
         public void NavigateToEditPrivacy(EditPrivacyPageInputData inputData)
         {
-            ParametersRepository.SetParameterForId("EditPrivacyInputData", (object)inputData);
+            ParametersRepository.SetParameterForId("EditPrivacyInputData", inputData);
             this.Navigate("/VKClient.Common;component/EditPrivacyPage.xaml?IsPopupNavigation=True");
         }
 
@@ -1017,7 +1213,7 @@ namespace VKClient.Library
 
         public void NavigateToChangeShortName(string currentShortName)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/SettingsChangeShortNamePage.xaml?CurrentShortName={0}&IsPopupNavigation=True", (object)Extensions.ForURL(currentShortName)));
+            this.Navigate(string.Format("/VKClient.Common;component/SettingsChangeShortNamePage.xaml?CurrentShortName={0}&IsPopupNavigation=True", Extensions.ForURL(currentShortName)));
         }
 
         public void NavigateToSettingsNotifications()
@@ -1033,13 +1229,13 @@ namespace VKClient.Library
         public void NavigateToCreateEditPoll(long ownerId, long pollId = 0, Poll poll = null)
         {
             if (poll != null)
-                ParametersRepository.SetParameterForId("Poll", (object)poll);
-            this.Navigate(string.Format("/VKClient.Common;component/CreateEditPollPage.xaml?OwnerId={0}&PollId={1}", ownerId, (object)pollId) + "&IsPopupNavigation=True");
+                ParametersRepository.SetParameterForId("Poll", poll);
+            this.Navigate(string.Format("/VKClient.Common;component/CreateEditPollPage.xaml?OwnerId={0}&PollId={1}", ownerId, pollId) + "&IsPopupNavigation=True");
         }
 
         public void NavigateToPollVoters(long ownerId, long pollId, long answerId, string answerText)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/PollVotersPage.xaml?OwnerId={0}&PollId={1}&AnswerId={2}&AnswerText={3}", ownerId, (object)pollId, (object)answerId, (object)answerText));
+            this.Navigate(string.Format("/VKClient.Common;component/PollVotersPage.xaml?OwnerId={0}&PollId={1}&AnswerId={2}&AnswerText={3}", ownerId, pollId, answerId, answerText));
         }
 
         public void NavigateToUsersSearch(string query = "")
@@ -1064,7 +1260,7 @@ namespace VKClient.Library
 
         public void NavigateToRegistrationPage()
         {
-            this.Navigate(string.Format("/VKClient.Common;component/RegistrationPage.xaml?SessionId={0}", (object)Guid.NewGuid().ToString()));
+            this.Navigate(string.Format("/VKClient.Common;component/RegistrationPage.xaml?SessionId={0}", Guid.NewGuid().ToString()));
         }
 
         public void NavigateToFriendsImportFacebook()
@@ -1079,7 +1275,7 @@ namespace VKClient.Library
 
         public void NavigateToFriendsImportTwitter(string oauthToken, string oauthVerifier)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/FriendsImportTwitterPage.xaml?oauthToken={0}&oauthVerifier={1}&IsPopupNavigation=True", (object)oauthToken, (object)oauthVerifier));
+            this.Navigate(string.Format("/VKClient.Common;component/FriendsImportTwitterPage.xaml?oauthToken={0}&oauthVerifier={1}&IsPopupNavigation=True", oauthToken, oauthVerifier));
         }
 
         public void NavigateToFriendsImportContacts()
@@ -1089,13 +1285,12 @@ namespace VKClient.Library
 
         public void NavigateToGroupRecommendations(int categoryId, string categoryName)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/RecommendedGroupsPage.xaml?CategoryId={0}&CategoryName={1}", (object)categoryId, (object)Extensions.ForURL(categoryName)));
+            this.Navigate(string.Format("/VKClient.Common;component/RecommendedGroupsPage.xaml?CategoryId={0}&CategoryName={1}", categoryId, Extensions.ForURL(categoryName)));
         }
 
         private static string GetNavigateToVideoCatalogString()
         {
-            //return string.Format("/VKClient.VKClient.Common.Backend.DataObjects.Video;component/VideoCatalog/VideoCatalogPage.xaml");
-            return string.Format("/VKClient.Video;component/VideoCatalog/VideoCatalogPage.xaml");//VKClient.Video\videocatalog\videocatalogpage.xaml
+            return string.Format("/VKClient.Video;component/VideoCatalog/VideoCatalogPage.xaml");
         }
 
         public void NavigateToVideoCatalog()
@@ -1105,17 +1300,17 @@ namespace VKClient.Library
 
         public static string GetOpenUrlPageStr(string uriToOpen)
         {
-            return string.Format("/VKClient.Common;component/OpenUrlPage.xaml?Uri={0}", (object)Extensions.ForURL(uriToOpen));
+            return string.Format("/VKClient.Common;component/OpenUrlPage.xaml?Uri={0}", Extensions.ForURL(uriToOpen));
         }
 
-        public static string GetWebViewPageNavStr(string uri)
+        public static string GetWebViewPageNavStr(string uri, bool supportInAppNavigation = false)
         {
-            return "/VKClient.Common;component/WebViewPage.xaml?Uri=" + HttpUtility.UrlEncode(uri);
+            return string.Format("/VKClient.Common;component/WebViewPage.xaml?Uri={0}&SupportInAppNavigation={1}", HttpUtility.UrlEncode(uri), supportInAppNavigation);
         }
 
-        public void NavigateToWebViewPage(string uri)
+        public void NavigateToWebViewPage(string uri, bool supportInAppNavigation = false)
         {
-            this.Navigate(NavigatorImpl.GetWebViewPageNavStr(uri));
+            this.Navigate(NavigatorImpl.GetWebViewPageNavStr(uri, supportInAppNavigation));
         }
 
         private static string GetNavigateToMarketString(long ownerId)
@@ -1132,13 +1327,13 @@ namespace VKClient.Library
         {
             if (product == null)
                 return;
-            ParametersRepository.SetParameterForId("Product", (object)product);
+            ParametersRepository.SetParameterForId("Product", product);
             this.NavigateToProduct(product.owner_id, product.id);
         }
 
         private static string GetNavigateToProductString(long ownerId, long productId)
         {
-            return string.Format("/VKClient.Common;component/Market/Views/ProductPage.xaml?OwnerId={0}&ProductId={1}", ownerId, (object)productId);
+            return string.Format("/VKClient.Common;component/Market/Views/ProductPage.xaml?OwnerId={0}&ProductId={1}", ownerId, productId);
         }
 
         public void NavigateToProduct(long ownerId, long productId)
@@ -1148,7 +1343,7 @@ namespace VKClient.Library
 
         public void NavigateToProductsSearchParams(long priceFrom, long priceTo, int currencyId, string currencyName)
         {
-            this.Navigate(string.Format("/VKClient.Common;component/Market/Views/ProductsSearchParamsPage.xaml?PriceFrom={0}&PriceTo={1}&CurrencyId={2}&CurrencyName={3}", (object)priceFrom, (object)priceTo, (object)currencyId, (object)currencyName));
+            this.Navigate(string.Format("/VKClient.Common;component/Market/Views/ProductsSearchParamsPage.xaml?PriceFrom={0}&PriceTo={1}&CurrencyId={2}&CurrencyName={3}", priceFrom, priceTo, currencyId, currencyName));
         }
 
         public void NavigateToMarketAlbums(long ownerId)
@@ -1158,7 +1353,7 @@ namespace VKClient.Library
 
         private static string GetNavigateToMarketAlbumProductsString(long ownerId, long albumId, string albumName)
         {
-            return string.Format("/VKClient.Common;component/Market/Views/MarketAlbumProductsPage.xaml?OwnerId={0}&AlbumId={1}&AlbumName={2}", ownerId, albumId, (object)albumName);
+            return string.Format("/VKClient.Common;component/Market/Views/MarketAlbumProductsPage.xaml?OwnerId={0}&AlbumId={1}&AlbumName={2}", ownerId, albumId, albumName);
         }
 
         public void NavigateToMarketAlbumProducts(long ownerId, long albumId, string albumName)
@@ -1168,39 +1363,40 @@ namespace VKClient.Library
 
         public void NavigateToVideoAlbumsList(long ownerId, bool forceAllowCreateAlbum = false)
         {
-            //this.Navigate(string.Format("/VKClient.VKClient.Common.Backend.DataObjects.Video;component/VideoCatalog/VideoAlbumsListPage.xaml?OwnerId={0}&ForceAllowCreateAlbum={1}", ownerId, (object)forceAllowCreateAlbum));
-            this.Navigate(string.Format("/VKClient.Video;component/VideoCatalog/VideoAlbumsListPage.xaml?OwnerId={0}&ForceAllowCreateAlbum={1}", ownerId, (object)forceAllowCreateAlbum));
+            this.Navigate(string.Format("/VKClient.Video;component/VideoCatalog/VideoAlbumsListPage.xaml?OwnerId={0}&ForceAllowCreateAlbum={1}", ownerId, forceAllowCreateAlbum));
         }
 
         public void NavigateToVideoList(VKList<VideoCatalogItem> catalogItems, int source, string context, string sectionId = "", string next = "", string name = "")
         {
-            ParametersRepository.SetParameterForId("CatalogItemsToShow", (object)catalogItems);
-            //this.Navigate(string.Format("/VKClient.VKClient.Common.Backend.DataObjects.Video;component/VideoCatalog/VideoListPage.xaml?SectionId={0}&Next={1}&Name={2}&Source={3}&Context={4}", (object)Extensions.ForURL(sectionId), (object)Extensions.ForURL(next), (object)Extensions.ForURL(name), (object)source, (object)Extensions.ForURL(context)));
-            this.Navigate(string.Format("/VKClient.Video;component/VideoCatalog/VideoListPage.xaml?SectionId={0}&Next={1}&Name={2}&Source={3}&Context={4}", (object)Extensions.ForURL(sectionId), (object)Extensions.ForURL(next), (object)Extensions.ForURL(name), (object)source, (object)Extensions.ForURL(context)));
+            ParametersRepository.SetParameterForId("CatalogItemsToShow", catalogItems);
+            this.Navigate(string.Format("/VKClient.Video;component/VideoCatalog/VideoListPage.xaml?SectionId={0}&Next={1}&Name={2}&Source={3}&Context={4}", Extensions.ForURL(sectionId), Extensions.ForURL(next), Extensions.ForURL(name), source, Extensions.ForURL(context)));
         }
 
         public void NavigateToCreateEditVideoAlbum(long albumId = 0, long groupId = 0, string name = "", PrivacyInfo pi = null)
         {
             if (pi != null)
-                ParametersRepository.SetParameterForId("AlbumPrivacyInfo", (object)pi);
-            //this.Navigate(string.Format("/VKClient.VKClient.Common.Backend.DataObjects.Video;component/VideoCatalog/CreateEditVideoAlbumPage.xaml?AlbumId={0}&GroupId={1}&Name={2}", albumId, (object)groupId, (object)Extensions.ForURL(name)));
-            this.Navigate(string.Format("/VKClient.Video;component/VideoCatalog/CreateEditVideoAlbumPage.xaml?AlbumId={0}&GroupId={1}&Name={2}", albumId, (object)groupId, (object)Extensions.ForURL(name)));
+                ParametersRepository.SetParameterForId("AlbumPrivacyInfo", pi);
+            this.Navigate(string.Format("/VKClient.Video;component/VideoCatalog/CreateEditVideoAlbumPage.xaml?AlbumId={0}&GroupId={1}&Name={2}", albumId, groupId, Extensions.ForURL(name)));
         }
 
         public void NavigateToAddVideoToAlbum(long ownerId, long videoId)
         {
-            //this.Navigate(string.Format("/VKClient.VKClient.Common.Backend.DataObjects.Video;component/VideoCatalog/AddToAlbumPage.xaml?VideoId={0}&OwnerId={1}", videoId, ownerId));
             this.Navigate(string.Format("/VKClient.Video;component/VideoCatalog/AddToAlbumPage.xaml?VideoId={0}&OwnerId={1}", videoId, ownerId));
         }
 
         public void NavigateToConversationMaterials(long peerId)
         {
-            this.Navigate("/VKMessenger;component/Views/ConversationMaterialsPage.xaml?PeerId=" + (object)peerId);
+            this.Navigate("/VKMessenger;component/Views/ConversationMaterialsPage.xaml?PeerId=" + peerId);
         }
 
-        public void NavigateToDocumentsPicker()
+        public void NavigateToDocumentsPicker(int maxAllowedToSelect)
         {
-            this.Navigate("/VKClient.Common;component/DocumentsPickerPage.xaml?IsPopupNavigation=true");
+            this.Navigate(string.Format("/VKClient.Common;component/DocumentsPickerPage.xaml?MaxAllowedToSelect={0}&IsPopupNavigation=true", maxAllowedToSelect));
+        }
+
+        public void NavigateToDocumentEditing(long ownerId, long id, string title)
+        {
+            this.Navigate(string.Format("/VKClient.Common;component/DocumentEditingPage.xaml?OwnerId={0}&Id={1}&Title={2}&IsPopupNavigation=true", ownerId, id, Extensions.ForURL(title)));
         }
 
         public void NavigateToCommunityCreation()
@@ -1210,17 +1406,17 @@ namespace VKClient.Library
 
         public void NavigateToCommunitySubscribers(long communityId, GroupType communityType, bool isManagement = false, bool isPicker = false, bool isBlockingPicker = false)
         {
-            this.Navigate(string.Format("/VKClient.Groups;component/CommunitySubscribersPage.xaml?CommunityId={0}&CommunityType={1}&IsManagement={2}&IsPicker={3}&IsBlockingPicker={4}", communityId, (int)communityType, isManagement, isPicker, isBlockingPicker));
+            this.Navigate(string.Format("/VKClient.Groups;component/CommunitySubscribersPage.xaml?CommunityId={0}&CommunityType={1}&IsManagement={2}&IsPicker={3}&IsBlockingPicker={4}", communityId, communityType, isManagement, isPicker, isBlockingPicker));
         }
 
-        private static string GetNavigateToStickersStoreString()
+        public void NavigateToStickersStore(long userOrChatId = 0, bool isChat = false)
         {
-            return "/VKClient.Common;component/Stickers/Views/StickersStorePage.xaml";
+            this.Navigate(this.GetNavigateToStickersStoreString(userOrChatId, isChat));
         }
 
-        public void NavigateToStickersStore()
+        private string GetNavigateToStickersStoreString(long userOrChatId, bool isChat)
         {
-            this.Navigate(NavigatorImpl.GetNavigateToStickersStoreString());
+            return string.Format("/VKClient.Common;component/Stickers/Views/StickersStorePage.xaml?UserOrChatId={0}&IsChat={1}", userOrChatId, isChat);
         }
 
         private static string GetNavigateToStickersManageString()
@@ -1240,14 +1436,26 @@ namespace VKClient.Library
 
         public void NavigateToCustomListPickerSelection(CustomListPicker parentPicker)
         {
-            ParametersRepository.SetParameterForId("ParentPicker", (object)parentPicker);
+            ParametersRepository.SetParameterForId("ParentPicker", parentPicker);
             this.Navigate("/VKClient.Common;component/UC/CustomListPicker/SelectionPage.xaml");
         }
 
-        public void NavigateToGraffitiDrawPage(long userOrChatId, bool isChat, string title) // NEW: 4.8.0
+        public void NavigateToGraffitiDrawPage(long userOrChatId, bool isChat, string title)
         {
             title = HttpUtility.UrlEncode(title);
-            this.Navigate(string.Format("/VKClient.Common;component/Graffiti/Views/GraffitiDrawPage.xaml?UserOrChatId={0}&IsChat={1}&Title={2}", (object)userOrChatId, (object)isChat, (object)title));
+            this.Navigate(string.Format("/VKClient.Common;component/Graffiti/Views/GraffitiDrawPage.xaml?UserOrChatId={0}&IsChat={1}&Title={2}", userOrChatId, isChat, title));
+        }
+
+        public void NavigateToSendMoneyPage(long targetId, User targetUser = null, int amount = 0, string comment = "")
+        {
+            if (targetUser != null)
+                ParametersRepository.SetParameterForId("MoneyTransferTargetUser", targetUser);
+            this.Navigate(string.Format("/VKClient.Common;component/MoneyTransfers/SendMoneyPage.xaml?TargetId={0}&Amount={1}&Comment={2}&IsPopupNavigation=true", targetId, amount, ExtensionsBase.ForURL(comment)));
+        }
+
+        public void NavigateToTransfersListPage()
+        {
+            this.Navigate("/VKClient.Common;component/MoneyTransfers/TransfersListPage.xaml");
         }
 
         public void NavigateToCommunityManagement(long communityId, GroupType communityType, bool isAdministrator)
@@ -1262,18 +1470,18 @@ namespace VKClient.Library
 
         public void NavigateToCommunityManagementPlacementSelection(long communityId, Place place)
         {
-            ParametersRepository.SetParameterForId("PlacementSelectionPlace", (object)place);
+            ParametersRepository.SetParameterForId("PlacementSelectionPlace", place);
             this.Navigate(string.Format("/VKClient.Groups;component/Management/Information/PlacementSelectionPage.xaml?CommunityId={0}&IsPopupNavigation=true", communityId));
         }
 
         public void NavigateToCommunityManagementServices(long communityId)
         {
-            this.Navigate("/VKClient.Groups;component/Management/ServicesPage.xaml?CommunityId=" + (object)communityId);
+            this.Navigate("/VKClient.Groups;component/Management/ServicesPage.xaml?CommunityId=" + communityId);
         }
 
         public void NavigateToCommunityManagementServiceSwitch(CommunityService service, CommunityServiceState currentState)
         {
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/ServiceSwitchPage.xaml?Service={0}&CurrentState={1}&IsPopupNavigation=true", (object)service, (object)currentState));
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/ServiceSwitchPage.xaml?Service={0}&CurrentState={1}&IsPopupNavigation=true", service, currentState));
         }
 
         public void NavigateToCommunityManagementManagers(long communityId, GroupType communityType)
@@ -1281,61 +1489,99 @@ namespace VKClient.Library
             this.Navigate(string.Format("/VKClient.Groups;component/Management/ManagersPage.xaml?CommunityId={0}&CommunityType={1}", communityId, (int)communityType));
         }
 
-        public void NavigateToCommunityManagementManagerAdding(long communityId, User user, bool fromPicker)
+        public void NavigateToCommunityManagementManagerAdding(long communityId, GroupType communityType, User user, bool fromPicker)
         {
-            ParametersRepository.SetParameterForId("CommunityManager", (object)user);
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/ManagerEditingPage.xaml?CommunityId={0}&FromPicker={1}&IsPopupNavigation=true", (object)communityId, (object)fromPicker));
+            ParametersRepository.SetParameterForId("CommunityManager", user);
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/ManagerEditingPage.xaml?CommunityId={0}&CommunityType={1}&FromPicker={2}&IsPopupNavigation=true", communityId, (int)communityType, fromPicker));
         }
 
-        public void NavigateToCommunityManagementManagerEditing(long communityId, User manager, bool isContact, string position, string email, string phone)
+        public void NavigateToCommunityManagementManagerEditing(long communityId, GroupType communityType, User manager, bool isContact, string position, string email, string phone)
         {
-            ParametersRepository.SetParameterForId("CommunityManager", (object)manager);
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/ManagerEditingPage.xaml?CommunityId={0}&IsContact={1}&Position={2}&Phone={3}&Email={4}&IsPopupNavigation=true", (object)communityId, (object)isContact, (object)Extensions.ForURL(position), (object)Extensions.ForURL(phone), (object)Extensions.ForURL(email)));
+            ParametersRepository.SetParameterForId("CommunityManager", manager);
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/ManagerEditingPage.xaml?CommunityId={0}&CommunityType={1}&IsContact={2}&Position={3}&Phone={4}&Email={5}&IsPopupNavigation=true", communityId, (int)communityType, isContact, Extensions.ForURL(position), Extensions.ForURL(phone), Extensions.ForURL(email)));
         }
 
         public void NavigateToCommunityManagementRequests(long communityId)
         {
-            this.Navigate("/VKClient.Groups;component/Management/RequestsPage.xaml?CommunityId=" + (object)communityId);
+            this.Navigate("/VKClient.Groups;component/Management/RequestsPage.xaml?CommunityId=" + communityId);
         }
 
         public void NavigateToCommunityManagementInvitations(long communityId)
         {
-            this.Navigate("/VKClient.Groups;component/Management/InvitationsPage.xaml?CommunityId=" + (object)communityId);
+            this.Navigate("/VKClient.Groups;component/Management/InvitationsPage.xaml?CommunityId=" + communityId);
         }
 
         public void NavigateToCommunityManagementBlacklist(long communityId, GroupType communityType)
         {
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlacklistPage.xaml?CommunityId={0}&CommunityType={1}", (object)communityId, (int)communityType));
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlacklistPage.xaml?CommunityId={0}&CommunityType={1}", communityId, (int)communityType));
         }
 
         public void NavigateToCommunityManagementBlockAdding(long communityId, User user, bool isOpenedWithoutPicker = false)
         {
-            ParametersRepository.SetParameterForId("CommunityManagementBlockEditingUser", (object)user);
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlockEditingPage.xaml?CommunityId={0}&IsEditing={1}&IsOpenedWithoutPicker={2}&IsPopupNavigation=true", (object)communityId, (object)false, (object)isOpenedWithoutPicker));
+            ParametersRepository.SetParameterForId("CommunityManagementBlockEditingUser", user);
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlockEditingPage.xaml?CommunityId={0}&IsEditing={1}&IsOpenedWithoutPicker={2}&IsPopupNavigation=true", communityId, false, isOpenedWithoutPicker));
         }
 
         public void NavigateToCommunityManagementBlockEditing(long communityId, User user, User manager)
         {
-            ParametersRepository.SetParameterForId("CommunityManagementBlockEditingUser", (object)user);
-            ParametersRepository.SetParameterForId("CommunityManagementBlockEditingManager", (object)manager);
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlockEditingPage.xaml?CommunityId={0}&IsEditing={1}&IsOpenedWithoutPicker={2}&IsPopupNavigation=true", (object)communityId, (object)true, (object)false));
+            ParametersRepository.SetParameterForId("CommunityManagementBlockEditingUser", user);
+            ParametersRepository.SetParameterForId("CommunityManagementBlockEditingManager", manager);
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlockEditingPage.xaml?CommunityId={0}&IsEditing={1}&IsOpenedWithoutPicker={2}&IsPopupNavigation=true", communityId, true, false));
         }
 
         public void NavigateToCommunityManagementBlockDurationPicker(int durationUnixTime)
         {
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlockDurationPicker.xaml?DurationUnixTime={0}&IsPopupNavigation=true", (object)durationUnixTime));
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/BlockDurationPicker.xaml?DurationUnixTime={0}&IsPopupNavigation=true", durationUnixTime));
         }
 
         public void NavigateToCommunityManagementLinks(long communityId)
         {
-            this.Navigate("/VKClient.Groups;component/Management/LinksPage.xaml?CommunityId=" + (object)communityId);
+            this.Navigate("/VKClient.Groups;component/Management/LinksPage.xaml?CommunityId=" + communityId);
         }
 
         public void NavigateToCommunityManagementLinkCreation(long communityId, GroupLink link)
         {
             if (link != null)
-                ParametersRepository.SetParameterForId("CommunityLink", (object)link);
-            this.Navigate(string.Format("/VKClient.Groups;component/Management/LinkCreationPage.xaml?CommunityId={0}&IsPopupNavigation=true", (object)communityId));
+                ParametersRepository.SetParameterForId("CommunityLink", link);
+            this.Navigate(string.Format("/VKClient.Groups;component/Management/LinkCreationPage.xaml?CommunityId={0}&IsPopupNavigation=true", communityId));
+        }
+
+        public void NavigateToProfileAppPage(long appId, long ownerId = 0, string utmParamsStr = "")
+        {
+            utmParamsStr = HttpUtility.UrlEncode(utmParamsStr);
+            this.Navigate(string.Format("/VKClient.Common;component/Profiles/Shared/Views/ProfileAppPage.xaml?AppId={0}&OwnerId={1}&UtmParams={2}", appId, ownerId, utmParamsStr));
+        }
+
+        public void NavigateToGifts(long userId, string firstName = "", string firstNameGen = "")
+        {
+            this.Navigate(string.Format("/VKClient.Common;component/Gifts/Views/GiftsPage.xaml?UserId={0}&FirstName={1}&FirstNameGen={2}", userId, firstName, firstNameGen));
+        }
+
+        public void NavigateToGiftsCatalog(long userOrChatId = 0, bool isChat = false)
+        {
+            this.Navigate(string.Format("/VKClient.Common;component/Gifts/Views/GiftsCatalogPage.xaml?UserOrChatId={0}&IsChat={1}", userOrChatId, isChat));
+        }
+
+        public void NavigateToGiftsCatalogCategory(string categoryName, string title, long userOrChatId = 0, bool isChat = false)
+        {
+            categoryName = HttpUtility.UrlEncode(categoryName);
+            title = HttpUtility.UrlEncode(title);
+            this.Navigate(string.Format("/VKClient.Common;component/Gifts/Views/GiftsCatalogCategoryPage.xaml?CategoryName={0}&Title={1}&UserOrChatId={2}&IsChat={3}", categoryName, title, userOrChatId, isChat));
+        }
+
+        public void NavigateToGiftSend(long giftId, string categoryName, string description, string imageUrl, int price, int giftsLeft, List<long> userIds, bool isProduct = false)
+        {
+            ParametersRepository.SetParameterForId("Description", description);
+            ParametersRepository.SetParameterForId("ImageUrl", imageUrl);
+            ParametersRepository.SetParameterForId("Price", price);
+            ParametersRepository.SetParameterForId("GiftsLeft", giftsLeft);
+            ParametersRepository.SetParameterForId("UserIds", userIds);
+            this.Navigate(string.Format("/VKClient.Common;component/Gifts/Views/GiftSendPage.xaml?GiftId={0}&CategoryName={1}&IsProduct={2}", giftId, categoryName, isProduct));
+        }
+
+        public void NavigateToDiagnostics()
+        {
+            this.Navigate("/VKClient.Common;component/Diagnostics/Views/DiagnosticsPage.xaml");
         }
 
         public class NavigationTypeMatch
@@ -1434,6 +1680,10 @@ namespace VKClient.Library
             product,
             stickers,
             stickersPack,
+            recommendedNews,
+            app,
+            gifts,
+            giftsCatalog,
         }
     }
 }

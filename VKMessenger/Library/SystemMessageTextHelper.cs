@@ -31,22 +31,22 @@ namespace VKMessenger.Library
               if (!(action == "chat_invite_user"))
               {
                 if (action == "chat_kick_user")
-                  str3 = message.action_mid != (long) message.uid ? (!user1.IsFemale ? string.Format(CommonResources.ChatKickoutMaleFrm, (object) str1, (object) str2) : string.Format(CommonResources.ChatKickoutFemaleFrm, (object) str1, (object) str2)) : (!user1.IsFemale ? string.Format(CommonResources.ChatLeftConversationMaleFrm, (object) str1) : string.Format(CommonResources.ChatLeftConversationFemaleFrm, (object) str1));
+                  str3 = message.action_mid != (long) message.uid ? (!user1.IsFemale ? string.Format(CommonResources.ChatKickoutMaleFrm, str1, str2) : string.Format(CommonResources.ChatKickoutFemaleFrm, str1, str2)) : (!user1.IsFemale ? string.Format(CommonResources.ChatLeftConversationMaleFrm, str1) : string.Format(CommonResources.ChatLeftConversationFemaleFrm, str1));
               }
               else
-                str3 = message.action_mid != (long) message.uid ? (!user1.IsFemale ? string.Format(CommonResources.ChatInviteMaleFrm, (object) str1, (object) str2) : string.Format(CommonResources.ChatInviteFemaleFrm, (object) str1, (object) str2)) : (!user1.IsFemale ? string.Format(CommonResources.ChatReturnedToConversationMaleFrm, (object) str1) : string.Format(CommonResources.ChatReturnedToConversationFemaleFrm, (object) str1));
+                str3 = message.action_mid != (long) message.uid ? (!user1.IsFemale ? string.Format(CommonResources.ChatInviteMaleFrm, str1, str2) : string.Format(CommonResources.ChatInviteFemaleFrm, str1, str2)) : (!user1.IsFemale ? string.Format(CommonResources.ChatReturnedToConversationMaleFrm, str1) : string.Format(CommonResources.ChatReturnedToConversationFemaleFrm, str1));
             }
             else
-              str3 = !user1.IsFemale ? string.Format(CommonResources.ChatTitleUpdateMaleFrm, (object) str1, (object) message.action_text) : string.Format(CommonResources.ChatTitleUpdateFemaleFrm, (object) str1, (object) message.action_text);
+              str3 = !user1.IsFemale ? string.Format(CommonResources.ChatTitleUpdateMaleFrm, str1, message.action_text) : string.Format(CommonResources.ChatTitleUpdateFemaleFrm, str1, message.action_text);
           }
           else
-            str3 = !user1.IsFemale ? string.Format(CommonResources.ChatCreateMaleFrm, (object) str1, (object) message.action_text) : string.Format(CommonResources.ChatCreateFemaleFrm, (object) str1, (object) message.action_text);
+            str3 = !user1.IsFemale ? string.Format(CommonResources.ChatCreateMaleFrm, str1, message.action_text) : string.Format(CommonResources.ChatCreateFemaleFrm, str1, message.action_text);
         }
         else
-          str3 = !user1.IsFemale ? string.Format(CommonResources.ChatPhotoDeleteMaleFrm, (object) str1) : string.Format(CommonResources.ChatPhotoDeleteFemaleFrm, (object) str1);
+          str3 = !user1.IsFemale ? string.Format(CommonResources.ChatPhotoDeleteMaleFrm, str1) : string.Format(CommonResources.ChatPhotoDeleteFemaleFrm, str1);
       }
       else
-        str3 = !user1.IsFemale ? string.Format(CommonResources.ChatPhotoUpdateMaleFrm, (object) str1) : string.Format(CommonResources.ChatPhotoUpdateFemaleFrm, (object) str1);
+        str3 = !user1.IsFemale ? string.Format(CommonResources.ChatPhotoUpdateMaleFrm, str1) : string.Format(CommonResources.ChatPhotoUpdateFemaleFrm, str1);
       return str3.Trim();
     }
 
@@ -56,8 +56,8 @@ namespace VKMessenger.Library
       if (!extendedText)
         return str;
       if (user.id > 0L)
-        return string.Format("[id{0}|{1}]", (object) user.id, (object) str);
-      return string.Format("[club{0}|{1}]", (object) -user.id, (object) str);
+        return string.Format("[id{0}|{1}]", user.id, str);
+      return string.Format("[club{0}|{1}]", -user.id, str);
     }
   }
 }

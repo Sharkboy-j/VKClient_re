@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Input;
 using VKClient.Audio.Base.DataObjects.Maps;
 using VKClient.Common.Backend;
@@ -18,10 +19,10 @@ namespace VKClient.Common.UC.MapAttachments
 
     protected MapAttachmentUCBase()
     {
-      this.Tap += new EventHandler<GestureEventArgs>(this.OnTap);
+      base.Tap += (new EventHandler<System.Windows.Input.GestureEventArgs>(this.OnTap));
     }
 
-    private void OnTap(object sender, GestureEventArgs e)
+    private void OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
       e.Handled = true;
       if (this._latitude == 0.0 && this._longitude == 0.0)
@@ -88,7 +89,7 @@ namespace VKClient.Common.UC.MapAttachments
 
     protected Uri GetMapUri()
     {
-      return MapsService.Current.GetMapUri(this._latitude, this._longitude, 16, (int) this.Width, this.Width / MapAttachmentUCBase.GetMapHeight(this.Width));
+      return MapsService.Current.GetMapUri(this._latitude, this._longitude, 16, (int) base.Width, base.Width / MapAttachmentUCBase.GetMapHeight(base.Width));
     }
   }
 }

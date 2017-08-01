@@ -25,7 +25,7 @@ namespace VKClient.Audio.Base.Library
 
     public SubscriptionFromPostManager()
     {
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
     }
 
     public void Handle(TransitionFromPostEvent message)
@@ -68,7 +68,7 @@ namespace VKClient.Audio.Base.Library
       SubscriptionFromPostManager.TransitionToPostData transitionToPostData = this._transitionTimes.FirstOrDefault<SubscriptionFromPostManager.TransitionToPostData>((Func<SubscriptionFromPostManager.TransitionToPostData, bool>) (t => t.OwnerId == ownerId));
       if (transitionToPostData == null || (DateTime.UtcNow - transitionToPostData.DateTime).TotalHours > 24.0)
         return;
-      EventAggregator.Current.Publish((object) new SubscriptionFromPostEvent()
+      EventAggregator.Current.Publish(new SubscriptionFromPostEvent()
       {
         post_id = transitionToPostData.PostId
       });

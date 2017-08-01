@@ -29,7 +29,7 @@ namespace VKClient.Common.Backend.DataObjects
       string str = "";
       if (string.IsNullOrEmpty(this.name))
       {
-        User user = users == null ? (User) null : users.FirstOrDefault<User>((Func<User, bool>) (u => u.uid == this.id));
+        User user = users == null ?  null : users.FirstOrDefault<User>((Func<User, bool>) (u => u.uid == this.id));
         if (user != null)
           str = user.Name;
       }
@@ -37,7 +37,7 @@ namespace VKClient.Common.Backend.DataObjects
         str = this.name;
       if (this.id <= 0L)
         return str;
-      return string.Format("[id{0}|{1}]", (object) this.id, (object) str);
+      return string.Format("[id{0}|{1}]", this.id, str);
     }
   }
 }

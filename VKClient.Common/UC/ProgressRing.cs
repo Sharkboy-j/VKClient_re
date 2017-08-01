@@ -6,9 +6,9 @@ namespace VKClient.Common.UC
 {
   public class ProgressRing : Control
   {
-    public static readonly DependencyProperty IsActiveProperty = DependencyProperty.Register("IsActive", typeof (bool), typeof (ProgressRing), new PropertyMetadata((object) false, new PropertyChangedCallback(ProgressRing.IsActiveChanged)));
-    public static readonly DependencyProperty TemplateSettingsProperty = DependencyProperty.Register("TemplateSettings", typeof (TemplateSettingValues), typeof (ProgressRing), new PropertyMetadata((object) new TemplateSettingValues(100.0, 10)));
-    public static readonly DependencyProperty EllipseDiameterFactorProperty = DependencyProperty.Register("EllipseDiameterFactor", typeof (int), typeof (ProgressRing), new PropertyMetadata((object) 10));
+      public static readonly DependencyProperty IsActiveProperty = DependencyProperty.Register("IsActive", typeof(bool), typeof(ProgressRing), new PropertyMetadata(false, new PropertyChangedCallback(ProgressRing.IsActiveChanged)));
+    public static readonly DependencyProperty TemplateSettingsProperty = DependencyProperty.Register("TemplateSettings", typeof (TemplateSettingValues), typeof (ProgressRing), new PropertyMetadata(new TemplateSettingValues(100.0, 10)));
+    public static readonly DependencyProperty EllipseDiameterFactorProperty = DependencyProperty.Register("EllipseDiameterFactor", typeof (int), typeof (ProgressRing), new PropertyMetadata(10));
     private bool _hasAppliedTemplate;
     private const int DEFAULT_ELLIPSE_DIAMETER_FACTOR = 10;
 
@@ -16,11 +16,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (bool) this.GetValue(ProgressRing.IsActiveProperty);
+        return (bool) base.GetValue(ProgressRing.IsActiveProperty);
       }
       set
       {
-        this.SetValue(ProgressRing.IsActiveProperty, (object) value);
+        base.SetValue(ProgressRing.IsActiveProperty, value);
       }
     }
 
@@ -28,11 +28,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (TemplateSettingValues) this.GetValue(ProgressRing.TemplateSettingsProperty);
+        return (TemplateSettingValues) base.GetValue(ProgressRing.TemplateSettingsProperty);
       }
       set
       {
-        this.SetValue(ProgressRing.TemplateSettingsProperty, (object) value);
+        base.SetValue(ProgressRing.TemplateSettingsProperty, value);
       }
     }
 
@@ -40,17 +40,18 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (int) this.GetValue(ProgressRing.EllipseDiameterFactorProperty);
+        return (int) base.GetValue(ProgressRing.EllipseDiameterFactorProperty);
       }
       set
       {
-        this.SetValue(ProgressRing.EllipseDiameterFactorProperty, (object) value);
+        base.SetValue(ProgressRing.EllipseDiameterFactorProperty, value);
       }
     }
 
     public ProgressRing()
     {
-      this.DefaultStyleKey = (object) typeof (ProgressRing);
+      //base.\u002Ector();
+      this.DefaultStyleKey = (typeof (ProgressRing));
       this.TemplateSettings = new TemplateSettingValues(60.0, this.EllipseDiameterFactor);
     }
 
@@ -72,14 +73,18 @@ namespace VKClient.Common.UC
     {
       double width = 100.0;
       if (!DesignerProperties.IsInDesignTool)
-        width = this.Width != double.NaN ? this.Width : availableSize.Width;
+      {
+        // ISSUE: explicit reference operation
+        width = base.Width != double.NaN ? base.Width : ((Size) @availableSize).Width;
+      }
       this.TemplateSettings = new TemplateSettingValues(width, this.EllipseDiameterFactor);
       return base.MeasureOverride(availableSize);
     }
 
     private static void IsActiveChanged(DependencyObject d, DependencyPropertyChangedEventArgs args)
     {
-      ((ProgressRing) d).UpdateState((bool) args.NewValue);
+      // ISSUE: explicit reference operation
+      ((ProgressRing) d).UpdateState((bool) ((DependencyPropertyChangedEventArgs) @args).NewValue);
     }
   }
 }

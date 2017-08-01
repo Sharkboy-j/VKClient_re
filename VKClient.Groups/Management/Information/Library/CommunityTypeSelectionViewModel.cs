@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using VKClient.Audio.Base.DataObjects;
 using VKClient.Common.Backend.DataObjects;
@@ -20,7 +21,7 @@ namespace VKClient.Groups.Management.Information.Library
     private string _openedDescription;
     private string _closedDescription;
 
-    public InformationViewModel ParentViewModel { get; set; }
+    public InformationViewModel ParentViewModel { get; private set; }
 
     public string Title
     {
@@ -31,7 +32,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._title = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.Title));
+        this.NotifyPropertyChanged<string>((() => this.Title));
       }
     }
 
@@ -44,7 +45,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._visibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.Visibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.Visibility));
       }
     }
 
@@ -57,7 +58,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._isOpenedSelected = value;
-        this.NotifyPropertyChanged<bool?>((System.Linq.Expressions.Expression<Func<bool?>>) (() => this.IsOpenedSelected));
+        this.NotifyPropertyChanged<bool?>((() => this.IsOpenedSelected));
       }
     }
 
@@ -70,7 +71,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._isClosedSelected = value;
-        this.NotifyPropertyChanged<bool?>((System.Linq.Expressions.Expression<Func<bool?>>) (() => this.IsClosedSelected));
+        this.NotifyPropertyChanged<bool?>((() => this.IsClosedSelected));
       }
     }
 
@@ -83,7 +84,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._isPrivateSelected = value;
-        this.NotifyPropertyChanged<bool?>((System.Linq.Expressions.Expression<Func<bool?>>) (() => this.IsPrivateSelected));
+        this.NotifyPropertyChanged<bool?>((() => this.IsPrivateSelected));
       }
     }
 
@@ -96,7 +97,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._privateVisibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.PrivateVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.PrivateVisibility));
       }
     }
 
@@ -109,7 +110,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._openedTitle = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.OpenedTitle));
+        this.NotifyPropertyChanged<string>((() => this.OpenedTitle));
       }
     }
 
@@ -122,7 +123,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._closedTitle = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.ClosedTitle));
+        this.NotifyPropertyChanged<string>((() => this.ClosedTitle));
       }
     }
 
@@ -135,7 +136,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._openedDescription = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.OpenedDescription));
+        this.NotifyPropertyChanged<string>((() => this.OpenedDescription));
       }
     }
 
@@ -148,7 +149,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._closedDescription = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.ClosedDescription));
+        this.NotifyPropertyChanged<string>((() => this.ClosedDescription));
       }
     }
 

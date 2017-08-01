@@ -10,7 +10,7 @@ namespace VKClient.Common.UC
 {
   public class CatalogBannerUC : UserControl, ISupportDataContext
   {
-    public static readonly DependencyProperty CatalogBannerProperty = DependencyProperty.Register("CatalogBanner", typeof (GameHeader), typeof (CatalogBannerUC), new PropertyMetadata(new PropertyChangedCallback(CatalogBannerUC.OnCatalogBannerChanged)));
+      public static readonly DependencyProperty CatalogBannerProperty = DependencyProperty.Register("CatalogBanner", typeof(GameHeader), typeof(CatalogBannerUC), new PropertyMetadata(new PropertyChangedCallback(CatalogBannerUC.OnCatalogBannerChanged)));
     internal Image imageBanner;
     private bool _contentLoaded;
 
@@ -18,16 +18,17 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (GameHeader) this.GetValue(CatalogBannerUC.CatalogBannerProperty);
+        return (GameHeader) base.GetValue(CatalogBannerUC.CatalogBannerProperty);
       }
       set
       {
-        this.SetValue(CatalogBannerUC.CatalogBannerProperty, (object) value);
+        base.SetValue(CatalogBannerUC.CatalogBannerProperty, value);
       }
     }
 
     public CatalogBannerUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -36,11 +37,12 @@ namespace VKClient.Common.UC
       CatalogBannerUC catalogBannerUc = d as CatalogBannerUC;
       if (catalogBannerUc == null)
         return;
-      GameHeader gameHeader = e.NewValue as GameHeader;
-      if (gameHeader == null)
+      // ISSUE: explicit reference operation
+      GameHeader newValue = e.NewValue as GameHeader;
+      if (newValue == null)
         ImageLoader.SetUriSource(catalogBannerUc.imageBanner, "");
       else
-        ImageLoader.SetUriSource(catalogBannerUc.imageBanner, gameHeader.Game.banner_896);
+        ImageLoader.SetUriSource(catalogBannerUc.imageBanner, newValue.Game.banner_1120);
     }
 
     public void SetDataContext(object obj)
@@ -49,7 +51,7 @@ namespace VKClient.Common.UC
       if (gameHeader != null)
         this.CatalogBanner = gameHeader;
       else
-        this.CatalogBanner = (GameHeader) null;
+        this.CatalogBanner =  null;
     }
 
     [DebuggerNonUserCode]
@@ -58,8 +60,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/CatalogBannerUC.xaml", UriKind.Relative));
-      this.imageBanner = (Image) this.FindName("imageBanner");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/CatalogBannerUC.xaml", UriKind.Relative));
+      this.imageBanner = (Image) base.FindName("imageBanner");
     }
   }
 }

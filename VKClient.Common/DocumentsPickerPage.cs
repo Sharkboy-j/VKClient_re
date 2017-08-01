@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -27,6 +28,7 @@ namespace VKClient.Common
 {
   public class DocumentsPickerPage : PageBase
   {
+    private int _maxAllowedToSelect;
     private bool _isInitialized;
     private ObservableCollection<DocumentsSectionViewModel> _sections;
     private ListPickerUC2 _picker;
@@ -42,7 +44,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as DocumentsViewModel;
+        return base.DataContext as DocumentsViewModel;
       }
     }
 
@@ -51,21 +53,22 @@ namespace VKClient.Common
       this.InitializeComponent();
       this.SuppressMenu = true;
       this.ucHeader.OnHeaderTap += (Action) (() => this.list.ScrollToTop());
-      this.list.OnRefresh = (Action) (() => this.ViewModel.CurrentSection.Items.LoadData(true, false, (Action<BackendResult<DocumentsInfo, ResultCode>>) null, false));
+      this.list.OnRefresh = (Action) (() => this.ViewModel.CurrentSection.Items.LoadData(true, false,  null, false));
       this.pullToRefresh.TrackListBox((ISupportPullToRefresh) this.list);
       this.BuilAppBar();
     }
 
     private void BuilAppBar()
     {
-      this.ApplicationBar = (IApplicationBar) ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
-      ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton()
-      {
-        IconUri = new Uri("/Resources/appbar.feature.search.rest.png", UriKind.Relative),
-        Text = CommonResources.FriendsPage_AppBar_Search
-      };
-      applicationBarIconButton.Click += new EventHandler(this.AppBarSearchButton_OnClicked);
-      this.ApplicationBar.Buttons.Add((object) applicationBarIconButton);
+      this.ApplicationBar = ((IApplicationBar) ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9));
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+      Uri uri = new Uri("/Resources/appbar.feature.search.rest.png", UriKind.Relative);
+      applicationBarIconButton1.IconUri = uri;
+      string pageAppBarSearch = CommonResources.FriendsPage_AppBar_Search;
+      applicationBarIconButton1.Text = pageAppBarSearch;
+      ApplicationBarIconButton applicationBarIconButton2 = applicationBarIconButton1;
+      applicationBarIconButton2.Click+=(new EventHandler(this.AppBarSearchButton_OnClicked));
+      this.ApplicationBar.Buttons.Add(applicationBarIconButton2);
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -73,18 +76,19 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (!this._isInitialized)
       {
+        this._maxAllowedToSelect = int.Parse(((Page) this).NavigationContext.QueryString["MaxAllowedToSelect"]);
         long loggedInUserId = AppGlobalStateManager.Current.LoggedInUserId;
         DocumentsViewModel parentPageViewModel = new DocumentsViewModel(loggedInUserId);
-        DocumentsSectionViewModel sectionViewModel = new DocumentsSectionViewModel(parentPageViewModel, loggedInUserId, 0L, CommonResources.AllDocuments, false, true)
+        DocumentsSectionViewModel sectionViewModel = new DocumentsSectionViewModel(parentPageViewModel, loggedInUserId, 0, CommonResources.AllDocuments, false, true)
         {
           IsSelected = true
         };
         parentPageViewModel.Sections.Add(sectionViewModel);
         parentPageViewModel.LoadSection(0);
-        this.DataContext = (object) parentPageViewModel;
+        base.DataContext = parentPageViewModel;
         this._isInitialized = true;
       }
-      if (e.NavigationMode != NavigationMode.Back || !ParametersRepository.Contains("FilePicked") && !ParametersRepository.Contains("PickedPhotoDocument"))
+      if (e.NavigationMode != NavigationMode.Back || !ParametersRepository.Contains("FilePicked") && !ParametersRepository.Contains("PickedPhotoDocuments"))
         return;
       this.SkipNextNavigationParametersRepositoryClearing = true;
       Navigator.Current.GoBack();
@@ -92,11 +96,11 @@ namespace VKClient.Common
 
     private void List_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      DocumentHeader documentHeader = ((LongListSelector) sender).SelectedItem as DocumentHeader;
-      if (documentHeader == null)
+      DocumentHeader selectedItem = ((LongListSelector) sender).SelectedItem as DocumentHeader;
+      if (selectedItem == null)
         return;
       this.list.SelectedItem = null;
-      ParametersRepository.SetParameterForId("PickedDocument", (object) documentHeader.Document);
+      ParametersRepository.SetParameterForId("PickedDocument", selectedItem.Document);
       Navigator.Current.GoBack();
     }
 
@@ -108,30 +112,32 @@ namespace VKClient.Common
     private void AppBarSearchButton_OnClicked(object sender, EventArgs e)
     {
       DocumentsSearchDataProvider searchDataProvider = new DocumentsSearchDataProvider((IEnumerable<DocumentHeader>) this.ViewModel.CurrentSection.Items.Collection);
-      DataTemplate dataTemplate = (DataTemplate) this.Resources["ItemTemplate"];
-      Action<object, object> selectedItemCallback = (Action<object, object>) ((p, f) => this.List_OnSelectionChanged(p, (SelectionChangedEventArgs) null));
-      Action<string> textChangedCallback = (Action<string>) (searchString => this.list.Visibility = searchString != "" ? Visibility.Collapsed : Visibility.Visible);
+      DataTemplate dataTemplate = (DataTemplate) base.Resources["ItemTemplate"];
+      Action<object, object> selectedItemCallback = (Action<object, object>) ((p, f) => this.List_OnSelectionChanged(p,  null));
+      Action<string> textChangedCallback = (Action<string>) (searchString => ((UIElement) this.list).Visibility = (searchString != "" ? Visibility.Collapsed : Visibility.Visible));
       DataTemplate itemTemplate = dataTemplate;
+      // ISSUE: variable of the null type
+      
       Thickness? margin = new Thickness?(new Thickness(0.0, 77.0, 0.0, 0.0));
-      DialogService popup = GenericSearchUC.CreatePopup<Doc, DocumentHeader>((ISearchDataProvider<Doc, DocumentHeader>)searchDataProvider, selectedItemCallback, textChangedCallback, itemTemplate, null, margin);
-      EventHandler eventHandler = (EventHandler) ((o, args) => this.list.Visibility = Visibility.Visible);
+      DialogService popup = GenericSearchUC.CreatePopup<Doc, DocumentHeader>((ISearchDataProvider<Doc, DocumentHeader>) searchDataProvider, selectedItemCallback, textChangedCallback, itemTemplate, null, margin);
+      EventHandler eventHandler = (EventHandler) ((o, args) => ((UIElement) this.list).Visibility = Visibility.Visible);
       popup.Closing += eventHandler;
-      Grid grid = this.gridContent;
-      popup.Show((UIElement) grid);
+      Grid gridContent = this.gridContent;
+      popup.Show((UIElement) gridContent);
     }
 
     private void FirstButton_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      Navigator.Current.NavigateToPhotoPickerPhotos(1, false, true);
+      Navigator.Current.NavigateToPhotoPickerPhotos(this._maxAllowedToSelect, false, true);
     }
 
     private void SecondButton_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
       FileOpenPicker fileOpenPicker = new FileOpenPicker();
-      ((IDictionary<string, object>) fileOpenPicker.ContinuationData)["FilePickedType"] = (object) 10;
+      ((IDictionary<string, object>) fileOpenPicker.ContinuationData)["FilePickedType"] = 10;
       foreach (string supportedDocExtension in VKConstants.SupportedDocExtensions)
         fileOpenPicker.FileTypeFilter.Add(supportedDocExtension);
-      ((IDictionary<string, object>) fileOpenPicker.ContinuationData)["Operation"] = (object) "DocumentFromPhone";
+      ((IDictionary<string, object>) fileOpenPicker.ContinuationData)["Operation"] = "DocumentFromPhone";
       fileOpenPicker.PickSingleFileAndContinue();
     }
 
@@ -150,7 +156,7 @@ namespace VKClient.Common
         PickerMaxHeight = 768.0,
         BackgroundColor = (Brush) Application.Current.Resources["PhoneCardOverlayBrush"],
         PickerMargin = new Thickness(0.0, 0.0, 0.0, 64.0),
-        ItemTemplate = (DataTemplate) this.Resources["FilterItemTemplate"]
+        ItemTemplate = (DataTemplate) base.Resources["FilterItemTemplate"]
       };
       this._picker.ItemTapped += (EventHandler<object>) ((sender, item) =>
       {
@@ -160,22 +166,27 @@ namespace VKClient.Common
         this.SelectSection(section);
         this.ViewModel.CurrentSection = section;
       });
-      Point point = this.rectSeparator.TransformToVisual((UIElement) this.gridRoot).Transform(new Point(0.0, 0.0));
-      int num1 = this._sections.IndexOf(this._sections.FirstOrDefault<DocumentsSectionViewModel>((Func<DocumentsSectionViewModel, bool>) (section => section.IsSelected)));
+      Point point = ((UIElement) this.rectSeparator).TransformToVisual((UIElement) this.gridRoot).Transform(new Point(0.0, 0.0));
+      int num1 = this._sections.IndexOf((DocumentsSectionViewModel)Enumerable.FirstOrDefault<DocumentsSectionViewModel>(this._sections, (Func<DocumentsSectionViewModel, bool>)(section => section.IsSelected)));
       double num2 = 0.0;
       if (num1 > -1)
         num2 = (double) (num1 * 64);
-      this._picker.Show(new Point(8.0, Math.Max(32.0, point.Y - num2)), (FrameworkElement) FramePageUtils.CurrentPage);
+      // ISSUE: explicit reference operation
+      this._picker.Show(new Point(8.0, Math.Max(32.0, ((Point) @point).Y - num2)), (FrameworkElement) FramePageUtils.CurrentPage);
     }
 
     private void SelectSection(DocumentsSectionViewModel section)
     {
       if (this._sections == null || section == null)
         return;
-      foreach (DocumentsSectionViewModel section1 in (Collection<DocumentsSectionViewModel>) this._sections)
+      using (IEnumerator<DocumentsSectionViewModel> enumerator = this._sections.GetEnumerator())
       {
-        int num = section1.SectionId == section.SectionId ? 1 : 0;
-        section1.IsSelected = num != 0;
+        while (enumerator.MoveNext())
+        {
+          DocumentsSectionViewModel current = enumerator.Current;
+          int num = current.SectionId == section.SectionId ? 1 : 0;
+          current.IsSelected = num != 0;
+        }
       }
     }
 
@@ -185,13 +196,13 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/DocumentsPickerPage.xaml", UriKind.Relative));
-      this.gridRoot = (Grid) this.FindName("gridRoot");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.gridContent = (Grid) this.FindName("gridContent");
-      this.list = (ExtendedLongListSelector) this.FindName("list");
-      this.rectSeparator = (Rectangle) this.FindName("rectSeparator");
-      this.pullToRefresh = (PullToRefreshUC) this.FindName("pullToRefresh");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/DocumentsPickerPage.xaml", UriKind.Relative));
+      this.gridRoot = (Grid) base.FindName("gridRoot");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.gridContent = (Grid) base.FindName("gridContent");
+      this.list = (ExtendedLongListSelector) base.FindName("list");
+      this.rectSeparator = (Rectangle) base.FindName("rectSeparator");
+      this.pullToRefresh = (PullToRefreshUC) base.FindName("pullToRefresh");
     }
   }
 }

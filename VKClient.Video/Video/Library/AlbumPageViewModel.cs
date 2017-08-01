@@ -32,7 +32,7 @@ namespace VKClient.Video.Library
     public AlbumPageViewModel(long userOrGroupId, bool isGroup)
     {
       this.VideosInAlbum = new ObservableCollection<Group<VideoHeader>>();
-      this.VideosInAlbum.Add(new Group<VideoHeader>(string.Empty, (IEnumerable<VideoHeader>) new List<VideoHeader>(), false));
+      ((Collection<Group<VideoHeader>>) this.VideosInAlbum).Add(new Group<VideoHeader>(string.Empty, (IEnumerable<VideoHeader>) new List<VideoHeader>(), false));
       this._userOrGroupId = userOrGroupId;
       this._isGroup = isGroup;
     }
@@ -41,7 +41,7 @@ namespace VKClient.Video.Library
     {
       this._albumId = albumId;
       this.VideosInAlbum = new ObservableCollection<Group<VideoHeader>>();
-      this.VideosInAlbum.Add(new Group<VideoHeader>(string.Empty, (IEnumerable<VideoHeader>) new List<VideoHeader>(), false));
+      ((Collection<Group<VideoHeader>>) this.VideosInAlbum).Add(new Group<VideoHeader>(string.Empty, (IEnumerable<VideoHeader>) new List<VideoHeader>(), false));
       this._loadedPages = 0;
       this.LoadVideosFromBackend(0);
     }

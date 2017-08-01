@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Framework;
@@ -15,6 +17,8 @@ namespace VKClient.Photos.Library
     private string _albumId;
     private int _seqNo;
     private Func<AlbumPhoto, bool, Stream> _getImageFunc;
+
+    public long MessageId { get; private set; }
 
     private static double RequiredDimension
     {
@@ -56,7 +60,7 @@ namespace VKClient.Photos.Library
       {
         if (this._photo != null)
           return this._photo.photo_130;
-        return null;
+        return  null;
       }
     }
 
@@ -71,10 +75,11 @@ namespace VKClient.Photos.Library
         if (this._isSelected == value)
           return;
         this._isSelected = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsSelected));
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.SelectUnselectImageUri));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.IsSelectedVisibility));
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.IsNotSelectedVisibility));
+        base.NotifyPropertyChanged<bool>(() => this.IsSelected);
+        base.NotifyPropertyChanged<string>(() => this.SelectUnselectImageUri);
+        base.NotifyPropertyChanged<string>(() => this.SelectionStateIconUri);
+        base.NotifyPropertyChanged<Visibility>(() => this.IsSelectedVisibility);
+        base.NotifyPropertyChanged<Visibility>(() => this.IsNotSelectedVisibility);
       }
     }
 
@@ -86,11 +91,21 @@ namespace VKClient.Photos.Library
       }
     }
 
+    public string SelectionStateIconUri
+    {
+      get
+      {
+        return !this.IsSelected ? "/Resources/AttachmentPicker/Unselected56px.png" : "/Resources/AttachmentPicker/Selected56px.png";
+      }
+    }
+
     public Visibility IsSelectedVisibility
     {
       get
       {
-        return !this._isSelected ? Visibility.Collapsed : Visibility.Visible;
+        if (!this._isSelected)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -98,7 +113,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this._isSelected ? Visibility.Collapsed : Visibility.Visible;
+        if (this._isSelected)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -138,9 +155,10 @@ namespace VKClient.Photos.Library
 
     public double Height { get; set; }
 
-    public AlbumPhoto(Photo photo)
+    public AlbumPhoto(Photo photo, long messageId = 0)
     {
       this._photo = photo;
+      this.MessageId = messageId;
     }
 
     public AlbumPhoto(string albumId, int seqNo, Func<AlbumPhoto, bool, Stream> getImageFunc, double width, double height)
@@ -154,7 +172,7 @@ namespace VKClient.Photos.Library
 
     public void NotifyUpdateThumbnail()
     {
-      this.NotifyPropertyChanged<Stream>((System.Linq.Expressions.Expression<Func<Stream>>) (() => this.ThumbnailStream));
+        base.NotifyPropertyChanged<Stream>(() => this.ThumbnailStream);
     }
   }
 }

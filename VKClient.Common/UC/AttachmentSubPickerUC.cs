@@ -6,32 +6,30 @@ using System.Windows.Input;
 
 namespace VKClient.Common.UC
 {
-  public class AttachmentSubPickerUC : UserControl
+  public class AttachmentSubpickerUC : UserControl
   {
-    private static int _instancesCount;
-    internal TextBlock textBlockTitle;
     internal ItemsControl itemsControl;
     private bool _contentLoaded;
 
     public event AttachmentSubItemSelectedEventHandler ItemSelected;
 
-    public AttachmentSubPickerUC()
+    public AttachmentSubpickerUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      ++AttachmentSubPickerUC._instancesCount;
     }
 
-    ~AttachmentSubPickerUC()
+    private void Item_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      --AttachmentSubPickerUC._instancesCount;
-    }
-
-    private void Item_OnTapped(object sender, GestureEventArgs e)
-    {
-      AttachmentPickerItem picketItem = (sender as FrameworkElement).DataContext as AttachmentPickerItem;
-      if (picketItem == null || this.ItemSelected == null)
+      AttachmentPickerItemViewModel dataContext = ((FrameworkElement) sender).DataContext as AttachmentPickerItemViewModel;
+      if (dataContext == null)
         return;
-      this.ItemSelected(picketItem);
+      // ISSUE: reference to a compiler-generated field
+      AttachmentSubItemSelectedEventHandler itemSelected = this.ItemSelected;
+      if (itemSelected == null)
+        return;
+      AttachmentPickerItemViewModel picketItem = dataContext;
+      itemSelected(picketItem);
     }
 
     [DebuggerNonUserCode]
@@ -40,9 +38,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/AttachmentSubPickerUC.xaml", UriKind.Relative));
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.itemsControl = (ItemsControl) this.FindName("itemsControl");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/AttachmentSubpickerUC.xaml", UriKind.Relative));
+      this.itemsControl = (ItemsControl) base.FindName("itemsControl");
     }
   }
 }

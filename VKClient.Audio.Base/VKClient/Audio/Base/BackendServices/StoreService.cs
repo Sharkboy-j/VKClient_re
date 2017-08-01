@@ -1,12 +1,15 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using VKClient.Audio.Base.DataObjects;
+using VKClient.Audio.Base.Events;
 using VKClient.Audio.Base.Library;
 using VKClient.Common.Backend;
 using VKClient.Common.Backend.DataObjects;
+using VKClient.Common.Framework;
 using VKClient.Common.Library;
 
 namespace VKClient.Audio.Base.BackendServices
@@ -27,7 +30,7 @@ namespace VKClient.Audio.Base.BackendServices
     {
       if (buyParams == null || buyParams.ProductType != StoreProductType.stickers)
         return;
-      this.FulfillPurchases(null, (Action) (() => this.DoBuyProduct(buyParams, successCallback, errorCallback)), errorCallback);
+      this.FulfillPurchases( null, (Action) (() => this.DoBuyProduct(buyParams, successCallback, errorCallback)), errorCallback);
     }
 
     private void DoBuyProduct(StoreBuyProductParams buyParams, Action<BackendResult<StoreBuyProductResult, ResultCode>> successCallback, Action<BackendResult<StorePurchaseResult, ResultCode>> errorCallback)
@@ -77,7 +80,7 @@ namespace VKClient.Audio.Base.BackendServices
           BackendResult<StorePurchaseResult, ResultCode> backendResult = new BackendResult<StorePurchaseResult, ResultCode>(result.ResultCode, StorePurchaseResult.GetForFailedPurchaseState());
           action(backendResult);
         }
-      }), (Func<string, StoreBuyProductResult>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(), (Action) (() => EventAggregator.Current.Publish(new StickersPurchaseFunnelEvent(StickersPurchaseFunnelAction.purchase_window))));
     }
 
     public void PurchaseVotesPack(VotesPack votesPack, Action successCallback, Action<BackendResult<StorePurchaseResult, ResultCode>> errorCallback, Action cancelledCallback)
@@ -148,7 +151,7 @@ namespace VKClient.Audio.Base.BackendServices
           "guid",
           buyParams.RandomId.ToString()
         }
-      }, callback, (Func<string, StorePurchaseResult>) null, false, true, new CancellationToken?());
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void RestorePurchases(string productId, Action successCallback, Action<BackendResult<StorePurchaseResult, ResultCode>> errorCallback)
@@ -211,10 +214,10 @@ namespace VKClient.Audio.Base.BackendServices
           "microsoft"
         }
       };
-      long num = (long) purchaseParams.ProductId;
-      if (num != 0L)
+      long productId = (long) purchaseParams.ProductId;
+      if (productId != 0L)
       {
-        parameters["product_id"] = num.ToString();
+        parameters["product_id"] = productId.ToString();
       }
       else
       {
@@ -256,12 +259,21 @@ namespace VKClient.Audio.Base.BackendServices
             return;
           action2();
         }
-      }), (Func<string, StorePurchaseResult>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
-    public void GetStickersStoreCatalog(Action<BackendResult<StoreCatalog, ResultCode>> callback)
+    public void GetStickersStoreCatalog(long purchaseFor, Action<BackendResult<StoreCatalog, ResultCode>> callback)
     {
-      VKRequestsDispatcher.DispatchRequestToVK<StoreCatalog>("execute.getStickersStoreCatalog", new Dictionary<string, string>(), callback, (Func<string, StoreCatalog>) null, false, true, new CancellationToken?());
+      Dictionary<string, string> parameters = new Dictionary<string, string>()
+      {
+        {
+          "func_v",
+          "3"
+        }
+      };
+      if (purchaseFor > 0L)
+        parameters["purchase_for"] = purchaseFor.ToString();
+      VKRequestsDispatcher.DispatchRequestToVK<StoreCatalog>("execute.getStickersStoreCatalog", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetBalanceData(Action<BackendResult<BalanceData, ResultCode>> callback)
@@ -285,7 +297,7 @@ namespace VKClient.Audio.Base.BackendServices
         BalanceData balanceData = new BalanceData();
         ResultCode resultCode = result.ResultCode;
         BalanceDataResponse resultData = result.ResultData;
-        List<StockItem> stockItems1 = (List<StockItem>) null;
+        List<StockItem> stockItems1 =  null;
         BackendResult<BalanceData, ResultCode> backendResult1 = new BackendResult<BalanceData, ResultCode>();
         backendResult1.ResultCode = resultCode;
         BalanceData balanceData1 = balanceData;
@@ -295,7 +307,7 @@ namespace VKClient.Audio.Base.BackendServices
         {
           balanceData.Balance = resultData.balance;
           VKList<StockItem> stockItems2 = resultData.stockItems;
-          stockItems1 = stockItems2 != null ? stockItems2.items : (List<StockItem>) null;
+          stockItems1 = stockItems2 != null ? stockItems2.items :  null;
         }
         if (result.ResultCode == ResultCode.Succeeded && stockItems1 != null)
         {
@@ -317,7 +329,7 @@ namespace VKClient.Audio.Base.BackendServices
           BackendResult<BalanceData, ResultCode> backendResult2 = response;
           action(backendResult2);
         }
-      }), (Func<string, BalanceDataResponse>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetStickersKeywords(Action<BackendResult<StickersKeywordsData, ResultCode>> callback)
@@ -332,7 +344,7 @@ namespace VKClient.Audio.Base.BackendServices
           "all_products",
           "1"
         }
-      }, callback, (Func<string, StickersKeywordsData>) null, false, true, new CancellationToken?());
+      }, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetStockItemByStickerId(long stickerId, Action<BackendResult<StockItem, ResultCode>> callback, CancellationToken? cancellationToken = null)
@@ -351,7 +363,7 @@ namespace VKClient.Audio.Base.BackendServices
           "no_inapp",
           "1"
         }
-      }, callback, (Func<string, StockItem>) null, false, true, cancellationToken);
+      }, callback,  null, false, true, cancellationToken,  null);
     }
 
     public void GetStockItemByName(string name, Action<BackendResult<StockItem, ResultCode>> callback, CancellationToken? cancellationToken = null)
@@ -374,7 +386,7 @@ namespace VKClient.Audio.Base.BackendServices
           "no_inapp",
           "1"
         }
-      }, callback, (Func<string, StockItem>) null, false, true, cancellationToken);
+      }, callback,  null, false, true, cancellationToken,  null);
     }
 
     public void GetStockItems(StoreProductType productType, List<long> productIds = null, List<StoreProductFilter> productFilters = null, long purchaseForId = 0, Action<BackendResult<VKList<StockItem>, ResultCode>> callback = null)
@@ -400,7 +412,7 @@ namespace VKClient.Audio.Base.BackendServices
         parameters["filters"] = string.Join(",", productFilters.Select<StoreProductFilter, string>((Func<StoreProductFilter, string>) (filter => filter.ToString().ToLowerInvariant())));
       if (purchaseForId > 0L)
         parameters["purchase_for"] = purchaseForId.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<VKList<StockItem>>("store.getStockItems", parameters, callback, (Func<string, VKList<StockItem>>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<VKList<StockItem>>("store.getStockItems", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetProducts(List<StoreProductFilter> productFilters = null, Action<BackendResult<VKList<StoreProduct>, ResultCode>> callback = null)
@@ -426,7 +438,7 @@ namespace VKClient.Audio.Base.BackendServices
       };
       if (productFilters != null && productFilters.Count > 0)
         parameters["filters"] = string.Join(",", productFilters.Select<StoreProductFilter, string>((Func<StoreProductFilter, string>) (filter => filter.ToString().ToLowerInvariant())));
-      VKRequestsDispatcher.DispatchRequestToVK<VKList<StoreProduct>>("store.getProducts", parameters, callback, (Func<string, VKList<StoreProduct>>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<VKList<StoreProduct>>("store.getProducts", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetProducts(StoreProductFilter productFilter, Action<BackendResult<VKList<StoreProduct>, ResultCode>> callback = null)
@@ -466,10 +478,10 @@ namespace VKClient.Audio.Base.BackendServices
         if (result.ResultCode == ResultCode.Succeeded)
         {
           ProductsWithStockItems resultData2 = result.ResultData;
-          if ((resultData2 != null ? resultData2.products.items : (List<StoreProduct>) null) != null)
+          if ((resultData2 != null ? resultData2.products.items :  null) != null)
           {
             VKList<StockItem> stockItems = resultData2.stockItems;
-            if ((stockItems != null ? stockItems.items : (List<StockItem>) null) != null)
+            if ((stockItems != null ? stockItems.items :  null) != null)
             {
               foreach (StoreProduct storeProduct in resultData2.products.items)
               {
@@ -486,7 +498,7 @@ namespace VKClient.Audio.Base.BackendServices
           return;
         BackendResult<List<StockItem>, ResultCode> backendResult = new BackendResult<List<StockItem>, ResultCode>(result.ResultCode, resultData1);
         action(backendResult);
-      }), (Func<string, ProductsWithStockItems>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
     public void ActivateProduct(int productId, Action<BackendResult<bool, ResultCode>> callback)
@@ -505,7 +517,7 @@ namespace VKClient.Audio.Base.BackendServices
       {
         bool resultData = result.ResultCode == ResultCode.Succeeded && result.ResultData == 1;
         callback(new BackendResult<bool, ResultCode>(result.ResultCode, resultData));
-      }), (Func<string, int>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
     public void DeactivateProduct(int productId, Action<BackendResult<bool, ResultCode>> callback)
@@ -524,7 +536,7 @@ namespace VKClient.Audio.Base.BackendServices
       {
         bool resultData = result.ResultCode == ResultCode.Succeeded && result.ResultData == 1;
         callback(new BackendResult<bool, ResultCode>(result.ResultCode, resultData));
-      }), (Func<string, int>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
     public void ReorderProducts(int productId, int after = 0, int before = 0, Action<BackendResult<bool, ResultCode>> callback = null)
@@ -552,12 +564,55 @@ namespace VKClient.Audio.Base.BackendServices
           return;
         BackendResult<bool, ResultCode> backendResult = new BackendResult<bool, ResultCode>(result.ResultCode, resultData);
         action(backendResult);
-      }), (Func<string, int>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
     public void MarkUpdatesAsViewed()
     {
-      VKRequestsDispatcher.DispatchRequestToVK<int>("store.markUpdatesAsViewed", new Dictionary<string, string>(), (Action<BackendResult<int, ResultCode>>) (result => {}), (Func<string, int>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<int>("store.markAsViewed", new Dictionary<string, string>()
+      {
+        {
+          "type",
+          "stickers"
+        },
+        {
+          "reset",
+          "global_promotion"
+        }
+      }, (Action<BackendResult<int, ResultCode>>) (result => {}),  null, false, true, new CancellationToken?(),  null);
+    }
+
+    public void GetFriendsList(long productId, Action<BackendResult<List<User>, ResultCode>> callback)
+    {
+      Dictionary<string, string> dictionary1 = new Dictionary<string, string>();
+      string index1 = "type";
+      string str1 = "stickers";
+      dictionary1[index1] = str1;
+      string index2 = "product_id";
+      string str2 = productId.ToString();
+      dictionary1[index2] = str2;
+      string index3 = "source_ids";
+      string str3 = "friends";
+      dictionary1[index3] = str3;
+      string index4 = "count";
+      string str4 = "5000";
+      dictionary1[index4] = str4;
+      string index5 = "extended";
+      string str5 = "1";
+      dictionary1[index5] = str5;
+      string index6 = "fields";
+      string str6 = "photo_max,online,online_mobile";
+      dictionary1[index6] = str6;
+      Dictionary<string, string> dictionary2 = dictionary1;
+      string methodName = "store.getFriendsList";
+      Dictionary<string, string> parameters = dictionary2;
+      Action<BackendResult<List<User>, ResultCode>> callback1 = callback;
+      int num1 = 0;
+      int num2 = 1;
+      CancellationToken? cancellationToken = new CancellationToken?();
+      // ISSUE: variable of the null type
+      
+      VKRequestsDispatcher.DispatchRequestToVK<List<User>>(methodName, parameters, callback1, (Func<string, List<User>>) (jsonStr => JsonConvert.DeserializeObject<GenericRoot<VKList<User>>>(jsonStr).response.users), num1 != 0, num2 != 0, cancellationToken, null);
     }
   }
 }

@@ -33,7 +33,7 @@ namespace VKClient.Common.Backend.DataObjects
         this._name = (value ?? "").ForUI();
         if (this.PropertyChanged == null)
           return;
-        this.PropertyChanged((object) this, new PropertyChangedEventArgs("name"));
+        this.PropertyChanged(this, new PropertyChangedEventArgs("name"));
       }
     }
 

@@ -17,10 +17,10 @@ namespace VKClient.Common.UC
     public FriendsRecommendationsNewsItemUC(NewsItemDataWithUsersAndGroupsInfo newsItem)
     {
       this.InitializeComponent();
-      this.MainPanel.Children.Add((UIElement) new FriendsRecommendationsUC(newsItem));
+      ((PresentationFrameworkCollection<UIElement>) ((Panel) this.MainPanel).Children).Add((UIElement) new FriendsRecommendationsUC(newsItem));
     }
 
-    private void ShowAllButton_OnTapped(object sender, GestureEventArgs e)
+    private void ShowAllButton_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
       Navigator.Current.NavigateToFriendsSuggestions();
     }
@@ -31,8 +31,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/FriendsRecommendationsNewsItemUC.xaml", UriKind.Relative));
-      this.MainPanel = (Grid) this.FindName("MainPanel");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/FriendsRecommendationsNewsItemUC.xaml", UriKind.Relative));
+      this.MainPanel = (Grid) base.FindName("MainPanel");
     }
   }
 }

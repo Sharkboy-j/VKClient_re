@@ -11,10 +11,10 @@ namespace VKClient.Audio.Base.Events
     {
       get
       {
-        string str = this.PostId + "|" + (object) this.ItemType + "|" + (object) this.Source;
+        string str = this.PostId + "|" + this.ItemType + "|" + this.Source;
         if (this.Source == ViewPostSource.NewsFeed)
           str = str + "_" + (this.IsTopFeed ? "Top" : this.FeedSource.ToString());
-        return str + "|" + (object) this.Position;
+        return str + "|" + this.Position;
       }
     }
 

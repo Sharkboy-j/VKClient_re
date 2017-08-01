@@ -17,7 +17,7 @@ namespace VKClient.Common.Backend.DataObjects
     {
       get
       {
-        return this.owner_id.ToString() + "_" + (object) this.vid;
+        return this.owner_id.ToString() + "_" + this.vid;
       }
     }
 
@@ -165,7 +165,7 @@ namespace VKClient.Common.Backend.DataObjects
 
     public override string ToString()
     {
-      return string.Format("video{0}_{1}", (object) this.owner_id, (object) this.id);
+      return string.Format("video{0}_{1}", this.owner_id, this.id);
     }
 
     public void Write(BinaryWriter writer)
@@ -187,8 +187,8 @@ namespace VKClient.Common.Backend.DataObjects
       writer.Write(this.comments);
       writer.WriteString(this.player);
       Guid guid = this.guid;
-      string @string = this.guid.ToString();
-      writer.WriteString(@string);
+      string str = this.guid.ToString();
+      writer.WriteString(str);
       writer.Write(this.can_edit);
       writer.Write(this.can_repost);
       writer.Write(this.can_comment);

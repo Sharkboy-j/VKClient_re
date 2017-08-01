@@ -15,24 +15,28 @@ using VKClient.Groups.Management.Library;
 
 namespace VKClient.Groups.Management
 {
-    public partial class RequestsPage : PageBase
+  public class RequestsPage : PageBase
   {
     private bool _isInitialized;
+    internal GenericHeaderUC Header;
+    internal ExtendedLongListSelector List;
+    internal PullToRefreshUC PullToRefresh;
+    private bool _contentLoaded;
 
     private RequestsViewModel ViewModel
     {
       get
       {
-        return this.DataContext as RequestsViewModel;
+        return base.DataContext as RequestsViewModel;
       }
     }
 
     public RequestsPage()
     {
-      this.InitializeComponent();
-      this.Header.OnHeaderTap += (Action) (() => this.List.ScrollToTop());
-      this.PullToRefresh.TrackListBox((ISupportPullToRefresh) this.List);
-      this.List.OnRefresh = (Action) (() => this.ViewModel.Requests.LoadData(true, false, (Action<BackendResult<VKList<User>, ResultCode>>) null, false));
+        this.InitializeComponent();
+        this.Header.OnHeaderTap += (Action)(() => this.List.ScrollToTop());
+        this.PullToRefresh.TrackListBox((ISupportPullToRefresh)this.List);
+        this.List.OnRefresh = (Action)(() => this.ViewModel.Requests.LoadData(true, false, (Action<BackendResult<VKList<User>, ResultCode>>)null, false));
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -40,9 +44,9 @@ namespace VKClient.Groups.Management
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      RequestsViewModel requestsViewModel = new RequestsViewModel(long.Parse(this.NavigationContext.QueryString["CommunityId"]));
-      this.DataContext = (object) requestsViewModel;
-      requestsViewModel.Requests.LoadData(true, false, (Action<BackendResult<VKList<User>, ResultCode>>) null, false);
+      RequestsViewModel requestsViewModel = new RequestsViewModel(long.Parse(((Page) this).NavigationContext.QueryString["CommunityId"]));
+      base.DataContext = requestsViewModel;
+      requestsViewModel.Requests.LoadData(true, false,  null, false);
       this._isInitialized = true;
     }
 
@@ -61,26 +65,26 @@ namespace VKClient.Groups.Management
 
     private void Request_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      FriendHeader friendHeader = ((FrameworkElement) sender).DataContext as FriendHeader;
-      if (friendHeader == null)
+      FriendHeader dataContext = ((FrameworkElement) sender).DataContext as FriendHeader;
+      if (dataContext == null)
         return;
-      Navigator.Current.NavigateToUserProfile(friendHeader.UserId, "", "", false);
+      Navigator.Current.NavigateToUserProfile(dataContext.UserId, "", "", false);
     }
 
     private void Button_OnAcceptClicked(object sender, RoutedEventArgs e)
     {
-      FriendHeader friendHeader = ((FrameworkElement) sender).DataContext as FriendHeader;
-      if (friendHeader == null)
+      FriendHeader dataContext = ((FrameworkElement) sender).DataContext as FriendHeader;
+      if (dataContext == null)
         return;
-      this.ViewModel.HandleRequest(friendHeader, true);
+      this.ViewModel.HandleRequest(dataContext, true);
     }
 
     private void Button_OnDeclineClicked(object sender, RoutedEventArgs e)
     {
-      FriendHeader friendHeader = ((FrameworkElement) sender).DataContext as FriendHeader;
-      if (friendHeader == null)
+      FriendHeader dataContext = ((FrameworkElement) sender).DataContext as FriendHeader;
+      if (dataContext == null)
         return;
-      this.ViewModel.HandleRequest(friendHeader, false);
+      this.ViewModel.HandleRequest(dataContext, false);
     }
 
     private void Button_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
@@ -93,5 +97,16 @@ namespace VKClient.Groups.Management
       e.Handled = true;
     }
 
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Groups;component/Management/RequestsPage.xaml", UriKind.Relative));
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.List = (ExtendedLongListSelector) base.FindName("List");
+      this.PullToRefresh = (PullToRefreshUC) base.FindName("PullToRefresh");
+    }
   }
 }

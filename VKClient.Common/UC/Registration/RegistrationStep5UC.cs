@@ -13,6 +13,7 @@ namespace VKClient.Common.UC.Registration
 
     public RegistrationStep5UC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -22,9 +23,9 @@ namespace VKClient.Common.UC.Registration
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep5UC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ucFriendsSearch = (FriendsSearchUC) this.FindName("ucFriendsSearch");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/Registration/RegistrationStep5UC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ucFriendsSearch = (FriendsSearchUC) base.FindName("ucFriendsSearch");
     }
   }
 }

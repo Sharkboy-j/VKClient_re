@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
 using VKClient.Audio.Base.AudioCache;
 using VKClient.Audio.Base.DataObjects;
@@ -30,7 +32,9 @@ namespace VKClient.Common.UC.InplaceGifViewer
     {
       get
       {
-        return !this.ShowDownloadingRing ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.ShowDownloadingRing)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -42,7 +46,7 @@ namespace VKClient.Common.UC.InplaceGifViewer
       }
     }
 
-    public DocumentHeader DocHeader { get; set; }
+    public DocumentHeader DocHeader { get;set; }
 
     public string Text
     {
@@ -70,7 +74,9 @@ namespace VKClient.Common.UC.InplaceGifViewer
     {
       get
       {
-        return !string.IsNullOrWhiteSpace(this.Text) ? Visibility.Visible : Visibility.Collapsed;
+        if (!string.IsNullOrWhiteSpace(this.Text))
+          return Visibility.Visible;
+        return Visibility.Collapsed;
       }
     }
 
@@ -78,7 +84,9 @@ namespace VKClient.Common.UC.InplaceGifViewer
     {
       get
       {
-        return !this._isFullScreen && !this._isOneItem || (this.CurrentState == InplaceGifViewerViewModel.State.Playing || this.CurrentState == InplaceGifViewerViewModel.State.Downloading) ? Visibility.Collapsed : Visibility.Visible;
+        if (!this._isFullScreen && !this._isOneItem || (this.CurrentState == InplaceGifViewerViewModel.State.Playing || this.CurrentState == InplaceGifViewerViewModel.State.Downloading))
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -94,7 +102,7 @@ namespace VKClient.Common.UC.InplaceGifViewer
           return;
         this._state = value;
         this.NotifyPropertyChanged<InplaceGifViewerViewModel.State>((System.Linq.Expressions.Expression<Func<InplaceGifViewerViewModel.State>>) (() => this.CurrentState));
-        EventAggregator.Current.Publish((object) new GifStateChanged()
+        EventAggregator.Current.Publish(new GifStateChanged()
         {
           ID = this._doc.id,
           NewState = this._state,
@@ -119,14 +127,24 @@ namespace VKClient.Common.UC.InplaceGifViewer
         string str;
         if (preview == null)
         {
-          str = null;
+          str =  null;
         }
         else
         {
           DocPreviewVideo video = preview.video;
-          str = video != null ? video.src : null;
+          str = video != null ? video.src :  null;
         }
         return str ?? this._doc.url ?? "";
+      }
+    }
+
+    public string LocalVideoFilePath
+    {
+      get
+      {
+        if (this.CurrentState != InplaceGifViewerViewModel.State.Playing)
+          return "";
+        return CacheManager.GetFilePath(this._localFile, CacheManager.DataType.CachedData, "/");
       }
     }
 
@@ -136,7 +154,7 @@ namespace VKClient.Common.UC.InplaceGifViewer
       {
         if (this.CurrentState != InplaceGifViewerViewModel.State.Playing)
           return "";
-        return CacheManager.GetFilePath(this._localFile, CacheManager.DataType.CachedData);
+        return this._localFile;
       }
     }
 
@@ -148,12 +166,12 @@ namespace VKClient.Common.UC.InplaceGifViewer
         string str;
         if (preview == null)
         {
-          str = null;
+          str =  null;
         }
         else
         {
           DocPreviewVideo video = preview.video;
-          str = video != null ? video.src : null;
+          str = video != null ? video.src :  null;
         }
         return string.IsNullOrWhiteSpace(str);
       }
@@ -174,11 +192,11 @@ namespace VKClient.Common.UC.InplaceGifViewer
 
     public InplaceGifViewerViewModel(Doc doc, bool isFullScreen, bool forceDisableAutoplay = false, bool isOneItem = false)
     {
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
       this._forceDisableAutoplay = forceDisableAutoplay;
       this._isOneItem = isOneItem;
       this._doc = doc;
-      this.DocHeader = new DocumentHeader(this._doc, 0, false);
+      this.DocHeader = new DocumentHeader(this._doc, 0, false, 0L);
       this._isFullScreen = isFullScreen;
       this._localFile = MediaLRUCache.Instance.GetLocalFile(this.VideoUri);
       this._state = MediaLRUCache.Instance.HasLocalFile(this.VideoUri) ? InplaceGifViewerViewModel.State.Downloaded : InplaceGifViewerViewModel.State.NotStarted;
@@ -194,7 +212,7 @@ namespace VKClient.Common.UC.InplaceGifViewer
       return GifsPlayerUtils.AllowAutoplay();
     }
 
-    internal void HandleOnScreenCenter()
+    internal void HandleOnScreen()
     {
       if (!this.AllowAutoplay())
         return;
@@ -208,60 +226,60 @@ namespace VKClient.Common.UC.InplaceGifViewer
 
     private void Play(GifPlayStartType startType, bool suppressStats)
     {
-      if (this._state == InplaceGifViewerViewModel.State.NotStarted || this._state == InplaceGifViewerViewModel.State.Failed)
-      {
-        this.CurrentState = InplaceGifViewerViewModel.State.Downloading;
-        Stream stream = CacheManager.GetStreamForWrite(this._localFile);
-        this._currentCancellationToken = new Cancellation();
-        JsonWebRequest.Download(this.VideoUri, stream, (Action<bool>) (res => Execute.ExecuteOnUIThread((Action) (() =>
+        if (this._state == InplaceGifViewerViewModel.State.NotStarted || this._state == InplaceGifViewerViewModel.State.Failed)
         {
-          try
-          {
-            if (this._currentCancellationToken.IsSet)
+            this.CurrentState = InplaceGifViewerViewModel.State.Downloading;
+            Stream stream = CacheManager.GetStreamForWrite(this._localFile);
+            this._currentCancellationToken = new Cancellation();
+            JsonWebRequest.Download(this.VideoUri, stream, (Action<bool>)(res => Execute.ExecuteOnUIThread((Action)(() =>
             {
-              this.CurrentState = InplaceGifViewerViewModel.State.Failed;
-              stream.Close();
-              CacheManager.TryDelete(this._localFile, CacheManager.DataType.CachedData);
-            }
-            else
-            {
-              int fileSize = (int) stream.Length;
-              stream.Close();
-              if (res)
-              {
-                MediaLRUCache.Instance.AddLocalFile(this.VideoUri, this._localFile, fileSize);
-                this.CurrentState = InplaceGifViewerViewModel.State.Downloaded;
-                this.CurrentState = InplaceGifViewerViewModel.State.Playing;
-                this.SendGifPlayStats(startType, suppressStats);
-              }
-              else
-              {
-                this.CurrentState = InplaceGifViewerViewModel.State.Failed;
-                CacheManager.TryDelete(this._localFile, CacheManager.DataType.CachedData);
-              }
-            }
-          }
-          catch
-          {
-            try
-            {
-              stream.Close();
-            }
-            catch
-            {
-            }
-            this.CurrentState = InplaceGifViewerViewModel.State.Failed;
-            CacheManager.TryDelete(this._localFile, CacheManager.DataType.CachedData);
-          }
-        }))), (Action<double>) (progress => this.DownloadProgress = progress), this._currentCancellationToken);
-      }
-      else
-      {
-        if (this._state != InplaceGifViewerViewModel.State.Downloaded)
-          return;
-        this.CurrentState = InplaceGifViewerViewModel.State.Playing;
-        this.SendGifPlayStats(startType, suppressStats);
-      }
+                try
+                {
+                    if (this._currentCancellationToken.IsSet)
+                    {
+                        this.CurrentState = InplaceGifViewerViewModel.State.Failed;
+                        stream.Close();
+                        CacheManager.TryDelete(this._localFile, CacheManager.DataType.CachedData);
+                    }
+                    else
+                    {
+                        int fileSize = (int)stream.Length;
+                        stream.Close();
+                        if (res)
+                        {
+                            MediaLRUCache.Instance.AddLocalFile(this.VideoUri, this._localFile, fileSize);
+                            this.CurrentState = InplaceGifViewerViewModel.State.Downloaded;
+                            this.CurrentState = InplaceGifViewerViewModel.State.Playing;
+                            this.SendGifPlayStats(startType, suppressStats);
+                        }
+                        else
+                        {
+                            this.CurrentState = InplaceGifViewerViewModel.State.Failed;
+                            CacheManager.TryDelete(this._localFile, CacheManager.DataType.CachedData);
+                        }
+                    }
+                }
+                catch
+                {
+                    try
+                    {
+                        stream.Close();
+                    }
+                    catch
+                    {
+                    }
+                    this.CurrentState = InplaceGifViewerViewModel.State.Failed;
+                    CacheManager.TryDelete(this._localFile, CacheManager.DataType.CachedData);
+                }
+            }))), (Action<double>)(progress => this.DownloadProgress = progress), this._currentCancellationToken);
+        }
+        else
+        {
+            if (this._state != InplaceGifViewerViewModel.State.Downloaded)
+                return;
+            this.CurrentState = InplaceGifViewerViewModel.State.Playing;
+            this.SendGifPlayStats(startType, suppressStats);
+        }
     }
 
     public void Stop()
@@ -288,7 +306,7 @@ namespace VKClient.Common.UC.InplaceGifViewer
           return;
         this._autoplayStatsSent = true;
       }
-      EventAggregator.Current.Publish((object) new GifPlayEvent(string.Format("{0}_{1}", (object) this._doc.owner_id, (object) this._doc.id), startType, CurrentMediaSource.GifPlaySource));
+      EventAggregator.Current.Publish(new GifPlayEvent(string.Format("{0}_{1}", this._doc.owner_id, this._doc.id), startType, CurrentMediaSource.GifPlaySource));
     }
 
     internal void HandleTap()
@@ -322,10 +340,10 @@ namespace VKClient.Common.UC.InplaceGifViewer
 
     private void CancelCurrentCancellationToken()
     {
-      Cancellation cancellation = this._currentCancellationToken;
-      if (cancellation == null)
+      Cancellation cancellationToken = this._currentCancellationToken;
+      if (cancellationToken == null)
         return;
-      cancellation.Set();
+      cancellationToken.Set();
     }
 
     public enum State

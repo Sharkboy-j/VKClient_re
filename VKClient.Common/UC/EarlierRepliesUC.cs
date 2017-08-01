@@ -12,6 +12,7 @@ namespace VKClient.Common.UC
 
     public EarlierRepliesUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -21,8 +22,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/EarlierRepliesUC.xaml", UriKind.Relative));
-      this.gridViewedFeedback = (Grid) this.FindName("gridViewedFeedback");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/EarlierRepliesUC.xaml", UriKind.Relative));
+      this.gridViewedFeedback = (Grid) base.FindName("gridViewedFeedback");
     }
   }
 }

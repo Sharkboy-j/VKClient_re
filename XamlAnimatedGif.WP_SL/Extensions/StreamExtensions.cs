@@ -30,7 +30,7 @@ namespace XamlAnimatedGif.Extensions
       }
     }
 
-    public static async Task<int> ReadByteAsync(this Stream stream, CancellationToken cancellationToken)
+    public static async Task<int> ReadByteAsync(this Stream stream, CancellationToken cancellationToken = default (CancellationToken))
     {
       byte[] buffer = new byte[1];
       return await stream.ReadAsync(buffer, 0, 1, cancellationToken) != 0 ? (int) buffer[0] : -1;

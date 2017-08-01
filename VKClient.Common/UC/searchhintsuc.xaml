@@ -90,7 +90,8 @@
                                Visibility="{Binding SubtitleVisibility}"
                                Margin="0 -4 0 0"
                                Foreground="{StaticResource PhoneVKSubtleBrush}"
-                               HorizontalAlignment="Left" />
+                               HorizontalAlignment="Left"
+                               Height="28"/>
                 </StackPanel>
 
                 <Border Grid.Column="2"

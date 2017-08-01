@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
@@ -20,20 +21,11 @@ namespace VKClient.Common
 {
   public class RegistrationPage : PageBase
   {
-    private ApplicationBar _appBar = new ApplicationBar()
-    {
-      BackgroundColor = VKConstants.AppBarBGColor,
-      ForegroundColor = VKConstants.AppBarFGColor,
-      Opacity = 0.9
-    };
-    private ApplicationBarIconButton _appBarButtonCheck = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/check.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Save
-    };
-    private readonly DelayedExecutor _de = new DelayedExecutor(300);
     private bool _isInitialized;
     private string _registrationVMFileID;
+    private ApplicationBar _appBar;
+    private ApplicationBarIconButton _appBarButtonCheck;
+    private readonly DelayedExecutor _de;
     internal GenericHeaderUC Header;
     internal Rectangle rectProgress;
     internal RegistrationStep1UC ucRegistrationStep1;
@@ -46,12 +38,29 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as RegistrationViewModel;
+        return base.DataContext as RegistrationViewModel;
       }
     }
 
     public RegistrationPage()
     {
+      ApplicationBar applicationBar = new ApplicationBar();
+      Color appBarBgColor = VKConstants.AppBarBGColor;
+      applicationBar.BackgroundColor = appBarBgColor;
+      Color appBarFgColor = VKConstants.AppBarFGColor;
+      applicationBar.ForegroundColor = appBarFgColor;
+      double num = 0.9;
+      applicationBar.Opacity = num;
+      this._appBar = applicationBar;
+      ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton();
+      Uri uri = new Uri("/Resources/check.png", UriKind.Relative);
+      applicationBarIconButton.IconUri = uri;
+      string chatEditAppBarSave = CommonResources.ChatEdit_AppBar_Save;
+      applicationBarIconButton.Text = chatEditAppBarSave;
+      this._appBarButtonCheck = applicationBarIconButton;
+      this._de = new DelayedExecutor(300);
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.Header.HideSandwitchButton = true;
       this.SuppressMenu = true;
@@ -60,9 +69,9 @@ namespace VKClient.Common
 
     private void BuildAppBar()
     {
-      this._appBarButtonCheck.Click += new EventHandler(this._appBarButtonCheck_Click);
-      this._appBar.Buttons.Add((object) this._appBarButtonCheck);
-      this.ApplicationBar = (IApplicationBar) this._appBar;
+      this._appBarButtonCheck.Click+=(new EventHandler(this._appBarButtonCheck_Click));
+      this._appBar.Buttons.Add(this._appBarButtonCheck);
+      this.ApplicationBar = ((IApplicationBar) this._appBar);
     }
 
     private void _appBarButtonCheck_Click(object sender, EventArgs e)
@@ -72,14 +81,14 @@ namespace VKClient.Common
         case 1:
           if (this.ucRegistrationStep1.textBoxFirstName.Text.Length < 2 || this.ucRegistrationStep1.textBoxLastName.Text.Length < 2)
           {
-            new GenericInfoUC().ShowAndHideLater(CommonResources.Registration_WrongName, null);
+            new GenericInfoUC().ShowAndHideLater(CommonResources.Registration_WrongName,  null);
             return;
           }
           break;
         case 4:
           if (this.ucRegistrationStep4.passwordBox.Password.Length < 6)
           {
-            new GenericInfoUC().ShowAndHideLater(CommonResources.Registration_ShortPassword, null);
+            new GenericInfoUC().ShowAndHideLater(CommonResources.Registration_ShortPassword,  null);
             return;
           }
           break;
@@ -92,11 +101,11 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (!this._isInitialized)
       {
-        this._registrationVMFileID = this.NavigationContext.QueryString["SessionId"];
+        this._registrationVMFileID = ((Page) this).NavigationContext.QueryString["SessionId"];
         RegistrationViewModel registrationViewModel = new RegistrationViewModel();
         CacheManager.TryDeserialize((IBinarySerializable) registrationViewModel, this._registrationVMFileID, CacheManager.DataType.CachedData);
         registrationViewModel.OnMovedForward = (Action) (() => this.HandleMoveBackOrForward());
-        this.DataContext = (object) registrationViewModel;
+        base.DataContext = registrationViewModel;
         this.HandleMoveBackOrForward();
         this._isInitialized = true;
         registrationViewModel.PropertyChanged += new PropertyChangedEventHandler(this.vm_PropertyChanged);
@@ -122,21 +131,23 @@ namespace VKClient.Common
       int num1 = this.RegistrationVM.CurrentStep - 1;
       bool flag = num1 <= 3;
       if (!flag)
-        this.NavigationService.ClearBackStack();
-      this.rectProgress.Width = flag ? 120.0 : 240.0;
+        ((Page) this).NavigationService.ClearBackStack();
+      ((FrameworkElement) this.rectProgress).Width=(flag ? 120.0 : 240.0);
       double num2 = flag ? (double) (120 * num1) : (double) (240 * (num1 - 4));
-      TranslateTransform translateTransform = this.rectProgress.RenderTransform as TranslateTransform;
-      TranslateTransform target = translateTransform;
-      double x = translateTransform.X;
+      TranslateTransform renderTransform = ((UIElement) this.rectProgress).RenderTransform as TranslateTransform;
+      TranslateTransform translateTransform = renderTransform;
+      double x = renderTransform.X;
       double to = num2;
-      DependencyProperty dependencyProperty = TranslateTransform.XProperty;
+      // ISSUE: variable of the null type
       int duration = 250;
       int? startTime = new int?(0);
       CubicEase cubicEase = new CubicEase();
       int num3 = 2;
-      cubicEase.EasingMode = (EasingMode) num3;
+      ((EasingFunctionBase) cubicEase).EasingMode = ((EasingMode) num3);
+      // ISSUE: variable of the null type
+      
       int num4 = 0;
-      target.Animate(x, to, (object) dependencyProperty, duration, startTime, (IEasingFunction) cubicEase, null, num4 != 0);
+      ((DependencyObject)translateTransform).Animate(x, to, TranslateTransform.XProperty, duration, startTime, (IEasingFunction)cubicEase, null, num4 != 0);
       switch (num1)
       {
         case 0:
@@ -144,13 +155,13 @@ namespace VKClient.Common
           {
             if (string.IsNullOrEmpty(this.ucRegistrationStep1.textBoxFirstName.Text))
             {
-              this.ucRegistrationStep1.textBoxFirstName.Focus();
+              ((Control) this.ucRegistrationStep1.textBoxFirstName).Focus();
             }
             else
             {
               if (!string.IsNullOrEmpty(this.ucRegistrationStep1.textBoxLastName.Text))
                 return;
-              this.ucRegistrationStep1.textBoxLastName.Focus();
+              ((Control) this.ucRegistrationStep1.textBoxLastName).Focus();
             }
           }))));
           break;
@@ -159,7 +170,7 @@ namespace VKClient.Common
           {
             if (!string.IsNullOrEmpty(this.ucRegistrationStep2.textBoxPhoneNumber.Text))
               return;
-            this.ucRegistrationStep2.textBoxPhoneNumber.Focus();
+            ((Control) this.ucRegistrationStep2.textBoxPhoneNumber).Focus();
           }))));
           break;
         case 2:
@@ -167,7 +178,7 @@ namespace VKClient.Common
           {
             if (!string.IsNullOrEmpty(this.ucRegistrationStep3.textBoxConfirmationCode.Text))
               return;
-            this.ucRegistrationStep3.textBoxConfirmationCode.Focus();
+            ((Control) this.ucRegistrationStep3.textBoxConfirmationCode).Focus();
           }))));
           break;
         case 3:
@@ -175,7 +186,7 @@ namespace VKClient.Common
           {
             if (!string.IsNullOrEmpty(this.ucRegistrationStep4.passwordBox.Password))
               return;
-            this.ucRegistrationStep4.passwordBox.Focus();
+            ((Control) this.ucRegistrationStep4.passwordBox).Focus();
           }))));
           break;
       }
@@ -183,13 +194,13 @@ namespace VKClient.Common
 
     private void HandleInputParams()
     {
-      List<Stream> streamList = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotos") as List<Stream>;
+      List<Stream> parameterForIdAndReset = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotos") as List<Stream>;
       Rect rect = new Rect();
       if (ParametersRepository.Contains("UserPicSquare"))
         rect = (Rect) ParametersRepository.GetParameterForIdAndReset("UserPicSquare");
-      if (streamList == null || streamList.Count <= 0)
+      if (parameterForIdAndReset == null || parameterForIdAndReset.Count <= 0)
         return;
-      this.RegistrationVM.SetUserPhoto(streamList[0], rect);
+      this.RegistrationVM.SetUserPhoto(parameterForIdAndReset[0], rect);
     }
 
     private void vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -219,13 +230,13 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/RegistrationPage.xaml", UriKind.Relative));
-      this.Header = (GenericHeaderUC) this.FindName("Header");
-      this.rectProgress = (Rectangle) this.FindName("rectProgress");
-      this.ucRegistrationStep1 = (RegistrationStep1UC) this.FindName("ucRegistrationStep1");
-      this.ucRegistrationStep2 = (RegistrationStep2UC) this.FindName("ucRegistrationStep2");
-      this.ucRegistrationStep3 = (RegistrationStep3UC) this.FindName("ucRegistrationStep3");
-      this.ucRegistrationStep4 = (RegistrationStep4UC) this.FindName("ucRegistrationStep4");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/RegistrationPage.xaml", UriKind.Relative));
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.rectProgress = (Rectangle) base.FindName("rectProgress");
+      this.ucRegistrationStep1 = (RegistrationStep1UC) base.FindName("ucRegistrationStep1");
+      this.ucRegistrationStep2 = (RegistrationStep2UC) base.FindName("ucRegistrationStep2");
+      this.ucRegistrationStep3 = (RegistrationStep3UC) base.FindName("ucRegistrationStep3");
+      this.ucRegistrationStep4 = (RegistrationStep4UC) base.FindName("ucRegistrationStep4");
     }
   }
 }

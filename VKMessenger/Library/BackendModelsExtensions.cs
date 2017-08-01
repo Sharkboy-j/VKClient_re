@@ -14,25 +14,25 @@ namespace VKMessenger.Library
       if (userStatus.online == 1L)
         return CommonResources.Conversation_Online;
       DateTime dateTime = Extensions.UnixTimeStampToDateTime((double) userStatus.time, true);
-      string str1 = string.Empty;
+      string empty = string.Empty;
       DateTime now = DateTime.Now;
       int int32 = Convert.ToInt32(Math.Floor((now - dateTime).TotalMinutes));
-      string str2;
+      string str;
       if (int32 > 0 && int32 < 60)
       {
         if (int32 < 2)
         {
-          str2 = !isMale ? CommonResources.Conversation_LastSeenAMomentAgoFemale : CommonResources.Conversation_LastSeenAMomentAgoMale;
+          str = !isMale ? CommonResources.Conversation_LastSeenAMomentAgoFemale : CommonResources.Conversation_LastSeenAMomentAgoMale;
         }
         else
         {
           int num = int32 % 10;
-          str2 = !isMale ? (num != 1 || int32 >= 10 && int32 <= 20 ? (num >= 5 || num == 0 || int32 >= 10 && int32 <= 20 ? string.Format(CommonResources.Conversation_LastSeenXFiveMinutesAgoFemaleFrm, (object) int32) : string.Format(CommonResources.Conversation_LastSeenXTwoFourMinutesAgoFemaleFrm, (object) int32)) : string.Format(CommonResources.Conversation_LastSeenX1MinutesAgoFemaleFrm, (object) int32)) : (num != 1 || int32 >= 10 && int32 <= 20 ? (num >= 5 || num == 0 || int32 >= 10 && int32 <= 20 ? string.Format(CommonResources.Conversation_LastSeenXFiveMinutesAgoMaleFrm, (object) int32) : string.Format(CommonResources.Conversation_LastSeenXTwoFourMinutesAgoMaleFrm, (object) int32)) : string.Format(CommonResources.Conversation_LastSeenX1MinutesAgoMaleFrm, (object) int32));
+          str = !isMale ? (num != 1 || int32 >= 10 && int32 <= 20 ? (num >= 5 || num == 0 || int32 >= 10 && int32 <= 20 ? string.Format(CommonResources.Conversation_LastSeenXFiveMinutesAgoFemaleFrm, int32) : string.Format(CommonResources.Conversation_LastSeenXTwoFourMinutesAgoFemaleFrm, int32)) : string.Format(CommonResources.Conversation_LastSeenX1MinutesAgoFemaleFrm, int32)) : (num != 1 || int32 >= 10 && int32 <= 20 ? (num >= 5 || num == 0 || int32 >= 10 && int32 <= 20 ? string.Format(CommonResources.Conversation_LastSeenXFiveMinutesAgoMaleFrm, int32) : string.Format(CommonResources.Conversation_LastSeenXTwoFourMinutesAgoMaleFrm, int32)) : string.Format(CommonResources.Conversation_LastSeenX1MinutesAgoMaleFrm, int32));
         }
       }
       else
-        str2 = !(now.Date == dateTime.Date) ? (!(now.AddDays(-1.0).Date == dateTime.Date) ? (now.Year != dateTime.Year ? (!isMale ? string.Format(CommonResources.Conversation_LastSeenOnFemaleFrm, (object) dateTime.ToString("dd.MM.yyyy"), (object) dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenOnMaleFrm, (object) dateTime.ToString("dd.MM.yyyy"), (object) dateTime.ToString("HH:mm"))) : (!isMale ? string.Format(CommonResources.Conversation_LastSeenOnFemaleFrm, (object) dateTime.ToString("dd.MM"), (object) dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenOnMaleFrm, (object) dateTime.ToString("dd.MM"), (object) dateTime.ToString("HH:mm")))) : (!isMale ? string.Format(CommonResources.Conversation_LastSeenYesterdayFemaleFrm, (object) dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenYesterdayMaleFrm, (object) dateTime.ToString("HH:mm")))) : (!isMale ? string.Format(CommonResources.Conversation_LastSeenTodayFemaleFrm, (object) dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenTodayMaleFrm, (object) dateTime.ToString("HH:mm")));
-      return str2;
+        str = !(now.Date == dateTime.Date) ? (!(now.AddDays(-1.0).Date == dateTime.Date) ? (now.Year != dateTime.Year ? (!isMale ? string.Format(CommonResources.Conversation_LastSeenOnFemaleFrm, dateTime.ToString("dd.MM.yyyy"), dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenOnMaleFrm, dateTime.ToString("dd.MM.yyyy"), dateTime.ToString("HH:mm"))) : (!isMale ? string.Format(CommonResources.Conversation_LastSeenOnFemaleFrm, dateTime.ToString("dd.MM"), dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenOnMaleFrm, dateTime.ToString("dd.MM"), dateTime.ToString("HH:mm")))) : (!isMale ? string.Format(CommonResources.Conversation_LastSeenYesterdayFemaleFrm, dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenYesterdayMaleFrm, dateTime.ToString("HH:mm")))) : (!isMale ? string.Format(CommonResources.Conversation_LastSeenTodayFemaleFrm, dateTime.ToString("HH:mm")) : string.Format(CommonResources.Conversation_LastSeenTodayMaleFrm, dateTime.ToString("HH:mm")));
+      return str;
     }
   }
 }

@@ -4,7 +4,7 @@ namespace VKClient.Common.Backend.DataObjects
 {
   public class VideoData
   {
-    public List<VKClient.Common.Backend.DataObjects.Video> AllVideos { get; set; }
+    public List<Video> AllVideos { get; set; }
 
     public List<VideoAlbum> AllAlbums { get; set; }
 

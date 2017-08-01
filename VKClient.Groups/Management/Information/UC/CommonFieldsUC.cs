@@ -8,19 +8,21 @@ using VKClient.Groups.UC;
 
 namespace VKClient.Groups.Management.Information.UC
 {
-    public partial class CommonFieldsUC : UserControl
+  public class CommonFieldsUC : UserControl
   {
+    private bool _contentLoaded;
 
     public CommonFieldsViewModel ViewModel
     {
       get
       {
-        return this.DataContext as CommonFieldsViewModel;
+        return base.DataContext as CommonFieldsViewModel;
       }
     }
 
     public CommonFieldsUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
@@ -38,28 +40,36 @@ namespace VKClient.Groups.Management.Information.UC
     {
       if (e.Key != Key.Enter)
         return;
-      this.Focus();
+      base.Focus();
     }
 
     private void TextBox_OnGotFocus(object sender, RoutedEventArgs e)
     {
-      RoutedEventHandler routedEventHandler = this.ViewModel.ParentViewModel.OnTextBoxGotFocus;
-      if (routedEventHandler == null)
+      RoutedEventHandler onTextBoxGotFocus = this.ViewModel.ParentViewModel.OnTextBoxGotFocus;
+      if (onTextBoxGotFocus == null)
         return;
-      object sender1 = sender;
-      RoutedEventArgs e1 = e;
-      routedEventHandler(sender1, e1);
+      object obj = sender;
+      RoutedEventArgs routedEventArgs = e;
+      onTextBoxGotFocus.Invoke(obj, routedEventArgs);
     }
 
     private void TextBox_OnLostFocus(object sender, RoutedEventArgs e)
     {
-      RoutedEventHandler routedEventHandler = this.ViewModel.ParentViewModel.OnTextBoxLostFocus;
-      if (routedEventHandler == null)
+      RoutedEventHandler textBoxLostFocus = this.ViewModel.ParentViewModel.OnTextBoxLostFocus;
+      if (textBoxLostFocus == null)
         return;
-      object sender1 = sender;
-      RoutedEventArgs e1 = e;
-      routedEventHandler(sender1, e1);
+      object obj = sender;
+      RoutedEventArgs routedEventArgs = e;
+      textBoxLostFocus.Invoke(obj, routedEventArgs);
     }
 
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
+        return;
+      this._contentLoaded = true;
+      Application.LoadComponent(this, new Uri("/VKClient.Groups;component/Management/Information/UC/CommonFieldsUC.xaml", UriKind.Relative));
+    }
   }
 }

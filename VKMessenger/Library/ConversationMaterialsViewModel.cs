@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using VKClient.Audio.Base;
@@ -18,7 +19,7 @@ using VKClient.Video.Library;
 
 namespace VKMessenger.Library
 {
-  public class ConversationMaterialsViewModel : ViewModelBase, ICollectionDataProvider<VKList<Attachment>, AlbumPhotoHeaderFourInARow>, ICollectionDataProvider<VKList<Attachment>, VideoHeader>, ICollectionDataProvider<VKList<Attachment>, AudioHeader>, ICollectionDataProvider<VKList<Attachment>, DocumentHeader>, ICollectionDataProvider<VKList<Attachment>, LinkHeader>
+  public class ConversationMaterialsViewModel : ViewModelBase, ICollectionDataProvider<VKList<ConversationMaterial>, AlbumPhotoHeaderFourInARow>, ICollectionDataProvider<VKList<ConversationMaterial>, VideoHeader>, ICollectionDataProvider<VKList<ConversationMaterial>, AudioHeader>, ICollectionDataProvider<VKList<ConversationMaterial>, DocumentHeader>, ICollectionDataProvider<VKList<ConversationMaterial>, LinkHeader>
   {
     private readonly long _peerId;
     private string _photosNextFrom;
@@ -27,15 +28,15 @@ namespace VKMessenger.Library
     private string _documentsNextFrom;
     private string _linksNextFrom;
 
-    public GenericCollectionViewModel<VKList<Attachment>, AlbumPhotoHeaderFourInARow> PhotosVM { get; set; }//
+    public GenericCollectionViewModel<VKList<ConversationMaterial>, AlbumPhotoHeaderFourInARow> PhotosVM { get; private set; }
 
-    public GenericCollectionViewModel<VKList<Attachment>, VideoHeader> VideosVM { get; set; }//
+    public GenericCollectionViewModel<VKList<ConversationMaterial>, VideoHeader> VideosVM { get; private set; }
 
-    public GenericCollectionViewModel<VKList<Attachment>, AudioHeader> AudiosVM { get; set; }//
+    public GenericCollectionViewModel<VKList<ConversationMaterial>, AudioHeader> AudiosVM { get; private set; }
 
-    public GenericCollectionViewModel<VKList<Attachment>, DocumentHeader> DocumentsVM { get; set; }//
+    public GenericCollectionViewModel<VKList<ConversationMaterial>, DocumentHeader> DocumentsVM { get; private set; }
 
-    public GenericCollectionViewModel<VKList<Attachment>, LinkHeader> LinksVM { get; set; }//
+    public GenericCollectionViewModel<VKList<ConversationMaterial>, LinkHeader> LinksVM { get; private set; }
 
     public string Title
     {
@@ -45,85 +46,147 @@ namespace VKMessenger.Library
       }
     }
 
-    Func<VKList<Attachment>, ListWithCount<AlbumPhotoHeaderFourInARow>> ICollectionDataProvider<VKList<Attachment>, AlbumPhotoHeaderFourInARow>.ConverterFunc
+    public long PeerId
     {
       get
       {
-        return (Func<VKList<Attachment>, ListWithCount<AlbumPhotoHeaderFourInARow>>) (list =>
+        return this._peerId;
+      }
+    }
+
+    public bool IsChat
+    {
+      get
+      {
+        return this.PeerId >= 2000000000L;
+      }
+    }
+
+    Func<VKList<ConversationMaterial>, ListWithCount<AlbumPhotoHeaderFourInARow>> ICollectionDataProvider<VKList<ConversationMaterial>, AlbumPhotoHeaderFourInARow>.ConverterFunc
+    {
+      get
+      {
+        return (Func<VKList<ConversationMaterial>, ListWithCount<AlbumPhotoHeaderFourInARow>>) (list =>
         {
           ListWithCount<AlbumPhotoHeaderFourInARow> listWithCount = new ListWithCount<AlbumPhotoHeaderFourInARow>();
-          foreach (IEnumerable<Attachment> source in list.items.Partition<Attachment>(4))
+          IEnumerator<IEnumerable<ConversationMaterial>> enumerator = list.items.Partition<ConversationMaterial>(4).GetEnumerator();
+          try
           {
-            AlbumPhotoHeaderFourInARow headerFourInArow = new AlbumPhotoHeaderFourInARow(source.Select<Attachment, Photo>((Func<Attachment, Photo>) (e => e.photo)));
-            listWithCount.List.Add(headerFourInArow);
+            while (((IEnumerator) enumerator).MoveNext())
+            {
+              IEnumerable<ConversationMaterial> current = enumerator.Current;
+              AlbumPhotoHeaderFourInARow headerFourInArow = new AlbumPhotoHeaderFourInARow((IEnumerable<Photo>)Enumerable.Select<ConversationMaterial, Photo>(current, (Func<ConversationMaterial, Photo>)(e => e.attachment.photo)), (IEnumerable<long>)Enumerable.Select<ConversationMaterial, long>(current, (Func<ConversationMaterial, long>)(e => e.message_id)));
+              listWithCount.List.Add(headerFourInArow);
+            }
+          }
+          finally
+          {
+            if (enumerator != null)
+              ((IDisposable) enumerator).Dispose();
           }
           return listWithCount;
         });
       }
     }
 
-    Func<VKList<Attachment>, ListWithCount<VideoHeader>> ICollectionDataProvider<VKList<Attachment>, VideoHeader>.ConverterFunc
+    Func<VKList<ConversationMaterial>, ListWithCount<VideoHeader>> ICollectionDataProvider<VKList<ConversationMaterial>, VideoHeader>.ConverterFunc
     {
       get
       {
-        return (Func<VKList<Attachment>, ListWithCount<VideoHeader>>) (list =>
+        return (Func<VKList<ConversationMaterial>, ListWithCount<VideoHeader>>) (list =>
         {
           ListWithCount<VideoHeader> listWithCount = new ListWithCount<VideoHeader>();
-          foreach (Attachment attachment in list.items)
+          List<ConversationMaterial>.Enumerator enumerator = list.items.GetEnumerator();
+          try
           {
-            VideoHeader videoHeader = new VideoHeader(attachment.video, (List<MenuItemData>) null, list.profiles, list.groups, StatisticsActionSource.messages, "", false, 0L);
-            listWithCount.List.Add(videoHeader);
+            while (enumerator.MoveNext())
+            {
+              ConversationMaterial current = enumerator.Current;
+              VideoHeader videoHeader = new VideoHeader(current.attachment.video,  null, list.profiles, list.groups, StatisticsActionSource.messages, "", false, 0, current.message_id);
+              listWithCount.List.Add(videoHeader);
+            }
+          }
+          finally
+          {
+            enumerator.Dispose();
           }
           return listWithCount;
         });
       }
     }
 
-    Func<VKList<Attachment>, ListWithCount<AudioHeader>> ICollectionDataProvider<VKList<Attachment>, AudioHeader>.ConverterFunc
+    Func<VKList<ConversationMaterial>, ListWithCount<AudioHeader>> ICollectionDataProvider<VKList<ConversationMaterial>, AudioHeader>.ConverterFunc
     {
       get
       {
-        return (Func<VKList<Attachment>, ListWithCount<AudioHeader>>) (list =>
+        return (Func<VKList<ConversationMaterial>, ListWithCount<AudioHeader>>) (list =>
         {
           ListWithCount<AudioHeader> listWithCount = new ListWithCount<AudioHeader>();
-          foreach (Attachment attachment in list.items)
+          List<ConversationMaterial>.Enumerator enumerator = list.items.GetEnumerator();
+          try
           {
-            AudioHeader audioHeader = new AudioHeader(attachment.audio);
-            listWithCount.List.Add(audioHeader);
+            while (enumerator.MoveNext())
+            {
+              ConversationMaterial current = enumerator.Current;
+              AudioHeader audioHeader = new AudioHeader(current.attachment.audio, current.message_id);
+              listWithCount.List.Add(audioHeader);
+            }
+          }
+          finally
+          {
+            enumerator.Dispose();
           }
           return listWithCount;
         });
       }
     }
 
-    Func<VKList<Attachment>, ListWithCount<DocumentHeader>> ICollectionDataProvider<VKList<Attachment>, DocumentHeader>.ConverterFunc
+    Func<VKList<ConversationMaterial>, ListWithCount<DocumentHeader>> ICollectionDataProvider<VKList<ConversationMaterial>, DocumentHeader>.ConverterFunc
     {
       get
       {
-        return (Func<VKList<Attachment>, ListWithCount<DocumentHeader>>) (list =>
+        return (Func<VKList<ConversationMaterial>, ListWithCount<DocumentHeader>>) (list =>
         {
           ListWithCount<DocumentHeader> listWithCount = new ListWithCount<DocumentHeader>();
-          foreach (Attachment attachment in list.items)
+          List<ConversationMaterial>.Enumerator enumerator = list.items.GetEnumerator();
+          try
           {
-            DocumentHeader documentHeader = new DocumentHeader(attachment.doc, 0, false);
-            listWithCount.List.Add(documentHeader);
+            while (enumerator.MoveNext())
+            {
+              ConversationMaterial current = enumerator.Current;
+              DocumentHeader documentHeader = new DocumentHeader(current.attachment.doc, 0, false, current.message_id);
+              listWithCount.List.Add(documentHeader);
+            }
+          }
+          finally
+          {
+            enumerator.Dispose();
           }
           return listWithCount;
         });
       }
     }
 
-    Func<VKList<Attachment>, ListWithCount<LinkHeader>> ICollectionDataProvider<VKList<Attachment>, LinkHeader>.ConverterFunc
+    Func<VKList<ConversationMaterial>, ListWithCount<LinkHeader>> ICollectionDataProvider<VKList<ConversationMaterial>, LinkHeader>.ConverterFunc
     {
       get
       {
-        return (Func<VKList<Attachment>, ListWithCount<LinkHeader>>) (list =>
+        return (Func<VKList<ConversationMaterial>, ListWithCount<LinkHeader>>) (list =>
         {
           ListWithCount<LinkHeader> listWithCount = new ListWithCount<LinkHeader>();
-          foreach (Attachment attachment in list.items)
+          List<ConversationMaterial>.Enumerator enumerator = list.items.GetEnumerator();
+          try
           {
-            LinkHeader linkHeader = new LinkHeader(attachment.link);
-            listWithCount.List.Add(linkHeader);
+            while (enumerator.MoveNext())
+            {
+              ConversationMaterial current = enumerator.Current;
+              LinkHeader linkHeader = new LinkHeader(current.attachment.link, current.message_id);
+              listWithCount.List.Add(linkHeader);
+            }
+          }
+          finally
+          {
+            enumerator.Dispose();
           }
           return listWithCount;
         });
@@ -133,26 +196,26 @@ namespace VKMessenger.Library
     public ConversationMaterialsViewModel(long peerId)
     {
       this._peerId = peerId;
-      this.PhotosVM = new GenericCollectionViewModel<VKList<Attachment>, AlbumPhotoHeaderFourInARow>((ICollectionDataProvider<VKList<Attachment>, AlbumPhotoHeaderFourInARow>) this);
-      this.VideosVM = new GenericCollectionViewModel<VKList<Attachment>, VideoHeader>((ICollectionDataProvider<VKList<Attachment>, VideoHeader>) this);
-      this.AudiosVM = new GenericCollectionViewModel<VKList<Attachment>, AudioHeader>((ICollectionDataProvider<VKList<Attachment>, AudioHeader>) this);
-      this.DocumentsVM = new GenericCollectionViewModel<VKList<Attachment>, DocumentHeader>((ICollectionDataProvider<VKList<Attachment>, DocumentHeader>) this);
-      this.LinksVM = new GenericCollectionViewModel<VKList<Attachment>, LinkHeader>((ICollectionDataProvider<VKList<Attachment>, LinkHeader>) this);
+      this.PhotosVM = new GenericCollectionViewModel<VKList<ConversationMaterial>, AlbumPhotoHeaderFourInARow>((ICollectionDataProvider<VKList<ConversationMaterial>, AlbumPhotoHeaderFourInARow>) this);
+      this.VideosVM = new GenericCollectionViewModel<VKList<ConversationMaterial>, VideoHeader>((ICollectionDataProvider<VKList<ConversationMaterial>, VideoHeader>) this);
+      this.AudiosVM = new GenericCollectionViewModel<VKList<ConversationMaterial>, AudioHeader>((ICollectionDataProvider<VKList<ConversationMaterial>, AudioHeader>) this);
+      this.DocumentsVM = new GenericCollectionViewModel<VKList<ConversationMaterial>, DocumentHeader>((ICollectionDataProvider<VKList<ConversationMaterial>, DocumentHeader>) this);
+      this.LinksVM = new GenericCollectionViewModel<VKList<ConversationMaterial>, LinkHeader>((ICollectionDataProvider<VKList<ConversationMaterial>, LinkHeader>) this);
       this.PhotosVM.LoadCount = 40;
       this.PhotosVM.ReloadCount = 80;
     }
 
-    public void GetData(GenericCollectionViewModel<VKList<Attachment>, AlbumPhotoHeaderFourInARow> caller, int offset, int count, Action<BackendResult<VKList<Attachment>, ResultCode>> callback)
+    public void GetData(GenericCollectionViewModel<VKList<ConversationMaterial>, AlbumPhotoHeaderFourInARow> caller, int offset, int count, Action<BackendResult<VKList<ConversationMaterial>, ResultCode>> callback)
     {
       if (offset > 0 && this._photosNextFrom == null)
       {
-        callback(new BackendResult<VKList<Attachment>, ResultCode>(ResultCode.Succeeded, new VKList<Attachment>()));
+        callback(new BackendResult<VKList<ConversationMaterial>, ResultCode>(ResultCode.Succeeded, new VKList<ConversationMaterial>()));
       }
       else
       {
         if (offset == 0 && this._photosNextFrom != null)
-          this._photosNextFrom = null;
-        MessagesService.Instance.GetConversationMaterials(this._peerId, "photo", this._photosNextFrom, count, (Action<BackendResult<VKList<Attachment>, ResultCode>>) (result =>
+          this._photosNextFrom =  null;
+        MessagesService.Instance.GetConversationMaterials(this._peerId, "photo", this._photosNextFrom, count, (Action<BackendResult<VKList<ConversationMaterial>, ResultCode>>) (result =>
         {
           this._photosNextFrom = result.ResultData.next_from;
           callback(result);
@@ -160,24 +223,24 @@ namespace VKMessenger.Library
       }
     }
 
-    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Attachment>, AlbumPhotoHeaderFourInARow> caller, int count)
+    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<ConversationMaterial>, AlbumPhotoHeaderFourInARow> caller, int count)
     {
       if (count <= 0)
         return CommonResources.NoPhotos;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OnePhotoFrm, CommonResources.TwoFourPhotosFrm, CommonResources.FivePhotosFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OnePhotoFrm, CommonResources.TwoFourPhotosFrm, CommonResources.FivePhotosFrm, true,  null, false);
     }
 
-    public void GetData(GenericCollectionViewModel<VKList<Attachment>, VideoHeader> caller, int offset, int count, Action<BackendResult<VKList<Attachment>, ResultCode>> callback)
+    public void GetData(GenericCollectionViewModel<VKList<ConversationMaterial>, VideoHeader> caller, int offset, int count, Action<BackendResult<VKList<ConversationMaterial>, ResultCode>> callback)
     {
       if (offset > 0 && this._videosNextFrom == null)
       {
-        callback(new BackendResult<VKList<Attachment>, ResultCode>(ResultCode.Succeeded, new VKList<Attachment>()));
+        callback(new BackendResult<VKList<ConversationMaterial>, ResultCode>(ResultCode.Succeeded, new VKList<ConversationMaterial>()));
       }
       else
       {
         if (offset == 0 && this._videosNextFrom != null)
-          this._videosNextFrom = null;
-        MessagesService.Instance.GetConversationMaterials(this._peerId, "video", this._videosNextFrom, count, (Action<BackendResult<VKList<Attachment>, ResultCode>>) (result =>
+          this._videosNextFrom =  null;
+        MessagesService.Instance.GetConversationMaterials(this._peerId, "video", this._videosNextFrom, count, (Action<BackendResult<VKList<ConversationMaterial>, ResultCode>>) (result =>
         {
           this._videosNextFrom = result.ResultData.next_from;
           callback(result);
@@ -185,24 +248,24 @@ namespace VKMessenger.Library
       }
     }
 
-    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Attachment>, VideoHeader> caller, int count)
+    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<ConversationMaterial>, VideoHeader> caller, int count)
     {
       if (count <= 0)
         return CommonResources.NoVideos;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneVideoFrm, CommonResources.TwoFourVideosFrm, CommonResources.FiveVideosFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneVideoFrm, CommonResources.TwoFourVideosFrm, CommonResources.FiveVideosFrm, true,  null, false);
     }
 
-    public void GetData(GenericCollectionViewModel<VKList<Attachment>, AudioHeader> caller, int offset, int count, Action<BackendResult<VKList<Attachment>, ResultCode>> callback)
+    public void GetData(GenericCollectionViewModel<VKList<ConversationMaterial>, AudioHeader> caller, int offset, int count, Action<BackendResult<VKList<ConversationMaterial>, ResultCode>> callback)
     {
       if (offset > 0 && this._audiosNextFrom == null)
       {
-        callback(new BackendResult<VKList<Attachment>, ResultCode>(ResultCode.Succeeded, new VKList<Attachment>()));
+        callback(new BackendResult<VKList<ConversationMaterial>, ResultCode>(ResultCode.Succeeded, new VKList<ConversationMaterial>()));
       }
       else
       {
         if (offset == 0 && this._audiosNextFrom != null)
-          this._audiosNextFrom = null;
-        MessagesService.Instance.GetConversationMaterials(this._peerId, "audio", this._audiosNextFrom, count, (Action<BackendResult<VKList<Attachment>, ResultCode>>) (result =>
+          this._audiosNextFrom =  null;
+        MessagesService.Instance.GetConversationMaterials(this._peerId, "audio", this._audiosNextFrom, count, (Action<BackendResult<VKList<ConversationMaterial>, ResultCode>>) (result =>
         {
           this._audiosNextFrom = result.ResultData.next_from;
           callback(result);
@@ -210,24 +273,24 @@ namespace VKMessenger.Library
       }
     }
 
-    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Attachment>, AudioHeader> caller, int count)
+    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<ConversationMaterial>, AudioHeader> caller, int count)
     {
       if (count <= 0)
         return AudioResources.NoTracks;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, AudioResources.OneTrackFrm, AudioResources.TwoFourTracksFrm, AudioResources.FiveTracksFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, AudioResources.OneTrackFrm, AudioResources.TwoFourTracksFrm, AudioResources.FiveTracksFrm, true,  null, false);
     }
 
-    public void GetData(GenericCollectionViewModel<VKList<Attachment>, DocumentHeader> caller, int offset, int count, Action<BackendResult<VKList<Attachment>, ResultCode>> callback)
+    public void GetData(GenericCollectionViewModel<VKList<ConversationMaterial>, DocumentHeader> caller, int offset, int count, Action<BackendResult<VKList<ConversationMaterial>, ResultCode>> callback)
     {
       if (offset > 0 && this._documentsNextFrom == null)
       {
-        callback(new BackendResult<VKList<Attachment>, ResultCode>(ResultCode.Succeeded, new VKList<Attachment>()));
+        callback(new BackendResult<VKList<ConversationMaterial>, ResultCode>(ResultCode.Succeeded, new VKList<ConversationMaterial>()));
       }
       else
       {
         if (offset == 0 && this._documentsNextFrom != null)
-          this._documentsNextFrom = null;
-        MessagesService.Instance.GetConversationMaterials(this._peerId, "doc", this._documentsNextFrom, count, (Action<BackendResult<VKList<Attachment>, ResultCode>>) (result =>
+          this._documentsNextFrom =  null;
+        MessagesService.Instance.GetConversationMaterials(this._peerId, "doc", this._documentsNextFrom, count, (Action<BackendResult<VKList<ConversationMaterial>, ResultCode>>) (result =>
         {
           this._documentsNextFrom = result.ResultData.next_from;
           callback(result);
@@ -235,24 +298,24 @@ namespace VKMessenger.Library
       }
     }
 
-    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Attachment>, DocumentHeader> caller, int count)
+    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<ConversationMaterial>, DocumentHeader> caller, int count)
     {
       if (count <= 0)
         return CommonResources.Documents_NoDocuments;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneDocFrm, CommonResources.TwoFourDocumentsFrm, CommonResources.FiveDocumentsFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneDocFrm, CommonResources.TwoFourDocumentsFrm, CommonResources.FiveDocumentsFrm, true,  null, false);
     }
 
-    public void GetData(GenericCollectionViewModel<VKList<Attachment>, LinkHeader> caller, int offset, int count, Action<BackendResult<VKList<Attachment>, ResultCode>> callback)
+    public void GetData(GenericCollectionViewModel<VKList<ConversationMaterial>, LinkHeader> caller, int offset, int count, Action<BackendResult<VKList<ConversationMaterial>, ResultCode>> callback)
     {
       if (offset > 0 && this._linksNextFrom == null)
       {
-        callback(new BackendResult<VKList<Attachment>, ResultCode>(ResultCode.Succeeded, new VKList<Attachment>()));
+        callback(new BackendResult<VKList<ConversationMaterial>, ResultCode>(ResultCode.Succeeded, new VKList<ConversationMaterial>()));
       }
       else
       {
         if (offset == 0 && this._linksNextFrom != null)
-          this._linksNextFrom = null;
-        MessagesService.Instance.GetConversationMaterials(this._peerId, "link", this._linksNextFrom, count, (Action<BackendResult<VKList<Attachment>, ResultCode>>) (result =>
+          this._linksNextFrom =  null;
+        MessagesService.Instance.GetConversationMaterials(this._peerId, "link", this._linksNextFrom, count, (Action<BackendResult<VKList<ConversationMaterial>, ResultCode>>) (result =>
         {
           this._linksNextFrom = result.ResultData.next_from;
           callback(result);
@@ -260,11 +323,11 @@ namespace VKMessenger.Library
       }
     }
 
-    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Attachment>, LinkHeader> caller, int count)
+    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<ConversationMaterial>, LinkHeader> caller, int count)
     {
       if (count <= 0)
         return CommonResources.Messenger_NoLinks;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneLinkFrm, CommonResources.TwoFourLinksFrm, CommonResources.FiveLinksFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneLinkFrm, CommonResources.TwoFourLinksFrm, CommonResources.FiveLinksFrm, true,  null, false);
     }
   }
 }

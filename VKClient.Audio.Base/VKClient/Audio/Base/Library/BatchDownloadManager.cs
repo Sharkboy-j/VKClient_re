@@ -48,7 +48,7 @@ namespace VKClient.Audio.Base.Library
     {
       if (ind >= this._downloadList.Count)
       {
-        EventAggregator.Current.Publish((object) new DownloadSucceededEvent()
+        EventAggregator.Current.Publish(new DownloadSucceededEvent()
         {
           Id = this._id
         });
@@ -61,7 +61,7 @@ namespace VKClient.Audio.Base.Library
         string localPath = this._downloadList[ind].LocalPath;
         if (this.FileExists(localPath))
         {
-          EventAggregator.Current.Publish((object) new DownloadProgressedEvent()
+          EventAggregator.Current.Publish(new DownloadProgressedEvent()
           {
             Id = this._id,
             Progress = ((double) (ind + 1) * 100.0 / (double) this._downloadList.Count)
@@ -90,7 +90,7 @@ namespace VKClient.Audio.Base.Library
                 }
               }
               this._lastProgress = (double) (ind + 1) * 100.0 / (double) this._downloadList.Count;
-              EventAggregator.Current.Publish((object) new DownloadProgressedEvent()
+              EventAggregator.Current.Publish(new DownloadProgressedEvent()
               {
                 Id = this._id,
                 Progress = this._lastProgress
@@ -101,7 +101,7 @@ namespace VKClient.Audio.Base.Library
             {
               Logger.Instance.Error("Failed to download batch id = " + this._id, ex);
               this._isInProgress = false;
-              EventAggregator.Current.Publish((object) new DownloadFailedEvent()
+              EventAggregator.Current.Publish(new DownloadFailedEvent()
               {
                 Id = this._id
               });
@@ -114,7 +114,7 @@ namespace VKClient.Audio.Base.Library
     private void StoreInSettings()
     {
       if (!IsolatedStorageSettings.ApplicationSettings.Contains("DownloadedBatches2"))
-        IsolatedStorageSettings.ApplicationSettings["DownloadedBatches2"] = (object) new List<string>();
+        IsolatedStorageSettings.ApplicationSettings["DownloadedBatches2"]= new List<string>();
       List<string> stringList = IsolatedStorageSettings.ApplicationSettings["DownloadedBatches2"] as List<string>;
       if (stringList.Contains(this._id))
         return;

@@ -1,18 +1,14 @@
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Navigation;
-using VKClient.Common;
 using VKClient.Common.Backend.DataObjects;
+using VKClient.Common.Emoji;
 using VKClient.Common.Framework;
 using VKClient.Common.Library;
 using VKClient.Common.Localization;
@@ -23,195 +19,25 @@ namespace VKMessenger.Views
 {
   public class ChatEditPage : PageBase
   {
-    private ApplicationBarIconButton _appBarButtonAdd = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("./Resources/appbar.add.rest.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Add
-    };
-    private ApplicationBarIconButton _appBarButtonSave = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("./Resources/check.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Save
-    };
-    private ApplicationBarIconButton _appBarButtonChange = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("./Resources/appbar.manage.rest.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Change
-    };
-    private ApplicationBarIconButton _appBarButtonExclude = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("./Resources/appbar.minus.rest.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Exclude
-    };
-    private ApplicationBarIconButton _appBarButtonCancel = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("./Resources/appbar.cancel.rest.png", UriKind.Relative),
-      Text = CommonResources.ChatEdit_AppBar_Cancel
-    };
-    private ApplicationBar _defaultAppBar = new ApplicationBar()
-    {
-      BackgroundColor = VKConstants.AppBarBGColor,
-      ForegroundColor = VKConstants.AppBarFGColor
-    };
-    private ApplicationBar _editAppBar = new ApplicationBar()
-    {
-      BackgroundColor = VKConstants.AppBarBGColor,
-      ForegroundColor = VKConstants.AppBarFGColor
-    };
-    private ApplicationBarMenuItem _appBarMenuItemLeave = new ApplicationBarMenuItem()
-    {
-      Text = CommonResources.ChatEdit_AppBar_Leave
-    };
     private bool _isInitialized;
-    internal Grid LayoutRoot;
-    internal GenericHeaderUC ucHeader;
-    internal TextBox textBoxChatName;
-    internal MultiselectList listBoxChatParticipants;
+    internal GenericHeaderUC Header;
+    internal ExtendedLongListSelector ContentList;
+    internal TextBox TitleBox;
+    internal TextBoxPanelControl TextBoxPanel;
     private bool _contentLoaded;
-
-    private bool IsInEditMode
-    {
-      get
-      {
-        return this.listBoxChatParticipants.IsSelectionEnabled;
-      }
-    }
-
-    private bool HaveSelectedItems
-    {
-      get
-      {
-        if (this.listBoxChatParticipants.SelectedItems != null)
-          return this.listBoxChatParticipants.SelectedItems.Count > 0;
-        return false;
-      }
-    }
 
     private ChatEditViewModel ChatEditVM
     {
       get
       {
-        return this.DataContext as ChatEditViewModel;
+        return base.DataContext as ChatEditViewModel;
       }
     }
 
     public ChatEditPage()
     {
       this.InitializeComponent();
-      this.BuildAppBar();
-    }
-
-    private void BuildAppBar()
-    {
-      this._appBarButtonAdd.Click += new EventHandler(this._appBarButtonAdd_Click);
-      this._appBarButtonSave.Click += new EventHandler(this._appBarButtonSave_Click);
-      this._appBarButtonChange.Click += new EventHandler(this._appBarButtonChange_Click);
-      this._appBarButtonExclude.Click += new EventHandler(this._appBarButtonExclude_Click);
-      this._appBarButtonCancel.Click += new EventHandler(this._appBarButtonCancel_Click);
-      this._appBarMenuItemLeave.Click += new EventHandler(this._appBarMenuItemLeave_Click);
-      this._defaultAppBar.Buttons.Add((object) this._appBarButtonAdd);
-      this._defaultAppBar.Buttons.Add((object) this._appBarButtonSave);
-      this._defaultAppBar.Buttons.Add((object) this._appBarButtonChange);
-      this._defaultAppBar.MenuItems.Add((object) this._appBarMenuItemLeave);
-      this._editAppBar.Buttons.Add((object) this._appBarButtonExclude);
-      this._editAppBar.Buttons.Add((object) this._appBarButtonCancel);
-      this._editAppBar.MenuItems.Add((object) this._appBarMenuItemLeave);
-    }
-
-    private void UpdateAppBar()
-    {
-      if (this.IsInEditMode)
-      {
-        this._appBarButtonExclude.IsEnabled = this.HaveSelectedItems;
-        this.ApplicationBar = (IApplicationBar) this._editAppBar;
-      }
-      else
-      {
-        this._appBarButtonSave.IsEnabled = this.ChatEditVM.CanSaveChat();
-        this.ApplicationBar = (IApplicationBar) this._defaultAppBar;
-      }
-    }
-
-    private void _appBarMenuItemLeave_Click(object sender, EventArgs e)
-    {
-      this.ChatEditVM.LeaveChat();
-      this.NavigationService.RemoveBackEntrySafe();
-      this.NavigationService.GoBackSafe();
-    }
-
-    private void _appBarButtonCancel_Click(object sender, EventArgs e)
-    {
-      this.listBoxChatParticipants.IsSelectionEnabled = false;
-      this.UpdateAppBar();
-    }
-
-    private void _appBarButtonExclude_Click(object sender, EventArgs e)
-    {
-      List<ChatParticipant> chatParticipantList1 = new List<ChatParticipant>();
-      bool flag1 = false;
-      bool flag2 = false;
-      if (this.listBoxChatParticipants.SelectedItems != null && this.listBoxChatParticipants.SelectedItems.Count > 0)
-      {
-        int count = this.listBoxChatParticipants.SelectedItems.Count;
-        foreach (object selectedItem in (IEnumerable) this.listBoxChatParticipants.SelectedItems)
-          chatParticipantList1.Add(selectedItem as ChatParticipant);
-        flag2 = chatParticipantList1.Any<ChatParticipant>((Func<ChatParticipant, bool>) (m => (long) m.ChatUser.uid == AppGlobalStateManager.Current.LoggedInUserId));
-        List<ChatParticipant> chatParticipantList2 = this.ChatEditVM.ExcludeMembers(chatParticipantList1);
-        if (count == chatParticipantList2.Count)
-          ExtendedMessageBox.ShowSafe(CommonResources.ChatEdit_CannotExclude);
-        else if (chatParticipantList2.Count > 0)
-          ExtendedMessageBox.ShowSafe(CommonResources.ChatEdit_CannotExcludeSome);
-        else
-          flag1 = true;
-      }
-      if (flag2)
-      {
-        this.NavigationService.RemoveBackEntrySafe();
-        this.NavigationService.GoBackSafe();
-      }
-      else
-      {
-        if (!flag1)
-          return;
-        this.listBoxChatParticipants.IsSelectionEnabled = false;
-        this.UpdateAppBar();
-      }
-    }
-
-    private void _appBarButtonChange_Click(object sender, EventArgs e)
-    {
-      this.listBoxChatParticipants.IsSelectionEnabled = true;
-      this.UpdateAppBar();
-    }
-
-    private void _appBarButtonSave_Click(object sender, EventArgs e)
-    {
-      this.ChatEditVM.SaveChat();
-      this.Focus();
-      this.UpdateAppBar();
-    }
-
-    private void _appBarButtonAdd_Click(object sender, EventArgs e)
-    {
-      ObservableCollection<ChatParticipant> chatParticipants = this.ChatEditVM.ChatParticipants;
-      Func<ChatParticipant, bool> func = (Func<ChatParticipant, bool>) (c =>
-      {
-        if (c.ChatUser != null)
-          return (long) c.ChatUser.uid == AppGlobalStateManager.Current.LoggedInUserId;
-        return false;
-      });
-
-      Func<ChatParticipant, bool> predicate = new Func<ChatParticipant, bool>(c => { return c.ChatUser != null && (long)c.ChatUser.uid == AppGlobalStateManager.Current.LoggedInUserId; });
-	
-      int currentCountInChat = chatParticipants.Any<ChatParticipant>(predicate) ? this.ChatEditVM.ChatParticipants.Count - 1 : this.ChatEditVM.ChatParticipants.Count;
-      if (currentCountInChat < VKConstants.MaxChatCount)
-      {
-        Navigator.Current.NavigateToPickUser(false, 0L, true, currentCountInChat, PickUserMode.PickForMessage, "", 0);
-      }
-      else
-      {
-        int num = (int) MessageBox.Show(CommonResources.NoMoreThan30MayTakePartInConversation);
-      }
+      this.Header.OnHeaderTap += (Action) (() => this.ContentList.ScrollToTop());
     }
 
     protected override void HandleOnNavigatedTo(NavigationEventArgs e)
@@ -219,96 +45,116 @@ namespace VKMessenger.Views
       base.HandleOnNavigatedTo(e);
       if (!this._isInitialized)
       {
-        ChatEditViewModel chatEditViewModel = new ChatEditViewModel(long.Parse(this.NavigationContext.QueryString["chat_id"]));
-        this.DataContext = (object) chatEditViewModel;
-        chatEditViewModel.LoadChatInfoAsync();
+        base.DataContext = (new ChatEditViewModel(long.Parse(((Page) this).NavigationContext.QueryString["ChatId"]), ((Page) this).NavigationService));
+        this.ChatEditVM.Reload(true);
         this._isInitialized = true;
       }
-      if (e.NavigationMode == NavigationMode.Back)
-      {
-        List<User> selectedUsers = ParametersRepository.GetParameterForIdAndReset("SelectedUsers") as List<User>;
-        if (selectedUsers != null)
-          this.ChatEditVM.AddUsersToChat(selectedUsers);
-      }
-      this.HandleInputParameters();
-      this.UpdateAppBar();
-    }
-
-    private void HandleInputParameters()
-    {
-      List<Stream> streamList = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotos") as List<Stream>;
-      Rect rect = new Rect();
-      if (ParametersRepository.Contains("UserPicSquare"))
-        rect = (Rect) ParametersRepository.GetParameterForIdAndReset("UserPicSquare");
-      if (streamList == null || streamList.Count <= 0)
-        return;
-      this.ChatEditVM.UpdateChatPhoto(streamList[0], rect);
-    }
-
-    protected override void OnBackKeyPress(CancelEventArgs e)
-    {
-      base.OnBackKeyPress(e);
-      if (!this.listBoxChatParticipants.IsSelectionEnabled)
-        return;
-      this.listBoxChatParticipants.IsSelectionEnabled = false;
-      e.Cancel = true;
-    }
-
-    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-      this.ChatEditVM.ChatName = this.textBoxChatName.Text;
-      this.UpdateAppBar();
-    }
-
-    private void listBoxChatParticipants_IsSelectionEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-      this.UpdateAppBar();
-    }
-
-    private void listBoxChatParticipants_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-      this.UpdateAppBar();
-    }
-
-    private void Grid_Tap(object sender, System.Windows.Input.GestureEventArgs e)
-    {
-      if (!this.listBoxChatParticipants.IsSelectionEnabled)
-        return;
-      try
-      {
-        MultiselectItem multiselectItem = this.listBoxChatParticipants.ItemContainerGenerator.ContainerFromItem((object) ((sender as FrameworkElement).DataContext as ChatParticipant)) as MultiselectItem;
-        int num = !multiselectItem.IsSelected ? 1 : 0;
-        multiselectItem.IsSelected = num != 0;
-      }
-      catch
-      {
-      }
-    }
-
-    private void Friend_Tap(object sender, System.Windows.Input.GestureEventArgs e)
-    {
-      if (this.listBoxChatParticipants.IsSelectionEnabled)
-        return;
-      FrameworkElement frameworkElement = sender as FrameworkElement;
-      if (frameworkElement == null)
-        return;
-      ChatParticipant chatParticipant = frameworkElement.DataContext as ChatParticipant;
-      if (chatParticipant == null)
-        return;
-      if (chatParticipant.IsUser)
-        Navigator.Current.NavigateToUserProfile((long) chatParticipant.ChatUser.uid, chatParticipant.ChatUser.Name, "", false);
       else
-        Navigator.Current.NavigateToGroup((long) chatParticipant.ChatUser.id, chatParticipant.FullName, false);
+      {
+        List<User> parameterForIdAndReset1 = ParametersRepository.GetParameterForIdAndReset("SelectedUsers") as List<User>;
+        if (parameterForIdAndReset1 != null && Enumerable.Any<User>(parameterForIdAndReset1))
+          this.ChatEditVM.AddMember((User) Enumerable.First<User>(parameterForIdAndReset1));
+        List<Stream> parameterForIdAndReset2 = ParametersRepository.GetParameterForIdAndReset("ChoosenPhotos") as List<Stream>;
+        if (parameterForIdAndReset2 == null || !Enumerable.Any<Stream>(parameterForIdAndReset2))
+          return;
+        Rect crop =  new Rect();
+        if (ParametersRepository.Contains("UserPicSquare"))
+          crop = (Rect) ParametersRepository.GetParameterForIdAndReset("UserPicSquare");
+        this.ChatEditVM.UpdatePhoto(parameterForIdAndReset2[0], crop);
+      }
     }
 
-    private void DeletePhoto_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+    private void TitleBox_OnKeyDown(object sender, KeyEventArgs e)
     {
-      this.ChatEditVM.DeleteChatPhoto();
+      if (e.Key != Key.Enter)
+        return;
+      ((Control) this).Focus();
+      if (!(this.TitleBox.Text != this.ChatEditVM.Title))
+        return;
+      this.ChatEditVM.ChangeTitle(this.TitleBox.Text, (Action) (() => this.TitleBox.Text = this.ChatEditVM.Title));
     }
 
-    private void Button_Click(object sender, RoutedEventArgs e)
+    private void Photo_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      if (this.ChatEditVM.IsPhotoMenuEnabled || this.ChatEditVM.IsPhotoChanging)
+        return;
+      Navigator.Current.NavigateToPhotoPickerPhotos(1, true, false);
+    }
+
+    private void ChangePhoto_OnClicked(object sender, RoutedEventArgs e)
     {
       Navigator.Current.NavigateToPhotoPickerPhotos(1, true, false);
+    }
+
+    private void DeletePhoto_OnClicked(object sender, RoutedEventArgs e)
+    {
+      if (MessageBox.Show(CommonResources.GenericConfirmation, CommonResources.DeleteOnePhoto, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+        return;
+      this.ChatEditVM.DeletePhoto();
+    }
+
+    private void NotificationsSound_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      if (this.ChatEditVM.IsNotificationsSoundModeSwitching)
+        return;
+      this.ChatEditVM.SwitchNotificationsSoundMode();
+    }
+
+    private void ConversationMaterials_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      Navigator.Current.NavigateToConversationMaterials(this.ChatEditVM.PeerId);
+    }
+
+    private void AddMember_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      if (this.ChatEditVM.IsMemberAdding)
+        return;
+      Navigator.Current.NavigateToPickUser(false, 0, true, 0, PickUserMode.PickWithSearch, "", 0, true);
+    }
+
+    private void Member_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      ChatMember dataContext = ((FrameworkElement) sender).DataContext as ChatMember;
+      if (dataContext == null)
+        return;
+      Navigator.Current.NavigateToUserProfile(dataContext.Id, "", "", false);
+    }
+
+    private void ExcludeButton_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      e.Handled = true;
+      ChatMember dataContext = ((FrameworkElement) sender).DataContext as ChatMember;
+      if (dataContext == null || MessageBox.Show(CommonResources.GenericConfirmation, CommonResources.ChatMemberExcluding, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+        return;
+      this.ChatEditVM.ExcludeMember(dataContext);
+    }
+
+    private void LeaveButton_OnClicked(object sender, System.Windows.Input.GestureEventArgs e)
+    {
+      if (this.ChatEditVM.IsChatLeaving || MessageBox.Show(CommonResources.GenericConfirmation, CommonResources.ChatMemberExcluding, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+        return;
+      this.ChatEditVM.LeaveChat();
+    }
+
+    private void TitleBox_OnGotFocus(object sender, RoutedEventArgs e)
+    {
+      this.TextBoxPanel.IsOpen = true;
+      Point relativePosition = ((UIElement) sender).GetRelativePosition((UIElement) this.ContentList);
+      // ISSUE: explicit reference operation
+      this.ContentList.ScrollToPosition(((Point) @relativePosition).Y - 38.0);
+    }
+
+    private void TitleBox_OnLostFocus(object sender, RoutedEventArgs e)
+    {
+      this.TextBoxPanel.IsOpen = false;
+      if (!(this.TitleBox.Text != this.ChatEditVM.Title))
+        return;
+      this.ChatEditVM.ChangeTitle(this.TitleBox.Text, (Action) (() => this.TitleBox.Text = this.ChatEditVM.Title));
+    }
+
+    private void ExcludeButton_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      e.Handled = true;
     }
 
     [DebuggerNonUserCode]
@@ -317,11 +163,11 @@ namespace VKMessenger.Views
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKMessenger;component/Views/ChatEditPage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.textBoxChatName = (TextBox) this.FindName("textBoxChatName");
-      this.listBoxChatParticipants = (MultiselectList) this.FindName("listBoxChatParticipants");
+      Application.LoadComponent(this, new Uri("/VKMessenger;component/Views/ChatEditPage.xaml", UriKind.Relative));
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.ContentList = (ExtendedLongListSelector) base.FindName("ContentList");
+      this.TitleBox = (TextBox) base.FindName("TitleBox");
+      this.TextBoxPanel = (TextBoxPanelControl) base.FindName("TextBoxPanel");
     }
   }
 }

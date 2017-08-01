@@ -12,7 +12,6 @@
              xmlns:framework="clr-namespace:VKClient.Common.Framework"
              d:DesignHeight="480"
              d:DesignWidth="480"
-             xmlns:commonFramewor="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
              xmlns:commonUC="clr-namespace:VKClient.Common.UC;assembly=VKClient.Common">
 
     <UserControl.Resources>
@@ -178,9 +177,9 @@
         <Grid Grid.Row="1"
               VerticalAlignment="Bottom">
 
-
-
             <StackPanel>
+                <commonUC:MentionPickerUC x:Name="mentionPicker" />
+
                 <!-- Reply to user -->
                 <StackPanel x:Name="panelReply"
                             MinHeight="50"
@@ -214,7 +213,8 @@
 
 
                     <ScrollViewer MaxHeight="168"
-                                  Name="scrollNewMessage">
+                                  Name="scrollNewMessage"
+                                  VerticalScrollBarVisibility="Disabled">
 
                         <commonUC:NewPostUC Margin="72 9 128 0"
                                             VerticalAlignment="Top"
@@ -222,26 +222,26 @@
 
                     </ScrollViewer>
 
-                    <Border Width="64"
-                            Height="72"
-                            commonFramewor:MetroInMotion.Tilt="2.1"
-                            Background="Transparent"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Bottom"
-                            Tap="AddAttachTap">
+                    <Grid Width="64"
+                          Height="72"
+                          framework:MetroInMotion.Tilt="2.1"
+                          Background="Transparent"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Bottom"
+                          Tap="AddAttachTap">
                         <Border Background="{StaticResource PhoneGray300_Gray500Brush}"
                                 Width="32"
                                 Height="32">
                             <Border.OpacityMask>
-                                <ImageBrush commonFramewor:ImageLoader.ImageBrushMultiResSource="/Resources/Attach32px.png" />
+                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Attach32px.png" />
                             </Border.OpacityMask>
                         </Border>
-                    </Border>
+                    </Grid>
 
                     <Grid Width="64"
                           Height="72"
                           Margin="0 0 64 0"
-                          commonFramewor:MetroInMotion.Tilt="2.1"
+                          framework:MetroInMotion.Tilt="2.1"
                           Background="Transparent"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Bottom"
@@ -254,7 +254,7 @@
                                 Background="{StaticResource PhoneGray300_Gray500Brush}"
                                 Name="borderEmoji">
                             <Border.OpacityMask>
-                                <ImageBrush commonFramewor:ImageLoader.ImageBrushMultiResSource="/Resources/Smile32px.png" />
+                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Smile32px.png" />
                             </Border.OpacityMask>
                         </Border>
 
@@ -265,27 +265,73 @@
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Top"
                                  Margin="36 21 0 0"
-                                 Fill="{StaticResource PhoneNewStoreItemsFillBrush}"
+                                 Fill="{StaticResource PhoneAccentRedBrush}"
                                  StrokeThickness="2"
                                  Stroke="{StaticResource PhoneBackgroundBrush}" />
                     </Grid>
 
-                    <Border Width="64"
-                            Height="72"
-                            Background="Transparent"
-                            commonFramewor:MetroInMotion.Tilt="2.1"
-                            Name="borderSend"
-                            Tap="SendTap"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom">
-                        <Border Background="{StaticResource PhoneBlue300_GrayBlue500Brush}"
-                                Width="32"
-                                Height="32">
-                            <Border.OpacityMask>
-                                <ImageBrush commonFramewor:ImageLoader.ImageBrushMultiResSource="/Resources/Send32px.png" />
-                            </Border.OpacityMask>
-                        </Border>
+                    <Border x:Name="borderHoldToRecord"
+                            Background="{StaticResource PhoneBackgroundBrush}"
+                            Visibility="Collapsed"
+                            Opacity="0"
+                            CacheMode="BitmapCache">
+                        <TextBlock Margin="0 19 64 0"
+                                   VerticalAlignment="Top"
+                                   FontSize="22.67"
+                                   Foreground="{StaticResource PhoneGray400_Gray500Brush}"
+                                   TextAlignment="Center"
+                                   Text="{Binding LocalizedResources.VoiceMessage_HoldOnToRecord, Source={StaticResource LocalizedStrings}}" />
                     </Border>
+
+                    <Grid Width="64"
+                          Height="72"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Bottom">
+                        <Border x:Name="borderSend"
+                                Width="64"
+                                Height="72"
+                                CacheMode="BitmapCache"
+                                Tap="SendTap">
+
+                            <Border Background="Transparent"
+                                    framework:MetroInMotion.Tilt="1.5">
+                                <Border Background="{StaticResource PhoneBlue300_GrayBlue500Brush}"
+                                        Width="32"
+                                        Height="32">
+                                    <Border.OpacityMask>
+                                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Send32px.png" />
+                                    </Border.OpacityMask>
+                                </Border>
+                            </Border>
+                        </Border>
+
+                        <Border x:Name="borderVoice"
+                                Width="64"
+                                Height="72"
+                                CacheMode="BitmapCache"
+                                UseOptimizedManipulationRouting="False"
+                                ManipulationStarted="BorderVoice_OnManipulationStarted"
+                                ManipulationDelta="BorderVoice_OnManipulationDelta"
+                                ManipulationCompleted="BorderVoice_OnManipulationCompleted">
+
+                            <Border Background="Transparent"
+                                    framework:MetroInMotion.Tilt="1.5">
+                                <Border Background="{StaticResource PhoneGray300_Gray500Brush}"
+                                        Width="32"
+                                        Height="32">
+                                    <Border.OpacityMask>
+                                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/VoiceMessage32px.png" />
+                                    </Border.OpacityMask>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </Grid>
+
+                    <commonUC:AudioRecorderUC x:Name="ucAudioRecorder"
+                                              Margin="0 -900 0 0"
+                                              Visibility="Collapsed"
+                                              Opened="UcAudioRecorder_OnOpened"
+                                              Closed="UcAudioRecorder_OnClosed" />
 
                     <StickersAutoSuggest:StickersAutoSuggestUC VerticalAlignment="Top"
                                                                x:Name="ucStickersAutoSuggest"

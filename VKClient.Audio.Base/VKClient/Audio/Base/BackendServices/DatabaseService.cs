@@ -27,7 +27,7 @@ namespace VKClient.Audio.Base.BackendServices
       Dictionary<string, string> parameters = new Dictionary<string, string>();
       parameters["need_all"] = "0";
       parameters["count"] = "500";
-      VKRequestsDispatcher.DispatchRequestToVK<VKList<Country>>("database.getCountries", parameters, callback, (Func<string, VKList<Country>>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<VKList<Country>>("database.getCountries", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetCountries(bool useExecute, Action<BackendResult<CountriesResponse, ResultCode>> callback)
@@ -51,7 +51,7 @@ namespace VKClient.Audio.Base.BackendServices
           parameters["count"] = "500";
           VKRequestsDispatcher.DispatchRequestToVK<VKList<Country>>("database.getCountries", parameters, (Action<BackendResult<VKList<Country>, ResultCode>>) (res1 =>
           {
-            CountriesResponse resultData = (CountriesResponse) null;
+            CountriesResponse resultData =  null;
             if (res.ResultCode == ResultCode.Succeeded)
             {
               resultData = new CountriesResponse()
@@ -62,11 +62,11 @@ namespace VKClient.Audio.Base.BackendServices
               this._cachedCountries = resultData;
             }
             callback(new BackendResult<CountriesResponse, ResultCode>(res1.ResultCode, resultData));
-          }), (Func<string, VKList<Country>>) null, false, true, new CancellationToken?());
+          }),  null, false, true, new CancellationToken?(),  null);
         }
         else
-          callback(new BackendResult<CountriesResponse, ResultCode>(res.ResultCode, (CountriesResponse) null));
-      }), (Func<string, VKList<Country>>) null, false, true, new CancellationToken?());
+          callback(new BackendResult<CountriesResponse, ResultCode>(res.ResultCode,  null));
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
     private void GetCountriesListWithExecute(Action<BackendResult<CountriesResponse, ResultCode>> callback)
@@ -78,7 +78,7 @@ namespace VKClient.Audio.Base.BackendServices
         if (res.ResultCode == ResultCode.Succeeded)
           this._cachedCountries = res.ResultData;
         callback(res);
-      }), (Func<string, CountriesResponse>) null, false, true, new CancellationToken?());
+      }),  null, false, true, new CancellationToken?(),  null);
     }
 
     public void GetCities(string q, long countryId, bool needAll, int offset, int count, Action<BackendResult<VKList<City>, ResultCode>> callback)
@@ -90,7 +90,7 @@ namespace VKClient.Audio.Base.BackendServices
         parameters["need_all"] = "1";
       parameters["offset"] = offset.ToString();
       parameters["count"] = count.ToString();
-      VKRequestsDispatcher.DispatchRequestToVK<VKList<City>>("database.getCities", parameters, callback, (Func<string, VKList<City>>) null, false, true, new CancellationToken?());
+      VKRequestsDispatcher.DispatchRequestToVK<VKList<City>>("database.getCities", parameters, callback,  null, false, true, new CancellationToken?(),  null);
     }
   }
 }

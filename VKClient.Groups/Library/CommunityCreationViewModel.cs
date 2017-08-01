@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Navigation;
 using VKClient.Common.Backend;
@@ -88,7 +89,7 @@ label_11:
       set
       {
         this._isFormEnabled = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormEnabled));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormEnabled));
       }
     }
 
@@ -101,7 +102,7 @@ label_11:
       set
       {
         this._name = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -114,8 +115,8 @@ label_11:
       set
       {
         this._isGroupSelected = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.PublicPageTypeFormPartVisibility));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<Visibility>((() => this.PublicPageTypeFormPartVisibility));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -128,8 +129,8 @@ label_11:
       set
       {
         this._isPublicPageSelected = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.PublicPageTypeFormPartVisibility));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<Visibility>((() => this.PublicPageTypeFormPartVisibility));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -142,8 +143,8 @@ label_11:
       set
       {
         this._isEventSelected = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.PublicPageTypeFormPartVisibility));
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<Visibility>((() => this.PublicPageTypeFormPartVisibility));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -153,7 +154,9 @@ label_11:
       {
         bool? publicPageSelected = this.IsPublicPageSelected;
         bool flag = true;
-        return (publicPageSelected.GetValueOrDefault() == flag ? (publicPageSelected.HasValue ? 1 : 0) : 0) == 0 ? Visibility.Collapsed : Visibility.Visible;
+        if ((publicPageSelected.GetValueOrDefault() == flag ? (publicPageSelected.HasValue ? 1 : 0) : 0) == 0)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -166,7 +169,7 @@ label_11:
       set
       {
         this._isPlaceSelected = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -179,7 +182,7 @@ label_11:
       set
       {
         this._isCompanySelected = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -192,7 +195,7 @@ label_11:
       set
       {
         this._isPersonSelected = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -205,7 +208,7 @@ label_11:
       set
       {
         this._isProductionSelected = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -218,7 +221,7 @@ label_11:
       set
       {
         this._areTermsAccepted = value;
-        this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>) (() => this.IsFormCompleted));
+        this.NotifyPropertyChanged<bool>((() => this.IsFormCompleted));
       }
     }
 
@@ -229,61 +232,59 @@ label_11:
 
     public void CreateCommunity()
     {
-      string type = "group";
-      int subtype = 0;
-      bool? publicPageSelected = this.IsPublicPageSelected;
-      bool flag1 = true;
-      if ((publicPageSelected.GetValueOrDefault() == flag1 ? (publicPageSelected.HasValue ? 1 : 0) : 0) != 0)
-      {
-        type = "public";
-        bool? isPlaceSelected = this.IsPlaceSelected;
-        bool flag2 = true;
-        if ((isPlaceSelected.GetValueOrDefault() == flag2 ? (isPlaceSelected.HasValue ? 1 : 0) : 0) != 0)
+        string type = "group";
+        int subtype = 0;
+        bool? publicPageSelected = this.IsPublicPageSelected;
+        bool flag1 = true;
+        if ((publicPageSelected.GetValueOrDefault() == flag1 ? (publicPageSelected.HasValue ? 1 : 0) : 0) != 0)
         {
-          subtype = 1;
+            type = "public";
+            bool? isPlaceSelected = this.IsPlaceSelected;
+            bool flag2 = true;
+            if ((isPlaceSelected.GetValueOrDefault() == flag2 ? (isPlaceSelected.HasValue ? 1 : 0) : 0) != 0)
+            {
+                subtype = 1;
+            }
+            else
+            {
+                bool? isCompanySelected = this.IsCompanySelected;
+                bool flag3 = true;
+                if ((isCompanySelected.GetValueOrDefault() == flag3 ? (isCompanySelected.HasValue ? 1 : 0) : 0) != 0)
+                {
+                    subtype = 2;
+                }
+                else
+                {
+                    bool? isPersonSelected = this.IsPersonSelected;
+                    bool flag4 = true;
+                    subtype = (isPersonSelected.GetValueOrDefault() == flag4 ? (isPersonSelected.HasValue ? 1 : 0) : 0) == 0 ? 4 : 3;
+                }
+            }
         }
         else
         {
-          bool? isCompanySelected = this.IsCompanySelected;
-          bool flag3 = true;
-          if ((isCompanySelected.GetValueOrDefault() == flag3 ? (isCompanySelected.HasValue ? 1 : 0) : 0) != 0)
-          {
-            subtype = 2;
-          }
-          else
-          {
-            bool? isPersonSelected = this.IsPersonSelected;
-            bool flag4 = true;
-            subtype = (isPersonSelected.GetValueOrDefault() == flag4 ? (isPersonSelected.HasValue ? 1 : 0) : 0) == 0 ? 4 : 3;
-          }
+            bool? isEventSelected = this.IsEventSelected;
+            bool flag2 = true;
+            if ((isEventSelected.GetValueOrDefault() == flag2 ? (isEventSelected.HasValue ? 1 : 0) : 0) != 0)
+                type = "event";
         }
-      }
-      else
-      {
-        bool? isEventSelected = this.IsEventSelected;
-        bool flag2 = true;
-        if ((isEventSelected.GetValueOrDefault() == flag2 ? (isEventSelected.HasValue ? 1 : 0) : 0) != 0)
-          type = "event";
-      }
-      this.SetInProgress(true, "");
-      this.IsFormEnabled = false;
-      GroupsService.Current.CreateCommunity(this.Name, type, subtype, (Action<BackendResult<Group, ResultCode>>) (result => Execute.ExecuteOnUIThread((Action) (() =>
-      {
-        if (result.ResultCode == ResultCode.Succeeded)
+        this.SetInProgress(true, "");
+        this.IsFormEnabled = false;
+        GroupsService.Current.CreateCommunity(this.Name, type, subtype, (Action<BackendResult<Group, ResultCode>>)(result => Execute.ExecuteOnUIThread((Action)(() =>
         {
-          EventAggregator.Current.Publish((object) new GroupMembershipStatusUpdated(result.ResultData.id, true));
-          Navigator.Current.NavigateToGroup(result.ResultData.id, "", false);
-          this._navigationService.RemoveBackEntry();
-        }
-        else
-        {
-          this.SetInProgress(false, "");
-          this.IsFormEnabled = true;
-          if (result.ResultCode == ResultCode.ValidationCancelledOrFailed)
-            return;
-          GenericInfoUC.ShowBasedOnResult((int) result.ResultCode, "", (VKRequestsDispatcher.Error) null);
-        }
-      }))));
+            if (result.ResultCode == ResultCode.Succeeded)
+            {
+                EventAggregator.Current.Publish((object)new GroupMembershipStatusUpdated(result.ResultData.id, true));
+                Navigator.Current.NavigateToGroup(result.ResultData.id, "", false);
+                this._navigationService.RemoveBackEntry();
+            }
+            else
+            {
+                this.SetInProgress(false, "");
+                this.IsFormEnabled = true;
+                GenericInfoUC.ShowBasedOnResult((int)result.ResultCode, "", null);
+            }
+        }))));
     }
   }
 }

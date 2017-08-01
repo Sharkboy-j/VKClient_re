@@ -57,7 +57,7 @@ namespace VKClient.Common.Backend.DataObjects
 
     public Photo photo { get; set; }
 
-    public VKClient.Common.Backend.DataObjects.Video video { get; set; }
+    public Video video { get; set; }
 
     public Topic topic { get; set; }
 

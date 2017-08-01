@@ -83,8 +83,13 @@ namespace System.Windows.Media.Imaging
 
     private static int ConvertColor(Color color)
     {
-      int num = (int) color.A + 1;
-      return (int) color.A << 24 | (int) (byte) ((int) color.R * num >> 8) << 16 | (int) (byte) ((int) color.G * num >> 8) << 8 | (int) (byte) ((int) color.B * num >> 8);
+      // ISSUE: explicit reference operation
+      int num = (int) ((Color) @color).A + 1;
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
+      return (int) ((Color) @color).A << 24 | (int) (byte) ((int) ((Color) @color).R * num >> 8) << 16 | (int) (byte) ((int) ((Color) @color).G * num >> 8) << 8 | (int) (byte) ((int) ((Color) @color).B * num >> 8);
     }
 
     public static void Clear(this WriteableBitmap bmp, Color color)
@@ -175,16 +180,16 @@ namespace System.Windows.Media.Imaging
     {
       using (BitmapContext bitmapContext = bmp.GetBitmapContext())
       {
-        int num1 = bitmapContext.Pixels[y * bitmapContext.Width + x];
-        int num2;
-        int num3 = num2 = (int) (byte) (num1 >> 24);
-        if (num3 == 0)
-          num3 = 1;
-        int num4 = 65280 / num3;
-        int num5 = (int) (byte) ((num1 >> 16 & (int) byte.MaxValue) * num4 >> 8);
-        int num6 = (int) (byte) ((num1 >> 8 & (int) byte.MaxValue) * num4 >> 8);
-        int num7 = (int) (byte) ((num1 & (int) byte.MaxValue) * num4 >> 8);
-        return Color.FromArgb((byte) num2, (byte) num5, (byte) num6, (byte) num7);
+        int pixel = bitmapContext.Pixels[y * bitmapContext.Width + x];
+        int num1;
+        int num2 = num1 = (int) (byte) (pixel >> 24);
+        if (num2 == 0)
+          num2 = 1;
+        int num3 = 65280 / num2;
+        int num4 = (int) (byte) ((pixel >> 16 & (int) byte.MaxValue) * num3 >> 8);
+        int num5 = (int) (byte) ((pixel >> 8 & (int) byte.MaxValue) * num3 >> 8);
+        int num6 = (int) (byte) ((pixel & (int) byte.MaxValue) * num3 >> 8);
+        return Color.FromArgb((byte) num1, (byte) num4, (byte) num5, (byte) num6);
       }
     }
 
@@ -192,13 +197,13 @@ namespace System.Windows.Media.Imaging
     {
       using (BitmapContext bitmapContext = bmp.GetBitmapContext(ReadWriteMode.ReadOnly))
       {
-        int num1 = bitmapContext.Pixels[y * bitmapContext.Width + x];
-        int num2 = 16;
-        byte num3 = (byte) (num1 >> num2);
-        int num4 = 8;
-        byte num5 = (byte) (num1 >> num4);
-        byte num6 = (byte) num1;
-        return (byte) ((int) num3 * 6966 + (int) num5 * 23436 + (int) num6 * 2366 >> 15);
+        int pixel = bitmapContext.Pixels[y * bitmapContext.Width + x];
+        int num1 = 16;
+        byte num2 = (byte) (pixel >> num1);
+        int num3 = 8;
+        byte num4 = (byte) (pixel >> num3);
+        byte num5 = (byte) pixel;
+        return (byte) ((int) num2 * 6966 + (int) num4 * 23436 + (int) num5 * 2366 >> 15);
       }
     }
 
@@ -243,7 +248,10 @@ namespace System.Windows.Media.Imaging
       using (BitmapContext bitmapContext = bmp.GetBitmapContext())
       {
         int num = (int) a + 1;
-        bitmapContext.Pixels[index] = (int) a << 24 | (int) (byte) ((int) color.R * num >> 8) << 16 | (int) (byte) ((int) color.G * num >> 8) << 8 | (int) (byte) ((int) color.B * num >> 8);
+        // ISSUE: explicit reference operation
+        // ISSUE: explicit reference operation
+        // ISSUE: explicit reference operation
+        bitmapContext.Pixels[index] = (int) a << 24 | (int) (byte) ((int) ((Color) @color).R * num >> 8) << 16 | (int) (byte) ((int) ((Color) @color).G * num >> 8) << 8 | (int) (byte) ((int) ((Color) @color).B * num >> 8);
       }
     }
 
@@ -252,7 +260,10 @@ namespace System.Windows.Media.Imaging
       using (BitmapContext bitmapContext = bmp.GetBitmapContext())
       {
         int num = (int) a + 1;
-        bitmapContext.Pixels[y * bitmapContext.Width + x] = (int) a << 24 | (int) (byte) ((int) color.R * num >> 8) << 16 | (int) (byte) ((int) color.G * num >> 8) << 8 | (int) (byte) ((int) color.B * num >> 8);
+        // ISSUE: explicit reference operation
+        // ISSUE: explicit reference operation
+        // ISSUE: explicit reference operation
+        bitmapContext.Pixels[y * bitmapContext.Width + x] = (int) a << 24 | (int) (byte) ((int) ((Color) @color).R * num >> 8) << 16 | (int) (byte) ((int) ((Color) @color).G * num >> 8) << 8 | (int) (byte) ((int) ((Color) @color).B * num >> 8);
       }
     }
 
@@ -280,166 +291,187 @@ namespace System.Windows.Media.Imaging
 
     public static void Blit(this WriteableBitmap bmp, Point destPosition, WriteableBitmap source, Rect sourceRect, Color color, WriteableBitmapExtensions.BlendMode BlendMode)
     {
-      Rect destRect = new Rect(destPosition, new Size(sourceRect.Width, sourceRect.Height));
+      Rect destRect=new Rect(destPosition, new Size(((Rect) @sourceRect).Width, ((Rect) @sourceRect).Height));
       bmp.Blit(destRect, source, sourceRect, color, BlendMode);
     }
 
     public static void Blit(this WriteableBitmap bmp, Rect destRect, WriteableBitmap source, Rect sourceRect, Color color, WriteableBitmapExtensions.BlendMode BlendMode)
     {
-      if ((int) color.A == 0)
+      // ISSUE: explicit reference operation
+      if ((int) ((Color) @color).A == 0)
         return;
-      int num1 = (int) destRect.Width;
-      int num2 = (int) destRect.Height;
+      // ISSUE: explicit reference operation
+      int width1 = (int) ((Rect) @destRect).Width;
+      // ISSUE: explicit reference operation
+      int height1 = (int) ((Rect) @destRect).Height;
       using (BitmapContext bitmapContext1 = source.GetBitmapContext(ReadWriteMode.ReadOnly))
       {
         using (BitmapContext bitmapContext2 = bmp.GetBitmapContext())
         {
-          int width1 = bitmapContext1.Width;
-          int width2 = bitmapContext2.Width;
-          int height = bitmapContext2.Height;
-          Rect rect = new Rect(0.0, 0.0, (double) width2, (double) height);
+          int width2 = bitmapContext1.Width;
+          int width3 = bitmapContext2.Width;
+          int height2 = bitmapContext2.Height;
+          Rect rect=new Rect(0.0, 0.0, (double) width3, (double) height2);
+          // ISSUE: explicit reference operation
           rect.Intersect(destRect);
+          // ISSUE: explicit reference operation
           if (rect.IsEmpty)
             return;
           int[] pixels1 = bitmapContext1.Pixels;
           int[] pixels2 = bitmapContext2.Pixels;
           int length1 = bitmapContext1.Length;
           int length2 = bitmapContext2.Length;
-          int num3 = (int) destRect.X;
-          int num4 = (int) destRect.Y;
-          int num5 = 0;
-          int num6 = 0;
-          int num7 = 0;
-          int num8 = 0;
-          int num9 = (int) color.A;
-          int num10 = (int) color.R;
-          int num11 = (int) color.G;
-          int num12 = (int) color.B;
-          bool flag = color != Colors.White;
-          int num13 = (int) sourceRect.Width;
-          double num14 = sourceRect.Width / destRect.Width;
-          double num15 = sourceRect.Height / destRect.Height;
-          int num16 = (int) sourceRect.X;
-          int num17 = (int) sourceRect.Y;
-          int num18 = -1;
-          int num19 = -1;
-          double num20 = (double) num17;
-          int num21 = num4;
-          for (int index1 = 0; index1 < num2; ++index1)
+          // ISSUE: explicit reference operation
+          int x1 = (int) ((Rect) @destRect).X;
+          // ISSUE: explicit reference operation
+          int y1 = (int) ((Rect) @destRect).Y;
+          int num1 = 0;
+          int num2 = 0;
+          int num3 = 0;
+          int num4 = 0;
+          // ISSUE: explicit reference operation
+          int a = (int) ((Color) @color).A;
+          // ISSUE: explicit reference operation
+          int r = (int) ((Color) @color).R;
+          // ISSUE: explicit reference operation
+          int g = (int) ((Color) @color).G;
+          // ISSUE: explicit reference operation
+          int b = (int) ((Color) @color).B;
+          bool flag = (color!= Colors.White);
+          // ISSUE: explicit reference operation
+          int width4 = (int) ((Rect) @sourceRect).Width;
+          // ISSUE: explicit reference operation
+          // ISSUE: explicit reference operation
+          double num5 = ((Rect) @sourceRect).Width / ((Rect) @destRect).Width;
+          // ISSUE: explicit reference operation
+          // ISSUE: explicit reference operation
+          double num6 = ((Rect) @sourceRect).Height / ((Rect) @destRect).Height;
+          // ISSUE: explicit reference operation
+          int x2 = (int) ((Rect) @sourceRect).X;
+          // ISSUE: explicit reference operation
+          int y2 = (int) ((Rect) @sourceRect).Y;
+          int num7 = -1;
+          int num8 = -1;
+          double num9 = (double) y2;
+          int num10 = y1;
+          for (int index1 = 0; index1 < height1; ++index1)
           {
-            if (num21 >= 0 && num21 < height)
+            if (num10 >= 0 && num10 < height2)
             {
-              double num22 = (double) num16;
-              int index2 = num3 + num21 * width2;
-              int num23 = num3;
-              int num24 = pixels1[0];
+              double num11 = (double) x2;
+              int index2 = x1 + num10 * width3;
+              int num12 = x1;
+              int num13 = pixels1[0];
               if (BlendMode == WriteableBitmapExtensions.BlendMode.None && !flag)
               {
-                int num25 = (int) num22 + (int) num20 * width1;
-                int num26 = num23 < 0 ? -num23 : 0;
-                int num27 = num23 + num26;
-                int num28 = width1 - num26;
-                int num29 = num27 + num28 < width2 ? num28 : width2 - num27;
-                if (num29 > num13)
-                  num29 = num13;
-                if (num29 > num1)
-                  num29 = num1;
-                BitmapContext.BlockCopy(bitmapContext1, (num25 + num26) * 4, bitmapContext2, (index2 + num26) * 4, num29 * 4);
+                int num14 = (int) num11 + (int) num9 * width2;
+                int num15 = num12 < 0 ? -num12 : 0;
+                int num16 = num12 + num15;
+                int num17 = width2 - num15;
+                int num18 = num16 + num17 < width3 ? num17 : width3 - num16;
+                if (num18 > width4)
+                  num18 = width4;
+                if (num18 > width1)
+                  num18 = width1;
+                BitmapContext.BlockCopy(bitmapContext1, (num14 + num15) * 4, bitmapContext2, (index2 + num15) * 4, num18 * 4);
               }
               else
               {
-                for (int index3 = 0; index3 < num1; ++index3)
+                for (int index3 = 0; index3 < width1; ++index3)
                 {
-                  if (num23 >= 0 && num23 < width2)
+                  if (num12 >= 0 && num12 < width3)
                   {
-                    if ((int) num22 != num18 || (int) num20 != num19)
+                    if ((int) num11 != num7 || (int) num9 != num8)
                     {
-                      int index4 = (int) num22 + (int) num20 * width1;
+                      int index4 = (int) num11 + (int) num9 * width2;
                       if (index4 >= 0 && index4 < length1)
                       {
-                        num24 = pixels1[index4];
-                        num8 = num24 >> 24 & (int) byte.MaxValue;
-                        num5 = num24 >> 16 & (int) byte.MaxValue;
-                        num6 = num24 >> 8 & (int) byte.MaxValue;
-                        num7 = num24 & (int) byte.MaxValue;
-                        if (flag && num8 != 0)
+                        num13 = pixels1[index4];
+                        num4 = num13 >> 24 & (int) byte.MaxValue;
+                        num1 = num13 >> 16 & (int) byte.MaxValue;
+                        num2 = num13 >> 8 & (int) byte.MaxValue;
+                        num3 = num13 & (int) byte.MaxValue;
+                        if (flag && num4 != 0)
                         {
-                          num8 = num8 * num9 * 32897 >> 23;
-                          num5 = (num5 * num10 * 32897 >> 23) * num9 * 32897 >> 23;
-                          num6 = (num6 * num11 * 32897 >> 23) * num9 * 32897 >> 23;
-                          num7 = (num7 * num12 * 32897 >> 23) * num9 * 32897 >> 23;
-                          num24 = num8 << 24 | num5 << 16 | num6 << 8 | num7;
+                          num4 = num4 * a * 32897 >> 23;
+                          num1 = (num1 * r * 32897 >> 23) * a * 32897 >> 23;
+                          num2 = (num2 * g * 32897 >> 23) * a * 32897 >> 23;
+                          num3 = (num3 * b * 32897 >> 23) * a * 32897 >> 23;
+                          num13 = num4 << 24 | num1 << 16 | num2 << 8 | num3;
                         }
                       }
                       else
-                        num8 = 0;
+                        num4 = 0;
                     }
                     if (BlendMode == WriteableBitmapExtensions.BlendMode.None)
-                      pixels2[index2] = num24;
+                      pixels2[index2] = num13;
                     else if (BlendMode == WriteableBitmapExtensions.BlendMode.ColorKeying)
                     {
-                      num5 = num24 >> 16 & (int) byte.MaxValue;
-                      num6 = num24 >> 8 & (int) byte.MaxValue;
-                      num7 = num24 & (int) byte.MaxValue;
-                      if (num5 != (int) color.R || num6 != (int) color.G || num7 != (int) color.B)
-                        pixels2[index2] = num24;
+                      num1 = num13 >> 16 & (int) byte.MaxValue;
+                      num2 = num13 >> 8 & (int) byte.MaxValue;
+                      num3 = num13 & (int) byte.MaxValue;
+                      // ISSUE: explicit reference operation
+                      // ISSUE: explicit reference operation
+                      // ISSUE: explicit reference operation
+                      if (num1 != (int) ((Color) @color).R || num2 != (int) ((Color) @color).G || num3 != (int) ((Color) @color).B)
+                        pixels2[index2] = num13;
                     }
                     else if (BlendMode == WriteableBitmapExtensions.BlendMode.Mask)
                     {
-                      int num25 = pixels2[index2];
-                      int num26 = num25 >> 24 & (int) byte.MaxValue;
-                      int num27 = num25 >> 16 & (int) byte.MaxValue;
-                      int num28 = num25 >> 8 & (int) byte.MaxValue;
-                      int num29 = num25 & (int) byte.MaxValue;
-                      int num30 = num26 * num8 * 32897 >> 23 << 24 | num27 * num8 * 32897 >> 23 << 16 | num28 * num8 * 32897 >> 23 << 8 | num29 * num8 * 32897 >> 23;
-                      pixels2[index2] = num30;
+                      int num14 = pixels2[index2];
+                      int num15 = num14 >> 24 & (int) byte.MaxValue;
+                      int num16 = num14 >> 16 & (int) byte.MaxValue;
+                      int num17 = num14 >> 8 & (int) byte.MaxValue;
+                      int num18 = num14 & (int) byte.MaxValue;
+                      int num19 = num15 * num4 * 32897 >> 23 << 24 | num16 * num4 * 32897 >> 23 << 16 | num17 * num4 * 32897 >> 23 << 8 | num18 * num4 * 32897 >> 23;
+                      pixels2[index2] = num19;
                     }
-                    else if (num8 > 0)
+                    else if (num4 > 0)
                     {
-                      int num25 = pixels2[index2];
-                      int num26 = num25 >> 24 & (int) byte.MaxValue;
-                      if ((num8 == (int) byte.MaxValue || num26 == 0) && (BlendMode != WriteableBitmapExtensions.BlendMode.Additive && BlendMode != WriteableBitmapExtensions.BlendMode.Subtractive) && BlendMode != WriteableBitmapExtensions.BlendMode.Multiply)
+                      int num14 = pixels2[index2];
+                      int num15 = num14 >> 24 & (int) byte.MaxValue;
+                      if ((num4 == (int) byte.MaxValue || num15 == 0) && (BlendMode != WriteableBitmapExtensions.BlendMode.Additive && BlendMode != WriteableBitmapExtensions.BlendMode.Subtractive) && BlendMode != WriteableBitmapExtensions.BlendMode.Multiply)
                       {
-                        pixels2[index2] = num24;
+                        pixels2[index2] = num13;
                       }
                       else
                       {
-                        int num27 = num25 >> 16 & (int) byte.MaxValue;
-                        int num28 = num25 >> 8 & (int) byte.MaxValue;
-                        int num29 = num25 & (int) byte.MaxValue;
+                        int num16 = num14 >> 16 & (int) byte.MaxValue;
+                        int num17 = num14 >> 8 & (int) byte.MaxValue;
+                        int num18 = num14 & (int) byte.MaxValue;
                         if (BlendMode == WriteableBitmapExtensions.BlendMode.Alpha)
-                          num25 = ((num8 << 8) + ((int) byte.MaxValue - num8) * num26 >> 8 << 24) + ((num5 << 8) + ((int) byte.MaxValue - num8) * num27 >> 8 << 16) + ((num6 << 8) + ((int) byte.MaxValue - num8) * num28 >> 8 << 8) + ((num7 << 8) + ((int) byte.MaxValue - num8) * num29 >> 8);
+                          num14 = ((num4 << 8) + ((int) byte.MaxValue - num4) * num15 >> 8 << 24) + ((num1 << 8) + ((int) byte.MaxValue - num4) * num16 >> 8 << 16) + ((num2 << 8) + ((int) byte.MaxValue - num4) * num17 >> 8 << 8) + ((num3 << 8) + ((int) byte.MaxValue - num4) * num18 >> 8);
                         else if (BlendMode == WriteableBitmapExtensions.BlendMode.Additive)
                         {
-                          int num30 = (int) byte.MaxValue <= num8 + num26 ? (int) byte.MaxValue : num8 + num26;
-                          num25 = num30 << 24 | (num30 <= num5 + num27 ? num30 : num5 + num27) << 16 | (num30 <= num6 + num28 ? num30 : num6 + num28) << 8 | (num30 <= num7 + num29 ? num30 : num7 + num29);
+                          int num19 = (int) byte.MaxValue <= num4 + num15 ? (int) byte.MaxValue : num4 + num15;
+                          num14 = num19 << 24 | (num19 <= num1 + num16 ? num19 : num1 + num16) << 16 | (num19 <= num2 + num17 ? num19 : num2 + num17) << 8 | (num19 <= num3 + num18 ? num19 : num3 + num18);
                         }
                         else if (BlendMode == WriteableBitmapExtensions.BlendMode.Subtractive)
-                          num25 = num26 << 24 | (num5 >= num27 ? 0 : num5 - num27) << 16 | (num6 >= num28 ? 0 : num6 - num28) << 8 | (num7 >= num29 ? 0 : num7 - num29);
+                          num14 = num15 << 24 | (num1 >= num16 ? 0 : num1 - num16) << 16 | (num2 >= num17 ? 0 : num2 - num17) << 8 | (num3 >= num18 ? 0 : num3 - num18);
                         else if (BlendMode == WriteableBitmapExtensions.BlendMode.Multiply)
                         {
-                          int num30 = num8 * num26 + 128;
-                          int num31 = num5 * num27 + 128;
-                          int num32 = num6 * num28 + 128;
-                          int num33 = num7 * num29 + 128;
-                          int num34 = (num30 >> 8) + num30 >> 8;
-                          int num35 = (num31 >> 8) + num31 >> 8;
-                          int num36 = (num32 >> 8) + num32 >> 8;
-                          int num37 = (num33 >> 8) + num33 >> 8;
-                          num25 = num34 << 24 | (num34 <= num35 ? num34 : num35) << 16 | (num34 <= num36 ? num34 : num36) << 8 | (num34 <= num37 ? num34 : num37);
+                          int num19 = num4 * num15 + 128;
+                          int num20 = num1 * num16 + 128;
+                          int num21 = num2 * num17 + 128;
+                          int num22 = num3 * num18 + 128;
+                          int num23 = (num19 >> 8) + num19 >> 8;
+                          int num24 = (num20 >> 8) + num20 >> 8;
+                          int num25 = (num21 >> 8) + num21 >> 8;
+                          int num26 = (num22 >> 8) + num22 >> 8;
+                          num14 = num23 << 24 | (num23 <= num24 ? num23 : num24) << 16 | (num23 <= num25 ? num23 : num25) << 8 | (num23 <= num26 ? num23 : num26);
                         }
-                        pixels2[index2] = num25;
+                        pixels2[index2] = num14;
                       }
                     }
                   }
-                  ++num23;
+                  ++num12;
                   ++index2;
-                  num22 += num14;
+                  num11 += num5;
                 }
               }
             }
-            num20 += num15;
-            ++num21;
+            num9 += num6;
+            ++num10;
           }
         }
       }
@@ -537,15 +569,17 @@ namespace System.Windows.Media.Imaging
 
     public static WriteableBitmap FromContent(this WriteableBitmap bmp, string relativePath)
     {
-      using (Stream stream = Application.GetResourceStream(new Uri(relativePath, UriKind.Relative)).Stream)
+      using (Stream stream1 = Application.GetResourceStream(new Uri(relativePath, UriKind.Relative)).Stream)
       {
         BitmapImage bitmapImage = new BitmapImage();
-        Stream streamSource = stream;
-        bitmapImage.SetSource(streamSource);
+        Stream stream2 = stream1;
+        ((BitmapSource) bitmapImage).SetSource(stream2);
         int num = 0;
-        bitmapImage.CreateOptions = (BitmapCreateOptions) num;
+        bitmapImage.CreateOptions = ((BitmapCreateOptions) num);
         bmp = new WriteableBitmap((BitmapSource) bitmapImage);
-        bitmapImage.UriSource = null;
+        // ISSUE: variable of the null type
+        
+        bitmapImage.UriSource=(null);
         return bmp;
       }
     }
@@ -652,12 +686,12 @@ namespace System.Windows.Media.Imaging
             int num5 = num1 >> num4 & (int) byte.MaxValue;
             int num6 = 8;
             int num7 = num1 >> num6 & (int) byte.MaxValue;
-            int num8 = (int) byte.MaxValue;
-            int num9 = num1 & num8;
-            int num10 = (int) byte.MaxValue - num5;
-            int num11 = (int) byte.MaxValue - num7;
-            int num12 = (int) byte.MaxValue - num9;
-            pixels1[index] = num3 << 24 | num10 << 16 | num11 << 8 | num12;
+            int maxValue = (int) byte.MaxValue;
+            int num8 = num1 & maxValue;
+            int num9 = (int) byte.MaxValue - num5;
+            int num10 = (int) byte.MaxValue - num7;
+            int num11 = (int) byte.MaxValue - num8;
+            pixels1[index] = num3 << 24 | num9 << 16 | num10 << 8 | num11;
           }
           return bmp1;
         }
@@ -696,7 +730,11 @@ namespace System.Windows.Media.Imaging
 
     public static WriteableBitmap Crop(this WriteableBitmap bmp, Rect region)
     {
-      return bmp.Crop((int) region.X, (int) region.Y, (int) region.Width, (int) region.Height);
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
+      return bmp.Crop((int) ((Rect) @region).X, (int) ((Rect) @region).Y, (int) ((Rect) @region).Width, (int) ((Rect) @region).Height);
     }
 
     public static WriteableBitmap Resize(this WriteableBitmap bmp, int width, int height, Interpolation interpolation)
@@ -955,14 +993,30 @@ namespace System.Windows.Media.Imaging
                 Color pixel2 = bmp.GetPixel(x2, y1);
                 Color pixel3 = bmp.GetPixel(x1, y2);
                 Color pixel4 = bmp.GetPixel(x2, y2);
-                double num17 = (1.0 - num15) * (double) pixel1.R + num15 * (double) pixel2.R;
-                double num18 = (1.0 - num15) * (double) pixel1.G + num15 * (double) pixel2.G;
-                double num19 = (1.0 - num15) * (double) pixel1.B + num15 * (double) pixel2.B;
-                double num20 = (1.0 - num15) * (double) pixel1.A + num15 * (double) pixel2.A;
-                double num21 = (1.0 - num15) * (double) pixel3.R + num15 * (double) pixel4.R;
-                double num22 = (1.0 - num15) * (double) pixel3.G + num15 * (double) pixel4.G;
-                double num23 = (1.0 - num15) * (double) pixel3.B + num15 * (double) pixel4.B;
-                double num24 = (1.0 - num15) * (double) pixel3.A + num15 * (double) pixel4.A;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num17 = (1.0 - num15) * (double) ((Color) @pixel1).R + num15 * (double) ((Color) @pixel2).R;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num18 = (1.0 - num15) * (double) ((Color) @pixel1).G + num15 * (double) ((Color) @pixel2).G;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num19 = (1.0 - num15) * (double) ((Color) @pixel1).B + num15 * (double) ((Color) @pixel2).B;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num20 = (1.0 - num15) * (double) ((Color) @pixel1).A + num15 * (double) ((Color) @pixel2).A;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num21 = (1.0 - num15) * (double) ((Color) @pixel3).R + num15 * (double) ((Color) @pixel4).R;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num22 = (1.0 - num15) * (double) ((Color) @pixel3).G + num15 * (double) ((Color) @pixel4).G;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num23 = (1.0 - num15) * (double) ((Color) @pixel3).B + num15 * (double) ((Color) @pixel4).B;
+                // ISSUE: explicit reference operation
+                // ISSUE: explicit reference operation
+                double num24 = (1.0 - num15) * (double) ((Color) @pixel3).A + num15 * (double) ((Color) @pixel4).A;
                 int num25 = (int) Math.Round((1.0 - num16) * num17 + num16 * num21);
                 int num26 = (int) Math.Round((1.0 - num16) * num18 + num16 * num22);
                 int num27 = (int) Math.Round((1.0 - num16) * num19 + num16 * num23);
@@ -1001,7 +1055,7 @@ namespace System.Windows.Media.Imaging
         int height = bitmapContext1.Height;
         int[] pixels1 = bitmapContext1.Pixels;
         int index1 = 0;
-        WriteableBitmap bmp1 = (WriteableBitmap) null;
+        WriteableBitmap bmp1 =  null;
         if (flipMode == FlipMode.Horizontal)
         {
           bmp1 = BitmapFactory.New(width, height);

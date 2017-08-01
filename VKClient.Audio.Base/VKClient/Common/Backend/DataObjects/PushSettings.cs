@@ -117,7 +117,8 @@ namespace VKClient.Common.Backend.DataObjects
       dictionary["open_url"] = "on";
       dictionary["new_post"] = "on";
       dictionary["birthday"] = PushSettings.GetOnOffStr(this.birthday);
-      return JsonConvert.SerializeObject((object) dictionary);
+      dictionary["money_transfer"] = "on";
+      return JsonConvert.SerializeObject(dictionary);
     }
 
     public static string GetOnOffStr(bool b)

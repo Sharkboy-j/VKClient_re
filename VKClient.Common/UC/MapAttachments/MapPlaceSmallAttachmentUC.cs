@@ -24,15 +24,15 @@ namespace VKClient.Common.UC.MapAttachments
     public MapPlaceSmallAttachmentUC()
     {
       this.InitializeComponent();
-      this.textBlockTitle.Text = "";
-      this.textBlockSubtitle.Text = "";
+      this.textBlockTitle.Text = ("");
+      this.textBlockSubtitle.Text = ("");
     }
 
     public override void OnReady()
     {
-      this.canvas.Width = this.Width;
+      ((FrameworkElement) this.canvas).Width=(base.Width);
       this.UpdateTitleSubtitle();
-      double maxWidth = this.Width - 100.0;
+      double maxWidth = base.Width - 100.0;
       this.textBlockTitle.CorrectText(maxWidth);
       this.textBlockSubtitle.CorrectText(maxWidth);
     }
@@ -40,7 +40,7 @@ namespace VKClient.Common.UC.MapAttachments
     private void UpdateTitleSubtitle()
     {
       Place place = this.Geo.place;
-      if (!string.IsNullOrEmpty(place != null ? place.group_photo : null))
+      if (!string.IsNullOrEmpty(place != null ? place.group_photo :  null))
         this._groupPhotoUri = new Uri(place.group_photo);
       if (!string.IsNullOrEmpty(this.Geo.AttachmentTitle) && !string.IsNullOrEmpty(this.Geo.AttachmentSubtitle))
       {
@@ -61,13 +61,13 @@ namespace VKClient.Common.UC.MapAttachments
           {
             this.Geo.AttachmentTitle = str1;
             this.Geo.AttachmentSubtitle = str2;
-            this.textBlockTitle.Text = str1.Replace("\n", " ").Replace("\r", " ").Replace("  ", " ");
-            this.textBlockSubtitle.Text = str2.Replace("\n", " ").Replace("\r", " ").Replace("  ", " ");
+            this.textBlockTitle.Text = (str1.Replace("\n", " ").Replace("\r", " ").Replace("  ", " "));
+            this.textBlockSubtitle.Text = (str2.Replace("\n", " ").Replace("\r", " ").Replace("  ", " "));
             return;
           }
         }
-        this.textBlockTitle.Text = "...";
-        this.textBlockSubtitle.Text = "...";
+        this.textBlockTitle.Text = ("...");
+        this.textBlockSubtitle.Text = ("...");
         this.ReverseGeocode((Action<string, string>) ((title, subtitle) => Execute.ExecuteOnUIThread((Action) (() =>
         {
           if (string.IsNullOrEmpty(title))
@@ -76,8 +76,8 @@ namespace VKClient.Common.UC.MapAttachments
             subtitle = CommonResources.MapAttachment_CountryNotIdentified;
           this.Geo.AttachmentTitle = title;
           this.Geo.AttachmentSubtitle = subtitle;
-          this.textBlockTitle.Text = title.Replace("\n", " ").Replace("\r", " ").Replace("  ", " ");
-          this.textBlockSubtitle.Text = subtitle.Replace("\n", " ").Replace("\r", " ").Replace("  ", " ");
+          this.textBlockTitle.Text = (title.Replace("\n", " ").Replace("\r", " ").Replace("  ", " "));
+          this.textBlockSubtitle.Text = (subtitle.Replace("\n", " ").Replace("\r", " ").Replace("  ", " "));
         }))));
       }
     }
@@ -89,12 +89,12 @@ namespace VKClient.Common.UC.MapAttachments
 
     public override void ReleaseResources()
     {
-      VeryLowProfileImageLoader.SetUriSource(this.imageGroupPhoto, (Uri) null);
+      VeryLowProfileImageLoader.SetUriSource(this.imageGroupPhoto,  null);
     }
 
     public override void ShownOnScreen()
     {
-      if (!(this._groupPhotoUri != (Uri) null) || !this._groupPhotoUri.IsAbsoluteUri)
+      if (!(this._groupPhotoUri !=  null) || !this._groupPhotoUri.IsAbsoluteUri)
         return;
       VeryLowProfileImageLoader.SetPriority(this._groupPhotoUri.OriginalString, DateTime.Now.Ticks);
     }
@@ -105,11 +105,11 @@ namespace VKClient.Common.UC.MapAttachments
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPlaceSmallAttachmentUC.xaml", UriKind.Relative));
-      this.canvas = (Canvas) this.FindName("canvas");
-      this.imageGroupPhoto = (Image) this.FindName("imageGroupPhoto");
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
-      this.textBlockSubtitle = (TextBlock) this.FindName("textBlockSubtitle");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/MapAttachments/MapPlaceSmallAttachmentUC.xaml", UriKind.Relative));
+      this.canvas = (Canvas) base.FindName("canvas");
+      this.imageGroupPhoto = (Image) base.FindName("imageGroupPhoto");
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
+      this.textBlockSubtitle = (TextBlock) base.FindName("textBlockSubtitle");
     }
   }
 }

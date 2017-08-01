@@ -9,7 +9,7 @@ namespace VKClient.Photos.Library
     {
       if (PhotosCount == 0)
         return PhotoResources.PhotoAlbumPage_NoPhotos;
-      return UIStringFormatterHelper.FormatNumberOfSomething(PhotosCount, PhotoResources.AlbumsPhotosCountOneFrm, PhotoResources.AlbumsPhotosCountTwoFrm, PhotoResources.AlbumsPhotosCountFiveFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(PhotosCount, PhotoResources.AlbumsPhotosCountOneFrm, PhotoResources.AlbumsPhotosCountTwoFrm, PhotoResources.AlbumsPhotosCountFiveFrm, true,  null, false);
     }
   }
 }

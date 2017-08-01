@@ -6,8 +6,10 @@ namespace VKClient.Audio.Base
 
     public string server { get; set; }
 
+    public string hash { get; set; }
+
     public string photo { get; set; }
 
-    public string hash { get; set; }
+    public string audio { get; set; }
   }
 }

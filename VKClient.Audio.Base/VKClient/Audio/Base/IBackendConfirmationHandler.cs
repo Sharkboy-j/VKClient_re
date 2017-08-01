@@ -4,6 +4,6 @@ namespace VKClient.Audio.Base
 {
   public interface IBackendConfirmationHandler
   {
-    void Confim(string confirmationText, Action<bool> callback);
+    void Confirm(string confirmationText, Action<bool> callback);
   }
 }

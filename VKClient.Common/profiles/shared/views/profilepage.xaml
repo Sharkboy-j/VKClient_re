@@ -137,8 +137,8 @@
                          HorizontalContentAlignment="Stretch">
 
             <Grid>
-                <StackPanel x:Name="stackPanelRoot"
-                            Width="480">
+                <uc:MyVirtualizingStackPanel x:Name="stackPanelRoot"
+                                             Width="480">
 
                     <Rectangle Fill="{StaticResource PhoneNewsDividerBrush}"
                                Visibility="{Binding StretchingRectVisibility}"
@@ -153,7 +153,7 @@
                                     VerticalAlignment="Top">
                             <Grid x:Name="gridHeader">
                                 <Border Visibility="{Binding UserHeaderVisibility}">
-                                    <userViews:ProfileInfoHeaderUC x:Name="ucProfileInfoHeader"
+                                    <userViews:ProfileInfoHeaderUC x:Name="ucUserProfileInfoHeader"
                                                                    RootTap="UcProfileInfoHeader_OnTap"
                                                                    Hold="UcProfileInfoHeader_OnHold"
                                                                    AddPhotoTap="AddPhoto_OnTap"
@@ -163,7 +163,8 @@
                                 </Border>
 
                                 <Border Visibility="{Binding GroupHeaderVisibility, FallbackValue=Collapsed}">
-                                    <groupViews:ProfileInfoHeaderUC Margin="16 112 16 4"
+                                    <groupViews:ProfileInfoHeaderUC x:Name="ucGroupProfileInfoHeader"
+                                                                    Margin="0 0 0 4"
                                                                     PhotoTapped="UcProfileInfoHeader_OnTap"
                                                                     Hold="UcProfileInfoHeader_OnHold"
                                                                     DataContext="{Binding GroupHeaderViewModel}" />
@@ -198,6 +199,10 @@
                                 <Border Visibility="{Binding InfoVisibility}">
                                     <sharedViews:InfoUC DataContext="{Binding InfoViewModel}"
                                                         Margin="0 8 0 0" />
+                                </Border>
+
+                                <Border Visibility="{Binding AppVisibility}">
+                                    <sharedViews:AppButtonUC DataContext="{Binding AppViewModel}" />
                                 </Border>
 
                                 <Border Visibility="{Binding MediaVisibility}">
@@ -272,16 +277,17 @@
                             </StackPanel>
                         </StackPanel>
                     </Grid>
-
+<!--Панель с новостями-->
                     <StackPanel Visibility="{Binding PostsVisibility}">
                         <framework:MyVirtualizingPanel2 x:Name="wallPanel"
                                                         DataContext="{Binding WallVM}"
                                                         ItemsSource="{Binding Collection}" />
 
-                        <uc:FooterUC DataContext="{Binding WallVM}" />
+                        <uc:FooterUC DataContext="{Binding WallVM}"
+                                     Margin="0,0,0,6" />
                     </StackPanel>
 
-                </StackPanel>
+                </uc:MyVirtualizingStackPanel>
             </Grid>
         </ViewportControl>
 

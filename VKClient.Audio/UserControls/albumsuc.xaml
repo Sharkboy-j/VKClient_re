@@ -24,7 +24,7 @@
             
                 <TextBlock Text="{Binding Title}"
                            Margin="16,7,16,7"
-                           FontSize="36.67"
+                           FontSize="30"
                            Foreground="{StaticResource PhoneContrastTitleBrush}"
                            FontFamily="Segoe WP SemiLight"
                            />            

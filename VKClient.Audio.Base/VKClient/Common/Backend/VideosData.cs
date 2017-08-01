@@ -5,7 +5,7 @@ namespace VKClient.Common.Backend
 {
   public class VideosData
   {
-    public VKList<VKClient.Common.Backend.DataObjects.Video> AddedVideos { get; set; }
+    public VKList<Video> AddedVideos { get; set; }
 
     public int UploadedVideosCount { get; set; }
 

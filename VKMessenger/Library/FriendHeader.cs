@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Framework;
@@ -45,7 +47,7 @@ namespace VKMessenger.Library
       set
       {
         this._imageUrl = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.ImageUrl));
+        this.NotifyPropertyChanged<string>(() => this.ImageUrl);
       }
     }
 
@@ -58,7 +60,7 @@ namespace VKMessenger.Library
       set
       {
         this._mediumImageUrl = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.MediumImageUrl));
+        this.NotifyPropertyChanged<string>(() => this.MediumImageUrl);
       }
     }
 
@@ -71,8 +73,8 @@ namespace VKMessenger.Library
       set
       {
         this._fullName = value;
-        this.Initial = new char?(string.IsNullOrEmpty(value) ? ' ' : value.ToLower().First<char>());
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.FullName));
+        this.Initial = new char?(string.IsNullOrEmpty(value) ? ' ' : ((IEnumerable<char>) ((string) value).ToLower()).First<char>());
+        this.NotifyPropertyChanged<string>(() => this.FullName);
       }
     }
 
@@ -87,7 +89,7 @@ namespace VKMessenger.Library
         if (this._isOnline == value)
           return;
         this._isOnline = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.IsOnline));
+        this.NotifyPropertyChanged<Visibility>(() => this.IsOnline);
       }
     }
 
@@ -100,7 +102,7 @@ namespace VKMessenger.Library
       set
       {
         this._initial = value;
-        this.NotifyPropertyChanged<char?>((System.Linq.Expressions.Expression<Func<char?>>) (() => this.Initial));
+        base.NotifyPropertyChanged<char?>(() => this.Initial);
       }
     }
 
@@ -133,12 +135,22 @@ namespace VKMessenger.Library
       if (this._user == null)
         return false;
       bool flag1 = true;
-      foreach (string searchString in (IEnumerable<string>) searchStrings)
+      IEnumerator<string> enumerator = searchStrings.GetEnumerator();
+      try
       {
-        bool flag2 = !string.IsNullOrEmpty(this._user.first_name) && this._user.first_name.StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase) || !string.IsNullOrEmpty(this._user.last_name) && this._user.last_name.StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase);
-        flag1 &= flag2;
-        if (!flag1)
-          break;
+        while (enumerator.MoveNext())
+        {
+          string current = enumerator.Current;
+          bool flag2 = !string.IsNullOrEmpty(this._user.first_name) && ((string) this._user.first_name).StartsWith(current, (StringComparison) 3) || !string.IsNullOrEmpty(this._user.last_name) && ((string) this._user.last_name).StartsWith(current, (StringComparison) 3);
+          flag1 &= flag2;
+          if (!flag1)
+            break;
+        }
+      }
+      finally
+      {
+        if (enumerator != null)
+          enumerator.Dispose();
       }
       return flag1;
     }
@@ -149,7 +161,7 @@ namespace VKMessenger.Library
         return;
       this.ImageUrl = this._user.photo_max;
       this.MediumImageUrl = this._user.photo_max;
-      this.FullName = string.Format("{0} {1}", (object) this._user.first_name, (object) this._user.last_name);
+      this.FullName = string.Format("{0} {1}", this._user.first_name, this._user.last_name);
       this.SetIsOnline((uint) this._user.online > 0U);
       this._userId = this._user.uid;
     }

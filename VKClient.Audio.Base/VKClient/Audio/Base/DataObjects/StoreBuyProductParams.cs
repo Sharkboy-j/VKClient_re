@@ -6,16 +6,16 @@ namespace VKClient.Audio.Base.DataObjects
 {
   public class StoreBuyProductParams
   {
-      public StoreProductType ProductType { get; set; }//
+      public StoreProductType ProductType { get; private set; }
 
-      public int ProductId { get; set; }//
+      public int ProductId { get; private set; }
 
     public int RandomId
     {
       get
       {
         AutorizationData authData = VKRequestsDispatcher.AuthData;
-        string str = authData != null ? authData.access_token : null;
+        string str = authData != null ? authData.access_token :  null;
         if (string.IsNullOrEmpty(str))
           return 0;
         return this.ProductId ^ str.GetHashCode();

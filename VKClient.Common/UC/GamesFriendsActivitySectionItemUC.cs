@@ -14,11 +14,11 @@ namespace VKClient.Common.UC
 {
   public class GamesFriendsActivitySectionItemUC : UserControl, INotifyPropertyChanged
   {
-    public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof (List<GameActivityHeader>), typeof (GamesFriendsActivitySectionItemUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivitySectionItemUC.OnItemsSourceChanged)));
-    public static readonly DependencyProperty MaxDisplayedItemsCountProperty = DependencyProperty.Register("MaxDisplayedItemsCount", typeof (int), typeof (GamesFriendsActivitySectionItemUC), new PropertyMetadata((object) 3));
-    public static readonly DependencyProperty GameIdProperty = DependencyProperty.Register("GameId", typeof (int), typeof (GamesFriendsActivitySectionItemUC), new PropertyMetadata((object) 0));
+      public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(List<GameActivityHeader>), typeof(GamesFriendsActivitySectionItemUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivitySectionItemUC.OnItemsSourceChanged)));
+    public static readonly DependencyProperty MaxDisplayedItemsCountProperty = DependencyProperty.Register("MaxDisplayedItemsCount", typeof (int), typeof (GamesFriendsActivitySectionItemUC), new PropertyMetadata(3));
+    public static readonly DependencyProperty GameIdProperty = DependencyProperty.Register("GameId", typeof (int), typeof (GamesFriendsActivitySectionItemUC), new PropertyMetadata(0));
     public static readonly DependencyProperty GameNameProperty = DependencyProperty.Register("GameName", typeof (string), typeof (GamesFriendsActivitySectionItemUC), new PropertyMetadata(null));
-    public static readonly DependencyProperty ItemsDisplayTypeProperty = DependencyProperty.Register("ItemsDisplayType", typeof (FriendsActivitySectionItemType), typeof (GamesFriendsActivitySectionItemUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivitySectionItemUC.OnItemsDisplayTypeChanged)));
+    public static readonly DependencyProperty ItemsDisplayTypeProperty = DependencyProperty.Register("ItemsDisplayType", typeof(FriendsActivitySectionItemType), typeof(GamesFriendsActivitySectionItemUC), new PropertyMetadata(new PropertyChangedCallback(GamesFriendsActivitySectionItemUC.OnItemsDisplayTypeChanged)));
     internal ItemsControl listBoxActivity;
     internal GroupFooterUC ucFooter;
     private bool _contentLoaded;
@@ -27,11 +27,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (List<GameActivityHeader>) this.GetValue(GamesFriendsActivitySectionItemUC.ItemsSourceProperty);
+        return (List<GameActivityHeader>) base.GetValue(GamesFriendsActivitySectionItemUC.ItemsSourceProperty);
       }
       set
       {
-        this.SetDPValue(GamesFriendsActivitySectionItemUC.ItemsSourceProperty, (object) value, "ItemsSource");
+        this.SetDPValue(GamesFriendsActivitySectionItemUC.ItemsSourceProperty, value, "ItemsSource");
       }
     }
 
@@ -39,11 +39,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (int) this.GetValue(GamesFriendsActivitySectionItemUC.MaxDisplayedItemsCountProperty);
+        return (int) base.GetValue(GamesFriendsActivitySectionItemUC.MaxDisplayedItemsCountProperty);
       }
       set
       {
-        this.SetDPValue(GamesFriendsActivitySectionItemUC.MaxDisplayedItemsCountProperty, (object) value, "MaxDisplayedItemsCount");
+        this.SetDPValue(GamesFriendsActivitySectionItemUC.MaxDisplayedItemsCountProperty, value, "MaxDisplayedItemsCount");
       }
     }
 
@@ -51,11 +51,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (int) this.GetValue(GamesFriendsActivitySectionItemUC.GameIdProperty);
+        return (int) base.GetValue(GamesFriendsActivitySectionItemUC.GameIdProperty);
       }
       set
       {
-        this.SetValue(GamesFriendsActivitySectionItemUC.GameIdProperty, (object) value);
+        base.SetValue(GamesFriendsActivitySectionItemUC.GameIdProperty, value);
       }
     }
 
@@ -63,11 +63,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(GamesFriendsActivitySectionItemUC.GameNameProperty);
+        return (string) base.GetValue(GamesFriendsActivitySectionItemUC.GameNameProperty);
       }
       set
       {
-        this.SetValue(GamesFriendsActivitySectionItemUC.GameNameProperty, (object) value);
+        base.SetValue(GamesFriendsActivitySectionItemUC.GameNameProperty, value);
       }
     }
 
@@ -75,11 +75,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (FriendsActivitySectionItemType) this.GetValue(GamesFriendsActivitySectionItemUC.ItemsDisplayTypeProperty);
+        return (FriendsActivitySectionItemType) base.GetValue(GamesFriendsActivitySectionItemUC.ItemsDisplayTypeProperty);
       }
       set
       {
-        this.SetValue(GamesFriendsActivitySectionItemUC.ItemsDisplayTypeProperty, (object) value);
+        base.SetValue(GamesFriendsActivitySectionItemUC.ItemsDisplayTypeProperty, value);
       }
     }
 
@@ -87,13 +87,15 @@ namespace VKClient.Common.UC
 
     public GamesFriendsActivitySectionItemUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      ((FrameworkElement) this.Content).DataContext = (object) this;
+      ((FrameworkElement) this.Content).DataContext = this;
     }
 
     private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       GamesFriendsActivitySectionItemUC activitySectionItemUc = d as GamesFriendsActivitySectionItemUC;
+      // ISSUE: explicit reference operation
       if (activitySectionItemUc == null || !(e.NewValue is List<GameActivityHeader>))
         return;
       activitySectionItemUc.UpdateData();
@@ -103,6 +105,8 @@ namespace VKClient.Common.UC
     {
       GamesFriendsActivitySectionItemUC activitySectionItemUc = d as GamesFriendsActivitySectionItemUC;
       FriendsActivitySectionItemType result;
+      // ISSUE: explicit reference operation
+      // ISSUE: explicit reference operation
       if (activitySectionItemUc == null || e.NewValue == null || !Enum.TryParse<FriendsActivitySectionItemType>(e.NewValue.ToString(), out result))
         return;
       activitySectionItemUc.UpdateItemType(result);
@@ -110,10 +114,12 @@ namespace VKClient.Common.UC
 
     private void SetDPValue(DependencyProperty property, object value, [CallerMemberName] string propertyName = null)
     {
-      this.SetValue(property, value);
+      base.SetValue(property, value);
+      // ISSUE: reference to a compiler-generated field
       if (this.PropertyChanged == null)
         return;
-      this.PropertyChanged((object) this, new PropertyChangedEventArgs(propertyName));
+      // ISSUE: reference to a compiler-generated field
+      this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
     }
 
     private void UpdateItemType(FriendsActivitySectionItemType itemType)
@@ -122,10 +128,10 @@ namespace VKClient.Common.UC
       {
         if (itemType != FriendsActivitySectionItemType.Short)
           return;
-        this.listBoxActivity.ItemTemplate = (DataTemplate) this.Resources["ShortItemTemplate"];
+        this.listBoxActivity.ItemTemplate = ((DataTemplate) base.Resources["ShortItemTemplate"]);
       }
       else
-        this.listBoxActivity.ItemTemplate = (DataTemplate) this.Resources["FullItemTemplate"];
+        this.listBoxActivity.ItemTemplate = ((DataTemplate) base.Resources["FullItemTemplate"]);
     }
 
     private void UpdateData()
@@ -143,13 +149,13 @@ namespace VKClient.Common.UC
 
     public void UpdateFooterVisibility()
     {
-      this.ucFooter.Visibility = this.ItemsSource.Count > this.MaxDisplayedItemsCount ? Visibility.Visible : Visibility.Collapsed;
+      ((UIElement) this.ucFooter).Visibility = (this.ItemsSource.Count > this.MaxDisplayedItemsCount ? Visibility.Visible : Visibility.Collapsed);
     }
 
     private void RebindItems()
     {
-      this.listBoxActivity.ItemsSource = null;
-      this.listBoxActivity.ItemsSource = (IEnumerable) this.ItemsSource.Take<GameActivityHeader>(this.MaxDisplayedItemsCount).ToList<GameActivityHeader>();
+      this.listBoxActivity.ItemsSource = ( null);
+      this.listBoxActivity.ItemsSource = ((IEnumerable) Enumerable.ToList<GameActivityHeader>(Enumerable.Take<GameActivityHeader>(this.ItemsSource, this.MaxDisplayedItemsCount)));
     }
 
     private void Footer_OnMoreTapped(object sender, EventArgs e)
@@ -163,9 +169,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/GamesFriendsActivitySectionItemUC.xaml", UriKind.Relative));
-      this.listBoxActivity = (ItemsControl) this.FindName("listBoxActivity");
-      this.ucFooter = (GroupFooterUC) this.FindName("ucFooter");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/GamesFriendsActivitySectionItemUC.xaml", UriKind.Relative));
+      this.listBoxActivity = (ItemsControl) base.FindName("listBoxActivity");
+      this.ucFooter = (GroupFooterUC) base.FindName("ucFooter");
     }
   }
 }

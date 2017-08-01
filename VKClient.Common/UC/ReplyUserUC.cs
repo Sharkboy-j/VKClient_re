@@ -7,7 +7,7 @@ namespace VKClient.Common.UC
 {
   public class ReplyUserUC : UserControl
   {
-    public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof (string), typeof (ReplyUserUC), new PropertyMetadata(new PropertyChangedCallback(ReplyUserUC.OnTitleChanged)));
+      public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(ReplyUserUC), new PropertyMetadata(new PropertyChangedCallback(ReplyUserUC.OnTitleChanged)));
     internal TextBlock textBlockTitle;
     private bool _contentLoaded;
 
@@ -15,11 +15,11 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return (string) this.GetValue(ReplyUserUC.TitleProperty);
+        return (string) base.GetValue(ReplyUserUC.TitleProperty);
       }
       set
       {
-        this.SetValue(ReplyUserUC.TitleProperty, (object) value);
+        base.SetValue(ReplyUserUC.TitleProperty, value);
       }
     }
 
@@ -27,8 +27,9 @@ namespace VKClient.Common.UC
 
     public ReplyUserUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
-      this.textBlockTitle.Text = "";
+      this.textBlockTitle.Text=("");
     }
 
     private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -36,16 +37,19 @@ namespace VKClient.Common.UC
       ReplyUserUC replyUserUc = d as ReplyUserUC;
       if (replyUserUc == null)
         return;
-      string str = e.NewValue as string;
-      replyUserUc.textBlockTitle.Text = !string.IsNullOrEmpty(str) ? str : "";
+      // ISSUE: explicit reference operation
+      string newValue = e.NewValue as string;
+      replyUserUc.textBlockTitle.Text = (!string.IsNullOrEmpty(newValue) ? newValue : "");
       replyUserUc.FireTitleChangedEvent();
     }
 
     private void FireTitleChangedEvent()
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.TitleChanged == null)
         return;
-      this.TitleChanged((object) this, EventArgs.Empty);
+      // ISSUE: reference to a compiler-generated field
+      this.TitleChanged(this, EventArgs.Empty);
     }
 
     [DebuggerNonUserCode]
@@ -54,8 +58,8 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/ReplyUserUC.xaml", UriKind.Relative));
-      this.textBlockTitle = (TextBlock) this.FindName("textBlockTitle");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/ReplyUserUC.xaml", UriKind.Relative));
+      this.textBlockTitle = (TextBlock) base.FindName("textBlockTitle");
     }
   }
 }

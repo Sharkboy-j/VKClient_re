@@ -66,26 +66,28 @@
                                 CornerRadius="0.75" />
                     </Canvas>
 
-                    <Border x:Name="borderCounter"
-                            Margin="17 12 0 0"
-                            VerticalAlignment="Top"
-                            HorizontalAlignment="Left">
-                        <Border x:Name="borderCounterStroke"
-                                Background="{StaticResource PhoneHeaderMenuBadgeBackgroundBrush}"
-                                BorderBrush="{StaticResource PhoneHeaderBackgroundBrush}"
-                                BorderThickness="3"
-                                Height="26"
-                                MinWidth="26"
-                                Opacity="{Binding HaveAnyNotificationsOpacity}">
-                            <TextBlock x:Name="textBlockCounter"
-                                       FontFamily="{StaticResource PhoneFontFamilyBold}"
-                                       Foreground="{StaticResource PhoneHeaderBackgroundBrush}"
-                                       FontSize="14.67"
-                                       Text="{Binding TotalCountStr, FallbackValue='2'}"
-                                       Margin="4 0"
-                                       TextAlignment="Center" />
-                        </Border>
-                    </Border>
+                    <Grid Height="30"
+                          MinWidth="30"
+                          Visibility="{Binding HaveAnyNotificationsVisibility}"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top"
+                          Name="counterPanel"
+                          Margin="17,7,0,0">
+                        <Rectangle Name="counterEllipse"
+                                   Fill="{StaticResource PhoneHeaderMenuBadgeBackgroundBrush}"
+                                   Stroke="{StaticResource PhoneHeaderBackgroundBrush}"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Stretch"
+                                   RadiusX="14" RadiusY="14" 
+                                   StrokeThickness="3"/>
+                        <TextBlock Name="counterBlock"
+                                   Foreground="{StaticResource PhoneHeaderBackgroundBrush}"
+                                   Text="{Binding TotalCountString}"
+                                   FontFamily="Segoe WP Bold"
+                                   TextAlignment="Center"
+                                   Margin="9,2,9,0"
+                                   FontSize="18"/>
+                    </Grid>
 
                 </Grid>
 

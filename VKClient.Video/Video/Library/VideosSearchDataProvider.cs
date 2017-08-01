@@ -29,26 +29,26 @@ namespace VKClient.Video.Library
       }
     }
 
-    public IEnumerable<VideoHeader> LocalItems { get; set; }//
+    public IEnumerable<VideoHeader> LocalItems { get; private set; }
 
     public Func<VKList<VKClient.Common.Backend.DataObjects.Video>, ListWithCount<VideoHeader>> ConverterFunc
     {
-      get
-      {
-        return (Func<VKList<VKClient.Common.Backend.DataObjects.Video>, ListWithCount<VideoHeader>>) (res =>
+        get
         {
-          ListWithCount<VideoHeader> listWithCount = new ListWithCount<VideoHeader>()
-          {
-            TotalCount = res.count
-          };
-          foreach (VKClient.Common.Backend.DataObjects.Video video in res.items)
-            listWithCount.List.Add(new VideoHeader(video, (List<MenuItemData>) null, res.profiles, res.groups, StatisticsActionSource.search, "", false, 0L)
+            return (Func<VKList<VKClient.Common.Backend.DataObjects.Video>, ListWithCount<VideoHeader>>)(res =>
             {
-              FromSearch = true
+                ListWithCount<VideoHeader> listWithCount = new ListWithCount<VideoHeader>()
+                {
+                    TotalCount = res.count
+                };
+                foreach (VKClient.Common.Backend.DataObjects.Video video in res.items)
+                    listWithCount.List.Add(new VideoHeader(video, (List<MenuItemData>)null, res.profiles, res.groups, StatisticsActionSource.search, "", false, 0, 0L)
+                    {
+                        FromSearch = true
+                    });
+                return listWithCount;
             });
-          return listWithCount;
-        });
-      }
+        }
     }
 
     public VideosSearchDataProvider(IEnumerable<VideoHeader> localItems)
@@ -60,7 +60,7 @@ namespace VKClient.Video.Library
     {
       if (count == 0)
         return CommonResources.NoVideos;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneVideoFrm, CommonResources.TwoFourVideosFrm, CommonResources.FiveVideosFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneVideoFrm, CommonResources.TwoFourVideosFrm, CommonResources.FiveVideosFrm, true,  null, false);
     }
 
     public void GetData(string searchString, Dictionary<string, string> parameters, int offset, int count, Action<BackendResult<VKList<VKClient.Common.Backend.DataObjects.Video>, ResultCode>> callback)

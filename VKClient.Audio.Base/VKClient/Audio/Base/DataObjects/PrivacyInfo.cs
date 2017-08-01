@@ -96,7 +96,7 @@ namespace VKClient.Audio.Base.DataObjects
           str = "nobody";
           break;
       }
-      List<string> list = this.AllowedUsers.Select<long, string>((Func<long, string>) (uid => uid.ToString())).Union<string>(this.DeniedUsers.Select<long, string>((Func<long, string>) (duid => "-" + duid.ToString()))).Union<string>(this.AllowedLists.Select<long, string>((Func<long, string>) (alid => "list" + (object) alid))).Union<string>(this.DeniedLists.Select<long, string>((Func<long, string>) (dlid => "-list" + (object) dlid))).ToList<string>();
+      List<string> list = this.AllowedUsers.Select<long, string>((Func<long, string>) (uid => uid.ToString())).Union<string>(this.DeniedUsers.Select<long, string>((Func<long, string>) (duid => "-" + duid.ToString()))).Union<string>(this.AllowedLists.Select<long, string>((Func<long, string>) (alid => "list" + alid))).Union<string>(this.DeniedLists.Select<long, string>((Func<long, string>) (dlid => "-list" + dlid))).ToList<string>();
       if (list.Count > 0 && str != "")
         str += ",";
       return str + list.GetCommaSeparated(",");

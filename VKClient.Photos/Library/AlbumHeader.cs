@@ -39,7 +39,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._albumName = value;
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.AlbumName));
+        this.NotifyPropertyChanged<string>((() => this.AlbumName));
       }
     }
 
@@ -77,8 +77,8 @@ namespace VKClient.Photos.Library
         this._imageUri = value;
         if (this.Album != null)
           this.Album.thumb_src = this._imageUri;
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.ImageUri));
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.ImageUriNoPlaceholder));
+        this.NotifyPropertyChanged<string>((() => this.ImageUri));
+        this.NotifyPropertyChanged<string>((() => this.ImageUriNoPlaceholder));
       }
     }
 
@@ -91,7 +91,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._imageUriSmall = value;
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.ImageUriSmall));
+        this.NotifyPropertyChanged<string>((() => this.ImageUriSmall));
       }
     }
 
@@ -104,7 +104,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._imageUri2 = value;
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.ImageUri2));
+        this.NotifyPropertyChanged<string>((() => this.ImageUri2));
       }
     }
 
@@ -117,7 +117,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._imageUri3 = value;
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.ImageUri3));
+        this.NotifyPropertyChanged<string>((() => this.ImageUri3));
       }
     }
 
@@ -140,7 +140,7 @@ namespace VKClient.Photos.Library
       set
       {
         this._photosCount = Math.Max(value, 0);
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.PhotosCountString));
+        this.NotifyPropertyChanged<string>((() => this.PhotosCountString));
       }
     }
 
@@ -167,7 +167,7 @@ namespace VKClient.Photos.Library
         if (value != null)
           this._album = value.Copy();
         else
-          this._album = (Album) null;
+          this._album =  null;
       }
     }
 
@@ -178,7 +178,7 @@ namespace VKClient.Photos.Library
       this.ImageUri = this.Album.thumb_src;
       this.ImageUriSmall = this.Album.thumb_src_small;
       this.AlbumId = this.Album.aid;
-      this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.AlbumDesc));
+      this.NotifyPropertyChanged<string>((() => this.AlbumDesc));
     }
   }
 }

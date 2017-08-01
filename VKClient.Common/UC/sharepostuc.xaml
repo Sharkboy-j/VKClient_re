@@ -74,13 +74,13 @@
 
                 <uc:ShareActionUC x:Name="buttonShare"
                                   Margin="24 24 0 25"
-                                  Icon="/Resources/ShareExternal/SharePost.png"
+                                  Icon="/VKClient.Common;component/Resources/ShareExternal/SharePost.png"
                                   Title="{Binding LocalizedResources.Share_ShareToWall, Source={StaticResource LocalizedStrings}}"
                                   Tap="ButtonShare_OnTap" />
 
                 <uc:ShareActionUC x:Name="buttonShareCommunity"
                                   Margin="24 0 0 25"
-                                  Icon="/Resources/ShareExternal/ShareCommunity.png"
+                                  Icon="/VKClient.Common;component/Resources/ShareExternal/ShareCommunity.png"
                                   Title="{Binding LocalizedResources.Share_ShareWithCommunity, Source={StaticResource LocalizedStrings}}"
                                   Tap="ShareWithCommunity_OnTap" />
 

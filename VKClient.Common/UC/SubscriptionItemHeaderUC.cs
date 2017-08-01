@@ -13,31 +13,32 @@ namespace VKClient.Common.UC
 
     public SubscriptionItemHeaderUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
-    private void Item_OnTap(object sender, GestureEventArgs e)
+    private void Item_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      SubscriptionItemHeader subscriptionItemHeader = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
-      if (subscriptionItemHeader == null || subscriptionItemHeader.TapAction == null)
+      SubscriptionItemHeader dataContext = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
+      if (dataContext == null || dataContext.TapAction == null)
         return;
-      subscriptionItemHeader.TapAction();
+      dataContext.TapAction();
     }
 
-    private void Subscribe_OnTap(object sender, GestureEventArgs e)
+    private void Subscribe_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      SubscriptionItemHeader subscriptionItemHeader = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
-      if (subscriptionItemHeader == null || subscriptionItemHeader.SubscribeAction == null)
+      SubscriptionItemHeader dataContext = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
+      if (dataContext == null || dataContext.SubscribeAction == null)
         return;
-      subscriptionItemHeader.SubscribeAction();
+      dataContext.SubscribeAction();
     }
 
-    private void Unsubscribe_OnTap(object sender, GestureEventArgs e)
+    private void Unsubscribe_OnTap(object sender, System.Windows.Input.GestureEventArgs e)
     {
-      SubscriptionItemHeader subscriptionItemHeader = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
-      if (subscriptionItemHeader == null || subscriptionItemHeader.UnsubscribeAction == null)
+      SubscriptionItemHeader dataContext = ((FrameworkElement) sender).DataContext as SubscriptionItemHeader;
+      if (dataContext == null || dataContext.UnsubscribeAction == null)
         return;
-      subscriptionItemHeader.UnsubscribeAction();
+      dataContext.UnsubscribeAction();
     }
 
     [DebuggerNonUserCode]
@@ -46,7 +47,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/SubscriptionItemHeaderUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/SubscriptionItemHeaderUC.xaml", UriKind.Relative));
     }
   }
 }

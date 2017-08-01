@@ -75,7 +75,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Bin\ARM\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;MY_MOD</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -83,57 +83,47 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>Bin\ARM\Release</OutputPath>
-    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE;MY_MOD</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Framework\MemoryCheckpoint.cs" />
     <Compile Include="Framework\MemoryDiagnosticsHelper.cs" />
     <Compile Include="Library\AccentColorTypes.cs" />
     <Compile Include="Library\BGType.cs" />
     <Compile Include="Library\BGTypes.cs" />
     <Compile Include="Library\CustomUriMapper.cs" />
+    <Compile Include="Library\GZipEncoder.cs" />
     <Compile Include="Library\LanguagesList.cs" />
     <Compile Include="Library\MessengerStateManager.cs" />
     <Compile Include="Library\NavigatorImpl.cs" />
     <Compile Include="Library\SettingsViewModel.cs" />
-    <Compile Include="LocalizedStrings.cs" />
-    <Compile Include="LoginPage.xaml.cs" />
-    <Compile Include="PrivacyPage.xaml.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\AppResources.Designer.cs">
+    <Compile Include="Localization\AppResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>AppResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Localization\LocalizedStrings.cs" />
+    <Compile Include="LoginPage.cs">
+      <DependentUpon>loginpage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PrivacyPage.cs">
+      <DependentUpon>privacypage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="VKTelemetryInitializer.cs" />
-    <Compile Include="WelcomePage.xaml.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </ApplicationDefinition>
-    <Page Include="LoginPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="PrivacyPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="WelcomePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <Compile Include="WelcomePage.cs">
+      <DependentUpon>welcomepage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -141,20 +131,16 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AppIcon.png" />
     <Content Include="AppResLib.dll.0419.mui" />
-    <None Include="packages.config" />
+    <None Include="microsoft.system.package.metadata\S-1-5-21-2702878673-795188819-444038987-2781.recovery" />
     <None Include="Properties\AppManifest.xml" />
     <None Include="Properties\WMAppManifest.xml">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="WindowsPhoneRuntimeComponent2.winmd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppResLib.dll" />
-    <Content Include="Assets\AlignmentGrid.png" />
-    <Content Include="Assets\ApplicationIcon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Assets\BadgeLogo.png" />
     <Content Include="Assets\Logo.png" />
     <Content Include="Assets\SplashScreen.png" />
@@ -162,41 +148,20 @@
     <Content Include="Assets\SquareTile71x71.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\WideLogo.png" />
-    <Content Include="Assets\Tiles\FlipCycleTileLarge.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Tiles\FlipCycleTileMedium.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Tiles\FlipCycleTileSmall.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Tiles\IconicTileMediumLarge.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Tiles\IconicTileSmall.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="avcodec-57.dll" />
+    <Content Include="avdevice-57.dll" />
+    <Content Include="avfilter-6.dll" />
+    <Content Include="avformat-57.dll" />
+    <Content Include="avutil-55.dll" />
+    <Content Include="ClrCompression.dll" />
     <Content Include="ServerHost-ARM-Release.exe" />
+    <Content Include="swresample-2.dll" />
+    <Content Include="swscale-4.dll" />
     <Content Include="TileBig.png" />
     <Content Include="TileSmall.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Add.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Select.png" />
+    <Content Include="VKClient.FFmpeg.dll" />
+    <Content Include="VKClient.Opus.dll" />
     <Content Include="WindowsPhoneRuntimeComponent2.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\AppResources.be-BY.resx" />
-    <EmbeddedResource Include="Resources\AppResources.kk-KZ.resx" />
-    <EmbeddedResource Include="Resources\AppResources.pt-BR.resx" />
-    <EmbeddedResource Include="Resources\AppResources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\AppResources.ru-RU.resx" />
-    <EmbeddedResource Include="Resources\AppResources.uk-UA.resx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AudioPlaybackAgent\AudioPlaybackAgent.csproj">
@@ -206,10 +171,6 @@
     <ProjectReference Include="..\VKClient.Audio.Base\VKClient.Audio.Base.csproj">
       <Project>{3f61632e-1f7a-42c4-bf38-ae07d3e9f383}</Project>
       <Name>VKClient.Audio.Base</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\VKClient.Audio\VKClient.Audio.csproj">
-      <Project>{72c5dee2-1dcf-467d-8525-27c8da1f57cc}</Project>
-      <Name>VKClient.Audio</Name>
     </ProjectReference>
     <ProjectReference Include="..\VKClient.Common\VKClient.Common.csproj">
       <Project>{e174760f-e91e-4bdc-bd36-4f9d54607104}</Project>
@@ -248,9 +209,44 @@
     </Reference>
     <Reference Include="Microsoft.Phone.Controls, Version=8.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls.Toolkit, Version=8.0.1.0, Culture=neutral, PublicKeyToken=b772ad94eb9ca604, processorArchitecture=MSIL">
-      <HintPath>packages\WPtoolkit.4.2013.08.16\lib\wp8\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Compression">
+      <HintPath>..\libs\System.IO.Compression.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\AppResources.be-BY.resx" />
+    <EmbeddedResource Include="Localization\AppResources.kk-KZ.resx" />
+    <EmbeddedResource Include="Localization\AppResources.pt-BR.resx" />
+    <EmbeddedResource Include="Localization\AppResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\AppResources.ru-RU.resx" />
+    <EmbeddedResource Include="Localization\AppResources.uk-UA.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+    <Resource Include="loginpage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="privacypage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="welcomepage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Common\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />

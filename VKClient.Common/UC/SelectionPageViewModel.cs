@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -11,22 +12,22 @@ namespace VKClient.Common.UC
   {
     private readonly CustomListPicker _parentPicker;
 
-    public string SelectionTitle { get; set; }
+    public string SelectionTitle { get; private set; }
 
-    public ObservableCollection<SelectionPageItem> Items { get; set; }
+    public ObservableCollection<SelectionPageItem> Items { get; private set; }
 
     public SelectionPageViewModel(CustomListPicker parentPicker)
     {
       this._parentPicker = parentPicker;
       this.SelectionTitle = parentPicker.SelectionTitle;
-      this.Items = new ObservableCollection<SelectionPageItem>(parentPicker.ItemsSource.Select<CustomListPickerItem, SelectionPageItem>((Func<CustomListPickerItem, SelectionPageItem>) (i =>
+      this.Items = new ObservableCollection<SelectionPageItem>((IEnumerable<SelectionPageItem>)Enumerable.Select<CustomListPickerItem, SelectionPageItem>(parentPicker.ItemsSource, (Func<CustomListPickerItem, SelectionPageItem>)(i =>
       {
         string str = i != parentPicker.SelectedItem ? "PhoneContrastTitleBrush" : "PhoneBlue300Brush";
         return new SelectionPageItem()
         {
           Title = i.Name,
           Source = i,
-          Foreground = (SolidColorBrush) Application.Current.Resources[(object) str]
+          Foreground = (SolidColorBrush) Application.Current.Resources[str]
         };
       })));
     }

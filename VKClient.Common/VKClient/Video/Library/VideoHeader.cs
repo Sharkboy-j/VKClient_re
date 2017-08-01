@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using VKClient.Audio.Base;
 using VKClient.Audio.Base.Events;
 using VKClient.Audio.Base.Library;
@@ -63,7 +66,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return this._vKVideo.live != 1 ? Visibility.Collapsed : Visibility.Visible;
+        if (this._vKVideo.live != 1)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -71,7 +76,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return this.ShowDurationVisibility != Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
+        if (this.ShowDurationVisibility != Visibility.Visible)
+          return Visibility.Visible;
+        return Visibility.Collapsed;
       }
     }
 
@@ -79,7 +86,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return string.IsNullOrWhiteSpace(this.UIDuration) ? Visibility.Collapsed : Visibility.Visible;
+        if (string.IsNullOrWhiteSpace(this.UIDuration))
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -87,7 +96,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return this._vKVideo.watched != 1 ? Visibility.Collapsed : Visibility.Visible;
+        if (this._vKVideo.watched != 1)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -129,13 +140,13 @@ namespace VKClient.Video.Library
       {
         if (this._vKVideo.owner_id < 0L)
         {
-          Group group = this._knownGroups.FirstOrDefault<Group>((Func<Group, bool>) (g => g.id == -this._vKVideo.owner_id));
+            Group group = (Group)Enumerable.FirstOrDefault<Group>(this._knownGroups, (Func<Group, bool>)(g => g.id == -this._vKVideo.owner_id));
           if (group != null)
             return group.name;
         }
         else
         {
-          User user = this._knownUsers.FirstOrDefault<User>((Func<User, bool>) (u => u.id == this._vKVideo.owner_id));
+            User user = (User)Enumerable.FirstOrDefault<User>(this._knownUsers, (Func<User, bool>)(u => u.id == this._vKVideo.owner_id));
           if (user != null)
             return user.Name;
         }
@@ -150,7 +161,7 @@ namespace VKClient.Video.Library
         int views = this._vKVideo.views;
         if (views <= 0)
           return "";
-        return UIStringFormatterHelper.FormatNumberOfSomething(views, CommonResources.OneViewFrm, CommonResources.TwoFourViewsFrm, CommonResources.FiveViewsFrm, true, null, false);
+        return UIStringFormatterHelper.FormatNumberOfSomething(views, CommonResources.OneViewFrm, CommonResources.TwoFourViewsFrm, CommonResources.FiveViewsFrm, true,  null, false);
       }
     }
 
@@ -169,7 +180,7 @@ namespace VKClient.Video.Library
         int number = this._vKVideo != null ? this._vKVideo.views : 0;
         if (number <= 0)
           return "";
-        return UIStringFormatterHelper.FormatNumberOfSomething(number, CommonResources.OneViewFrm, CommonResources.TwoFourViewsFrm, CommonResources.FiveViewsFrm, true, null, false);
+        return UIStringFormatterHelper.FormatNumberOfSomething(number, CommonResources.OneViewFrm, CommonResources.TwoFourViewsFrm, CommonResources.FiveViewsFrm, true,  null, false);
       }
     }
 
@@ -185,7 +196,9 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return !this.CanPlay ? Visibility.Visible : Visibility.Collapsed;
+        if (!this.CanPlay)
+          return Visibility.Visible;
+        return Visibility.Collapsed;
       }
     }
 
@@ -201,7 +214,7 @@ namespace VKClient.Video.Library
     {
       get
       {
-        return this._menuItems.Count > 0;
+        return ((Collection<MenuItemData>) this._menuItems).Count > 0;
       }
     }
 
@@ -214,9 +227,11 @@ namespace VKClient.Video.Library
       private set
       {
         this._vKVideo = value;
-        this.NotifyPropertyChanged<VKClient.Common.Backend.DataObjects.Video>((System.Linq.Expressions.Expression<Func<VKClient.Common.Backend.DataObjects.Video>>) (() => this.VKVideo));
+        base.NotifyPropertyChanged<VKClient.Common.Backend.DataObjects.Video>(() => this.VKVideo);
       }
     }
+
+    public long MessageId { get; private set; }
 
     public string Image
     {
@@ -268,9 +283,10 @@ namespace VKClient.Video.Library
       }
     }
 
-    public VideoHeader(VKClient.Common.Backend.DataObjects.Video video, List<MenuItemData> menuItems = null, List<User> knownUsers = null, List<Group> knownGroups = null, StatisticsActionSource source = StatisticsActionSource.undefined, string context = "", bool pickMode = false, long albumId = 0)
+    public VideoHeader(VKClient.Common.Backend.DataObjects.Video video, List<MenuItemData> menuItems = null, List<User> knownUsers = null, List<Group> knownGroups = null, StatisticsActionSource source = StatisticsActionSource.undefined, string context = "", bool pickMode = false, long albumId = 0, long messageId = 0)
     {
       this.VKVideo = video;
+      this.MessageId = messageId;
       this.SetMenuItems(menuItems);
       this._knownUsers = knownUsers ?? new List<User>();
       this._knownGroups = knownGroups ?? new List<Group>();
@@ -278,15 +294,15 @@ namespace VKClient.Video.Library
       this._albumId = albumId;
       this._actionSource = source;
       this._context = context;
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
     }
 
     public void SetMenuItems(List<MenuItemData> menuItems)
     {
-      this._menuItems.Clear();
+      ((Collection<MenuItemData>) this._menuItems).Clear();
       if (menuItems == null)
         return;
-      menuItems.ForEach((Action<MenuItemData>) (m => this._menuItems.Add(m)));
+      menuItems.ForEach((Action<MenuItemData>) (m => ((Collection<MenuItemData>) this._menuItems).Add(m)));
     }
 
     public void Handle(VideoEdited message)
@@ -304,7 +320,7 @@ namespace VKClient.Video.Library
     {
       if (this._vKVideo == null)
         return "";
-      return this._vKVideo.owner_id.ToString() + "_" + (object) this._vKVideo.vid;
+      return this._vKVideo.owner_id.ToString() + "_" + this._vKVideo.vid;
     }
 
     public bool Matches(string searchString)
@@ -324,12 +340,12 @@ namespace VKClient.Video.Library
       }
       else
       {
-        ParametersRepository.SetParameterForId("PickedVideo", (object) this._vKVideo);
+        ParametersRepository.SetParameterForId("PickedVideo", this._vKVideo);
         if (this._albumId != 0L)
         {
           PageBase currentPage = FramePageUtils.CurrentPage;
           if (currentPage != null)
-            currentPage.NavigationService.RemoveBackEntrySafe();
+            ((Page) currentPage).NavigationService.RemoveBackEntrySafe();
         }
         Navigator.Current.GoBack();
       }

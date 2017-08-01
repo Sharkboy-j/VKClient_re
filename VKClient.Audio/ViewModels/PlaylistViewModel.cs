@@ -30,10 +30,13 @@ namespace VKClient.Audio.ViewModels
     {
       get
       {
-        return (Func<List<AudioObj>, ListWithCount<AudioHeader>>) (list => new ListWithCount<AudioHeader>()
+        return (Func<List<AudioObj>, ListWithCount<AudioHeader>>) (list =>
         {
-          TotalCount = list.Count,
-          List = new List<AudioHeader>(list.Select<AudioObj, AudioHeader>((Func<AudioObj, AudioHeader>) (i => new AudioHeader(i))))
+          ListWithCount<AudioHeader> listWithCount = new ListWithCount<AudioHeader>();
+          listWithCount.TotalCount = list.Count;
+          List<AudioHeader> audioHeaderList = new List<AudioHeader>((IEnumerable<AudioHeader>)Enumerable.Select<AudioObj, AudioHeader>(list, (Func<AudioObj, AudioHeader>)(i => new AudioHeader(i, 0L))));
+          listWithCount.List = audioHeaderList;
+          return listWithCount;
         });
       }
     }
@@ -41,20 +44,31 @@ namespace VKClient.Audio.ViewModels
     public PlaylistViewModel()
     {
       this._audios = new GenericCollectionViewModel<List<AudioObj>, AudioHeader>((ICollectionDataProvider<List<AudioObj>, AudioHeader>) this);
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
     }
 
     public void GetData(GenericCollectionViewModel<List<AudioObj>, AudioHeader> caller, int offset, int count, Action<BackendResult<List<AudioObj>, ResultCode>> callback)
     {
       Playlist playlist = PlaylistManager.LoadTracksFromIsolatedStorage(true);
       if (playlist.Tracks == null)
-        playlist.Tracks = new List<AudioObj>();
+        playlist.Tracks=(new List<AudioObj>());
       List<AudioObj> resultData = playlist.Tracks;
       if (this.Shuffle)
       {
         resultData = new List<AudioObj>();
-        foreach (int shuffledIndex in playlist.ShuffledIndexes)
-          resultData.Add(playlist.Tracks[shuffledIndex]);
+        List<int>.Enumerator enumerator = playlist.ShuffledIndexes.GetEnumerator();
+        try
+        {
+          while (enumerator.MoveNext())
+          {
+            int current = enumerator.Current;
+            resultData.Add(playlist.Tracks[current]);
+          }
+        }
+        finally
+        {
+          enumerator.Dispose();
+        }
       }
       callback(new BackendResult<List<AudioObj>, ResultCode>(ResultCode.Succeeded, resultData));
     }
@@ -63,7 +77,7 @@ namespace VKClient.Audio.ViewModels
     {
       if (count <= 0)
         return AudioResources.NoTracks;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, AudioResources.OneTrackFrm, AudioResources.TwoFourTracksFrm, AudioResources.FiveTracksFrm, true, null, false);
+      return UIStringFormatterHelper.FormatNumberOfSomething(count, AudioResources.OneTrackFrm, AudioResources.TwoFourTracksFrm, AudioResources.FiveTracksFrm, true,  null, false);
     }
   }
 }

@@ -61,7 +61,7 @@
                                 Tap="Error_OnTap">
                             <Border Width="32"
                                     Height="32"
-                                    Background="{StaticResource PhoneNewStoreItemsFillBrush}">
+                                    Background="{StaticResource PhoneAccentRedBrush}">
                                 <Border.OpacityMask>
                                     <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Error32px.png" />
                                 </Border.OpacityMask>

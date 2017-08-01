@@ -8,78 +8,47 @@
              FontFamily="{StaticResource PhoneFontFamilyNormal}"
              FontSize="{StaticResource PhoneFontSizeNormal}"
              Foreground="{StaticResource PhoneForegroundBrush}"
-             d:DesignHeight="480"
-             d:DesignWidth="480"
              VerticalAlignment="Bottom">
 
-    <Grid Background="{StaticResource PhoneMenuBackgroundBrush}">
+    <Grid Background="{StaticResource PhoneAttachmentPickerBackgroundBrush}">
         <ScrollViewer x:Name="scrollViewer"
                       VerticalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0 8 0 0">
+            <StackPanel Margin="0,6,0,0">
                 <Border VerticalAlignment="Top"
                         HorizontalAlignment="Left">
 
-                    <framework:ExtendedLongListSelector Name="listBoxPhotos"
-                                                        Margin="184 -184 0 -184"
-                                                        Height="480"
-                                                        Width="112"
+                    <framework:ExtendedLongListSelector x:Name="listBoxPhotos"
+                                                        Margin="184,-184,0,-184"
                                                         Link="ExtendedLongListSelector_Link"
-                                                        ItemsSource="{Binding PPPVM.AlbumPhotos}">
+                                                        ItemsSource="{Binding PhotosVM.AlbumPhotos}"
+                                                        Height="480"
+                                                        Width="128">
                         <framework:ExtendedLongListSelector.Projection>
                             <PlaneProjection RotationZ="90" />
                         </framework:ExtendedLongListSelector.Projection>
                         <framework:ExtendedLongListSelector.ListHeader>
-                            <StackPanel Width="112"
-                                        Margin="0 8 0 4">
+                            <StackPanel Width="128"
+                                        Margin="0,6,0,4">
 
                                 <Grid Background="Transparent"
                                       Tap="Camera_tap"
-                                      Width="112"
-                                      Height="112">
-
+                                      Height="128"
+                                      Width="128">
                                     <Grid.Projection>
                                         <PlaneProjection RotationZ="-90" />
                                     </Grid.Projection>
-
-
-                                    <Border Background="{StaticResource PhoneCameraIconBackgroundBrush}"
-                                            Width="112"
-                                            Height="112">
-                                        <Border.OpacityMask>
-                                            <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/AttachCamera.png" />
-                                        </Border.OpacityMask>
-                                    </Border>
-
+                                    <Image framework:MultiResImageLoader.UriSource="/Resources/AttachmentPicker/Camera.png"
+                                           Height="128"
+                                           Width="128" />
                                 </Grid>
 
-                                <!--<Grid x:Name="gridGraffitiAttach"
-                                  Background="Transparent"
-                                  Tap="Graffiti_OnTap"
-                                  Width="112"
-                                  Height="112"
-                                  Margin="0 8 0 4">
-
-                                <Grid.Projection>
-                                    <PlaneProjection RotationZ="-90" />
-                                </Grid.Projection>
-
-
-                                <Border Background="{StaticResource PhoneCameraIconBackgroundBrush}"
-                                        Width="112"
-                                        Height="112">
-                                    <Border.OpacityMask>
-                                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/AttachGraffiti.png" />
-                                    </Border.OpacityMask>
-                                </Border>
-
-                            </Grid>-->
                             </StackPanel>
                         </framework:ExtendedLongListSelector.ListHeader>
                         <framework:ExtendedLongListSelector.ItemTemplate>
                             <DataTemplate>
-                                <Grid Width="112"
-                                      Height="112"
-                                      Margin="0 4">
+                                <Grid Width="128"
+                                      Height="128"
+                                      Margin="0,3">
                                     <Grid.Projection>
                                         <PlaneProjection RotationZ="-90" />
                                     </Grid.Projection>
@@ -88,48 +57,65 @@
                                            framework:ImageLoader.StreamSource="{Binding ThumbnailStream}"
                                            Stretch="UniformToFill"
                                            Tap="Image_Tap_1" />
-                                    <Ellipse Fill="{StaticResource PhoneButtonTextForegroundBrush}"
-                                             IsHitTestVisible="False"
-                                             Width="28"
-                                             Height="28"
-                                             VerticalAlignment="Top"
-                                             HorizontalAlignment="Right"
-                                             Margin="66,7,6,0"
-                                             Visibility="{Binding IsSelectedVisibility}" />
-                                    <Image Width="30"
+
+                                    <Image Width="56"
+                                           Height="56"
                                            IsHitTestVisible="False"
-                                           Height="30"
+                                           Margin="0"
                                            Tag="1"
                                            VerticalAlignment="Top"
                                            HorizontalAlignment="Right"
-                                           Margin="66,6,6,0"
-                                           framework:ImageLoader.UriSource="{Binding SelectUnselectImageUri}">
-                                    </Image>
+                                           framework:MultiResImageLoader.UriSource="{Binding SelectionStateIconUri}" />
 
                                 </Grid>
                             </DataTemplate>
                         </framework:ExtendedLongListSelector.ItemTemplate>
+                        <framework:ExtendedLongListSelector.ListFooter>
+                            <Rectangle Margin="0,3,0,0" />
+                        </framework:ExtendedLongListSelector.ListFooter>
                     </framework:ExtendedLongListSelector>
                 </Border>
 
                 <ItemsControl ItemsSource="{Binding AttachmentTypes}"
-                              Margin="0 21 0 8">
+                              Margin="0,16,0,16">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid Background="Transparent"
-                                  Tap="Grid_Tap"
-                                  Margin="22 0 0 0"
-                                  framework:MetroInMotion.Tilt="2.1"
-                                  Height="64">
-                                <TextBlock Text="{Binding Text}"
-                                           FontFamily="Segoe WP Semilight"
-                                           FontSize="32"
-                                           Foreground="{Binding Foreground}" />
-                            </Grid>
+                            <StackPanel Background="Transparent"
+                                        framework:MetroInMotion.Tilt="2.1"
+                                        Tap="Item_OnClicked"
+                                        Orientation="Horizontal"
+                                        Height="64">
+                                <Border Width="32"
+                                        Height="32"
+                                        Margin="16,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Background="{Binding IconBackground}">
+                                    <Border.OpacityMask>
+                                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="{Binding Icon}" />
+                                    </Border.OpacityMask>
+                                </Border>
+                                <TextBlock Text="{Binding Title}"
+                                           Margin="24,13,0,0"
+                                           FontSize="25.333"
+                                           Foreground="{Binding TitleForeground}" />
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
             </StackPanel>
         </ScrollViewer>
+
+        <Border x:Name="borderLoading"
+                Visibility="Collapsed">
+            <Border.Background>
+                <SolidColorBrush Color="{StaticResource PhoneBackgroundColor}"
+                                 Opacity="0.3" />
+            </Border.Background>
+
+            <ProgressBar Background="Transparent"
+                         IsIndeterminate="True"
+                         Foreground="{StaticResource PhoneBlue300_GrayBlue100Brush}" />
+        </Border>
     </Grid>
 </UserControl>

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Navigation;
 using VKClient.Common.Framework;
 
@@ -25,10 +26,10 @@ namespace VKClient.Common
       }
       else
       {
-        string str = this.NavigationContext.QueryString["Uri"];
-        if (!string.IsNullOrEmpty(str))
-          str = HttpUtility.UrlDecode(str);
-        Navigator.Current.NavigateToWebUri(str, false, true);
+        string uri = ((Page) this).NavigationContext.QueryString["Uri"];
+        if (!string.IsNullOrEmpty(uri))
+          uri = HttpUtility.UrlDecode(uri);
+        Navigator.Current.NavigateToWebUri(uri, false, true);
       }
     }
 
@@ -38,7 +39,7 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/OpenUrlPage.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/OpenUrlPage.xaml", UriKind.Relative));
     }
   }
 }

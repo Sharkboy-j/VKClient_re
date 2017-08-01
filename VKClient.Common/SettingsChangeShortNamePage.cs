@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using VKClient.Common.Framework;
 using VKClient.Common.Library;
@@ -15,19 +17,10 @@ namespace VKClient.Common
 {
   public class SettingsChangeShortNamePage : PageBase
   {
-    private ApplicationBarIconButton _appBarButtonCheck = new ApplicationBarIconButton() { IconUri = new Uri("/Resources/check.png", UriKind.Relative), Text = CommonResources.ChatEdit_AppBar_Save };
-    private ApplicationBarIconButton _appBarButtonCancel = new ApplicationBarIconButton()
-    {
-      IconUri = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative),
-      Text = CommonResources.AppBar_Cancel
-    };
-    private ApplicationBar _appBar = new ApplicationBar()
-    {
-      BackgroundColor = VKConstants.AppBarBGColor,
-      ForegroundColor = VKConstants.AppBarFGColor,
-      Opacity = 0.9
-    };
     private bool _isInitialized;
+    private ApplicationBarIconButton _appBarButtonCheck;
+    private ApplicationBarIconButton _appBarButtonCancel;
+    private ApplicationBar _appBar;
     internal Grid LayoutRoot;
     internal GenericHeaderUC ucHeader;
     internal Grid ContentPanel;
@@ -40,34 +33,58 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as SettingsChangeShortNameViewModel;
+        return base.DataContext as SettingsChangeShortNameViewModel;
       }
     }
 
     public SettingsChangeShortNamePage()
     {
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+      Uri uri1 = new Uri("/Resources/check.png", UriKind.Relative);
+      applicationBarIconButton1.IconUri = uri1;
+      string chatEditAppBarSave = CommonResources.ChatEdit_AppBar_Save;
+      applicationBarIconButton1.Text = chatEditAppBarSave;
+      this._appBarButtonCheck = applicationBarIconButton1;
+      ApplicationBarIconButton applicationBarIconButton2 = new ApplicationBarIconButton();
+      Uri uri2 = new Uri("/Resources/appbar.cancel.rest.png", UriKind.Relative);
+      applicationBarIconButton2.IconUri = uri2;
+      string appBarCancel = CommonResources.AppBar_Cancel;
+      applicationBarIconButton2.Text = appBarCancel;
+      this._appBarButtonCancel = applicationBarIconButton2;
+      ApplicationBar applicationBar = new ApplicationBar();
+      Color appBarBgColor = VKConstants.AppBarBGColor;
+      applicationBar.BackgroundColor = appBarBgColor;
+      Color appBarFgColor = VKConstants.AppBarFGColor;
+      applicationBar.ForegroundColor = appBarFgColor;
+      double num = 0.9;
+      applicationBar.Opacity = num;
+      this._appBar = applicationBar;
+      // ISSUE: explicit constructor call
+      //base.\u002Ector();
       this.InitializeComponent();
       this.BuildAppBar();
-      this.ucHeader.TextBlockTitle.Text = CommonResources.Settings_ShortName.ToUpperInvariant();
-      this.Loaded += new RoutedEventHandler(this.SettingsChangeShortNamePage_Loaded);
+      this.ucHeader.TextBlockTitle.Text = (CommonResources.Settings_ShortName.ToUpperInvariant());
+      // ISSUE: method pointer
+      base.Loaded+=(new RoutedEventHandler( this.SettingsChangeShortNamePage_Loaded));
       this.ucHeader.HideSandwitchButton = true;
       this.SuppressMenu = true;
     }
 
     private void SettingsChangeShortNamePage_Loaded(object sender, RoutedEventArgs e)
     {
-      this.textBoxName.Focus();
+      ((Control) this.textBoxName).Focus();
       this.textBoxName.Select(this.textBoxName.Text.Length, 0);
-      this.Loaded -= new RoutedEventHandler(this.SettingsChangeShortNamePage_Loaded);
+      // ISSUE: method pointer
+      base.Loaded-=(new RoutedEventHandler( this.SettingsChangeShortNamePage_Loaded));
     }
 
     private void BuildAppBar()
     {
-      this._appBarButtonCheck.Click += new EventHandler(this._appBarButtonCheck_Click);
-      this._appBarButtonCancel.Click += new EventHandler(this._appBarButtonCancel_Click);
-      this._appBar.Buttons.Add((object) this._appBarButtonCheck);
-      this._appBar.Buttons.Add((object) this._appBarButtonCancel);
-      this.ApplicationBar = (IApplicationBar) this._appBar;
+      this._appBarButtonCheck.Click+=(new EventHandler(this._appBarButtonCheck_Click));
+      this._appBarButtonCancel.Click+=(new EventHandler(this._appBarButtonCancel_Click));
+      this._appBar.Buttons.Add(this._appBarButtonCheck);
+      this._appBar.Buttons.Add(this._appBarButtonCancel);
+      this.ApplicationBar = ((IApplicationBar) this._appBar);
     }
 
     private void _appBarButtonCancel_Click(object sender, EventArgs e)
@@ -87,8 +104,8 @@ namespace VKClient.Common
       base.HandleOnNavigatedTo(e);
       if (!this._isInitialized)
       {
-        SettingsChangeShortNameViewModel shortNameViewModel = new SettingsChangeShortNameViewModel(this.NavigationContext.QueryString["CurrentShortName"]);
-        this.DataContext = (object) shortNameViewModel;
+        SettingsChangeShortNameViewModel shortNameViewModel = new SettingsChangeShortNameViewModel(((Page) this).NavigationContext.QueryString["CurrentShortName"]);
+        base.DataContext = shortNameViewModel;
         this._isInitialized = true;
         shortNameViewModel.PropertyChanged += new PropertyChangedEventHandler(this.vm_PropertyChanged);
       }
@@ -114,7 +131,7 @@ namespace VKClient.Common
 
     private void UpdateSource(TextBox textBox)
     {
-      textBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+      ((FrameworkElement) textBox).GetBindingExpression((DependencyProperty) TextBox.TextProperty).UpdateSource();
     }
 
     private void CopyAtName(object sender, RoutedEventArgs e)
@@ -143,13 +160,13 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/SettingsChangeShortNamePage.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
-      this.ContentPanel = (Grid) this.FindName("ContentPanel");
-      this.textBoxName = (TextBox) this.FindName("textBoxName");
-      this.AtNameMenu = (ContextMenu) this.FindName("AtNameMenu");
-      this.LinkMenu = (ContextMenu) this.FindName("LinkMenu");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/SettingsChangeShortNamePage.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
+      this.ContentPanel = (Grid) base.FindName("ContentPanel");
+      this.textBoxName = (TextBox) base.FindName("textBoxName");
+      this.AtNameMenu = (ContextMenu) base.FindName("AtNameMenu");
+      this.LinkMenu = (ContextMenu) base.FindName("LinkMenu");
     }
   }
 }

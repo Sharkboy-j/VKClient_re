@@ -1,5 +1,6 @@
 using Microsoft.Phone.Info;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.IsolatedStorage;
 using VKClient.Common.Backend.DataObjects;
@@ -10,74 +11,111 @@ namespace VKClient.Common.Utils
     {
         private object lockObj = new object();
         private string LOGNAME = "VKLog.txt";
-        private static bool IsLoggingToIsolatedStorageEnabled = false;
+        //private static bool IsLoggingToIsolatedStorageEnabled=false;
         private static Logger _logger;
+
+        private List<string> _logItems /*{ get; }*/ = new List<string>();
 
         public static Logger Instance
         {
             get
             {
-                if (Logger._logger == null)
-                    Logger._logger = new Logger();
-                return Logger._logger;
+                return Logger._logger ?? (Logger._logger = new Logger());
             }
         }
 
         public void LogMemoryUsage()
         {
-            this.Info("Memory usage: {0}", (object)(long)DeviceExtendedProperties.GetValue("ApplicationCurrentMemoryUsage"));
+            this.Info("Memory usage: {0}", (long)DeviceExtendedProperties.GetValue("ApplicationCurrentMemoryUsage"));
+        }
+
+        private void Log(string message)
+        {
+            this.AddLogItem(message);
+        }
+
+        private void AddLogItem(string message)
+        {
+            this._logItems.Add(message);
+            if (this._logItems.Count <= 200)
+                return;
+            while (this._logItems.Count > 200)
+                this._logItems.RemoveAt(0);
+        }
+
+        public string GetLog()
+        {
+            return string.Join("\n", this._logItems);
         }
 
         public void Assert(bool assertion, string commentOnFailure)
         {
             if (assertion)
                 return;
-            this.Info("ASSERTION FAILED, {0}", (object)commentOnFailure);
+            this.Info("ASSERTION FAILED, {0}", commentOnFailure);
         }
 
         public void Info(string info, params object[] formatParameters)
         {
             string logMsg = info;
-
             if (formatParameters != null && formatParameters.Length != 0)
                 logMsg = string.Format(info, formatParameters);
-
             //
-            Console.WriteLine(logMsg);
+            //System.Diagnostics.Debug.WriteLine(logMsg);
             //
-
             string str = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff") + ": " + logMsg;
-            if (!Logger.IsLoggingToIsolatedStorageEnabled)
+            this.Log(str.Substring(0, Math.Min(500, str.Length)));
+            if (!VKClient.Common.Library.AppGlobalStateManager.Current.GlobalState.IsLogsEnabled)//if (!Logger.IsLoggingToIsolatedStorageEnabled)
                 return;
             this.WriteLogToStorage(logMsg);
         }
 
         public void Error(string error, ResultCode code)
         {
-            //if (!Logger.IsLoggingToIsolatedStorageEnabled)
-            //  return;
-            this.WriteLogToStorage("ERROR:" + error + " ErrorCode: " + code.ToString());
+            string str = "ERROR: " + error + " ErrorCode: " + code;
+            this.Log(str);
+            
+            if (!VKClient.Common.Library.AppGlobalStateManager.Current.GlobalState.IsLogsEnabled)//if (!Logger.IsLoggingToIsolatedStorageEnabled)
+                return;
+            //
+            System.Diagnostics.Debug.WriteLine(str);
+            //
+            this.WriteLogToStorage(str);
         }
 
         public void Error(string error)
         {
-            //if (!Logger.IsLoggingToIsolatedStorageEnabled)
-            //  return;
-            this.WriteLogToStorage("ERROR:" + error);
+            string str = "ERROR: " + error;
+            this.Log(str);
+            
+            if (!VKClient.Common.Library.AppGlobalStateManager.Current.GlobalState.IsLogsEnabled)//if (!Logger.IsLoggingToIsolatedStorageEnabled)
+                return;
+            //
+            System.Diagnostics.Debug.WriteLine(str);
+            //
+            this.WriteLogToStorage(str);
         }
 
         public void Error(string error, Exception e)
         {
             string exceptionData = this.GetExceptionData(e);
-            //if (!Logger.IsLoggingToIsolatedStorageEnabled)
-            //  return;
-            this.WriteLogToStorage("ERROR: " + error + Environment.NewLine + exceptionData);
+            string str = "ERROR: " + error + Environment.NewLine + exceptionData;
+            this.Log(str);
+            
+            if (!VKClient.Common.Library.AppGlobalStateManager.Current.GlobalState.IsLogsEnabled)//if (!Logger.IsLoggingToIsolatedStorageEnabled)
+                return;
+            //
+            System.Diagnostics.Debug.WriteLine(str);
+            //
+            this.WriteLogToStorage(str);
         }
 
         public void ErrorAndSaveToIso(string error, Exception e)
         {
             string exceptionData = this.GetExceptionData(e);
-            this.WriteLogToStorage("ERROR: " + error + Environment.NewLine + exceptionData);
+            string str = "ERROR: " + error + Environment.NewLine + exceptionData;
+            this.Log(str);
+            this.WriteLogToStorage(str);
         }
 
         private string GetExceptionData(Exception e)
@@ -95,29 +133,28 @@ namespace VKClient.Common.Utils
                 logMsg = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + ": " + logMsg;
                 lock (this.lockObj)
                 {
-                    using (IsolatedStorageFile resource_1 = IsolatedStorageFile.GetUserStoreForApplication())
+                    using (IsolatedStorageFile storeForApplication = IsolatedStorageFile.GetUserStoreForApplication())
                     {
-                        Stream local_4_1;
-                        if (!resource_1.FileExists(this.LOGNAME))
+                        Stream stream;
+                        if (!storeForApplication.FileExists(this.LOGNAME))
                         {
-                            local_4_1 = (Stream)resource_1.CreateFile(this.LOGNAME);
+                            stream = (Stream)storeForApplication.CreateFile(this.LOGNAME);
                         }
                         else
                         {
-                            local_4_1 = (Stream)resource_1.OpenFile(this.LOGNAME, FileMode.OpenOrCreate);
-                            local_4_1.Seek(0L, SeekOrigin.End);
+                            stream = (Stream)storeForApplication.OpenFile(this.LOGNAME, FileMode.OpenOrCreate);
+                            stream.Seek(0, SeekOrigin.End);
                         }
-                        using (StreamWriter resource_0 = new StreamWriter(local_4_1))
+                        using (StreamWriter streamWriter = new StreamWriter(stream))
                         {
-                            resource_0.WriteLine(logMsg);
-                            resource_0.Flush();
-                            resource_0.Close();
+                            streamWriter.WriteLine(logMsg);
+                            streamWriter.Flush();
+                            streamWriter.Close();
                         }
                     }
                 }
-                System.Diagnostics.Debug.WriteLine(logMsg);
             }
-            catch
+            catch (Exception)
             {
             }
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,42 +17,74 @@ namespace VKMessenger.Framework.Convertors
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
       if (value == null)
-        return (object) new TextBlock();
+        return new TextBlock();
       string str1 = value as string;
       TextBlock textBlock = new TextBlock();
-      textBlock.Style = (Style) Application.Current.Resources[(object) (string) parameter];
-      textBlock.TextWrapping = TextWrapping.NoWrap;
+      ((FrameworkElement) textBlock).Style=((Style) Application.Current.Resources[parameter]);
+      textBlock.TextWrapping=((TextWrapping) 1);
       SolidColorBrush solidColorBrush1 = new SolidColorBrush((Color) Application.Current.Resources["PhoneAccentColor"]);
       char[] chArray = new char[1]{ ' ' };
-      foreach (string str2 in ((IEnumerable<string>) str1.Split(chArray)).Where<string>((Func<string, bool>) (s => !string.IsNullOrWhiteSpace(s))))
+      IEnumerator<string> enumerator1 = ((IEnumerable<string>)Enumerable.Where<string>(str1.Split(chArray), (Func<string, bool>)(s => !string.IsNullOrWhiteSpace(s)))).GetEnumerator();
+      try
       {
-        bool flag = false;
-        IList<string> stringList = (IList<string>) new List<string>();
-        if (MessengerStateManagerInstance.Current.RootFrame.Content is ConversationsSearch)
-          stringList = (IList<string>) MessengerStateManagerInstance.Current.ConversationSearchStrings;
-        foreach (string str3 in (IEnumerable<string>) stringList)
+        while (((IEnumerator) enumerator1).MoveNext())
         {
-          if (str2.StartsWith(str3, StringComparison.CurrentCultureIgnoreCase))
+          string current1 = enumerator1.Current;
+          bool flag = false;
+          IList<string> stringList = (IList<string>) new List<string>();
+          if (((ContentControl) MessengerStateManagerInstance.Current.RootFrame).Content is ConversationsSearch)
+            stringList = (IList<string>) MessengerStateManagerInstance.Current.ConversationSearchStrings;
+          IEnumerator<string> enumerator2 = stringList.GetEnumerator();
+          try
+          {
+            while (((IEnumerator) enumerator2).MoveNext())
+            {
+              string current2 = enumerator2.Current;
+              if (current1.StartsWith(current2, StringComparison.CurrentCultureIgnoreCase))
+              {
+                InlineCollection inlines1 = textBlock.Inlines;
+                Run run1 = new Run();
+                string str2 = current1.Substring(0, current2.Length);
+                run1.Text = str2;
+                SolidColorBrush solidColorBrush2 = solidColorBrush1;
+                ((TextElement) run1).Foreground = ((Brush) solidColorBrush2);
+                ((PresentationFrameworkCollection<Inline>) inlines1).Add((Inline) run1);
+                InlineCollection inlines2 = textBlock.Inlines;
+                Run run2 = new Run();
+                string str3 = current1.Substring(current2.Length);
+                run2.Text = str3;
+                ((PresentationFrameworkCollection<Inline>) inlines2).Add((Inline) run2);
+                flag = true;
+                break;
+              }
+            }
+          }
+          finally
+          {
+            if (enumerator2 != null)
+              ((IDisposable) enumerator2).Dispose();
+          }
+          if (!flag)
           {
             InlineCollection inlines = textBlock.Inlines;
             Run run = new Run();
-            run.Text = str2.Substring(0, str3.Length);
-            SolidColorBrush solidColorBrush2 = solidColorBrush1;
-            run.Foreground = (Brush) solidColorBrush2;
-            inlines.Add((Inline) run);
-            textBlock.Inlines.Add((Inline) new Run()
-            {
-              Text = str2.Substring(str3.Length)
-            });
-            flag = true;
-            break;
+            string str2 = current1;
+            run.Text = str2;
+            ((PresentationFrameworkCollection<Inline>) inlines).Add((Inline) run);
           }
+          InlineCollection inlines3 = textBlock.Inlines;
+          Run run3 = new Run();
+          string str4 = " ";
+          run3.Text = str4;
+          ((PresentationFrameworkCollection<Inline>) inlines3).Add((Inline) run3);
         }
-        if (!flag)
-          textBlock.Inlines.Add((Inline) new Run() { Text = str2 });
-        textBlock.Inlines.Add((Inline) new Run() { Text = " " });
       }
-      return (object) textBlock;
+      finally
+      {
+        if (enumerator1 != null)
+          ((IDisposable) enumerator1).Dispose();
+      }
+      return textBlock;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

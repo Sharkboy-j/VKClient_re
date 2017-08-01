@@ -10,15 +10,12 @@ namespace VKClient.Audio.Base.DataObjects
 
     public override string ToString()
     {
-      return string.Format("State: {0}\nError fatal: {1}\nError message: {2}", (object) this.state, (object) this.error_fatal, (object) this.error_message);
+      return string.Format("State: {0}\nError fatal: {1}\nError message: {2}", this.state, this.error_fatal, this.error_message);
     }
 
     public static StorePurchaseResult GetForFailedPurchaseState()
     {
-      return new StorePurchaseResult()
-      {
-        state = -2
-      };
+      return new StorePurchaseResult() { state = -2 };
     }
   }
 }

@@ -16,21 +16,26 @@ namespace VKClient.Common.UC
 
     public ShareContentActionsUC()
     {
+      //base.\u002Ector();
       this.InitializeComponent();
     }
 
-    private void ShareWallPostItem_OnTapped(object sender, GestureEventArgs e)
+    private void ShareWallPostItem_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.ShareWallPostItemSelected == null)
         return;
-      this.ShareWallPostItemSelected((object) this, EventArgs.Empty);
+      // ISSUE: reference to a compiler-generated field
+      this.ShareWallPostItemSelected(this, EventArgs.Empty);
     }
 
-    private void ShareCommunityItem_OnTapped(object sender, GestureEventArgs e)
+    private void ShareCommunityItem_OnTapped(object sender, System.Windows.Input.GestureEventArgs e)
     {
+      // ISSUE: reference to a compiler-generated field
       if (this.ShareCommunityItemSelected == null)
         return;
-      this.ShareCommunityItemSelected((object) this, EventArgs.Empty);
+      // ISSUE: reference to a compiler-generated field
+      this.ShareCommunityItemSelected(this, EventArgs.Empty);
     }
 
     [DebuggerNonUserCode]
@@ -39,7 +44,7 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/ShareContentActionsUC.xaml", UriKind.Relative));
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/ShareContentActionsUC.xaml", UriKind.Relative));
     }
   }
 }

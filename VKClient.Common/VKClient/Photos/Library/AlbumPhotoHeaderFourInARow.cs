@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Library;
@@ -21,7 +23,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return !this.AllowEdit ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.AllowEdit)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -31,7 +35,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return !this.AllowRemove ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.AllowRemove)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -39,7 +45,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return !this.AllowEdit && !this.AllowRemove ? Visibility.Collapsed : Visibility.Visible;
+        if (!this.AllowEdit && !this.AllowRemove)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -49,7 +57,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this.Photo1 == null ? Visibility.Collapsed : Visibility.Visible;
+        if (this.Photo1 == null)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -57,7 +67,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this.Photo2 == null ? Visibility.Collapsed : Visibility.Visible;
+        if (this.Photo2 == null)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -65,7 +77,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this.Photo3 == null ? Visibility.Collapsed : Visibility.Visible;
+        if (this.Photo3 == null)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -73,7 +87,9 @@ namespace VKClient.Photos.Library
     {
       get
       {
-        return this.Photo4 == null ? Visibility.Collapsed : Visibility.Visible;
+        if (this.Photo4 == null)
+          return Visibility.Collapsed;
+        return Visibility.Visible;
       }
     }
 
@@ -91,30 +107,41 @@ namespace VKClient.Photos.Library
       this.AllowRemove = allowRemove;
     }
 
-    public AlbumPhotoHeaderFourInARow(IEnumerable<Photo> photos)
+    public AlbumPhotoHeaderFourInARow(IEnumerable<Photo> photos, IEnumerable<long> messageIds = null)
     {
       IEnumerator<Photo> enumerator = photos.GetEnumerator();
-      if (enumerator.MoveNext())
-        this.Photo1 = new AlbumPhoto(enumerator.Current);
-      if (enumerator.MoveNext())
-        this.Photo2 = new AlbumPhoto(enumerator.Current);
-      if (enumerator.MoveNext())
-        this.Photo3 = new AlbumPhoto(enumerator.Current);
-      if (!enumerator.MoveNext())
+      List<long> longList = messageIds != null ?  Enumerable.ToList<long>(messageIds) :  null;
+      if (((IEnumerator) enumerator).MoveNext())
+      {
+        // ISSUE: explicit non-virtual call
+        this.Photo1 = new AlbumPhoto(enumerator.Current, longList != null ? longList[0] : 0L);
+      }
+      if (((IEnumerator) enumerator).MoveNext())
+      {
+        // ISSUE: explicit non-virtual call
+        this.Photo2 = new AlbumPhoto(enumerator.Current, longList != null ? longList[1] : 0L);
+      }
+      if (((IEnumerator) enumerator).MoveNext())
+      {
+        // ISSUE: explicit non-virtual call
+        this.Photo3 = new AlbumPhoto(enumerator.Current, longList != null ? longList[2] : 0L);
+      }
+      if (!((IEnumerator) enumerator).MoveNext())
         return;
-      this.Photo4 = new AlbumPhoto(enumerator.Current);
+      // ISSUE: explicit non-virtual call
+      this.Photo4 = new AlbumPhoto(enumerator.Current, longList != null ? longList[3] : 0L);
     }
 
     public AlbumPhotoHeaderFourInARow(IEnumerable<AlbumPhoto> photos)
     {
       IEnumerator<AlbumPhoto> enumerator = photos.GetEnumerator();
-      if (enumerator.MoveNext())
+      if (((IEnumerator) enumerator).MoveNext())
         this.Photo1 = enumerator.Current;
-      if (enumerator.MoveNext())
+      if (((IEnumerator) enumerator).MoveNext())
         this.Photo2 = enumerator.Current;
-      if (enumerator.MoveNext())
+      if (((IEnumerator) enumerator).MoveNext())
         this.Photo3 = enumerator.Current;
-      if (!enumerator.MoveNext())
+      if (!((IEnumerator) enumerator).MoveNext())
         return;
       this.Photo4 = enumerator.Current;
     }
@@ -150,7 +177,7 @@ namespace VKClient.Photos.Library
 
     public AlbumPhoto GetPhotoByTag(string tag)
     {
-      AlbumPhoto albumPhoto = (AlbumPhoto) null;
+      AlbumPhoto albumPhoto =  null;
       if (!(tag == "1"))
       {
         if (!(tag == "2"))

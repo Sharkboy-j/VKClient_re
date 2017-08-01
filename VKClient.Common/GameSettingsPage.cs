@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Navigation;
 using VKClient.Common.Framework;
 using VKClient.Common.Library.Games;
@@ -19,7 +20,7 @@ namespace VKClient.Common
     {
       get
       {
-        return this.DataContext as GameSettingsViewModel;
+        return base.DataContext as GameSettingsViewModel;
       }
     }
 
@@ -35,11 +36,11 @@ namespace VKClient.Common
       if (this._isInitialized)
         return;
       long result = 0;
-      if (this.NavigationContext.QueryString.ContainsKey("GameId"))
-        long.TryParse(this.NavigationContext.QueryString["GameId"], out result);
+      if (((Page) this).NavigationContext.QueryString.ContainsKey("GameId"))
+        long.TryParse(((Page) this).NavigationContext.QueryString["GameId"], out result);
       GameSettingsViewModel settingsViewModel = new GameSettingsViewModel(result);
       settingsViewModel.LoadGameInfo();
-      this.DataContext = (object) settingsViewModel;
+      base.DataContext = settingsViewModel;
       this._isInitialized = true;
     }
 
@@ -55,8 +56,8 @@ namespace VKClient.Common
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/GameSettingsPage.xaml", UriKind.Relative));
-      this.ucHeader = (GenericHeaderUC) this.FindName("ucHeader");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/GameSettingsPage.xaml", UriKind.Relative));
+      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
     }
   }
 }

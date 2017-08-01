@@ -31,7 +31,9 @@ namespace VKClient.Common.UC
     {
       get
       {
-        return !(this.ImageSource == (Uri) null) ? Visibility.Visible : Visibility.Collapsed;
+        if (!(this.ImageSource ==  null))
+          return Visibility.Visible;
+        return Visibility.Collapsed;
       }
     }
 

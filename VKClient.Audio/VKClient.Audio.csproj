@@ -71,7 +71,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Bin\ARM\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;MY_MOD</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -80,9 +80,9 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>Bin\ARM\Release</OutputPath>
-    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE;MY_MOD</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -90,9 +90,14 @@
     <PlatformTarget />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="UserControls\AlbumsUC.cs" />
-    <Compile Include="UserControls\AllUC.cs" />
-    <Compile Include="AudioPage.cs" />
+    <Compile Include="AddEditAudioPage.cs">
+      <DependentUpon>addeditaudiopage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AudioPage.cs">
+      <DependentUpon>audiopage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Library\AddEditAudioViewModel.cs" />
     <Compile Include="Library\AudioHeader.cs" />
     <Compile Include="Localization\AudioLocalizedStrings.cs" />
     <Compile Include="Localization\AudioResources.Designer.cs">
@@ -101,56 +106,29 @@
       <DependentUpon>AudioResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserControls\EditAlbumUC.cs" />
-    <Compile Include="UserControls\LyricsUC.cs" />
-    <Compile Include="UserControls\PlaylistUC.cs" />
+    <Compile Include="UserControls\AlbumsUC.cs">
+      <DependentUpon>albumsuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\AllUC.cs">
+      <DependentUpon>alluc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\EditAlbumUC.cs">
+      <DependentUpon>editalbumuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\LyricsUC.cs">
+      <DependentUpon>lyricsuc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\PlaylistUC.cs">
+      <DependentUpon>playlistuc.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\AllAlbumsViewModel.cs" />
     <Compile Include="ViewModels\AllAudioViewModel.cs" />
     <Compile Include="ViewModels\AudioAlbumHeader.cs" />
     <Compile Include="ViewModels\AudioSearchDataProvider.cs" />
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
-    <Compile Include="Views\AudioPlayer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="audiopage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\albumsuc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\alluc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\editalbumuc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\lyricsuc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\playlistuc.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\audioplayer.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Localization\AudioResources.be-BY.resx" />
-    <EmbeddedResource Include="Localization\AudioResources.kk-KZ.resx" />
-    <EmbeddedResource Include="Localization\AudioResources.pt-BR.resx" />
-    <EmbeddedResource Include="Localization\AudioResources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>AudioResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Localization\AudioResources.ru-RU.resx" />
-    <EmbeddedResource Include="Localization\AudioResources.uk-UA.resx" />
+    <Compile Include="Views\AudioPlayer.cs">
+      <DependentUpon>audioplayer.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VKClient.Audio.Base\VKClient.Audio.Base.csproj">
@@ -168,6 +146,58 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="addeditaudiopage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="audiopage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UserControls\albumsuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UserControls\alluc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UserControls\editalbumuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UserControls\lyricsuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="UserControls\playlistuc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+    <Resource Include="Views\audioplayer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\AudioResources.be-BY.resx" />
+    <EmbeddedResource Include="Localization\AudioResources.kk-KZ.resx" />
+    <EmbeddedResource Include="Localization\AudioResources.pt-BR.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\AudioResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>AudioResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\AudioResources.ru-RU.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\AudioResources.uk-UA.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />

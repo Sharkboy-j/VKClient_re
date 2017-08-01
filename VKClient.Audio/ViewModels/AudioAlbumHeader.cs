@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using System.Reflection;
 using VKClient.Common.Backend.DataObjects;
 using VKClient.Common.Framework;
 using VKClient.Common.Library;
@@ -33,7 +34,7 @@ namespace VKClient.Audio.ViewModels
     {
       get
       {
-        return this._menuItems.Count > 0;
+        return ((Collection<MenuItemData>) this._menuItems).Count > 0;
       }
     }
 
@@ -46,7 +47,7 @@ namespace VKClient.Audio.ViewModels
       set
       {
         this._album.title = value;
-        this.NotifyPropertyChanged<string>((Expression<Func<string>>) (() => this.Title));
+        this.NotifyPropertyChanged<string>(() => this.Title);
       }
     }
 
@@ -60,12 +61,12 @@ namespace VKClient.Audio.ViewModels
     {
       if (this._album.album_id == AllAlbumsViewModel.RECOMMENDED_ALBUM_ID || this._album.album_id == AllAlbumsViewModel.POPULAR_ALBUM_ID || this._album.owner_id != AppGlobalStateManager.Current.LoggedInUserId)
         return;
-      this._menuItems.Add(new MenuItemData()
+      ((Collection<MenuItemData>) this._menuItems).Add(new MenuItemData()
       {
         Title = CommonResources.Edit,
         Tag = "edit"
       });
-      this._menuItems.Add(new MenuItemData()
+      ((Collection<MenuItemData>) this._menuItems).Add(new MenuItemData()
       {
         Title = CommonResources.Delete,
         Tag = "delete"

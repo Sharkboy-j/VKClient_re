@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Media;
 using VKClient.Common;
@@ -62,7 +63,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.HaveForwardedMessages ? Visibility.Visible : Visibility.Collapsed;
+                if (this.HaveForwardedMessages)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -103,7 +106,7 @@ namespace VKMessenger.Library
                     str = "message.state.sending.png";
                 if (str != "")
                     return MultiResolutionHelper.Instance.AppendResolutionSuffix("/VKClient.Common;component/Resources/" + str, false, "");
-                return str;
+                return "";
             }
         }
 
@@ -136,7 +139,7 @@ namespace VKMessenger.Library
             set
             {
                 this._uiUserName = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.UIUserName));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.UIUserName));
             }
         }
 
@@ -149,7 +152,7 @@ namespace VKMessenger.Library
             set
             {
                 this._uiMessageText = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.UIMessageText));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.UIMessageText));
             }
         }
 
@@ -183,7 +186,7 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.StickerAttachment == null ? 0.6 : 1.0;
+                return (this.StickerAttachment == null ? 0 : (this.GraffitiAttachment != null ? 1 : 0)) == 0 ? 0.4 : 1.0;
             }
         }
 
@@ -196,7 +199,7 @@ namespace VKMessenger.Library
             set
             {
                 this._uiMessageDate = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.UIDate));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.UIDate));
             }
         }
 
@@ -204,8 +207,8 @@ namespace VKMessenger.Library
         {
             get
             {
-                IEnumerable<AttachmentViewModel> arg_25_0 = this.Attachments;
-                Func<AttachmentViewModel, bool> arg_25_1 = new Func<AttachmentViewModel, bool>(a =>
+                ObservableCollection<AttachmentViewModel> attachments1 = this.Attachments;
+                Func<AttachmentViewModel, bool> func1 = (Func<AttachmentViewModel, bool>)(a =>
                 {
                     if (a.AttachmentType == AttachmentType.Sticker)
                         return true;
@@ -224,15 +227,16 @@ namespace VKMessenger.Library
                     }
                     return nullable ?? false;
                 });
-
-                if (Enumerable.Any<AttachmentViewModel>(arg_25_0, arg_25_1))
-                {
+                //Func<AttachmentViewModel, bool> predicate1;
+                if (attachments1.Any<AttachmentViewModel>(func1))
                     return new SolidColorBrush(Colors.Transparent);
-                }
+                ObservableCollection<AttachmentViewModel> attachments2 = this.Attachments;
+                Func<AttachmentViewModel, bool> func2 = (Func<AttachmentViewModel, bool>)(a => a.AttachmentType == AttachmentType.Gift);
+                //Func<AttachmentViewModel, bool> predicate2;
+                if (attachments2.Any<AttachmentViewModel>(func2))
+                    return (SolidColorBrush)Application.Current.Resources["PhoneDialogGiftMessageBackgroundBrush"];
                 if (this._message.@out == 1)
-                {
                     return (SolidColorBrush)Application.Current.Resources["PhoneDialogOutMessageBackgroundBrush"];
-                }
                 return (SolidColorBrush)Application.Current.Resources["PhoneDialogInMessageBackgroundBrush"];
             }
         }
@@ -246,8 +250,8 @@ namespace VKMessenger.Library
             private set
             {
                 this._uiOpacity = value;
-                this.NotifyPropertyChanged<double>((System.Linq.Expressions.Expression<Func<double>>)(() => this.UIOpacity));
-                this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>)(() => this.BGBrush));
+                this.NotifyPropertyChanged<double>((Expression<Func<double>>)(() => this.UIOpacity));
+                this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>)(() => this.BGBrush));
             }
         }
 
@@ -263,7 +267,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.IsResponse ? Visibility.Collapsed : Visibility.Visible;
+                if (this.IsResponse)
+                    return Visibility.Collapsed;
+                return Visibility.Visible;
             }
         }
 
@@ -281,7 +287,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return string.IsNullOrEmpty(this.UIMessageText) ? Visibility.Collapsed : Visibility.Visible;
+                if (string.IsNullOrEmpty(this.UIMessageText))
+                    return Visibility.Collapsed;
+                return Visibility.Visible;
             }
         }
 
@@ -289,7 +297,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.Attachments.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                if (this.Attachments.Count > 0)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -309,22 +319,19 @@ namespace VKMessenger.Library
             {
                 if (this._message.attachments != null)
                 {
-                    IEnumerable<Attachment> attachments = this._message.attachments;
-                    Func<Attachment, bool> arg_37_1 = new Func<Attachment, bool>(a =>
-                      {
-                          if (a.type == "sticker")
-                              return true;
-                          if (!(a.type == "doc"))
-                              return false;
-                          Doc doc = a.doc;
-                          if (doc == null)
-                              return false;
-                          return doc.IsGraffiti;
-                      });
-
-
-
-                    if (attachments.Any<Attachment>(arg_37_1))
+                    List<Attachment> attachments = this._message.attachments;
+                    Func<Attachment, bool> func = (Func<Attachment, bool>)(a =>
+                    {
+                        if (a.type == "sticker")
+                            return true;
+                        if (!(a.type == "doc"))
+                            return false;
+                        Doc doc = a.doc;
+                        if (doc == null)
+                            return false;
+                        return doc.IsGraffiti;
+                    });
+                    if (attachments.Any<Attachment>(func))
                     {
                         switch (this.MessageInOrOutType)
                         {
@@ -365,7 +372,6 @@ namespace VKMessenger.Library
             }
         }
 
-        // NEW: 4.8.0
         public bool IsGraffiti
         {
             get
@@ -404,7 +410,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.IsTetATetResponse ? Visibility.Visible : Visibility.Collapsed;
+                if (this.IsTetATetResponse)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -422,7 +430,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.IsChatResponse ? Visibility.Visible : Visibility.Collapsed;
+                if (this.IsChatResponse)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -435,7 +445,7 @@ namespace VKMessenger.Library
             set
             {
                 this._uiImageUrl = value;
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.UIImageUrl));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.UIImageUrl));
             }
         }
 
@@ -463,7 +473,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this._outboundMessage != null && this._message.@out == 1 && this._outboundMessage.OutboundMessageStatus == OutboundMessageStatus.Failed ? Visibility.Visible : Visibility.Collapsed;
+                if (this._outboundMessage != null && this._message.@out == 1 && this._outboundMessage.OutboundMessageStatus == OutboundMessageStatus.Failed)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -471,7 +483,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this._message.@out == 1 && (this._outboundMessage == null || this._outboundMessage.OutboundMessageStatus == OutboundMessageStatus.Delivered) ? Visibility.Visible : Visibility.Collapsed;
+                if (this._message.@out == 1 && (this._outboundMessage == null || this._outboundMessage.OutboundMessageStatus == OutboundMessageStatus.Delivered))
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -479,7 +493,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this._message.read_state == 0 && !this.IsChat && this.UIStatusDelivered == Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
+                if (this._message.read_state == 0 && !this.IsChat && this.UIStatusDelivered == Visibility.Visible)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -487,7 +503,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return !this.IsResponse ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+                if (!this.IsResponse)
+                    return (HorizontalAlignment)0;
+                return (HorizontalAlignment)2;
             }
         }
 
@@ -502,7 +520,7 @@ namespace VKMessenger.Library
                 if (this._isInSelectionMode == value)
                     return;
                 this._isInSelectionMode = value;
-                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.IsInSelectionMode));
+                this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsInSelectionMode));
             }
         }
 
@@ -533,7 +551,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return !this.IsResponse ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                if (!this.IsResponse)
+                    return (HorizontalAlignment)2;
+                return (HorizontalAlignment)0;
             }
         }
 
@@ -553,7 +573,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return !this.IsSelected ? Visibility.Collapsed : Visibility.Visible;
+                if (!this.IsSelected)
+                    return Visibility.Collapsed;
+                return Visibility.Visible;
             }
         }
 
@@ -568,8 +590,8 @@ namespace VKMessenger.Library
                 if (this._isSelected == value)
                     return;
                 this._isSelected = value;
-                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.IsSelected));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.SelectionMarkVisibility));
+                this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsSelected));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.SelectionMarkVisibility));
                 this.UpdateUIOpacity();
             }
         }
@@ -625,9 +647,9 @@ namespace VKMessenger.Library
             set
             {
                 this._isUploading = value;
-                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.IsUploading));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.DateTimeVisibility));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.IsUploadingVisibility));
+                this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsUploading));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.DateTimeVisibility));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.IsUploadingVisibility));
             }
         }
 
@@ -635,7 +657,9 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.IsUploading ? Visibility.Visible : Visibility.Collapsed;
+                if (this.IsUploading)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -643,7 +667,11 @@ namespace VKMessenger.Library
         {
             get
             {
-                return this.IsUploading || this.UIStatusFailed != Visibility.Collapsed ? Visibility.Collapsed : Visibility.Visible;
+                if (this.IsUploading)
+                    return Visibility.Collapsed;
+                if (this.UIStatusFailed == Visibility.Collapsed)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
             }
         }
 
@@ -672,7 +700,7 @@ namespace VKMessenger.Library
                 message.uid = (int)outboundMessage.UserOrChatId;
             message.date = Extensions.DateTimeToUnixTimestamp(DateTime.UtcNow, true);
             message.sticker_id = outboundMessage.StickerItem == null ? 0 : outboundMessage.StickerItem.StickerId;
-            message.body = message.sticker_id != 0 || outboundMessage.GraffitiAttachmentItem != null ? "" : outboundMessage.MessageText;//UPDATE: 4.8.0
+            message.body = message.sticker_id != 0 || outboundMessage.GraffitiAttachmentItem != null ? "" : outboundMessage.MessageText;
             message.attachments = new List<Attachment>();
             if (message.sticker_id == 0)
             {
@@ -716,15 +744,25 @@ namespace VKMessenger.Library
         private Color GetUnlblended(Color c)
         {
             double num = 0.8;
-            if ((int)c.G == 200 && (int)c.R == 227 || (int)c.G == 196 && (int)c.R == 164)
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            if ((int)((Color)@c).G == 200 && (int)((Color)@c).R == 227 || (int)((Color)@c).G == 196 && (int)((Color)@c).R == 164)
                 num = 1.0;
-            return new Color()
-            {
-                A = byte.MaxValue,
-                R = (byte)Math.Min((double)byte.MaxValue, (double)c.R / num),
-                G = (byte)Math.Min((double)byte.MaxValue, (double)c.G / num),
-                B = (byte)Math.Min((double)byte.MaxValue, (double)c.B / num)
-            };
+            Color color = new Color();
+            // ISSUE: explicit reference operation
+            color.A = byte.MaxValue;
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            color.R=((byte)Math.Min((double)byte.MaxValue, (double)((Color)@c).R / num));
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            color.G=((byte)Math.Min((double)byte.MaxValue, (double)((Color)@c).G / num));
+            // ISSUE: explicit reference operation
+            // ISSUE: explicit reference operation
+            color.B=((byte)Math.Min((double)byte.MaxValue, (double)((Color)@c).B / num));
+            return color;
         }
 
         private void InitializeWithMessage(Message message)
@@ -795,18 +833,17 @@ namespace VKMessenger.Library
                     }
                     ++index;
                 }
-
-                if (this.GraffitiAttachment != null)//UPDTE: 4.8.0
+                if (this.GraffitiAttachment != null)
                 {
-                    OutboundMessageViewModel messageViewModel = this._outboundMessage;
+                    OutboundMessageViewModel outboundMessage = this._outboundMessage;
                     Doc doc1;
-                    if (messageViewModel == null)
+                    if (outboundMessage == null)
                     {
                         doc1 = (Doc)null;
                     }
                     else
                     {
-                        GraffitiAttachmentItem graffitiAttachmentItem = messageViewModel.GraffitiAttachmentItem;
+                        GraffitiAttachmentItem graffitiAttachmentItem = outboundMessage.GraffitiAttachmentItem;
                         if (graffitiAttachmentItem == null)
                         {
                             doc1 = (Doc)null;
@@ -814,7 +851,7 @@ namespace VKMessenger.Library
                         else
                         {
                             Attachment attachment = graffitiAttachmentItem.CreateAttachment();
-                            doc1 = attachment != null ? attachment.doc : null;
+                            doc1 = attachment != null ? attachment.doc : (Doc)null;
                         }
                     }
                     Doc doc2 = doc1;
@@ -825,7 +862,6 @@ namespace VKMessenger.Library
                             attachment.doc = doc2;
                     }
                 }
-
                 this.EnsureCorrectOrderAfterDelivery();
             }
             this.RefreshUIProperties();
@@ -840,10 +876,11 @@ namespace VKMessenger.Library
                     return;
                 vm.Messages.Remove(this);
                 vm.Messages.AddOrdered<MessageViewModel>(this, ConversationViewModel._comparisonFunc, true);
+                vm.Scroll.ScrollToBottom(true, false);
             }));
         }
 
-        private void InitializeAttachments()// UPDATE: 4.8.0
+        private void InitializeAttachments()
         {
             this.Attachments.Clear();
             if (this._message.attachments != null)
@@ -926,19 +963,19 @@ namespace VKMessenger.Library
                 if (this.IsChat || this._isForwarded)
                     this.UIImageUrl = this._associatedUser.photo_max;
                 this.UIUserName = this._associatedUser.first_name;
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.UIStatusDelivered));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.UIStatusFailed));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.DateTimeVisibility));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.UIStatusMessageNotRead));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.UIStatusDelivered));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.UIStatusFailed));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.DateTimeVisibility));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.UIStatusMessageNotRead));
                 foreach (MessageViewModel forwardedMessage in (Collection<MessageViewModel>)this.ForwardedMessages)
                     forwardedMessage.RefreshUIProperties();
-                this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>)(() => this.ForwardedMessagesHeaderText));
-                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.HaveForwardedMessages));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.UIHaveMessageText));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.HaveAttachments));
-                this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>)(() => this.HaveForwardedMessagesVisivility));
-                this.NotifyPropertyChanged<Thickness>((System.Linq.Expressions.Expression<Func<Thickness>>)(() => this.ForwardedMargin));
-                this.NotifyPropertyChanged<bool>((System.Linq.Expressions.Expression<Func<bool>>)(() => this.IsInSelectionMode));
+                this.NotifyPropertyChanged<string>((Expression<Func<string>>)(() => this.ForwardedMessagesHeaderText));
+                this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.HaveForwardedMessages));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.UIHaveMessageText));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.HaveAttachments));
+                this.NotifyPropertyChanged<Visibility>((Expression<Func<Visibility>>)(() => this.HaveForwardedMessagesVisivility));
+                this.NotifyPropertyChanged<Thickness>((Expression<Func<Thickness>>)(() => this.ForwardedMargin));
+                this.NotifyPropertyChanged<bool>((Expression<Func<bool>>)(() => this.IsInSelectionMode));
             }));
         }
 

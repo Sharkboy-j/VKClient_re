@@ -19,22 +19,31 @@ using VKClient.Common.Utils;
 using VKClient.Groups.Library;
 
 using VKClient.Audio.Base.Extensions;
-
 namespace VKClient.Groups
 {
-  public partial class CommunitySubscribersPage : PageBase
+  public class CommunitySubscribersPage : PageBase
   {
     private bool _isInitialized;
     private bool _isManagement;
     private bool _isPicker;
     private bool _isBlockingPicker;
     private long _communityId;
+    internal GenericHeaderUC Header;
+    internal Pivot Pivot;
+    internal PivotItem PivotItemAll;
+    internal ExtendedLongListSelector AllList;
+    internal PivotItem PivotItemUnsure;
+    internal ExtendedLongListSelector UnsureList;
+    internal PivotItem PivotItemFriends;
+    internal ExtendedLongListSelector FriendsList;
+    internal PullToRefreshUC PullToRefresh;
+    private bool _contentLoaded;
 
     public CommunitySubscribersViewModel ViewModel
     {
       get
       {
-        return this.DataContext as CommunitySubscribersViewModel;
+        return base.DataContext as CommunitySubscribersViewModel;
       }
     }
 
@@ -64,23 +73,24 @@ namespace VKClient.Groups
       base.HandleOnNavigatedTo(e);
       if (this._isInitialized)
         return;
-      GroupType toEnum = this.NavigationContext.QueryString["CommunityType"].ParseToEnum<GroupType>();
-      this._communityId = long.Parse(this.NavigationContext.QueryString["CommunityId"]);
-      this._isManagement = this.NavigationContext.QueryString["IsManagement"].ToLower() == "true";
-      this._isPicker = this.NavigationContext.QueryString["IsPicker"].ToLower() == "true";
-      this._isBlockingPicker = this.NavigationContext.QueryString["IsBlockingPicker"].ToLower() == "true";
+      GroupType toEnum = ((Page) this).NavigationContext.QueryString["CommunityType"].ParseToEnum<GroupType>();
+      this._communityId = long.Parse(((Page) this).NavigationContext.QueryString["CommunityId"]);
+      this._isManagement = ((Page) this).NavigationContext.QueryString["IsManagement"].ToLower() == "true";
+      this._isPicker = ((Page) this).NavigationContext.QueryString["IsPicker"].ToLower() == "true";
+      this._isBlockingPicker = ((Page) this).NavigationContext.QueryString["IsBlockingPicker"].ToLower() == "true";
       if (toEnum != GroupType.Event)
-        this.Pivot.Items.Remove((object) this.PivotItemUnsure);
+        ((PresentationFrameworkCollection<object>) ((ItemsControl) this.Pivot).Items).Remove((object) this.PivotItemUnsure);
       CommunitySubscribersViewModel subscribersViewModel = new CommunitySubscribersViewModel(this._communityId, toEnum, this._isManagement);
-      this.DataContext = (object) subscribersViewModel;
-      ApplicationBarIconButton applicationBarIconButton = new ApplicationBarIconButton()
-      {
-        IconUri = new Uri("/Resources/appbar.feature.search.rest.png", UriKind.Relative),
-        Text = CommonResources.FriendsPage_AppBar_Search
-      };
-      applicationBarIconButton.Click += new EventHandler(this.SearchButton_OnClicked);
-      this.ApplicationBar = (IApplicationBar) ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9);
-      this.ApplicationBar.Buttons.Add((object) applicationBarIconButton);
+      base.DataContext=((object) subscribersViewModel);
+      ApplicationBarIconButton applicationBarIconButton1 = new ApplicationBarIconButton();
+      Uri uri = new Uri("/Resources/appbar.feature.search.rest.png", UriKind.Relative);
+      applicationBarIconButton1.IconUri=(uri);
+      string pageAppBarSearch = CommonResources.FriendsPage_AppBar_Search;
+      applicationBarIconButton1.Text=(pageAppBarSearch);
+      ApplicationBarIconButton applicationBarIconButton2 = applicationBarIconButton1;
+      applicationBarIconButton2.Click+=(new EventHandler(this.SearchButton_OnClicked));
+      this.ApplicationBar=((IApplicationBar) ApplicationBarBuilder.Build(new Color?(), new Color?(), 0.9));
+      this.ApplicationBar.Buttons.Add((object) applicationBarIconButton2);
       if (this._isPicker)
       {
         this.Header.HideSandwitchButton = true;
@@ -116,79 +126,103 @@ namespace VKClient.Groups
       LinkHeader item = longListSelector.SelectedItem as LinkHeader;
       if (item == null)
         return;
-      longListSelector.SelectedItem = null;
+      longListSelector.SelectedItem=((object) null);
       if (!this._isPicker)
         Navigator.Current.NavigateToUserProfile(item.Id, item.User.Name, "", false);
       else if (item.Id != AppGlobalStateManager.Current.LoggedInUserId && (this.ViewModel.Managers == null || this.ViewModel.Managers.All<User>((Func<User, bool>) (m => m.id != item.Id))))
       {
         if (!this._isBlockingPicker)
-          Navigator.Current.NavigateToCommunityManagementManagerAdding(this.ViewModel.CommunityId, item.User, true);
+          Navigator.Current.NavigateToCommunityManagementManagerAdding(this.ViewModel.CommunityId, this.ViewModel.CommunityType, item.User, true);
         else
           Navigator.Current.NavigateToCommunityManagementBlockAdding(this.ViewModel.CommunityId, item.User, false);
       }
       else
-        new GenericInfoUC().ShowAndHideLater(CommonResources.Error, null);
+        new GenericInfoUC().ShowAndHideLater(CommonResources.Error, (FrameworkElement) null);
     }
 
     private void AddToManagers_OnClicked(object sender, RoutedEventArgs e)
     {
-      LinkHeader linkHeader = ((FrameworkElement) sender).DataContext as LinkHeader;
-      if (linkHeader == null)
+      LinkHeader dataContext = ((FrameworkElement) sender).DataContext as LinkHeader;
+      if (dataContext == null)
         return;
-      Navigator.Current.NavigateToCommunityManagementManagerAdding(this.ViewModel.CommunityId, linkHeader.User, false);
+      Navigator.Current.NavigateToCommunityManagementManagerAdding(this.ViewModel.CommunityId, this.ViewModel.CommunityType, dataContext.User, false);
     }
 
     private void Edit_OnClicked(object sender, RoutedEventArgs e)
     {
-      LinkHeader linkHeader = ((FrameworkElement) sender).DataContext as LinkHeader;
-      if (linkHeader == null)
+      LinkHeader dataContext = ((FrameworkElement) sender).DataContext as LinkHeader;
+      if (dataContext == null)
         return;
-      this.ViewModel.NavigateToManagerEditing(linkHeader);
+      this.ViewModel.NavigateToManagerEditing(dataContext);
     }
 
     private void RemoveFromCommunity_OnClicked(object sender, RoutedEventArgs e)
     {
-      LinkHeader user = ((FrameworkElement) sender).DataContext as LinkHeader;
-      if (user == null || MessageBox.Show(CommonResources.GenericConfirmation, CommonResources.RemovingFromCommunity, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+      LinkHeader dataContext = ((FrameworkElement) sender).DataContext as LinkHeader;
+      if (dataContext == null || MessageBox.Show(CommonResources.GenericConfirmation, CommonResources.RemovingFromCommunity, (MessageBoxButton) 1) != MessageBoxResult.OK)
         return;
-      this.ViewModel.RemoveFromCommunity(user);
+      this.ViewModel.RemoveFromCommunity(dataContext);
     }
 
     private void Block_OnClicked(object sender, RoutedEventArgs e)
     {
-      LinkHeader linkHeader = ((FrameworkElement) sender).DataContext as LinkHeader;
-      if (linkHeader == null)
+      LinkHeader dataContext = ((FrameworkElement) sender).DataContext as LinkHeader;
+      if (dataContext == null)
         return;
-      Navigator.Current.NavigateToCommunityManagementBlockAdding(this._communityId, linkHeader.User, true);
+      Navigator.Current.NavigateToCommunityManagementBlockAdding(this._communityId, dataContext.User, true);
     }
 
     private void SearchButton_OnClicked(object sender, EventArgs e)
     {
-      if (this.ViewModel.Managers == null)
+        if (this.ViewModel.Managers == null)
+        {
+            return;
+        }
+        DialogService expr_20 = new DialogService();
+        expr_20.BackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        expr_20.AnimationType = DialogService.AnimationTypes.None;
+        expr_20.HideOnNavigation = false;
+        DataTemplate itemTemplate = (DataTemplate)base.Resources["ItemTemplate"];
+        CommunitySubscribersSearchDataProvider searchDataProvider = new CommunitySubscribersSearchDataProvider(this._communityId, this.ViewModel.CommunityType, this.ViewModel.Managers, this._isManagement, this.Pivot.SelectedItem == this.PivotItemFriends);
+        GenericSearchUC searchUC = new GenericSearchUC();
+        searchUC.LayoutRootGrid.Margin=(new Thickness(0.0, 77.0, 0.0, 0.0));
+        searchUC.Initialize<User, LinkHeader>(searchDataProvider, delegate(object p, object f)
+        {
+            this.List_OnSelectionChanged(p, null);
+        }, itemTemplate);
+        searchUC.SearchTextBox.TextChanged+=(delegate(object s, TextChangedEventArgs ev)
+        {
+            bool flag = searchUC.SearchTextBox.Text != "";
+            this.Pivot.Visibility = (flag ? Visibility.Collapsed : Visibility.Visible);
+        });
+        expr_20.Closed += delegate(object p, EventArgs f)
+        {
+            this.Pivot.Visibility=(0);
+            this.ViewModel.SearchViewModel = null;
+        };
+        expr_20.Child = searchUC;
+        expr_20.Show(this.Pivot);
+        this.InitializeAdornerControls();
+        this.ViewModel.SearchViewModel = ((GenericSearchViewModel<User, LinkHeader>)searchUC.ViewModel).SearchVM;
+    }
+
+
+    [DebuggerNonUserCode]
+    public void InitializeComponent()
+    {
+      if (this._contentLoaded)
         return;
-      DialogService dialogService = new DialogService();
-      dialogService.BackgroundBrush = (Brush) new SolidColorBrush(Colors.Transparent);
-      dialogService.AnimationType = DialogService.AnimationTypes.None;
-      int num = 0;
-      dialogService.HideOnNavigation = num != 0;
-      DataTemplate itemTemplate = (DataTemplate) this.Resources["ItemTemplate"];
-      CommunitySubscribersSearchDataProvider searchDataProvider = new CommunitySubscribersSearchDataProvider(this._communityId, this.ViewModel.CommunityType, this.ViewModel.Managers, this._isManagement, this.Pivot.SelectedItem == this.PivotItemFriends);
-      GenericSearchUC searchUC = new GenericSearchUC();
-      searchUC.LayoutRootGrid.Margin = new Thickness(0.0, 77.0, 0.0, 0.0);
-      searchUC.Initialize<User, LinkHeader>((ISearchDataProvider<User, LinkHeader>) searchDataProvider, (Action<object, object>) ((p, f) => this.List_OnSelectionChanged(p, (SelectionChangedEventArgs) null)), itemTemplate);
-      searchUC.SearchTextBox.TextChanged += (TextChangedEventHandler) ((s, ev) => this.Pivot.Visibility = searchUC.SearchTextBox.Text != "" ? Visibility.Collapsed : Visibility.Visible);
-      EventHandler eventHandler = (EventHandler) ((p, f) =>
-      {
-        this.Pivot.Visibility = Visibility.Visible;
-        this.ViewModel.SearchViewModel = (GenericCollectionViewModel2<VKList<User>, LinkHeader>) null;
-      });
-      dialogService.Closed += eventHandler;
-      GenericSearchUC genericSearchUc = searchUC;
-      dialogService.Child = (FrameworkElement) genericSearchUc;
-      Pivot pivot = this.Pivot;
-      dialogService.Show((UIElement) pivot);
-      this.InitializeAdornerControls();
-      this.ViewModel.SearchViewModel = ((GenericSearchViewModel<User, LinkHeader>) searchUC.ViewModel).SearchVM;
+      this._contentLoaded = true;
+      Application.LoadComponent((object) this, new Uri("/VKClient.Groups;component/CommunitySubscribersPage.xaml", UriKind.Relative));
+      this.Header = (GenericHeaderUC) base.FindName("Header");
+      this.Pivot = (Pivot) base.FindName("Pivot");
+      this.PivotItemAll = (PivotItem) base.FindName("PivotItemAll");
+      this.AllList = (ExtendedLongListSelector) base.FindName("AllList");
+      this.PivotItemUnsure = (PivotItem) base.FindName("PivotItemUnsure");
+      this.UnsureList = (ExtendedLongListSelector) base.FindName("UnsureList");
+      this.PivotItemFriends = (PivotItem) base.FindName("PivotItemFriends");
+      this.FriendsList = (ExtendedLongListSelector) base.FindName("FriendsList");
+      this.PullToRefresh = (PullToRefreshUC) base.FindName("PullToRefresh");
     }
   }
 }

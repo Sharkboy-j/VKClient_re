@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Media;
 using VKClient.Audio.Base.DataObjects;
@@ -20,7 +21,7 @@ namespace VKClient.Groups.Management.Information.Library
     private SolidColorBrush _pinForeground;
     private double _panelTilt;
 
-    public InformationViewModel ParentViewModel { get; set; }
+    public InformationViewModel ParentViewModel { get; private set; }
 
     public Visibility Visibility
     {
@@ -31,7 +32,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._visibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.Visibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.Visibility));
       }
     }
 
@@ -44,7 +45,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._descriptionText = value;
-        this.NotifyPropertyChanged<string>((System.Linq.Expressions.Expression<Func<string>>) (() => this.DescriptionText));
+        this.NotifyPropertyChanged<string>((() => this.DescriptionText));
       }
     }
 
@@ -57,7 +58,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._descriptionForeground = value;
-        this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>) (() => this.DescriptionForeground));
+        this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>) (() => this.DescriptionForeground));
       }
     }
 
@@ -70,7 +71,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._editButtonVisibility = value;
-        this.NotifyPropertyChanged<Visibility>((System.Linq.Expressions.Expression<Func<Visibility>>) (() => this.EditButtonVisibility));
+        this.NotifyPropertyChanged<Visibility>((() => this.EditButtonVisibility));
       }
     }
 
@@ -83,7 +84,7 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._pinForeground = value;
-        this.NotifyPropertyChanged<SolidColorBrush>((System.Linq.Expressions.Expression<Func<SolidColorBrush>>) (() => this.PinForeground));
+        this.NotifyPropertyChanged<SolidColorBrush>((Expression<Func<SolidColorBrush>>) (() => this.PinForeground));
       }
     }
 
@@ -96,14 +97,14 @@ namespace VKClient.Groups.Management.Information.Library
       set
       {
         this._panelTilt = value;
-        this.NotifyPropertyChanged<double>((System.Linq.Expressions.Expression<Func<double>>) (() => this.PanelTilt));
+        this.NotifyPropertyChanged<double>((() => this.PanelTilt));
       }
     }
 
     public CommunityPlacementViewModel(InformationViewModel parentViewModel)
     {
       this.ParentViewModel = parentViewModel;
-      EventAggregator.Current.Subscribe((object) this);
+      EventAggregator.Current.Subscribe(this);
     }
 
     public void Read(CommunitySettings information)

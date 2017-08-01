@@ -10,5 +10,6 @@ namespace VKMessenger.Library
     WallPost,
     Sticker,
     WallReply,
+    Gift,
   }
 }

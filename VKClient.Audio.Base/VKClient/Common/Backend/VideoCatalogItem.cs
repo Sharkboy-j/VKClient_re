@@ -49,7 +49,7 @@ namespace VKClient.Common.Backend
     {
     }
 
-    public VideoCatalogItem(VKClient.Common.Backend.DataObjects.Video video)
+    public VideoCatalogItem(Video video)
     {
       this.id = video.id;
       this.owner_id = video.owner_id;

@@ -70,12 +70,12 @@ namespace Microsoft.Phone.Applications.Common
 
     public override string ToString()
     {
-      return string.Format("({0},{1},{2})", (object) this.X, (object) this.Y, (object) this.Z);
+      return string.Format("({0},{1},{2})", this.X, this.Y, this.Z);
     }
 
     public override bool Equals(object o)
     {
-      if (o is Simple3DVector)
+      if ((o as Simple3DVector) != null)
         return this == (Simple3DVector) o;
       return false;
     }

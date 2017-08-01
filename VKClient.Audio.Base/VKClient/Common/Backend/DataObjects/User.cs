@@ -6,7 +6,7 @@ using VKClient.Common.Framework;
 
 namespace VKClient.Common.Backend.DataObjects
 {
-    public class User : IBinarySerializable
+    public class User : IProfile, IBinarySerializable
     {
         public static readonly string DEACTIVATED_DELETED = "deleted";
         public static readonly string DEACTIVATED_BANNED = "banned";
@@ -33,11 +33,15 @@ namespace VKClient.Common.Backend.DataObjects
         private string _facebook = "";
         private string _first_name_acc;
         private string _last_name_acc;
-        //private string _photo_rec;
+        private string _bdate;
+        private BirthDate _birthDate;
+        private string _photo_rec;
         private string _photo_max;
         private string _facebookName;
         private string _twitter;
         private string _instagram;
+
+        public string domain { get; set; }
 
         public DateTime CachedDateTime { get; set; }
 
@@ -72,6 +76,17 @@ namespace VKClient.Common.Backend.DataObjects
             get
             {
                 string str = this.first_name;
+                if (!string.IsNullOrWhiteSpace(this.last_name))
+                    str = str + " " + this.last_name[0].ToString().ToUpperInvariant() + ".";
+                return str;
+            }
+        }
+
+        public string FirstNameDatLastNameShort
+        {
+            get
+            {
+                string str = this.first_name_dat;
                 if (!string.IsNullOrWhiteSpace(this.last_name))
                     str = str + " " + this.last_name[0].ToString().ToUpperInvariant() + ".";
                 return str;
@@ -212,7 +227,26 @@ namespace VKClient.Common.Backend.DataObjects
             }
         }
 
-        public string bdate { get; set; }
+        public string bdate
+        {
+            get
+            {
+                return this._bdate;
+            }
+            set
+            {
+                this._bdate = value;
+                this._birthDate = null;
+            }
+        }
+
+        public BirthDate BirthDate
+        {
+            get
+            {
+                return this._birthDate ?? (this._birthDate = new BirthDate(this));
+            }
+        }
 
         public string home_town
         {
@@ -253,8 +287,6 @@ namespace VKClient.Common.Backend.DataObjects
         public Occupation occupation { get; set; }
 
         public UserPersonal personal { get; set; }
-
-        public string domain { get; set; }
 
         public int timezone { get; set; }
 
@@ -352,6 +384,8 @@ namespace VKClient.Common.Backend.DataObjects
 
         public int can_write_private_message { get; set; }
 
+        public int is_messages_blocked { get; set; }
+
         public Exports exports { get; set; }
 
         public string activity
@@ -375,6 +409,8 @@ namespace VKClient.Common.Backend.DataObjects
         public int can_see_audio { get; set; }
 
         public int can_send_friend_request { get; set; }
+
+        public int can_see_gifts { get; set; }
 
         public int relation { get; set; }
 
@@ -574,11 +610,19 @@ namespace VKClient.Common.Backend.DataObjects
             }
         }
 
+        public string name
+        {
+            get
+            {
+                return this.Name;
+            }
+        }
+
         public string NameLink
         {
             get
             {
-                return string.Format("[id{0}|{1}]", (object)this.id, (object)this.Name);
+                return string.Format("[id{0}|{1}]", this.id, this.Name);
             }
         }
 
@@ -631,11 +675,13 @@ namespace VKClient.Common.Backend.DataObjects
             this.last_seen = new UserStatus();
             this.counters = new Counters();
             this.exports = new Exports();
+
+            this.domain = "";
         }
 
         public void Write(BinaryWriter writer)
         {
-            writer.Write(8);
+            writer.Write(9);
             writer.Write(this.uid);
             writer.WriteString(this.first_name);
             writer.WriteString(this.last_name);
@@ -658,6 +704,7 @@ namespace VKClient.Common.Backend.DataObjects
             writer.Write(this.friend_status);
             writer.Write<BlockInformation>(this.ban_info, false);
             writer.WriteString(this.role);
+            writer.WriteString(this.domain);
         }
 
         public void Read(BinaryReader reader)
@@ -705,14 +752,17 @@ namespace VKClient.Common.Backend.DataObjects
             if (num1 >= num7)
                 this.ban_info = reader.ReadGeneric<BlockInformation>();
             int num8 = 8;
-            if (num1 < num8)
+            if (num1 >= num8)
+                this.role = reader.ReadString();
+            int num9 = 9;
+            if (num1 < num9)
                 return;
-            this.role = reader.ReadString();
+            this.domain = reader.ReadString();
         }
 
         public override string ToString()
         {
-            return string.Format("{0} {1} {2} {3}", (object)this.uid, (object)this.first_name, (object)this.last_name, (object)this.online);
+            return string.Format("{0} {1} {2} {3}", this.uid, this.first_name, this.last_name, this.online);
         }
     }
 }

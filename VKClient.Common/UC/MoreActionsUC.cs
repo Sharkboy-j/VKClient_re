@@ -26,8 +26,8 @@ namespace VKClient.Common.UC
 
     public void SetBlue()
     {
-      this.LayoutRoot.Background = (Brush) Application.Current.Resources["PhoneHeaderBackgroundBrush"];
-      this.border.Background = (Brush) Application.Current.Resources["PhoneBlueOnBlueIconBrush"];
+      ((Panel) this.LayoutRoot).Background = ((Brush) Application.Current.Resources["PhoneHeaderBackgroundBrush"]);
+      this.border.Background = ((Brush) Application.Current.Resources["PhoneBlueOnBlueIconBrush"]);
     }
 
     private void OptionsButtonTap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -39,28 +39,34 @@ namespace VKClient.Common.UC
       }
       else
       {
-        ISupportMenuActions supportMenuActions = this.DataContext as ISupportMenuActions;
-        if (supportMenuActions == null)
+        ISupportMenuActions dataContext = base.DataContext as ISupportMenuActions;
+        if (dataContext == null)
           return;
-        List<MenuItemData> menuItemsData = supportMenuActions.GetMenuItemsData();
+        List<MenuItemData> menuItemsData = dataContext.GetMenuItemsData();
         List<MenuItem> menuItems = new List<MenuItem>();
         if (menuItemsData != null)
         {
-          foreach (MenuItemData menuItemData in menuItemsData)
-          {
-            MenuItemData m = menuItemData;
-            MenuItem menuItem1 = new MenuItem();
-            string title = m.Title;
-            menuItem1.Header = (object) title;
-            MenuItem menuItem2 = menuItem1;
-            menuItem2.Click += (RoutedEventHandler) ((s, ev) => m.OnTap());
-            menuItems.Add(menuItem2);
-          }
-          if (menuItems.Count > 0)
-          {
-            this.SetMenu(menuItems);
-            this.ShowMenu();
-          }
+            using (List<MenuItemData>.Enumerator enumerator = menuItemsData.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    MenuItemData m = enumerator.Current;
+                    MenuItem menuItem = new MenuItem
+                    {
+                        Header = m.Title
+                    };
+                    menuItem.Click += delegate(object s, RoutedEventArgs ev)
+                    {
+                        m.OnTap.Invoke();
+                    };
+                    menuItems.Add(menuItem);
+                }
+            }
+            if (menuItems.Count > 0)
+            {
+                this.SetMenu(menuItems);
+                this.ShowMenu();
+            }
         }
         e.Handled = true;
       }
@@ -72,14 +78,14 @@ namespace VKClient.Common.UC
         return;
       ContextMenu contextMenu1 = new ContextMenu();
       SolidColorBrush solidColorBrush1 = (SolidColorBrush) Application.Current.Resources["PhoneMenuBackgroundBrush"];
-      contextMenu1.Background = (Brush) solidColorBrush1;
+      ((Control) contextMenu1).Background = ((Brush) solidColorBrush1);
       SolidColorBrush solidColorBrush2 = (SolidColorBrush) Application.Current.Resources["PhoneMenuForegroundBrush"];
-      contextMenu1.Foreground = (Brush) solidColorBrush2;
+      ((Control) contextMenu1).Foreground = ((Brush) solidColorBrush2);
       int num = 0;
       contextMenu1.IsZoomEnabled = num != 0;
       ContextMenu contextMenu2 = contextMenu1;
       foreach (MenuItem menuItem in menuItems)
-        contextMenu2.Items.Add((object) menuItem);
+        ((PresentationFrameworkCollection<object>) contextMenu2.Items).Add(menuItem);
       ContextMenuService.SetContextMenu((DependencyObject) this, contextMenu2);
     }
 
@@ -107,9 +113,9 @@ namespace VKClient.Common.UC
       if (this._contentLoaded)
         return;
       this._contentLoaded = true;
-      Application.LoadComponent((object) this, new Uri("/VKClient.Common;component/UC/MoreActionsUC.xaml", UriKind.Relative));
-      this.LayoutRoot = (Grid) this.FindName("LayoutRoot");
-      this.border = (Border) this.FindName("border");
+      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UC/MoreActionsUC.xaml", UriKind.Relative));
+      this.LayoutRoot = (Grid) base.FindName("LayoutRoot");
+      this.border = (Border) base.FindName("border");
     }
   }
 }
