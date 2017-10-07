@@ -39,9 +39,9 @@ namespace VKClient.Audio.Base.AudioCache
       CacheManager.TrySerialize((IBinarySerializable) this, "MediaLRUCache", false, CacheManager.DataType.CachedData);
     }
 
-    private void HandleRemovedItem(LRUCacheItem<string, string> ci)
+    private async void HandleRemovedItem(LRUCacheItem<string, string> ci)
     {
-      CacheManager.TryDeleteAsync(MediaLRUCache.RemoveLengthPrefixFromLocalFilePath(ci.value));
+      await CacheManager.TryDeleteAsync(MediaLRUCache.RemoveLengthPrefixFromLocalFilePath(ci.value));
     }
 
     public void AddLocalFile(string uri, string filePath, int fileSize)

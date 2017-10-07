@@ -695,12 +695,12 @@ namespace VKClient.Common.Framework
             this.SetupSystemTray();
         }
 
-        private void HandleCallbackParameters()
+        private async void HandleCallbackParameters()
         {
             string parameterForIdAndReset = ParametersRepository.GetParameterForIdAndReset("CallbackUriToLaunch") as string;
             if (parameterForIdAndReset == null)
                 return;
-            Launcher.LaunchUriAsync(new Uri(parameterForIdAndReset, UriKind.Absolute));
+            await Launcher.LaunchUriAsync(new Uri(parameterForIdAndReset, UriKind.Absolute));
         }
 
         private void SetupSystemTray()

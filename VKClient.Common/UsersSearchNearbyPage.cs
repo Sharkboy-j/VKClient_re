@@ -12,71 +12,71 @@ using Windows.System;
 
 namespace VKClient.Common
 {
-  public class UsersSearchNearbyPage : PageBase
-  {
-    private UsersSearchNearbyViewModel _viewModel;
-    internal VisualStateGroup CommonStates;
-    internal VisualState Normal;
-    internal VisualState Disabled;
-    internal GenericHeaderUC ucHeader;
-    internal ProgressRing progressRing;
-    internal TextBlock textBlockDescription;
-    internal TextBlock textBlockDisabled;
-    internal Button buttonOpenSettings;
-    internal ExtendedLongListSelector listUsers;
-    private bool _contentLoaded;
-
-    public UsersSearchNearbyPage()
+    public class UsersSearchNearbyPage : PageBase
     {
-      this.InitializeComponent();
-      this.ucHeader.TextBlockTitle.Text = CommonResources.PageTitle_UsersSearch_Nearby;
-    }
+        private UsersSearchNearbyViewModel _viewModel;
+        internal VisualStateGroup CommonStates;
+        internal VisualState Normal;
+        internal VisualState Disabled;
+        internal GenericHeaderUC ucHeader;
+        internal ProgressRing progressRing;
+        internal TextBlock textBlockDescription;
+        internal TextBlock textBlockDisabled;
+        internal Button buttonOpenSettings;
+        internal ExtendedLongListSelector listUsers;
+        private bool _contentLoaded;
 
-    protected override void HandleOnNavigatedTo(NavigationEventArgs e)
-    {
-      base.HandleOnNavigatedTo(e);
-      this._viewModel = new UsersSearchNearbyViewModel();
-      base.DataContext = this._viewModel;
-      this._viewModel.LoadGeoposition(new Action<GeoPositionStatus>(this.HandlePositionStatus));
-    }
+        public UsersSearchNearbyPage()
+        {
+            this.InitializeComponent();
+            this.ucHeader.TextBlockTitle.Text = CommonResources.PageTitle_UsersSearch_Nearby;
+        }
 
-    private void HandlePositionStatus(GeoPositionStatus status)
-    {
-      if (status == GeoPositionStatus.Ready)
-      {
-        this._viewModel.StopLoading();
-        VisualStateManager.GoToState((Control) this, "Disabled", false);
-      }
-      else
-      {
-        VisualStateManager.GoToState((Control) this, "Normal", false);
-        if (status != GeoPositionStatus.Initializing)
-          return;
-        this._viewModel.StartLoading();
-      }
-    }
+        protected override void HandleOnNavigatedTo(NavigationEventArgs e)
+        {
+            base.HandleOnNavigatedTo(e);
+            this._viewModel = new UsersSearchNearbyViewModel();
+            base.DataContext = this._viewModel;
+            this._viewModel.LoadGeoposition(new Action<GeoPositionStatus>(this.HandlePositionStatus));
+        }
 
-    private void ButtonOpenSettings_OnClick(object sender, RoutedEventArgs e)
-    {
-      Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
-    }
+        private void HandlePositionStatus(GeoPositionStatus status)
+        {
+            if (status == GeoPositionStatus.Ready)
+            {
+                this._viewModel.StopLoading();
+                VisualStateManager.GoToState((Control)this, "Disabled", false);
+            }
+            else
+            {
+                VisualStateManager.GoToState((Control)this, "Normal", false);
+                if (status != GeoPositionStatus.Initializing)
+                    return;
+                this._viewModel.StartLoading();
+            }
+        }
 
-    [DebuggerNonUserCode]
-    public void InitializeComponent()
-    {
-      if (this._contentLoaded)
-        return;
-      this._contentLoaded = true;
-      Application.LoadComponent(this, new Uri("/VKClient.Common;component/UsersSearchNearbyPage.xaml", UriKind.Relative));
-      this.CommonStates = (VisualStateGroup) base.FindName("CommonStates");
-      this.Normal = (VisualState) base.FindName("Normal");
-      this.Disabled = (VisualState) base.FindName("Disabled");
-      this.ucHeader = (GenericHeaderUC) base.FindName("ucHeader");
-      this.progressRing = (ProgressRing) base.FindName("progressRing");
-      this.textBlockDescription = (TextBlock) base.FindName("textBlockDescription");
-      this.textBlockDisabled = (TextBlock) base.FindName("textBlockDisabled");
-      this.buttonOpenSettings = (Button) base.FindName("buttonOpenSettings");
-      this.listUsers = (ExtendedLongListSelector) base.FindName("listUsers");
+        private async void ButtonOpenSettings_OnClick(object sender, RoutedEventArgs e)
+        {
+            await Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
+        }
+
+        [DebuggerNonUserCode]
+        public void InitializeComponent()
+        {
+            if (this._contentLoaded)
+                return;
+            this._contentLoaded = true;
+            Application.LoadComponent(this, new Uri("/VKClient.Common;component/UsersSearchNearbyPage.xaml", UriKind.Relative));
+            this.CommonStates = (VisualStateGroup)base.FindName("CommonStates");
+            this.Normal = (VisualState)base.FindName("Normal");
+            this.Disabled = (VisualState)base.FindName("Disabled");
+            this.ucHeader = (GenericHeaderUC)base.FindName("ucHeader");
+            this.progressRing = (ProgressRing)base.FindName("progressRing");
+            this.textBlockDescription = (TextBlock)base.FindName("textBlockDescription");
+            this.textBlockDisabled = (TextBlock)base.FindName("textBlockDisabled");
+            this.buttonOpenSettings = (Button)base.FindName("buttonOpenSettings");
+            this.listUsers = (ExtendedLongListSelector)base.FindName("listUsers");
+        }
     }
-  }
 }

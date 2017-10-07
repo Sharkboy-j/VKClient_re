@@ -175,7 +175,17 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
-
+        <Grid x:Name="Shadow" Height="5" VerticalAlignment="Bottom">
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#4C000000" Offset="0"/>
+                    <GradientStop Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Grid.RenderTransform>
+                <CompositeTransform TranslateY="5"/>
+            </Grid.RenderTransform>
+        </Grid>
 
     </Grid>
 

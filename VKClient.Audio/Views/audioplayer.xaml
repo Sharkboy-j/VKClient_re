@@ -17,7 +17,6 @@
                 >
 
     <framework:PageBase.Resources>
-
         <Style x:Key="SliderStyle1" TargetType="Slider">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -49,14 +48,14 @@
                                 </VisualStateGroup>
                             </VisualStateManager.VisualStateGroups>
                             <Grid x:Name="HorizontalTemplate" Margin="{StaticResource PhoneHorizontalMargin}">
-                                <Rectangle x:Name="HorizontalTrack" Fill="{TemplateBinding Background}" Height="3" IsHitTestVisible="False" Margin="0,22,0,50"/>
-                                <Rectangle x:Name="HorizontalFill" Fill="{TemplateBinding Foreground}" Height="3" IsHitTestVisible="False" Margin="0,22,0,50">
+                                <Rectangle x:Name="HorizontalTrack" Fill="{TemplateBinding Background}" Height="3" IsHitTestVisible="False" Margin="0,22,0,20"/>
+                                <Rectangle x:Name="HorizontalFill" Fill="{TemplateBinding Foreground}" Height="3" IsHitTestVisible="False" Margin="0,22,0,20">
                                     <Rectangle.Clip>
                                         <RectangleGeometry Rect="0, 0, 6, 12"/>
                                     </Rectangle.Clip>
                                 </Rectangle>
                                 <Rectangle x:Name="HorizontalCenterElement" Fill="{StaticResource PhoneMenuBackgroundBrush}"
-                                           Stroke="{StaticResource PhoneAudioPlayerForeground1Brush}" HorizontalAlignment="Left" Height="15" Margin="0,17,0,44" Width="15"
+                                           Stroke="{StaticResource PhoneAudioPlayerForeground1Brush}" HorizontalAlignment="Left" Height="15" Margin="0,17,0,15" Width="15"
 								RadiusX="7.5" RadiusY="7.5" StrokeThickness="2">
                                     <Rectangle.RenderTransform>
                                         <TranslateTransform/>
@@ -83,12 +82,206 @@
         </Style>
     </framework:PageBase.Resources>
 
-    <Grid x:Name="LayoutRoot">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="64"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+
+        
+
+        <StackPanel>
+            <TextBlock Text="{Binding ArtistName, FallbackValue='Arcade Fire'}"  
+                             Foreground="{StaticResource PhoneAudioPlayerForeground1Brush}"
+                           FontSize="35" 
+                           Margin="24 31 0 0"/>
+            <TextBlock Text="{Binding TrackName, FallbackValue='Here comes the night'}" 
+                           FontSize="26"
+                             Foreground="{StaticResource PhoneAudioPlayerForeground2Brush}"
+                           Margin="25 -7 0 0"
+                          FontWeight="Light"/>
+        </StackPanel>
+
+
+        <Grid Grid.Row="1" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+
+
+            <Grid Height="60" Width="60" Visibility="{Binding HaveLyricsVisibility}" Tap="SongText_Tap">
+                <Border Width="24" Height="24"             
+                                Background="{StaticResource PhoneNewsActionLikedForegroundBrush}"
+                                Visibility="{Binding HaveLyricsVisibility}">
+                    <Border.OpacityMask>
+                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicControlsSongText.png" />
+                    </Border.OpacityMask>
+                </Border>
+            </Grid>
+
+
+            <Grid Height="60" Width="60" Grid.Column="1" Tap="Broadcast_Tap">
+                <Border Width="24" Height="24" Background="{Binding BroadcastBackground, FallbackValue=White}">
+                    <Border.OpacityMask>
+                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicControlsBroadcast.png" />
+                    </Border.OpacityMask>
+                </Border>
+            </Grid>
+
+
+
+
+            <Grid Height="60" Width="60" Grid.Column="2"
+                                Tap="Shuffle_Tap">
+                <Border Width="24" Height="24" Background="{Binding ShuffleBackground, FallbackValue=White}">
+                    <Border.OpacityMask>
+                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicControlsShuffle.png" />
+                    </Border.OpacityMask>
+                </Border>
+            </Grid>
+
+
+
+            <Grid Height="60" Width="60" Grid.Column="3" Tap="Repeat_Tap">
+                <Border Width="24" Height="24"
+                            Tap="Repeat_Tap"
+                            Background="{Binding RepeatBackground, FallbackValue=White}">
+                    <Border.OpacityMask>
+                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicControlsRepeat.png" />
+                    </Border.OpacityMask>
+                </Border>
+            </Grid>
+
+
+
+
+            <Grid Height="60" Width="60" Visibility="{Binding CanAddVisibility}"
+                              Grid.Column="4" Tap="Add_Tap">
+                <Border Width="24" Height="24"
+                                     Background="{StaticResource PhoneNewsActionLikedForegroundBrush}"
+                                    Opacity="{Binding CanAddOpacity}"
+                                    Visibility="{Binding CanAddVisibility}">
+                    <Border.OpacityMask>
+                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicControlsAdd.png" />
+                    </Border.OpacityMask>
+                </Border>
+
+                <Border Width="24" Height="24"
+                                     Background="{StaticResource PhoneNewsActionLikedForegroundBrush}"
+                                    Visibility="{Binding AddedVisibility}"      
+                                    Opacity="0.3">
+                    <Border.OpacityMask>
+                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicControlsAdded.png" />
+                    </Border.OpacityMask>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2" Name="ArtPlace" Loaded="ArtPlace_Loaded">
+
+
+            <Path x:Name="music_icon" Visibility="Collapsed"
+                          Data="F1M112.463,0.925C112.463,0.925 38.562,14.306 38.562,14.306 34.559,15.232 31.435,19.319 31.435,23.389 31.435,23.389 31.402,97.807 31.402,97.807 31.402,97.807 31.268,97.803 31.268,97.803 31.268,97.803 34.539,99.52 22.061,99.682 5.27,99.901 0,106.287 0.003,115.696 0.008,127.774 5.825,132 20.075,132 37.207,132 44.392,122.738 44.82,104.818 44.82,104.818 44.841,104.816 44.841,104.816 44.841,104.816 44.939,50.893 44.939,50.893 44.939,50.893 106.732,37.938 106.732,37.938 106.732,37.938 106.753,79.033 106.753,79.033 106.753,79.033 106.753,79.03 106.753,79.03 106.753,79.03 106.752,79.041 106.753,79.058 106.753,79.058 106.753,79.318 106.753,79.318 106.685,80.466 108.314,81.206 97.411,80.871 80.541,80.352 75.461,88.144 75.464,97.252 75.47,108.943 80.947,113.282 95.265,113.282 112.476,113.282 119.569,104.166 120,87.117 120,87.117 120,87.134 120,87.134 120,87.134 120,6.646 120,6.646 120,2.577 116.466,0 112.463,0.925z"
+                          Fill="{StaticResource PhoneAudioPlayerArtworkForegroundBrush}" Height="132" Width="120"/>
+            <Image 
+                           
+                             HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                           framework:ImageLoader.UriSource="{Binding Artwork}"/>
+        </Grid>
+        
+        <Grid Grid.Row="3" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Foreground="{StaticResource PhoneAudioPlayerForeground1Brush}"
+                                   FontSize="15"
+                                   Text="{Binding PositionStr, FallbackValue=0:20}" Margin="20 15 0 0" />
+
+            <Border Grid.Column="1">
+                <Slider  ManipulationStarted="Slider_ManipulationStarted_1"
+                            Style="{StaticResource SliderStyle1}"
+                                 Name="slider"
+                             Background="{StaticResource PhoneAudioPlayerSliderBackgroundBrush}"
+                                 Foreground="{StaticResource PhoneAudioPlayerForeground1Brush}"
+                             ManipulationCompleted="Slider_ManipulationCompleted_1"
+                             Maximum="{Binding RemainingSeconds}"
+                         VerticalAlignment="Top"/>
+            </Border>
+
+            <TextBlock Grid.Column="2"
+                            Foreground="{StaticResource PhoneAudioPlayerForeground1Brush}"
+                                   FontSize="15"
+                                   Text="{Binding RemainingStr, FallbackValue=3:20}" Margin="0 15 20 0"/>
+        </Grid>
+
+        <Grid Grid.Row="4" Margin="0 0 0 30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Border framework:MetroInMotion.Tilt="2.1" VerticalAlignment="Bottom"
+                           HorizontalAlignment="Right"
+                        Width="48" Height="48" Tap="RevButton_Tap" Background="{StaticResource PhoneAudioPlayerForeground1Brush}">
+                <Border.OpacityMask>
+                    <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicTransportPrev.png" />
+                </Border.OpacityMask>
+
+            </Border>
+
+            <Border framework:MetroInMotion.Tilt="2.1" Grid.Column="1" VerticalAlignment="Bottom"
+                            Width="56"
+                            Height="56"
+                            Visibility="{Binding PlayImageVisibility}"
+                            Tap="playImage_Tap"
+                            Background="{StaticResource PhoneAudioPlayerForeground1Brush}">
+                <Border.OpacityMask>
+                    <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicTransportPlay.png" />
+                </Border.OpacityMask>
+
+            </Border>
+
+            <Border framework:MetroInMotion.Tilt="2.1" Grid.Column="1" VerticalAlignment="Bottom"
+                            Width="56"
+                            Height="56"
+                           
+                            Tap="pauseImage_Tap"
+                            Visibility="{Binding PauseImageVisibility}"
+                            Background="{StaticResource PhoneAudioPlayerForeground1Brush}">
+                <Border.OpacityMask>
+                    <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicTransportPause.png" />
+                </Border.OpacityMask>
+
+            </Border>
+
+
+            <Border framework:MetroInMotion.Tilt="2.1" Grid.Column="2" VerticalAlignment="Bottom"
+                            Width="48"
+                            Height="48"
+                            Tap="ForwardButton_Tap"
+                    HorizontalAlignment="Left"
+                            Background="{StaticResource PhoneAudioPlayerForeground1Brush}">
+                <Border.OpacityMask>
+                    <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicTransportNext.png" />
+                </Border.OpacityMask>
+
+            </Border>
+        </Grid>
+        <!--<Grid x:Name="LayoutRoot">
         <Grid 
           Background="{StaticResource PhoneAudioPlayerBackgroundBrush}">
-
-            <!--<Image Source="../Temp/wp-musicplayer-2.png" Opacity="0.6" Margin="0 0 0 0 "/>-->
-
 
             <Grid >
                 <StackPanel>
@@ -353,6 +546,6 @@
 
             </Grid>
         </Grid>
+    </Grid>-->
     </Grid>
-
 </framework:PageBase>

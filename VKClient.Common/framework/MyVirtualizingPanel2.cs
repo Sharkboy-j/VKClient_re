@@ -154,7 +154,7 @@ namespace VKClient.Common.Framework
                         IEnumerable<Panel> logicalChildrenByType2 = ((FrameworkElement)Enumerable.ElementAt<ContentPresenter>(logicalChildrenByType1, index)).GetLogicalChildrenByType<Panel>(false);
                         if (Enumerable.Any<Panel>(logicalChildrenByType2))
                         {
-                            this._outerPanel = (Panel)Enumerable.First<Panel>(logicalChildrenByType2);
+                            this._outerPanel = Enumerable.First<Panel>(logicalChildrenByType2);
                             break;
                         }
                     }
@@ -186,7 +186,7 @@ namespace VKClient.Common.Framework
             //base.\u002Ector();
             // ISSUE: method pointer
             base.Loaded += (new RoutedEventHandler(this.MyVirtualizingPanel_Loaded));
-            ((PresentationFrameworkCollection<UIElement>)((Panel)this).Children).Add((UIElement)this._itemsPanel);
+            this.Children.Add(this._itemsPanel);
         }
 
         public void Cleanup()
@@ -341,7 +341,7 @@ namespace VKClient.Common.Framework
             {
                 virtualizingPanel2.ClearItems();
                 List<IVirtualizable> virtualizableList2 = new List<IVirtualizable>();
-                IEnumerator enumerator = ((IEnumerable)virtualizingPanel2.ItemsSource).GetEnumerator();
+                IEnumerator enumerator = virtualizingPanel2.ItemsSource.GetEnumerator();
                 try
                 {
                     while (enumerator.MoveNext())
@@ -372,18 +372,14 @@ namespace VKClient.Common.Framework
                 return;
             this.ScrollViewer.OnCompressionTop = (Action)(() =>
             {
-                // ISSUE: reference to a compiler-generated field
                 if (this.Compression == null)
                     return;
-                // ISSUE: reference to a compiler-generated field
                 this.Compression(this, new CompressionEventArgs(CompressionType.Top));
             });
             this.ScrollViewer.OnCompressionBottom = (Action)(() =>
             {
-                // ISSUE: reference to a compiler-generated field
                 if (this.Compression == null)
                     return;
-                // ISSUE: reference to a compiler-generated field
                 this.Compression(this, new CompressionEventArgs(CompressionType.Bottom));
             });
         }
@@ -401,9 +397,8 @@ namespace VKClient.Common.Framework
                 return;
             IScrollableArea listScrollViewer = this._listScrollViewer;
             PlaneProjection planeProjection = new PlaneProjection();
-            double num = 180.0;
-            planeProjection.RotationZ = num;
-            listScrollViewer.Projection = (Projection)planeProjection;
+            planeProjection.RotationZ = 180.0;
+            listScrollViewer.Projection = planeProjection;
         }
 
         protected void EnsureBoundToScrollViewer()

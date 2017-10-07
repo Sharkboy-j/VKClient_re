@@ -140,7 +140,7 @@ namespace VKClient.Common.UC
 
     public event EventHandler ItemsCleared;
 
-    public event EventHandler SwipedToHide;
+    //public event EventHandler SwipedToHide;
 
     public event PropertyChangedEventHandler PropertyChanged;
 

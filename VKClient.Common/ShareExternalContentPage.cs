@@ -36,7 +36,7 @@ namespace VKClient.Common
       {
         this.ucShareContent.ShareContentDataProvider = contentDataProvider;
         base.DataContext = (new ViewModelBase());
-        (Application.Current as IAppStateInfo).ShareOperation =  null;
+        //(Application.Current as IAppStateInfo).ShareOperation =  null;
         this._isInitialized = true;
       }
     }

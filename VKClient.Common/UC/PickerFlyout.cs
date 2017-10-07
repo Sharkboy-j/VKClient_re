@@ -29,7 +29,7 @@ namespace VKClient.Common.UC
         private PageBase _page;
         private Grid _childPanel;
         private Grid _overlay;
-        private FrameworkElement _child;
+        //private FrameworkElement _child;
         private IApplicationBar _applicationBar;
         private bool _deferredShowToLoaded;
         private UIElement _controlToFadeout;

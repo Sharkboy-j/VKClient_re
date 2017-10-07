@@ -71,7 +71,7 @@ namespace VKClient.Common.Backend
             return advertisingId;
           return AdvertisingDeviceInfo.ADV_ID_USE_IS_FORBIDDEN;
         }
-        catch (Exception ex)
+        catch (Exception )
         {
           return AdvertisingDeviceInfo.ERROR_READING_ADV_ID;
         }

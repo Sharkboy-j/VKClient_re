@@ -30,16 +30,12 @@
         </DataTemplate>
     </framework:PageBase.Resources>
 
-    <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot"
           Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-
-
-
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel"
@@ -56,12 +52,47 @@
                                Height="574"
                                Margin="0 -480 0 0" />
 
-                    <uc:NewsfeedNewPostUC x:Name="ucNewPost"
+                    <!--<uc:NewsfeedNewPostUC x:Name="ucNewPost"
                                           CacheMode="BitmapCache"
-                                          Height="80" />
+                                          Height="80" />-->
+                    <Grid Height="64">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Tap="StackPanel_Tap_1">
+                            <Border Background="{StaticResource PhoneHeaderBackgroundBrush}" Width="32" Height="32">
+                                <Border.OpacityMask>
+                                    <ImageBrush ImageSource="/Resources/Mod/ic_story_28.png"/>
+                                </Border.OpacityMask>
+                            </Border>
+                            <TextBlock Foreground="{StaticResource PhoneHeaderBackgroundBrush}" Text="История" VerticalAlignment="Center" Margin="10 0 0 0"/>
+                        </StackPanel>
+                        <Border Margin="0 15"  BorderBrush="{StaticResource PhoneHeaderBackgroundBrush}" Grid.Column="1" BorderThickness="1 0 0 0"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Background="{StaticResource PhoneHeaderBackgroundBrush}" Width="32" Height="32">
+                                <Border.OpacityMask>
+                                    <ImageBrush ImageSource="/Resources/Mod/ic_live_24.png"/>
+                                </Border.OpacityMask>
+                            </Border>
+                            <TextBlock Foreground="{StaticResource PhoneHeaderBackgroundBrush}" Text="Эфир" VerticalAlignment="Center" Margin="10 0 0 0"/>
+                        </StackPanel>
+                        <Border Margin="0 15"  BorderBrush="{StaticResource PhoneHeaderBackgroundBrush}" Grid.Column="3" BorderThickness="1 0 0 0"/>
+                        <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Center" Tap="StackPanel_Tap">
+                            <Border Background="{StaticResource PhoneHeaderBackgroundBrush}" Width="32" Height="32">
+                                <Border.OpacityMask>
+                                    <ImageBrush ImageSource="/Resources/Profile/NewPost-1080p.png"/>
+                                </Border.OpacityMask>
+                            </Border>
+                            <TextBlock Foreground="{StaticResource PhoneHeaderBackgroundBrush}" Text="Запись" VerticalAlignment="Center" Margin="10 0 0 0"/>
+                        </StackPanel>
+                        </Grid>
 
-                    <Rectangle Fill="{StaticResource PhoneNewsDividerBrush}"
-                               Height="16" />
+                    <Rectangle Fill="{StaticResource PhoneNewsDividerBrush}" Height="16" />
 
 
                     <framework:MyVirtualizingPanel2 VerticalAlignment="Top"
@@ -72,13 +103,11 @@
                     <uc:FooterUC DataContext="{Binding NewsFeedVM}" />
 
                 </uc:MyVirtualizingStackPanel>
-
             </ViewportControl>
 
         </Grid>
 
-        <uc:NewsfeedHeaderUC x:Name="Header"
-                             CacheMode="BitmapCache" />
+        <uc:NewsfeedHeaderUC x:Name="Header" CacheMode="BitmapCache" />
 
 
         <Rectangle x:Name="rectSystemTrayPlaceholder"

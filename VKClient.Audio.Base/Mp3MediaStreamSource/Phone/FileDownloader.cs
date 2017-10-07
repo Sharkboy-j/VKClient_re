@@ -142,7 +142,7 @@ namespace Mp3MediaStreamSource.Phone
           this._dtReceivedResponse = DateTime.Now;
           stream.BeginRead(this._buffer, 0, this._buffer.Length, new AsyncCallback(this.ReadAsync), stream);
         }
-        catch (Exception ex)
+        catch (Exception )
         {
           this._downloadFailed = true;
           this.CloseStreams(stream, true);
@@ -241,7 +241,7 @@ namespace Mp3MediaStreamSource.Phone
           this._reporter.ReportDownloadedFileChunk(this._fileId, str, 0, byteRangeEnd, true);
           flag = true;
         }
-        catch (Exception ex)
+        catch (Exception )
         {
         }
       }
@@ -262,7 +262,7 @@ namespace Mp3MediaStreamSource.Phone
           return;
         this._iso.Dispose();
       }
-      catch (Exception ex)
+      catch (Exception )
       {
       }
     }

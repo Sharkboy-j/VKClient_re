@@ -412,6 +412,11 @@ namespace VKClient.Common.Profiles.Shared.Views
             this.ucHeader.rectBackground.Opacity = opacity;
             this.ucHeader.textBlockTitle.Opacity = opacity;
             this.ucHeader.counterPanel.Opacity = opacity;
+            //
+            if (opacity == 1.0)
+                this.ucHeader.Shadow.Opacity = 1.0;
+            else
+                this.ucHeader.Shadow.Opacity = 0.0;
         }
 
         private static double CalculateOpacity(double sp, double minSP, double maxSP)

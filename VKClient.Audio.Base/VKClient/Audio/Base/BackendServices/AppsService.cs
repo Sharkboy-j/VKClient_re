@@ -37,12 +37,8 @@ namespace VKClient.Audio.Base.BackendServices
             dictionary["count"] = count.ToString();
             string methodName = "apps.getCatalog";
             Dictionary<string, string> parameters = dictionary;
-            int num1 = 0;
-            int num2 = 1;
             CancellationToken? cancellationToken = new CancellationToken?();
-            // ISSUE: variable of the null type
-
-            VKRequestsDispatcher.DispatchRequestToVK<VKList<Game>>(methodName, parameters, callback, (Func<string, VKList<Game>>)(jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<VKList<Game>>>(jsonStr).response), num1 != 0, num2 != 0, cancellationToken, null);
+            VKRequestsDispatcher.DispatchRequestToVK<VKList<Game>>(methodName, parameters, callback, (Func<string, VKList<Game>>)(jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<VKList<Game>>>(jsonStr).response), false, true, cancellationToken, null);
         }
 
         public void GetMyGames(int offset, int count, Action<BackendResult<VKList<Game>, ResultCode>> callback)
@@ -54,12 +50,9 @@ namespace VKClient.Audio.Base.BackendServices
             dictionary["count"] = count.ToString();
             string methodName = "apps.getCatalog";
             Dictionary<string, string> parameters = dictionary;
-            int num1 = 0;
-            int num2 = 1;
-            CancellationToken? cancellationToken = new CancellationToken?();
-            // ISSUE: variable of the null type
 
-            VKRequestsDispatcher.DispatchRequestToVK<VKList<Game>>(methodName, parameters, callback, (Func<string, VKList<Game>>)(jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<VKList<Game>>>(jsonStr).response), num1 != 0, num2 != 0, cancellationToken, null);
+            CancellationToken? cancellationToken = new CancellationToken?();
+            VKRequestsDispatcher.DispatchRequestToVK<VKList<Game>>(methodName, parameters, callback, (Func<string, VKList<Game>>)(jsonStr => JsonConvert.DeserializeObject<VKRequestsDispatcher.GenericRoot<VKList<Game>>>(jsonStr).response), false, true, cancellationToken, null);
         }
 
         public void GetActivity(long gameId, int count, string start_from, Action<BackendResult<GamesFriendsActivityResponse, ResultCode>> callback)

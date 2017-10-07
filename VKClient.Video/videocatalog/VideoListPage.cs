@@ -85,8 +85,7 @@ namespace VKClient.Video.VideoCatalog
         videoListData.items = vkList.items;
         string fileId = this._section_id + "cached";
         int num2 = 0;
-        int num3 = 0;
-        CacheManager.TrySerializeAsync((IBinarySerializable) videoListData, fileId, num2 != 0, (CacheManager.DataType) num3);
+        CacheManager.TrySerializeAsync((IBinarySerializable) videoListData, fileId, num2 != 0, (CacheManager.DataType) 0);
       }
       this._isInitialized = true;
     }

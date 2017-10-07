@@ -28,7 +28,7 @@ using System.Linq;
 
 namespace VKClient.Audio
 {
-    public class AllUC : UserControl, IHandle<AudioPlayerStateChanged>//mod
+    public class AllUC : UserControl
     {
         internal ExtendedLongListSelector AllAudios;
         private bool _contentLoaded;
@@ -54,8 +54,6 @@ namespace VKClient.Audio
         public AllUC()
         {
             this.InitializeComponent();
-
-            //EventAggregator.Current.Subscribe(this);//mod
         }
 
         private void EditTrackItem_Tap(object sender, RoutedEventArgs e)
@@ -77,10 +75,7 @@ namespace VKClient.Audio
             AudioHeader dataContext = frameworkElement.DataContext as AudioHeader;
             if (dataContext == null)
                 return;
-            this.DeleteAudios(new List<AudioHeader>()
-      {
-        dataContext
-      });
+            this.DeleteAudios(new List<AudioHeader>() { dataContext });
         }
 
         public void DeleteAudios(List<AudioHeader> list)
@@ -112,21 +107,10 @@ namespace VKClient.Audio
         //
         private void Temp_Click(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            AudioTrack track = null;
-            Grid btn = sender as Grid;
-            for (int i = 0; i < this.VM.AllTracks.Collection.Count; i++)
-            {
-                AudioHeader temp = this.VM.AllTracks.Collection[i];
-                if (temp.Track.UniqueId == btn.Tag.ToString())
-                {
-                    track = AudioTrackHelper.CreateTrack(temp.Track);
-                }
-            }
+            string tag = (sender as Grid).Tag.ToString();
+            AudioHeader track = this.VM.AllTracks.Collection.First((h) => h.Track.UniqueId == tag);
 
-            if (track == null)
-                return;
-
-            if (track.Tag == BGAudioPlayerWrapper.Instance.Track.Tag)
+            if (track.Track.UniqueId == BGAudioPlayerWrapper.Instance.Track.GetTagId())
             {
                 if (BGAudioPlayerWrapper.Instance.PlayerState == PlayState.Playing)
                     BGAudioPlayerWrapper.Instance.Pause();
@@ -134,45 +118,59 @@ namespace VKClient.Audio
                     BGAudioPlayerWrapper.Instance.Play();
                 return;
             }
-
-            BGAudioPlayerWrapper.Instance.Track = track;
-            BGAudioPlayerWrapper.Instance.Volume = 1.0;
-            BGAudioPlayerWrapper.Instance.Play();
-
-            Grid grid = btn.Children[0] as Grid;
-            Border borderPlay = grid.Children[1] as Border;
-            borderPlay.Opacity = 0.1;
-
-            Border borderPause = grid.Children[2] as Border;
-            borderPause.Opacity = 1;
-
-            EventAggregator.Current.Publish(new AudioPlayerStateChanged(BGAudioPlayerWrapper.Instance.PlayerState));
+            else
+            {
+                this.NavigateToAudioPlayer(track, this.VM.AllTracks.Collection, false);
+            }
         }
 
-        public void Handle(AudioPlayerStateChanged message)
+        private void Grid_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {            
+            string tag = (sender as Grid).Tag.ToString();
+            AudioHeader track = this.VM.AllTracks.Collection.First((h) => h.Track.UniqueId == tag);
+            this.NavigateToAudioPlayer(track, this.VM.AllTracks.Collection, true);
+        }
+        
+        private void NavigateToAudioPlayer(AudioHeader track, IEnumerable enumerable, bool need_navigate = false)
         {
-            string tag = AudioTrackExtensions.GetTagId(BGAudioPlayerWrapper.Instance.Track);
-            IEnumerable<Grid> logicalChildrenByType1 = this.GetLogicalChildrenByType<Grid>(false);
-            for (int index = 0; index < logicalChildrenByType1.Count<Grid>(); index++)
+            if (track == null)
+                return;
+            if (track.IsContentRestricted)
             {
-                Grid btn = logicalChildrenByType1.ElementAt(index);
-                Grid grid = btn.Children[0] as Grid;
-                if (grid == null || grid.Tag == null || grid.Children.Count < 2)
-                    continue;
-                Border borderPlay = grid.Children[1] as Border;
-                Border borderPause = grid.Children[2] as Border;
-
-                if (btn.Tag.ToString() == tag && BGAudioPlayerWrapper.Instance.PlayerState == PlayState.Playing)
+                track.ShowContentRestrictedMessage();
+            }
+            else if (track.Track.UniqueId == BGAudioPlayerWrapper.Instance.Track.GetTagId())
+            {
+                if (need_navigate)
+                    Navigator.Current.NavigateToAudioPlayer(true);
+            }
+            else
+            {
+                List<AudioObj> tracks = new List<AudioObj>();
+                IEnumerator enumerator = enumerable.GetEnumerator();
+                try
                 {
-                    borderPlay.Opacity = 0.1;
-                    borderPause.Opacity = 1;
+                    while (enumerator.MoveNext())
+                    {
+                        AudioHeader current = enumerator.Current as AudioHeader;
+                        if (current != null)
+                            tracks.Add(current.Track);
+                    }
                 }
+                finally
+                {
+                    IDisposable disposable = enumerator as IDisposable;
+                    if (disposable != null)
+                        disposable.Dispose();
+                }
+
+                PlaylistManager.SetAudioAgentPlaylist(tracks, CurrentMediaSource.AudioSource);
+                if (!track.TryAssignTrack())
+                    return;
+                if (need_navigate)
+                    Navigator.Current.NavigateToAudioPlayer(true);
                 else
-                {
-                    borderPlay.Opacity = 1;
-                    borderPause.Opacity = 0.1;
-                }
-
+                    BGAudioPlayerWrapper.Instance.Play();
             }
         }
     }

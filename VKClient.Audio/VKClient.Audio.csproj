@@ -121,6 +121,9 @@
     <Compile Include="UserControls\PlaylistUC.cs">
       <DependentUpon>playlistuc.xaml</DependentUpon>
     </Compile>
+    <None Include="UserControls\Test.xaml.cs">
+      <DependentUpon>Test.xaml</DependentUpon>
+    </None>
     <Compile Include="ViewModels\AllAlbumsViewModel.cs" />
     <Compile Include="ViewModels\AllAudioViewModel.cs" />
     <Compile Include="ViewModels\AudioAlbumHeader.cs" />
@@ -198,6 +201,12 @@
     <EmbeddedResource Include="Localization\AudioResources.uk-UA.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="UserControls\Test.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />

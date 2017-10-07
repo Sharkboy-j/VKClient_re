@@ -20,10 +20,7 @@ namespace VKClient.Audio.Base
 
         public static string AppVersionForUserAgent
         {
-            get
-            {
-                return string.Format(string.Format("com.vk.wp_app/{0} ({1}, {2})", AppInfo.Version.Replace(".", "").PadRight(3, '0'), AppInfo.OSTypeAndVersion, AppInfo.Device));
-            }
+            get { return string.Format(string.Format("com.vk.wp_app/{0} ({1}, {2})", AppInfo.Version.Replace(".", "").PadRight(3, '0'), AppInfo.OSTypeAndVersion, AppInfo.Device)); }
         }
 
         public static string AppVersionForPushes
@@ -37,10 +34,7 @@ namespace VKClient.Audio.Base
 
         public static string OSTypeAndVersion
         {
-            get
-            {
-                return string.Format("WindowsPhone_{0}", Environment.OSVersion.Version);
-            }
+            get { return string.Format("WindowsPhone_{0}", Environment.OSVersion.Version); }
         }
 
         public static string OSVersion
@@ -81,7 +75,7 @@ namespace VKClient.Audio.Base
                 return AppInfo._version;
             PackageVersion version = Package.Current.Id.Version;
             AppInfo._version = string.Format("{0}.{1}", version.Major, version.Minor);
-            if ((int)version.Build > 0)
+            if (version.Build > 0)
                 AppInfo._version += string.Format(".{0}", version.Build);
             return AppInfo._version;
         }

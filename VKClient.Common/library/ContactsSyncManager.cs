@@ -34,7 +34,7 @@ namespace VKClient.Common.Library
       ContactsCache contactsCache = new ContactsCache();
       try
       {
-        int num = await CacheManager.TryDeserializeAsync((IBinarySerializable) contactsCache, "SAVED_ContactsPhoneNumbers", CacheManager.DataType.CachedData) ? 1 : 0;
+        await CacheManager.TryDeserializeAsync((IBinarySerializable) contactsCache, "SAVED_ContactsPhoneNumbers", CacheManager.DataType.CachedData);
       }
       catch
       {
@@ -44,7 +44,7 @@ namespace VKClient.Common.Library
 
     private static async Task StoreContactsAsync(ContactsCache contactsCache)
     {
-      int num = await CacheManager.TrySerializeAsync((IBinarySerializable) contactsCache, "SAVED_ContactsPhoneNumbers", false, CacheManager.DataType.CachedData) ? 1 : 0;
+      await CacheManager.TrySerializeAsync((IBinarySerializable) contactsCache, "SAVED_ContactsPhoneNumbers", false, CacheManager.DataType.CachedData);
     }
 
     private static async Task<List<string>> GetPhoneContactsAsync()

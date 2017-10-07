@@ -5,19 +5,19 @@ using Windows.System;
 
 namespace VKClient.Common.Framework
 {
-  public static class GeolocationHelper
-  {
-    public static void HandleDisabledLocationSettings()
+    public static class GeolocationHelper
     {
-      try
-      {
-        if (MessageBox.Show(CommonResources.GeolocationDisabled_Message, CommonResources.GeolocationDisabled_Title, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
-          return;
-        Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
-      }
-      catch
-      {
-      }
+        public static async void HandleDisabledLocationSettings()
+        {
+            try
+            {
+                if (MessageBox.Show(CommonResources.GeolocationDisabled_Message, CommonResources.GeolocationDisabled_Title, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+                    return;
+                await Launcher.LaunchUriAsync(new Uri("ms-settings-location:"));
+            }
+            catch
+            {
+            }
+        }
     }
-  }
 }

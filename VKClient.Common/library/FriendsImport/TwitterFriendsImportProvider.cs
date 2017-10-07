@@ -100,22 +100,19 @@ namespace VKClient.Common.Library.FriendsImport
         public void Login()
         {
             OAuthWebQuery requestTokenQuery = TwitterFriendsImportProvider.GetRequestTokenQuery();
-            EventHandler<WebQueryResponseEventArgs> eventHandler = (EventHandler<WebQueryResponseEventArgs>)((sender, args) =>
+            EventHandler<WebQueryResponseEventArgs> eventHandler = (async (sender, args) =>
             {
                 try
                 {
                     this._oauthToken = TwitterFriendsImportProvider.GetQueryParameters(new StreamReader(args.Response).ReadToEnd())["oauth_token"];
-                    Launcher.LaunchUriAsync(new Uri(string.Format("{0}?oauth_token={1}", "https://api.twitter.com/oauth/authorize", this._oauthToken)));
+                    await Launcher.LaunchUriAsync(new Uri(string.Format("{0}?oauth_token={1}", "https://api.twitter.com/oauth/authorize", this._oauthToken)));
                 }
                 catch
                 {
                 }
             });
             requestTokenQuery.QueryResponse += eventHandler;
-            string url = "https://api.twitter.com/oauth/request_token";
-            // ISSUE: variable of the null type
-
-            requestTokenQuery.RequestAsync(url, null);
+            requestTokenQuery.RequestAsync("https://api.twitter.com/oauth/request_token", null);
         }
 
         private static OAuthWebQuery GetRequestTokenQuery()
@@ -128,10 +125,9 @@ namespace VKClient.Common.Library.FriendsImport
             oauthWorkflow.RequestTokenUrl = "https://api.twitter.com/oauth/request_token";
             oauthWorkflow.Version = "1.0a";
             oauthWorkflow.CallbackUrl = "com.vk.vkclient://twitter-oauth/callback";
-            int num1 = 0;
-            OAuthWebQuery oauthWebQuery = new OAuthWebQuery(oauthWorkflow.BuildRequestTokenInfo((WebMethod)num1), false);
-            int num2 = 1;
-            oauthWebQuery.HasElevatedPermissions = num2 != 0;
+            
+            OAuthWebQuery oauthWebQuery = new OAuthWebQuery(oauthWorkflow.BuildRequestTokenInfo((WebMethod)0), false);
+            oauthWebQuery.HasElevatedPermissions = true;
             return oauthWebQuery;
         }
 

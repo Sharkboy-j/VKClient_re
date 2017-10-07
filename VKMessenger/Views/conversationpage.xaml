@@ -31,6 +31,55 @@
 
 
 
+        
+
+        <!--ContentPanel - place additional content here-->
+        <Grid x:Name="ContentPanel"
+              Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto"
+                               MinHeight="72" />
+            </Grid.RowDefinitions>
+
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="22.667"
+                       Foreground="{StaticResource PhoneVKSubtleBrush}"
+                       Visibility="{Binding NoMessages, Converter={StaticResource BoolToVisibilityConverter}}"
+                       Text="{Binding Path=LocalizedResources.Conversation_NoMessagesYet, Source={StaticResource LocalizedStrings}}"></TextBlock>
+
+            <ViewportControl Name="myScroll"
+                             VerticalAlignment="Bottom"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <commonFramewor:MyVirtualizingPanel2 Margin="16 13 16 0"
+                                                     x:Name="myPanel" />
+            </ViewportControl>
+
+            <Image Width="42"
+                   Height="42"
+                   Tap="ArrowDownTap"
+                   Visibility="{Binding ArrowDownDarkVisibility}"
+                   Margin="0 0 16 16"
+                   commonFramewor:MultiResImageLoader.UriSource="/Resources/New/ChatToBottomDark.png"
+                   VerticalAlignment="Bottom"
+                   HorizontalAlignment="Right" />
+            <Image Width="42"
+                   Height="42"
+                   Tap="ArrowDownTap"
+                   commonFramewor:MultiResImageLoader.UriSource="/Resources/New/ChatToBottom.png"
+                   Visibility="{Binding ArrowDownLightVisibility}"
+                   Margin="0 0 16 16"
+                   VerticalAlignment="Bottom"
+                   HorizontalAlignment="Right" />
+            <commonUC:NewMessageUC Grid.Row="1"
+                                   x:Name="ucNewMessage"
+                                   IsVoiceMessageButtonEnabled="True" />
+
+
+        </Grid>
+
         <Grid Height="112"
               Background="{StaticResource PhoneHeaderBackgroundBrush}"
               Name="gridHeader">
@@ -147,55 +196,20 @@
                        Height="32"
                        commonFramewor:MultiResImageLoader.UriSource="/Resources/MoreHorizontal32px.png" />
             </Grid>
+
+            <Grid Height="5" VerticalAlignment="Bottom">
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#4C000000" Offset="0"/>
+                        <GradientStop Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <Grid.RenderTransform>
+                    <CompositeTransform TranslateY="5"/>
+                </Grid.RenderTransform>
+            </Grid>
         </Grid>
-
-        <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel"
-              Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto"
-                               MinHeight="72" />
-            </Grid.RowDefinitions>
-
-            <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontSize="22.667"
-                       Foreground="{StaticResource PhoneVKSubtleBrush}"
-                       Visibility="{Binding NoMessages, Converter={StaticResource BoolToVisibilityConverter}}"
-                       Text="{Binding Path=LocalizedResources.Conversation_NoMessagesYet, Source={StaticResource LocalizedStrings}}"></TextBlock>
-
-            <ViewportControl Name="myScroll"
-                             VerticalAlignment="Bottom"
-                             HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
-                <commonFramewor:MyVirtualizingPanel2 Margin="16 13 16 0"
-                                                     x:Name="myPanel" />
-            </ViewportControl>
-
-            <Image Width="42"
-                   Height="42"
-                   Tap="ArrowDownTap"
-                   Visibility="{Binding ArrowDownDarkVisibility}"
-                   Margin="0 0 16 16"
-                   commonFramewor:MultiResImageLoader.UriSource="/Resources/New/ChatToBottomDark.png"
-                   VerticalAlignment="Bottom"
-                   HorizontalAlignment="Right" />
-            <Image Width="42"
-                   Height="42"
-                   Tap="ArrowDownTap"
-                   commonFramewor:MultiResImageLoader.UriSource="/Resources/New/ChatToBottom.png"
-                   Visibility="{Binding ArrowDownLightVisibility}"
-                   Margin="0 0 16 16"
-                   VerticalAlignment="Bottom"
-                   HorizontalAlignment="Right" />
-            <commonUC:NewMessageUC Grid.Row="1"
-                                   x:Name="ucNewMessage"
-                                   IsVoiceMessageButtonEnabled="True" />
-
-
-        </Grid>
-
+        
         <ContentControl x:Name="MediaControl"
                         IsHitTestVisible="False" />
 

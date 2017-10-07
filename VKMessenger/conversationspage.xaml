@@ -25,14 +25,9 @@
         </Grid.RowDefinitions>
 
    
-
-        
+        <!--ContentPanel - place additional content here-->
+        <Grid x:Name="ContentPanel" Grid.Row="1"/>
         <uc:GenericHeaderUC x:Name="Header"/>
         <uc:PullToRefreshUC x:Name="ucPullToRefresh"/>
-        <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1">
-            <!--<views:ConversationsUC x:Name="conversationsUC"/>-->
-        </Grid>
-
     </Grid>
 </framework:PageBase>

@@ -99,7 +99,7 @@ namespace VKClient.Common.Library
                 int autoReloadInterval = this.GetNewsfeedAutoReloadInterval();
                 if (autoReloadInterval <= 0)
                     return false;
-                return (DateTime.Now- this._lastNewsFeedUpdateDateTime).TotalSeconds >= (double)autoReloadInterval;
+                return (DateTime.Now - this._lastNewsFeedUpdateDateTime).TotalSeconds >= (double)autoReloadInterval;
             }
         }
 
@@ -127,8 +127,7 @@ namespace VKClient.Common.Library
                 Action<FreshNewsState> stateChangedCallback = this.FreshNewsStateChangedCallback;
                 if (stateChangedCallback == null)
                     return;
-                int freshNewsState = (int)this._freshNewsState;
-                stateChangedCallback((FreshNewsState)freshNewsState);
+                stateChangedCallback(this._freshNewsState);
             }
         }
 
@@ -160,7 +159,7 @@ namespace VKClient.Common.Library
         {
             get
             {
-                int totalSeconds = (int)(DateTime.Now- this._lastNotificationsSyncDateTime).TotalSeconds;
+                int totalSeconds = (int)(DateTime.Now - this._lastNotificationsSyncDateTime).TotalSeconds;
                 NewsFeedConsts newsFeedConsts = this.NewsFeedConsts;
                 int? nullable = newsFeedConsts != null ? new int?(newsFeedConsts.notifications_sync_interval) : new int?();
                 int valueOrDefault = nullable.GetValueOrDefault();
@@ -179,11 +178,9 @@ namespace VKClient.Common.Library
                     this._from = newsFeedData.next_from;
                     if (newsFeedData.FeedType.HasValue)
                     {
-                        AppGlobalStateData globalState = AppGlobalStateManager.Current.GlobalState;
                         NewsFeedType? feedType = newsFeedData.FeedType;
-                        NewsFeedType newsFeedType = NewsFeedType.top;
-                        int num = feedType.GetValueOrDefault() == newsFeedType ? (feedType.HasValue ? 1 : 0) : 0;
-                        globalState.NewsfeedTopEnabled = num != 0;
+                        bool num = feedType.GetValueOrDefault() == NewsFeedType.top ? (feedType.HasValue ? true : false) : false;
+                        AppGlobalStateManager.Current.GlobalState.NewsfeedTopEnabled = num;
                         this._newsFeedType = newsFeedData.FeedType;
                     }
                     if (newsFeedData.consts != null)
@@ -199,7 +196,7 @@ namespace VKClient.Common.Library
         {
             get
             {
-                double totalSeconds = (DateTime.Now- this._lastFreshNewsCheckDateTime).TotalSeconds;
+                double totalSeconds = (DateTime.Now - this._lastFreshNewsCheckDateTime).TotalSeconds;
                 NewsFeedConsts newsFeedConsts = this.NewsFeedConsts;
                 int? nullable1 = newsFeedConsts != null ? new int?(newsFeedConsts.fresh_news_expiration_timeout) : new int?();
                 double? nullable2 = nullable1.HasValue ? new double?(nullable1.GetValueOrDefault()) : new double?();
@@ -299,8 +296,7 @@ namespace VKClient.Common.Library
             {
                 while (enumerator.MoveNext())
                 {
-                    int current = (int)enumerator.Current;
-                    if (id == (long)current)
+                    if (id == (long)((int)enumerator.Current) )
                         CurrentNewsFeedSource.FeedSource = (NewsSourcesPredefined)id;
                 }
             }
@@ -571,9 +567,9 @@ namespace VKClient.Common.Library
         {
             if (ignoreItemData == null)
                 return;
-            for (int index = 0; index < ((Collection<IVirtualizable>)this.NewsFeedVM.Collection).Count; ++index)
+            for (int index = 0; index < this.NewsFeedVM.Collection.Count; ++index)
             {
-                IVirtualizable virtualizable = ((Collection<IVirtualizable>)this.NewsFeedVM.Collection)[index];
+                IVirtualizable virtualizable = this.NewsFeedVM.Collection[index];
                 ICanHideFromNewsfeed hideFromNewsfeed = virtualizable as ICanHideFromNewsfeed;
                 NewsFeedIgnoreItemData feedIgnoreItemData = hideFromNewsfeed != null ? hideFromNewsfeed.GetIgnoreItemData() : null;
                 if (feedIgnoreItemData != null && !(feedIgnoreItemData.Type != ignoreItemData.Type) && (feedIgnoreItemData.OwnerId == ignoreItemData.OwnerId && feedIgnoreItemData.ItemId == ignoreItemData.ItemId))
@@ -700,10 +696,9 @@ namespace VKClient.Common.Library
             VideosNewsItem videosNewsItem = new VideosNewsItem(480.0, new Thickness(), post, null, null);
             if (this.NewsSource.ID == NewsSources.NewsFeed.PickableItem.ID)
             {
-                // ISSUE: method pointer
                 videosNewsItem.HideSourceItemsCallback = new Action<long, User, Group>(this.HideSourceItemsCallback);
             }
-            return (IVirtualizable)videosNewsItem;
+            return videosNewsItem;
         }
 
         private WallPostItem CreateWallPostItem(NewsItemDataWithUsersAndGroupsInfo post)
@@ -713,7 +708,6 @@ namespace VKClient.Common.Library
             WallPostItem wallPostItem = new WallPostItem(480.0, new Thickness(), true, post, new Action<WallPostItem>(this.itemDeleted), false, null, false, false, true, true, null, null) { IgnoreNewsfeedItemCallback = new Action<NewsFeedIgnoreItemData>(this.IgnoreNewsFeedItem) };
             if (this.NewsSource.ID == NewsSources.NewsFeed.PickableItem.ID)
             {
-                // ISSUE: method pointer
                 wallPostItem.HideSourceItemsCallback = new Action<long, User, Group>(this.HideSourceItemsCallback);
             }
             return wallPostItem;
@@ -733,7 +727,7 @@ namespace VKClient.Common.Library
 
         public void Reset()
         {
-            ((Collection<IVirtualizable>)this.NewsFeedVM.Collection).Clear();
+            this.NewsFeedVM.Collection.Clear();
             this.NewsSource = NewsSources.NewsFeed.PickableItem;
             this._from = "";
             this._freshNewsData = null;
@@ -744,7 +738,7 @@ namespace VKClient.Common.Library
             if (this._isLoadingFreshNews || ((Collection<IVirtualizable>)this.NewsFeedVM.Collection).Count == 0)
                 return;
             DateTime dateTimeNow = DateTime.Now;
-            double totalSeconds = (dateTimeNow- this._lastFreshNewsCheckDateTime).TotalSeconds;
+            double totalSeconds = (dateTimeNow - this._lastFreshNewsCheckDateTime).TotalSeconds;
             NewsFeedConsts newsFeedConsts = this.NewsFeedConsts;
             int? nullable1 = newsFeedConsts != null ? new int?(newsFeedConsts.fresh_news_check_interval) : new int?();
             double? nullable2 = nullable1.HasValue ? new double?(nullable1.GetValueOrDefault()) : new double?();
@@ -777,7 +771,7 @@ namespace VKClient.Common.Library
             }
             if (this.NewsSource.ID == NewsSources.NewsFeed.PickableItem.ID && this._newsFeedType.HasValue && this._newsFeedType.Value == NewsFeedType.top)
             {
-                int totalSeconds = (int)(DateTime.Now- this.NavigatedFromNewsfeedTime).TotalSeconds;
+                int totalSeconds = (int)(DateTime.Now - this.NavigatedFromNewsfeedTime).TotalSeconds;
                 string postId;
                 int postPosition;
                 this.GetCurrentPostInfo(scrollPosition, out postId, out postPosition);
@@ -936,8 +930,6 @@ namespace VKClient.Common.Library
                                 }
                                 else
                                 {
-                                    // ISSUE: explicit non-virtual call
-                                    // ISSUE: explicit non-virtual call
                                     if (newNotificationIds != null && newNotificationIds.Count > 0 || existingNotificationIds != null && existingNotificationIds.Count > 0)
                                         action1();
                                     else if (num2 == -1)
@@ -1017,7 +1009,7 @@ namespace VKClient.Common.Library
 
         private void CreateNewNotificationsFromExisting(NewsFeedData newsfeedData)
         {
-            IEnumerator<IVirtualizable> enumerator = ((Collection<IVirtualizable>)this.NewsFeedVM.Collection).GetEnumerator();
+            IEnumerator<IVirtualizable> enumerator = this.NewsFeedVM.Collection.GetEnumerator();
             try
             {
                 while (enumerator.MoveNext())
@@ -1063,10 +1055,10 @@ namespace VKClient.Common.Library
             {
                 return true;
             }
-            int arg_3F_0 = newNotificationIds.Count;
+            
             List<long> expr_1E = existingNotificationIds;
             int? num = (expr_1E != null) ? new int?(expr_1E.Count) : default(int?);
-            return arg_3F_0 == num.GetValueOrDefault() && num.HasValue && !Enumerable.Any<long>(Enumerable.Where<long>(newNotificationIds, (long id, int i) => id != existingNotificationIds[i]));
+            return newNotificationIds.Count == num.GetValueOrDefault() && num.HasValue && !Enumerable.Any<long>(Enumerable.Where<long>(newNotificationIds, (long id, int i) => id != existingNotificationIds[i]));
         }
 
         public void ReplaceAllWithPendingFreshNews()
@@ -1074,7 +1066,7 @@ namespace VKClient.Common.Library
             if (this._freshNewsData == null || this._freshNewsData.Items.Count == 0)
                 return;
             while (((Collection<IVirtualizable>)this.NewsFeedVM.Collection).Count > 0)
-                this.NewsFeedVM.Delete(((IEnumerable<IVirtualizable>)this.NewsFeedVM.Collection).Last<IVirtualizable>());
+                this.NewsFeedVM.Delete(this.NewsFeedVM.Collection.Last<IVirtualizable>());
             for (int index = this._freshNewsData.Items.Count - 1; index >= 0; --index)
                 this.NewsFeedVM.Insert(this._freshNewsData.Items[index], 0);
             this.NewsFeedVM.TotalCount = 0;
@@ -1095,12 +1087,8 @@ namespace VKClient.Common.Library
                 if (wallPostItem2 == null)
                     return false;
                 WallPost wallPost = wallPostItem2.WallPost;
-                long id1 = wallPost.id;
-                long toId1 = wallPost.to_id;
-                long id2 = newWallPost.id;
-                long toId2 = newWallPost.to_id;
-                if (id1 == id2)
-                    return toId1 == toId2;
+                if (wallPost.id == newWallPost.id)
+                    return wallPost.to_id == newWallPost.to_id;
                 return false;
             }));
             if (virtualizable == null)
@@ -1123,21 +1111,21 @@ namespace VKClient.Common.Library
             else
             {
                 this.KeepScrollPosition = false;
-                int ind = ((Collection<IVirtualizable>)this.NewsFeedVM.Collection).IndexOf(virtualizable);
+                int ind = this.NewsFeedVM.Collection.IndexOf(virtualizable);
                 this.NewsFeedVM.Delete(virtualizable);
-                this.NewsFeedVM.Insert((IVirtualizable)wallPostItem1, ind);
+                this.NewsFeedVM.Insert(wallPostItem1, ind);
                 this.KeepScrollPosition = true;
             }
         }
 
         public void Handle(AdReportedEvent message)
         {
-            this.NewsFeedVM.Delete((IVirtualizable)Enumerable.FirstOrDefault<IVirtualizable>(this.NewsFeedVM.Collection, (Func<IVirtualizable, bool>)(item =>
-          {
-              if (item is NewsFeedAdsItem)
-                  return (item as NewsFeedAdsItem).NewsItem.ads[0].ad_data == message.AdData;
-              return false;
-          })));
+            this.NewsFeedVM.Delete(Enumerable.FirstOrDefault<IVirtualizable>(this.NewsFeedVM.Collection, (Func<IVirtualizable, bool>)(item =>
+            {
+                if (item is NewsFeedAdsItem)
+                return (item as NewsFeedAdsItem).NewsItem.ads[0].ad_data == message.AdData;
+                return false;
+            })));
         }
 
         public void Handle(NewsfeedTopEnabledDisabledEvent message)

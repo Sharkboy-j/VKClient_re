@@ -305,12 +305,12 @@ namespace VKClient.Common.Library
         {
             EventAggregator.Current.Subscribe(this);
             this._helperGetFriendsAndMutual = new AsyncHelper<BackendResult<FriendsAndMutualFriends, ResultCode>>((Action<Action<BackendResult<FriendsAndMutualFriends, ResultCode>>>)(a => UsersService.Instance.GetFriendsAndMutual(this._uid, a)));
-            this._helperGetCurrentUserFriends = new AsyncHelper<BackendResult<List<User>, ResultCode>>((Action<Action<BackendResult<List<User>, ResultCode>>>)(a => UsersService.Instance.GetFriendsWithRequests((Action<BackendResult<AllFriendsList, ResultCode>>)(res =>
+            this._helperGetCurrentUserFriends = new AsyncHelper<BackendResult<List<User>, ResultCode>>((Action<Action<BackendResult<List<User>, ResultCode>>>)(a => UsersService.Instance.GetFriendsWithRequests( ( Action<BackendResult<AllFriendsList, ResultCode>>) (async res =>
             {
                 if (res.ResultCode == ResultCode.Succeeded)
                 {
                     FriendsCache.Instance.SetFriends(res.ResultData.friends, res.ResultData.requests);
-                    ContactsManager.Instance.SyncContactsAsync(res.ResultData.friends);
+                    await ContactsManager.Instance.SyncContactsAsync(res.ResultData.friends);
                     this.RequestsViewModel = res.ResultData.requests;
                     CountersManager.Current.Counters.friends = this.RequestsViewModel.menu_counter;
                     EventAggregator.Current.Publish(new CountersChanged(CountersManager.Current.Counters));

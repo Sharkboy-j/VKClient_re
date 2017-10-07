@@ -18,7 +18,7 @@ namespace VKMessenger.Library
     public class AttachmentViewModel : ViewModelBase, IBinarySerializable
     {
         private string _resourceDescription;
-        private string _accessKey;
+        //private string _accessKey;
         private AttachmentType _attachmentType;
         private double _latitude;
         private double _longitude;
@@ -370,10 +370,7 @@ namespace VKMessenger.Library
         {
             this._geo = geo;
             this.AttachmentType = AttachmentType.Geo;
-            string[] strArray = ((string)geo.coordinates).Split((char[])new char[1]
-      {
-        ' '
-      });
+            string[] strArray = (geo.coordinates).Split(new char[1] { ' ' });
             if (strArray.Length > 1)
             {
                 double.TryParse(strArray[0], NumberStyles.Any, (IFormatProvider)CultureInfo.InvariantCulture, out this._latitude);
@@ -385,7 +382,7 @@ namespace VKMessenger.Library
         public AttachmentViewModel()
         {
             this._resourceDescription = string.Empty;
-        this._accessKey = "";
+            //this._accessKey = "";
         }
 
         private void TryReadStickerData(string resourceUri, int dimension)
@@ -443,8 +440,7 @@ namespace VKMessenger.Library
         public void Read(BinaryReader reader)
         {
             int num1 = reader.ReadInt32();
-            int num2 = 1;
-            if (num1 >= num2)
+            if (num1 >= 1)
             {
                 this._attachmentType = (AttachmentType)reader.ReadInt32();
                 this.ResourceUri = reader.ReadString();
@@ -465,29 +461,23 @@ namespace VKMessenger.Library
                 if (this._attachmentType == AttachmentType.Geo && string.IsNullOrEmpty(this._resourceDescription))
                     this.InitializeUIPropertiesForGeoAttachment();
             }
-            int num3 = 2;
-            if (num1 >= num3)
+            if (num1 >= 2)
             {
                 this._stickerDimension = reader.ReadDouble();
                 this._stickerAlignment = (HorizontalAlignment)reader.ReadInt32();
             }
-            int num4 = 3;
-            if (num1 >= num4)
+            if (num1 >= 3)
                 this._documentImageUri = reader.ReadString();
-            int num5 = 4;
-            if (num1 >= num5)
+            if (num1 >= 4)
             {
                 this._attachment = reader.ReadGeneric<Attachment>();
                 this._geo = reader.ReadGeneric<Geo>();
             }
-            int num6 = 5;
-            if (num1 >= num6)
+            if (num1 >= 5)
                 this._comment = reader.ReadGeneric<Comment>();
-            int num7 = 6;
-            if (num1 >= num7)
+            if (num1 >= 6)
                 this.ParentPostId = reader.ReadString();
-            int num8 = 7;
-            if (num1 < num8)
+            if (num1 < 7)
                 return;
             this.AudioContentRestricted = reader.ReadInt32();
         }

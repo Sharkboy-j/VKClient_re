@@ -1048,11 +1048,11 @@ namespace VKClient.Library
             }
         }
 
-        public void OpenGame(long gameId)
+        public async void OpenGame(long gameId)
         {
             if (gameId <= 0L)
                 return;
-            Launcher.LaunchUriAsync(new Uri(string.Format("vk{0}://", gameId)));
+            await Launcher.LaunchUriAsync(new Uri(string.Format("vk{0}://", gameId)));
         }
 
         public void NavigateToGameSettings(long gameId)

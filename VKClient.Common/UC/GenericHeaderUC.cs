@@ -49,6 +49,8 @@ namespace VKClient.Common.UC
         internal Border borderMenuOpenIcon;
         internal ItemsControl itemsControlOptionsMenu;
         private bool _contentLoaded;
+        //
+        internal Grid Shadow;
 
         public Action OnHeaderTap { get; set; }
 
@@ -515,6 +517,8 @@ namespace VKClient.Common.UC
             this.borderIcon = (Border)base.FindName("borderIcon");
             this.borderMenuOpenIcon = (Border)base.FindName("borderMenuOpenIcon");
             this.itemsControlOptionsMenu = (ItemsControl)base.FindName("itemsControlOptionsMenu");
+            //
+            this.Shadow = (Grid)base.FindName("Shadow");
         }
     }
 }

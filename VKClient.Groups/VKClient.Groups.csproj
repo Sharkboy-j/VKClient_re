@@ -106,9 +106,9 @@
     <Compile Include="GroupInvitationsPage.cs">
       <DependentUpon>groupinvitationspage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GroupPage.cs">
+    <None Include="GroupPage.cs">
       <DependentUpon>grouppage.xaml</DependentUpon>
-    </Compile>
+    </None>
     <Compile Include="GroupsListPage.cs">
       <DependentUpon>groupslistpage.xaml</DependentUpon>
     </Compile>
@@ -267,10 +267,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Resource>
-    <Resource Include="grouppage.xaml">
+    <None Include="grouppage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Resource>
+    </None>
     <Resource Include="groupslistpage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

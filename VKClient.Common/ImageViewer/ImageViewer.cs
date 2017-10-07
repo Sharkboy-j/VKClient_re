@@ -522,7 +522,7 @@ namespace VKClient.Common.ImageViewer
       this._getImageFunc = getImageFunc;
       this._showHideOriginalImageAction = showHideOriginalImageAction;
       if (this._currentViewControl != null)
-        ((PresentationFrameworkCollection<UIElement>) ((Panel) this).Children).Remove((UIElement) this._currentViewControl);
+        this.Children.Remove(this._currentViewControl);
       this._currentViewControl = currentViewControl;
       this._setDataContextOnCurrentViewControlAction = setDataContextOnCurrentViewControlAction;
       if (!this._isShown)

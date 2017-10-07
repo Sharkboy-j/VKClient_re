@@ -236,6 +236,7 @@ namespace VKClient.Library
 							VKRequestsDispatcher.DispatchRequestToVK<object>("account.validateAction", parameters, callback, null, false, true, default(CancellationToken?), null);
 						});
 					}
+                    
 					ShareOperation shareOperation = (Application.Current as IAppStateInfo).ShareOperation;
 					if (shareOperation != null)
 					{

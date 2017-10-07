@@ -45,7 +45,7 @@ namespace VKClient.Common
     private int _adminLevel;
     private IShareContentDataProvider _shareContentDataProvider;
     private DelayedExecutor _de;
-    private double savedHeight;
+    //private double savedHeight;
     internal Grid LayoutRoot;
     internal GenericHeaderUC ucHeader;
     internal Grid ContentPanel;

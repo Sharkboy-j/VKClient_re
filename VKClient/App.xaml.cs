@@ -42,7 +42,7 @@ namespace VKClient
     public partial class App : Application, IAppStateInfo
     {
         private static string _imageDictionaryKey = "ImageDict";
-        public static TelemetryClient TelemetryClient;
+        //public static TelemetryClient TelemetryClient;
         private static CustomUriMapper _uriMapper;
         private bool phoneApplicationInitialized;
     //    private bool _wasReset;
@@ -104,7 +104,7 @@ namespace VKClient
                 if (!Telemetry)
                     TelemetryConfiguration.Active.DisableTelemetry = true;
                 TelemetryConfiguration.Active.TelemetryInitializers.Add((ITelemetryInitializer)new VKTelemetryInitializer());
-                App.TelemetryClient = new TelemetryClient();
+                //App.TelemetryClient = new TelemetryClient();
             }
             catch (Exception )
             {
@@ -177,7 +177,7 @@ namespace VKClient
         {
             Logger.Instance.ErrorAndSaveToIso("UNHANDLED", e.ExceptionObject);
             e.Handled = true;
-            this.ReportException(e.ExceptionObject);
+            //this.ReportException(e.ExceptionObject);
         }
 
         private void Application_Launching(object sender, LaunchingEventArgs e)
@@ -515,9 +515,9 @@ namespace VKClient
                 return uri.Contains("url=");
             return false;
         }
-
+        
         public void ReportException(Exception exc)
-        {
+        {/*
             if (exc == null)
                 return;
             try
@@ -526,9 +526,9 @@ namespace VKClient
             }
             catch (Exception )
             {
-            }
+            }*/
         }
-
+        
         public void HandleSuccessfulLogin(AutorizationData logInInfo, bool navigate = true)
         {
             Execute.ExecuteOnUIThread(delegate

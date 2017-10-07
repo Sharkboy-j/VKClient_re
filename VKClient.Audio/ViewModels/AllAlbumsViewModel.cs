@@ -195,9 +195,9 @@ namespace VKClient.Audio.ViewModels
                 if (created.Value)
                 {
                     int ind = 0;
-                    if (((Collection<AudioAlbumHeader>)this._allAlbums.Collection).Count > 0 && ((IEnumerable<AudioAlbumHeader>)this._allAlbums.Collection).First<AudioAlbumHeader>().Album.album_id == AllAlbumsViewModel.RECOMMENDED_ALBUM_ID)
+                    if (this._allAlbums.Collection.Count > 0 && this._allAlbums.Collection.First<AudioAlbumHeader>().Album.album_id == AllAlbumsViewModel.RECOMMENDED_ALBUM_ID)
                         ++ind;
-                    if (((Collection<AudioAlbumHeader>)this._allAlbums.Collection).Count > 1 && ((Collection<AudioAlbumHeader>)this._allAlbums.Collection)[1].Album.album_id == AllAlbumsViewModel.POPULAR_ALBUM_ID)
+                    if (this._allAlbums.Collection.Count > 1 && this._allAlbums.Collection[1].Album.album_id == AllAlbumsViewModel.POPULAR_ALBUM_ID)
                         ++ind;
                     this._allAlbums.Insert(new AudioAlbumHeader(message.Album), ind);
                     return;

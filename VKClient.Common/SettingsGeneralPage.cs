@@ -34,9 +34,9 @@ namespace VKClient.Common
             this.Header.textBlockTitle.Text = (CommonResources.NewSettings_General.ToUpperInvariant());
         }
 
-        private void ConfigureLockScreenTap(object sender, System.Windows.Input.GestureEventArgs e)
+        private async void ConfigureLockScreenTap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
+            await Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
         }
 
         private void ClearMusicCacheTap(object sender, GestureEventArgs e)//mod

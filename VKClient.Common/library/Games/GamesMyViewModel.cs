@@ -12,60 +12,60 @@ using VKClient.Common.Utils;
 
 namespace VKClient.Common.Library.Games
 {
-  public class GamesMyViewModel : ViewModelBase, ICollectionDataProvider<VKList<Game>, GameHeader>, IHandle<GameDisconnectedEvent>, IHandle
-  {
-    private readonly GenericCollectionViewModel<VKList<Game>, GameHeader> _myGamesVM;
-
-    public GenericCollectionViewModel<VKList<Game>, GameHeader> MyGamesVM
+    public class GamesMyViewModel : ViewModelBase, ICollectionDataProvider<VKList<Game>, GameHeader>, IHandle<GameDisconnectedEvent>, IHandle
     {
-      get
-      {
-        return this._myGamesVM;
-      }
-    }
+        private readonly GenericCollectionViewModel<VKList<Game>, GameHeader> _myGamesVM;
 
-    public Func<VKList<Game>, ListWithCount<GameHeader>> ConverterFunc
-    {
-      get
-      {
-        return (Func<VKList<Game>, ListWithCount<GameHeader>>) (data =>
+        public GenericCollectionViewModel<VKList<Game>, GameHeader> MyGamesVM
         {
-          ListWithCount<GameHeader> listWithCount = new ListWithCount<GameHeader>() { TotalCount = data.count };
-          foreach (Game game in data.items)
-            listWithCount.List.Add(new GameHeader(game));
-          return listWithCount;
-        });
-      }
-    }
+            get
+            {
+                return this._myGamesVM;
+            }
+        }
 
-    public event EventHandler ItemsCleared;
+        public Func<VKList<Game>, ListWithCount<GameHeader>> ConverterFunc
+        {
+            get
+            {
+                return (Func<VKList<Game>, ListWithCount<GameHeader>>)(data =>
+                {
+                    ListWithCount<GameHeader> listWithCount = new ListWithCount<GameHeader>() { TotalCount = data.count };
+                    foreach (Game game in data.items)
+                        listWithCount.List.Add(new GameHeader(game));
+                    return listWithCount;
+                });
+            }
+        }
 
-    public GamesMyViewModel()
-    {
-      this._myGamesVM = new GenericCollectionViewModel<VKList<Game>, GameHeader>((ICollectionDataProvider<VKList<Game>, GameHeader>) this);
-      EventAggregator.Current.Subscribe(this);
-    }
+        public event EventHandler ItemsCleared;
 
-    public async void GetData(GenericCollectionViewModel<VKList<Game>, GameHeader> caller, int offset, int count, Action<BackendResult<VKList<Game>, ResultCode>> callback)
-    {
-      AppsService.Instance.GetMyGames(offset, count, callback);
-    }
+        public GamesMyViewModel()
+        {
+            this._myGamesVM = new GenericCollectionViewModel<VKList<Game>, GameHeader>((ICollectionDataProvider<VKList<Game>, GameHeader>)this);
+            EventAggregator.Current.Subscribe(this);
+        }
 
-    public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Game>, GameHeader> caller, int count)
-    {
-      if (count <= 0)
-        return CommonResources.NoGames;
-      return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneGameFrm, CommonResources.TwoFourGamesFrm, CommonResources.FiveGamesFrm, true,  null, false);
-    }
+        public void GetData(GenericCollectionViewModel<VKList<Game>, GameHeader> caller, int offset, int count, Action<BackendResult<VKList<Game>, ResultCode>> callback)
+        {
+            AppsService.Instance.GetMyGames(offset, count, callback);
+        }
 
-    public void Handle(GameDisconnectedEvent data)
-    {
-        this._myGamesVM.Delete((GameHeader)Enumerable.FirstOrDefault<GameHeader>(this._myGamesVM.Collection, (Func<GameHeader, bool>)(game => game.Game.id == data.GameId)));
-      // ISSUE: reference to a compiler-generated field
-      if (((Collection<GameHeader>) this._myGamesVM.Collection).Count != 0 || this.ItemsCleared == null)
-        return;
-      // ISSUE: reference to a compiler-generated field
-      this.ItemsCleared(this, EventArgs.Empty);
+        public string GetFooterTextForCount(GenericCollectionViewModel<VKList<Game>, GameHeader> caller, int count)
+        {
+            if (count <= 0)
+                return CommonResources.NoGames;
+            return UIStringFormatterHelper.FormatNumberOfSomething(count, CommonResources.OneGameFrm, CommonResources.TwoFourGamesFrm, CommonResources.FiveGamesFrm, true, null, false);
+        }
+
+        public void Handle(GameDisconnectedEvent data)
+        {
+            this._myGamesVM.Delete((GameHeader)Enumerable.FirstOrDefault<GameHeader>(this._myGamesVM.Collection, (Func<GameHeader, bool>)(game => game.Game.id == data.GameId)));
+            // ISSUE: reference to a compiler-generated field
+            if (((Collection<GameHeader>)this._myGamesVM.Collection).Count != 0 || this.ItemsCleared == null)
+                return;
+            // ISSUE: reference to a compiler-generated field
+            this.ItemsCleared(this, EventArgs.Empty);
+        }
     }
-  }
 }

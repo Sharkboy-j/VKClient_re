@@ -15,93 +15,67 @@
         <localization:AudioLocalizedStrings x:Key="LocalizedStrings" />
 
         <DataTemplate x:Key="TrackTemplate">
-            <Grid  Margin="8 0"
-                   Background="Transparent"
-                   framework:MetroInMotion.Tilt="2.5"
-                   Opacity="{Binding TrackOpacity}">
+            <Grid Margin="0 5 8 5" Background="Transparent"
+                   
+          Opacity="{Binding TrackOpacity}"
+                   >
                 <Grid.ColumnDefinitions>
-                    <!--<ColumnDefinition Width="56"/>-->
-                    <!--MOD-->
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="56"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                
 
 
-                <Grid Width="48"
-                        Height="48"
-                        Grid.Column="0"
-                        HorizontalAlignment="Left"
+                <Grid Grid.Column="0" framework:MetroInMotion.Tilt="2.5" Grid.RowSpan="2"
                         Tag="{Binding Track.UniqueId}"
                       Tap="Temp_Click"
-                      Visibility="Collapsed">
+                      >
 
-                    <Grid Width="36"
-              Height="36"
-              Canvas.Top="8"
-              Canvas.Left="16">
-
-                        <Ellipse Width="36"
+                    <Ellipse Width="36"
                      Height="36"
                      Stroke="{StaticResource PhoneAccentBlueBrush}"
-                     StrokeThickness="2" />
+                     StrokeThickness="2" Opacity="{Binding DownloadProgress}"/>
 
 
-                        <Border x:Name="borderPlay"
+                    <Border x:Name="borderPlay"
                     Width="28"
                     Height="28"
                     Background="{StaticResource PhoneAccentBlueBrush}"
-                                Opacity="1">
-                            <Border.OpacityMask>
-                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/WallPost/AttachPlay.png" />
-                            </Border.OpacityMask>
-                        </Border>
+                           Visibility="{Binding PlayVisibility}" >
+                        <Border.OpacityMask>
+                            <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/WallPost/AttachPlay.png" />
+                        </Border.OpacityMask>
+                    </Border>
 
-                        <Border x:Name="borderPause"
+                    <Border x:Name="borderPause"
                     Width="28"
                     Height="28"
                     Background="{StaticResource PhoneAccentBlueBrush}"
-                        >
-                            <Border.OpacityMask>
-                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/WallPost/AttachPause.png" />
-                            </Border.OpacityMask>
-                        </Border>
-                    </Grid>
+                            Visibility="{Binding PauseVisibility}">
+                        <Border.OpacityMask>
+                            <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/WallPost/AttachPause.png" />
+                        </Border.OpacityMask>
+                    </Border>
 
                 </Grid>
-                
-                <StackPanel Margin="0,5"
-                                Orientation="Vertical"
-                            Grid.Column="0">
-                    <TextBlock Text="{Binding Title}" 
-                               Margin="0 0 0 0"                                
+
+                <Grid Grid.Column="1" Tap="Grid_Tap" Tag="{Binding Track.UniqueId}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="{Binding Title, FallbackValue=Title}"
                                FontSize="25"
                                Foreground="{Binding TitleBrush}"
-                               FontFamily="Segoe WP SemiLight"/>
-                    <TextBlock Text="{Binding Artist}"
-                               Margin="1, -2, 0, 0"
-                               Foreground="{Binding SubtitleBrush}"                                
-                               Style="{StaticResource PhoneTextSubtleStyle}"/>
-                </StackPanel>
-<!--MOD-->
-                <Border
-                    Background="{StaticResource PhoneForegroundBrush}"
-                    Width="23"
-                       Height="23"
-                       Grid.Column="1"
-                       Margin="0,10,0,0"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Top"
-                       Visibility="{Binding IsCachedVisibility}">
-                    <Border.OpacityMask>
-                        <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/New/MusicCached.png"/>
-                    </Border.OpacityMask>
-                </Border>
-                <!--MOD-->
-                <TextBlock Text="{Binding UIDuration}"
-                           Grid.Column="1"
-                           VerticalAlignment="Bottom"
-                           Margin="8 0 0 11"
-                           Foreground="{Binding SubtitleBrush}"/>
+                           FontWeight="Light"/>
+                    <TextBlock Text="{Binding Artist, FallbackValue=Artist}"
+                               Grid.Row="1"
+                               Foreground="{Binding SubtitleBrush}"/>
+                </Grid>
+                
+
+
 
                 <toolkit:ContextMenuService.ContextMenu>
                     <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}" 

@@ -24,7 +24,7 @@ namespace VKClient.Common.Library
     public class ContactsManager : IHandle<FriendRequestAcceptedDeclined>, IHandle, IHandle<FriendRemoved>
     {
         private static readonly int MAX_FRIENDS_TO_SYNC = 10000;
-        private static readonly double MIN_SYNC_INTERVAL_HR = 24.0;
+        //private static readonly double MIN_SYNC_INTERVAL_HR = 24.0;
         private static readonly string SAVED_CONTACTS_FILE_ID = "SAVED_Contacts";
         private static ContactsManager _instance;
         private SavedContacts _savedContacts;
@@ -69,7 +69,7 @@ namespace VKClient.Common.Library
             if (!this._needPersist)
                 return;
             Logger.Instance.Info("ContactsManager persisting saved contacts data");
-            int num = await CacheManager.TrySerializeAsync((IBinarySerializable)this._savedContacts, ContactsManager.SAVED_CONTACTS_FILE_ID, false, CacheManager.DataType.CachedData) ? 1 : 0;
+            await CacheManager.TrySerializeAsync((IBinarySerializable)this._savedContacts, ContactsManager.SAVED_CONTACTS_FILE_ID, false, CacheManager.DataType.CachedData);
             this._needPersist = false;
         }
 

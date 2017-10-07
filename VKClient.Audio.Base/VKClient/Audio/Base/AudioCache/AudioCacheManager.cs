@@ -109,14 +109,14 @@ namespace VKClient.Audio.Base.AudioCache
                     if (!this._downloadedDict.ContainsKey(remoteFileInfo.UniqueId))
                     {
                         InProgressDownloadInfo progressDownloadInfo1 = this._inProgressDownloads.FirstOrDefault<InProgressDownloadInfo>((Func<InProgressDownloadInfo, bool>)(inPr => inPr.RemoteFile.UniqueId == remoteFileInfo.UniqueId));
-                        InProgressDownloadInfo progressDownloadInfo2 = new InProgressDownloadInfo(remoteFileInfo);
+                        
                         if (progressDownloadInfo1 != null)
                         {
                             progressDownloadInfo1.RemoteFile.UriStr = remoteFileInfo.UriStr;
                             progressDownloadInfo1.LastDownloadResult = DownloadResult.OK;
                         }
                         else
-                            this._inProgressDownloads.Add(progressDownloadInfo2);
+                            this._inProgressDownloads.Add(new InProgressDownloadInfo(remoteFileInfo));
                     }
                 }
                 this.DownloadNextOneIfNeeded();
@@ -157,6 +157,15 @@ namespace VKClient.Audio.Base.AudioCache
                             this.ProcessFullyDownloadedFile(currentDownload);
                             Execute.ExecuteOnUIThread((Action)(() => this._inProgressDownloads.Remove(currentDownload)));
                         }
+                        //
+                        float temp = (float)currentDownload.DownloadedToByte / (float)currentDownload.Length;
+
+                        EventAggregator.Current.Publish(new AudioTrackDownloadProgress
+                        {
+                            Id = currentDownload.RemoteFile.UniqueId,
+                            Progress = (temp * 100f)
+                        });
+                        //
                         this._isDownloading = false;
                         this.DownloadNextOneIfNeeded();
                     }));
@@ -166,7 +175,6 @@ namespace VKClient.Audio.Base.AudioCache
 
         private void ProcessFullyDownloadedFile(InProgressDownloadInfo currentDownload)
         {
-            AudioService instance = AudioService.Instance;
             List<string> ids = new List<string>();
             ids.Add(currentDownload.RemoteFile.UniqueId);
             Action<BackendResult<List<AudioObj>, ResultCode>> callback = (Action<BackendResult<List<AudioObj>, ResultCode>>)(res =>
@@ -178,7 +186,7 @@ namespace VKClient.Audio.Base.AudioCache
                 audioObj.url = currentDownload.LocalFileId;
                 this._downloadedList.Add(audioObj);
             });
-            instance.GetAudio(ids, callback);
+            AudioService.Instance.GetAudio(ids, callback);
         }
 
         private void PerformChunkDownload(InProgressDownloadInfo di, Action resultCallback)

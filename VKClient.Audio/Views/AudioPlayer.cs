@@ -30,12 +30,14 @@ namespace VKClient.Audio.Views
         //private bool _subscribed;
         private bool _applyPositionFromVM;
         private ApplicationBar _appBar;
-        internal Grid LayoutRoot;
-        internal TextBlock textBlockNowPlayingLabel;
+        //internal Grid LayoutRoot;
+        //internal TextBlock textBlockNowPlayingLabel;
         internal Path music_icon;
         internal Slider slider;
-        internal TextBlock textBlockNextLabel;
+        //internal TextBlock textBlockNextLabel;
         private bool _contentLoaded;
+        //
+        internal Grid ArtPlace;
 
         private AudioPlayerViewModel VM
         {
@@ -63,8 +65,8 @@ namespace VKClient.Audio.Views
             //base.\u002Ector();
             this.InitializeComponent();
             this.SetupAppBar();
-            this.textBlockNowPlayingLabel.Text = (CommonResources.AudioPlayer_NowPlaying.ToUpperInvariant());
-            this.textBlockNextLabel.Text = (CommonResources.AudioPlayer_Next.ToUpperInvariant());
+            //this.textBlockNowPlayingLabel.Text = (CommonResources.AudioPlayer_NowPlaying.ToUpperInvariant());
+            //this.textBlockNextLabel.Text = (CommonResources.AudioPlayer_Next.ToUpperInvariant());
             ((Control)this._progressBar).Foreground = ((Brush)(Application.Current.Resources["PhoneAudioPlayerForeground2Brush"] as SolidColorBrush));
             base.Loaded += (new RoutedEventHandler(this.AudioPlayer_Loaded));
         }
@@ -73,7 +75,7 @@ namespace VKClient.Audio.Views
         {
             //if (!this._subscribed)
                 this.VM.PropertyChanged += new PropertyChangedEventHandler(this.VM_PropertyChanged);
-            (this.slider).Value = this.VM.PositionSeconds;
+            this.slider.Value = this.VM.PositionSeconds;
         }
 
         private void VM_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -120,7 +122,7 @@ namespace VKClient.Audio.Views
                 audioPlayerViewModel.PreventPositionUpdates = true;
                 base.DataContext = audioPlayerViewModel;
                 audioPlayerViewModel.PreventPositionUpdates = false;
-                int num = ((Page)this).NavigationContext.QueryString["startPlaying"] == bool.TrueString ? 1 : 0;
+                //int num = ((Page)this).NavigationContext.QueryString["startPlaying"] == bool.TrueString ? 1 : 0;
                 this._isInitialized = true;
             }
             this.VM.Activate(true);
@@ -216,13 +218,13 @@ namespace VKClient.Audio.Views
                 PlaylistViewModel vm = new PlaylistViewModel();
                 vm.Shuffle = this.VM.Shuffle;
                 ucPlaylist.DataContext = (vm);
-                Action _9__2 = null;
+                //Action _9__2 = null;
                 vm.Audios.LoadData(false, false, delegate(BackendResult<List<AudioObj>, ResultCode> res)
                 {
                     Action arg_1F_0;
-                    if ((arg_1F_0 = _9__2) == null)
-                    {
-                        arg_1F_0 = (_9__2 = delegate
+                    //if ((arg_1F_0 = _9__2) == null)
+                    //{
+                        arg_1F_0 = (/*_9__2 =*/ delegate
                         {
                             IEnumerable<AudioHeader> arg_2F_0 = vm.Audios.Collection;
                             Func<AudioHeader, bool> arg_2F_1 = new Func<AudioHeader, bool>((i) => { return i.IsCurrentTrack; });
@@ -238,7 +240,7 @@ namespace VKClient.Audio.Views
                                 ucPlaylist.AllAudios.ScrollTo(audioHeader);
                             }
                         });
-                    }
+                    //}
                     Execute.ExecuteOnUIThread(arg_1F_0);
                 }, false);
             };
@@ -252,11 +254,19 @@ namespace VKClient.Audio.Views
                 return;
             this._contentLoaded = true;
             Application.LoadComponent(this, new Uri("/VKClient.Audio;component/Views/AudioPlayer.xaml", UriKind.Relative));
-            this.LayoutRoot = (Grid)base.FindName("LayoutRoot");
-            this.textBlockNowPlayingLabel = (TextBlock)base.FindName("textBlockNowPlayingLabel");
+            //this.LayoutRoot = (Grid)base.FindName("LayoutRoot");
+            //this.textBlockNowPlayingLabel = (TextBlock)base.FindName("textBlockNowPlayingLabel");
             this.music_icon = (Path)base.FindName("music_icon");
             this.slider = (Slider)base.FindName("slider");
-            this.textBlockNextLabel = (TextBlock)base.FindName("textBlockNextLabel");
+            //this.textBlockNextLabel = (TextBlock)base.FindName("textBlockNextLabel");
+            //
+            this.ArtPlace = (Grid)base.FindName("ArtPlace");
+        }
+
+        private void ArtPlace_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.ArtPlace.Height = this.ArtPlace.ActualWidth;
+            this.music_icon.Visibility = System.Windows.Visibility.Visible;
         }
     }
 }

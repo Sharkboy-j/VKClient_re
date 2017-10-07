@@ -49,7 +49,7 @@ namespace VKClient.Common
         internal Grid ContentPanel;
         internal ViewportControl scrollNews;
         internal MyVirtualizingStackPanel stackPanel;
-        internal NewsfeedNewPostUC ucNewPost;
+        //internal NewsfeedNewPostUC ucNewPost;
         internal MyVirtualizingPanel2 panelNews;
         internal NewsfeedHeaderUC Header;
         internal Rectangle rectSystemTrayPlaceholder;
@@ -115,14 +115,11 @@ namespace VKClient.Common
             // ISSUE: method pointer
             base.Loaded += (new RoutedEventHandler(this.NewsPage_Loaded));
             this.Header.OnFreshNewsTap = new Action(this.OnFreshNewsTap);
-            GenericHeaderUC ucHeader = this.Header.ucHeader;
-            Action action1 = (Action)(() => this.OnHeaderTap(true));
-            ucHeader.OnHeaderTap = action1;
-            Action action2 = new Action(this.OpenNewsSourcePicker);
-            ucHeader.OnTitleTap = action2;
-            ((UIElement)ucHeader.borderMenuOpenIcon).Visibility = Visibility.Visible;
+            this.Header.ucHeader.OnHeaderTap = (Action)(() => this.OnHeaderTap(true));
+            this.Header.ucHeader.OnTitleTap = new Action(this.OpenNewsSourcePicker);
+            this.Header.ucHeader.borderMenuOpenIcon.Visibility = Visibility.Visible;
             this._hideHelper = new HideHeaderHelper(this.Header, this.scrollNews, this);
-            ((FrameworkElement)this.ucNewPost).DataContext = MenuViewModel.Instance;
+            //((FrameworkElement)this.ucNewPost).DataContext = MenuViewModel.Instance;
         }
 
         private void BuildAppBar()
@@ -168,7 +165,7 @@ namespace VKClient.Common
             if (this._needToScrollToOffset)
             {
                 this.panelNews.ScrollTo(NewsPage._scrollPosition);
-                ((UIElement)this.panelNews).Opacity = 1.0;
+                this.panelNews.Opacity = 1.0;
                 this._needToScrollToOffset = false;
             }
             if (!this._photoFeedMoveTutorial)
@@ -199,20 +196,23 @@ namespace VKClient.Common
                 {
                     NewsViewModel instance = NewsViewModel.Instance;
                     PickableNewsfeedSourceItemViewModel m0 = Enumerable.FirstOrDefault<PickableNewsfeedSourceItemViewModel>(NewsSources.GetAllPredefinedNewsSources(), (Func<PickableNewsfeedSourceItemViewModel, bool>)(item => item.PickableItem.ID == newsSourceId));
-                    PickableItem pickableItem = m0 != null ? ((PickableNewsfeedSourceItemViewModel)m0).PickableItem : null;
+                    PickableItem pickableItem = m0 != null ? m0.PickableItem : null;
                     instance.NewsSource = pickableItem;
                     flag = true;
                 }
                 base.DataContext = NewsViewModel.Instance;
-                NewsViewModel.Instance.EnsureUpToDate();
+                //NewsViewModel.Instance.EnsureUpToDate();
+                if (NewsViewModel.Instance.NewsFeedVM.Collection.Count == 0)
+                    NewsViewModel.Instance.ReloadNews(true, true, false);
+                //
                 NewsViewModel.Instance.FreshNewsStateChangedCallback = new Action<FreshNewsState>(this.FreshNewsStateChangedCallback);
                 if (e.NavigationMode == NavigationMode.New && NewsPage._scrollPosition != 0.0 && !flag)
                 {
                     this._needToScrollToOffset = true;
-                    ((UIElement)this.panelNews).Opacity = 0.0;
+                    this.panelNews.Opacity = 0.0;
                 }
-                this.AskToast();
-                this.ucPullToRefresh.TrackListBox((ISupportPullToRefresh)this.panelNews);
+                //this.AskToast();//todo:delete?
+                this.ucPullToRefresh.TrackListBox(this.panelNews);
                 this.panelNews.OnRefresh = (Action)(() => NewsViewModel.Instance.ReloadNews(false, true, false));
                 this._isInitialized = true;
             }
@@ -464,14 +464,10 @@ namespace VKClient.Common
             DialogService dialogService = new DialogService();
             dialogService.Child = (FrameworkElement)childUC;
             dialogService.BackgroundBrush = null;
-            int num1 = 0;
-            dialogService.IsOverlayApplied = num1 != 0;
-            int num2 = 5;
-            dialogService.AnimationType = (DialogService.AnimationTypes)num2;
-            int num3 = 6;
-            dialogService.AnimationTypeChild = (DialogService.AnimationTypes)num3;
-            int num4 = 0;
-            dialogService.IsBackKeyOverride = num4 != 0;
+            dialogService.IsOverlayApplied = false;
+            dialogService.AnimationType = (DialogService.AnimationTypes)5;
+            dialogService.AnimationTypeChild = (DialogService.AnimationTypes)6;
+            dialogService.IsBackKeyOverride = false;
             this._photoFeedMoveTutorialDialog = dialogService;
             this._photoFeedMoveTutorialDialog.Closing += (EventHandler)((sender, args) => header.HideNewsfeedPromoOverlay());
             this._photoFeedMoveTutorialDialog.Show(null);
@@ -491,21 +487,17 @@ namespace VKClient.Common
                 return;
             NewsfeedTopPromoUC newsfeedTopPromoUc = new NewsfeedTopPromoUC();
             NewsfeedTopPromoViewModel topPromoViewModel = new NewsfeedTopPromoViewModel(notification.bubble_newsfeed);
-            ((FrameworkElement)newsfeedTopPromoUc).DataContext = topPromoViewModel;
+            newsfeedTopPromoUc.DataContext = topPromoViewModel;
             NewsfeedTopPromoUC childUC = newsfeedTopPromoUc;
             GenericHeaderUC header = this.Header.ucHeader;
             childUC.SetCutArea(header.GetTitleMarginLeft(), header.GetTitleWidth());
             DialogService dialogService = new DialogService();
-            dialogService.Child = (FrameworkElement)childUC;
+            dialogService.Child = childUC;
             dialogService.BackgroundBrush = null;
-            int num1 = 0;
-            dialogService.IsOverlayApplied = num1 != 0;
-            int num2 = 5;
-            dialogService.AnimationType = (DialogService.AnimationTypes)num2;
-            int num3 = 6;
-            dialogService.AnimationTypeChild = (DialogService.AnimationTypes)num3;
-            int num4 = 0;
-            dialogService.IsBackKeyOverride = num4 != 0;
+            dialogService.IsOverlayApplied = false;
+            dialogService.AnimationType = (DialogService.AnimationTypes)5;
+            dialogService.AnimationTypeChild = (DialogService.AnimationTypes)6;
+            dialogService.IsBackKeyOverride = false;
             this._newsfeedTopPromoDialog = dialogService;
             childUC.ButtonPrimaryTapCallback = (Action)(() =>
             {
@@ -539,11 +531,22 @@ namespace VKClient.Common
             this.ContentPanel = (Grid)base.FindName("ContentPanel");
             this.scrollNews = (ViewportControl)base.FindName("scrollNews");
             this.stackPanel = (MyVirtualizingStackPanel)base.FindName("stackPanel");
-            this.ucNewPost = (NewsfeedNewPostUC)base.FindName("ucNewPost");
+            //this.ucNewPost = (NewsfeedNewPostUC)base.FindName("ucNewPost");
             this.panelNews = (MyVirtualizingPanel2)base.FindName("panelNews");
             this.Header = (NewsfeedHeaderUC)base.FindName("Header");
             this.rectSystemTrayPlaceholder = (Rectangle)base.FindName("rectSystemTrayPlaceholder");
             this.ucPullToRefresh = (PullToRefreshUC)base.FindName("ucPullToRefresh");
+        }
+
+        private void StackPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            Navigator.Current.NavigateToNewWallPost(0, false, 0, false, false, false);
+        }
+
+        private void StackPanel_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            Dictionary<string, string> s = new Dictionary<string, string>();
+            VKRequestsDispatcher.DispatchRequestToVK2("stories.get", s);
         }
     }
 }

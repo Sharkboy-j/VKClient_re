@@ -106,7 +106,7 @@ namespace VKClient.Audio.Base.MediaStream
           }
         }
       }
-      catch (Exception ex)
+      catch (Exception )
       {
         this._downloadFailed = true;
       }

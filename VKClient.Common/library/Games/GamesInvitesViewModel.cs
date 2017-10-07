@@ -55,7 +55,7 @@ namespace VKClient.Common.Library.Games
       this._gamesInvitesVM = new GenericCollectionViewModel<GamesRequestsResponse, GameRequestHeader>((ICollectionDataProvider<GamesRequestsResponse, GameRequestHeader>) this);
     }
 
-    public async void GetData(GenericCollectionViewModel<GamesRequestsResponse, GameRequestHeader> caller, int offset, int count, Action<BackendResult<GamesRequestsResponse, ResultCode>> callback)
+    public void GetData(GenericCollectionViewModel<GamesRequestsResponse, GameRequestHeader> caller, int offset, int count, Action<BackendResult<GamesRequestsResponse, ResultCode>> callback)
     {
       AppsService.Instance.GetInviteRequests(offset, count, callback);
     }

@@ -16,7 +16,7 @@ namespace VKClient.Audio.Base.Utils
         httpWebRequest.Method = get;
         return (await httpWebRequest.GetResponseAsync()).GetResponseStream();
       }
-      catch (Exception ex)
+      catch (Exception )
       {
       }
       return  null;

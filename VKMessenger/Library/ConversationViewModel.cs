@@ -848,21 +848,21 @@ namespace VKMessenger.Library
                 this._isChat = reader.ReadBoolean();
                 this._userStatus = reader.ReadGeneric<UserStatus>();
                 this._user = reader.ReadGeneric<User>();
-                int num2 = 1;
-                if (num1 == num2)
+                
+                if (num1 == 1)
                     reader.ReadGeneric<VKClient.Audio.Base.DataObjects.Chat>();
                 this._messages = new ObservableCollection<MessageViewModel>(reader.ReadList<MessageViewModel>());
                 this._outboundMessage = reader.ReadGeneric<OutboundMessageViewModel>();
                 this._isInSelectionMode = reader.ReadBoolean();
-                int num3 = 2;
-                if (num1 >= num3)
+                
+                if (num1 >= 2)
                     this._chat = reader.ReadGeneric<ChatExtended>();
                 //this._isInitialized = true;
                 this.RefreshUIPropertiesSafe();
             }
             catch (Exception ex)
             {
-                ServiceLocator.Resolve<IAppStateInfo>().ReportException(ex);
+                //ServiceLocator.Resolve<IAppStateInfo>().ReportException(ex);
                 throw ex;
             }
         }
@@ -891,7 +891,7 @@ namespace VKMessenger.Library
             }
             catch (Exception ex)
             {
-                ServiceLocator.Resolve<IAppStateInfo>().ReportException(ex);
+                //ServiceLocator.Resolve<IAppStateInfo>().ReportException(ex);
                 throw ex;
             }
         }

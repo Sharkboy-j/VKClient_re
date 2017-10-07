@@ -328,7 +328,7 @@ namespace VKClient.Common.Library
             {
                 if (this.Page != null)
                     return ((FrameworkElement)this.Page).DataContext as ViewModelBase;
-                return (ViewModelBase)null;
+                return null;
             }
         }
 
@@ -388,8 +388,8 @@ namespace VKClient.Common.Library
 
         private int GetElementsCountForItem(T item)
         {
-            if ((object)item is IItemsCount)
-                return ((object)item as IItemsCount).GetItemsCount();
+            if (item is IItemsCount)
+                return (item as IItemsCount).GetItemsCount();
             return 1;
         }
 
@@ -435,26 +435,24 @@ namespace VKClient.Common.Library
                 this._isLoading = true;
                 this._refresh = refresh;
                 this.UpdateStatus(!suppressLoadingMessage, new ResultCode?());
-                ViewModelBase mainVM = this.MainVM;
-                if (refresh && mainVM != null && !suppressLoadingMessage)
-                    this.MainVM.SetInProgress(true, CommonResources.Refreshing);
+                ViewModelBase _mainVM = this.MainVM;
+                if (refresh && _mainVM != null && !suppressLoadingMessage)
+                    _mainVM.SetInProgress(true, CommonResources.Refreshing);
                 if (clearCollectionOnRefresh & refresh)
                     this.Collection = new ObservableCollection<T>();
                 this._parent.GetData(this, refresh ? 0 : this.GetCollectionCount(), refresh ? this.LoadCount : this.ReloadCount, (Action<BackendResult<B, ResultCode>>)(res =>
                 {
-                    if (mainVM != null)
-                        mainVM.SetInProgress(false, "");
+                    if (_mainVM != null)
+                        _mainVM.SetInProgress(false, "");
                     this.UpdateStatus(false, new ResultCode?());
                     if (res.ResultCode == ResultCode.Succeeded)
                     {
                         this._isLoaded = true;
                         this.ReadData(refresh, res.ResultData, (Action)(() =>
                         {
-                            Action<BackendResult<B, ResultCode>> action = callback;
-                            if (action == null)
+                            if (callback == null)
                                 return;
-                            BackendResult<B, ResultCode> backendResult = res;
-                            action(backendResult);
+                            callback(res);
                         }));
                     }
                     else
@@ -501,15 +499,15 @@ namespace VKClient.Common.Library
             this.RaiseOnStartedEdit();
             listWithCount.List.ForEach((Action<T>)(t =>
             {
-                IList list1 = (object)t as IList;
+                IList list1 = t as IList;
                 bool flag1 = false;
                 if (list1 != null)
                 {
                     int index = listWithCount.List.IndexOf(t);
                     if (index >= 0 && index < this._collection.Count)
                     {
-                        IList list2 = (object)this._collection[index] as IList;
-                        foreach (object obj in (IEnumerable)list1)
+                        IList list2 = this._collection[index] as IList;
+                        foreach (object obj in list1)
                             list2.Add(obj);
                         receivedNewData = true;
                         flag1 = true;
@@ -518,7 +516,7 @@ namespace VKClient.Common.Library
                 if (flag1)
                     return;
                 bool flag2 = true;
-                IHaveUniqueKey haveUniqueKey = (object)t as IHaveUniqueKey;
+                IHaveUniqueKey haveUniqueKey = t as IHaveUniqueKey;
                 if (haveUniqueKey != null && this._collectionItemsDict.ContainsKey(haveUniqueKey.GetKey()))
                     flag2 = false;
                 if (!flag2)
@@ -577,7 +575,7 @@ namespace VKClient.Common.Library
 
         public void Delete(T item)
         {
-            if ((object)item == null)
+            if (item == null)
                 return;
             this._updatingCollection = true;
             if (this._collection.Remove(item))
@@ -616,7 +614,7 @@ namespace VKClient.Common.Library
 
         public bool ItemExists(T item)
         {
-            IHaveUniqueKey haveUniqueKey = (object)item as IHaveUniqueKey;
+            IHaveUniqueKey haveUniqueKey = item as IHaveUniqueKey;
             if (haveUniqueKey != null)
                 return this._collectionItemsDict.ContainsKey(haveUniqueKey.GetKey());
             return false;
@@ -638,27 +636,21 @@ namespace VKClient.Common.Library
 
         private void RaiseOnStartedEdit()
         {
-            // ISSUE: reference to a compiler-generated field
-            if (this.StartedEdit == null)
-                return;
-            // ISSUE: reference to a compiler-generated field
-            this.StartedEdit((object)this, EventArgs.Empty);
+            if (this.StartedEdit != null)
+                this.StartedEdit(this, EventArgs.Empty);
         }
 
         private void RaiseOnEndedEdit()
         {
-            // ISSUE: reference to a compiler-generated field
-            if (this.EndedEdit == null)
-                return;
-            // ISSUE: reference to a compiler-generated field
-            this.EndedEdit((object)this, EventArgs.Empty);
+            if (this.EndedEdit != null)
+                this.EndedEdit(this, EventArgs.Empty);
         }
 
         public void LoadMore()
         {
             if (this._status.ResultCode.HasValue)
                 return;
-            this.LoadData(false, true, (Action<BackendResult<B, ResultCode>>)null, false);
+            this.LoadData(false, true, null, false);
         }
 
         private class Status
