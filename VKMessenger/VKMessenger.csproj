@@ -214,9 +214,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="resources\deleteattachment.png" />
     <Content Include="resources\map_pin.png" />
-    <Content Include="resources\play.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="conversationspage.xaml">

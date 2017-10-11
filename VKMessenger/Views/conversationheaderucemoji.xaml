@@ -1,33 +1,32 @@
-﻿<virtItems:UserControlVirtualizable x:Class="VKMessenger.Views.ConversationHeaderUCEmoji"
-                                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                                    xmlns:framework="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
-                                    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
-                                    xmlns:virtItems="clr-namespace:VKClient.Common.Library.VirtItems;assembly=VKClient.Common"
-                                    mc:Ignorable="d"
-                                    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-                                    FontSize="{StaticResource PhoneFontSizeNormal}"
-                                    Foreground="{StaticResource PhoneForegroundBrush}"
-                                    d:DesignHeight="101"
-                                    d:DesignWidth="480">
+﻿<virtItems:UserControlVirtualizable
+    x:Class="VKMessenger.Views.ConversationHeaderUCEmoji"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:framework="clr-namespace:VKClient.Common.Framework;assembly=VKClient.Common"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:virtItems="clr-namespace:VKClient.Common.Library.VirtItems;assembly=VKClient.Common"
+    d:DesignHeight="101"
+    d:DesignWidth="480"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    mc:Ignorable="d">
 
-    <Grid Height="102"
-          Background="Transparent">
+    <Grid Height="102" Background="Transparent">
         <toolkit:ContextMenuService.ContextMenu>
-            <toolkit:ContextMenu Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}"
-                                 Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
-                                 IsZoomEnabled="False"
-                                 ItemsSource="{Binding MenuItems}">
+            <toolkit:ContextMenu
+                Background="{Binding InvertedOpaqueBG, Source={StaticResource ThemeHelper}}"
+                Foreground="{Binding InvertedOpaqueFG, Source={StaticResource ThemeHelper}}"
+                IsZoomEnabled="False"
+                ItemsSource="{Binding MenuItems}">
                 <toolkit:ContextMenu.ItemTemplate>
                     <DataTemplate>
 
-                        <toolkit:MenuItem  Tap="MenuItemTap"
-                                           Padding="0">
+                        <toolkit:MenuItem Padding="0" Tap="MenuItemTap">
                             <toolkit:MenuItem.Header>
-                                <TextBlock Text="{Binding Title}"
-                                           Tag="{Binding Tag}" />
+                                <TextBlock Tag="{Binding Tag}" Text="{Binding Title}" />
                             </toolkit:MenuItem.Header>
                         </toolkit:MenuItem>
 
@@ -39,176 +38,203 @@
 
         <!--<Image Source="../Temp/wp-messages-4.png"  Margin="0 -88 0 0" Stretch="None"/>-->
         <Border Background="{Binding MainBackgroundBrush}">
-            <Grid Background="Transparent"
-                  framework:MetroInMotion.Tilt="1.5">
+            <Grid framework:MetroInMotion.Tilt="1.5" Background="Transparent">
                 <Grid DataContext="{Binding ConversationAvatarVM}">
 
-                    <Canvas HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Margin="14 14 0 0"
-                            Visibility="{Binding IsNotChatVisibility}">
-                        <Rectangle Width="72"
-                                   Height="72"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
+                    <Canvas
+                        Margin="14,14,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Visibility="{Binding IsNotChatVisibility}">
+                        <Rectangle
+                            Width="72"
+                            Height="72"
+                            Style="{StaticResource PhotoPlaceholderRectangle}">
                             <Rectangle.Clip>
-                                <EllipseGeometry Center="36 36"
-                                                 RadiusX="36"
-                                                 RadiusY="36" />
+                                <EllipseGeometry
+                                    Center="36 36"
+                                    RadiusX="36"
+                                    RadiusY="36" />
                             </Rectangle.Clip>
                         </Rectangle>
 
-                        <Image framework:ImageLoader.UriSource="{Binding Path=UIImageUrl, Mode=OneWay}"
-                               Width="72"
-                               Height="72"
-                               VerticalAlignment="Center">
+                        <Image
+                            Width="72"
+                            Height="72"
+                            VerticalAlignment="Center"
+                            framework:ImageLoader.UriSource="{Binding Path=UIImageUrl, Mode=OneWay}">
                             <Image.Clip>
-                                <EllipseGeometry Center="36 36"
-                                                 RadiusX="36"
-                                                 RadiusY="36" />
+                                <EllipseGeometry
+                                    Center="36 36"
+                                    RadiusX="36"
+                                    RadiusY="36" />
                             </Image.Clip>
                         </Image>
                     </Canvas>
 
-                    <Canvas Visibility="{Binding IsChatVisibility}"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top">
+                    <Canvas
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Visibility="{Binding IsChatVisibility}">
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="14 14 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
+                        <Rectangle
+                            Width="35"
+                            Height="35"
+                            Margin="14,14,0,0"
+                            Style="{StaticResource PhotoPlaceholderRectangle}">
                             <Rectangle.Clip>
-                                <EllipseGeometry Center="35 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="35 35"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Rectangle.Clip>
                         </Rectangle>
-                        <Image Width="35"
-                               Height="35"
-                               Margin="14 14 0 0"
-                               framework:ImageLoader.UriSource="{Binding Path=UIChatImage1Url, Mode=OneWay}">
+                        <Image
+                            Width="35"
+                            Height="35"
+                            Margin="14,14,0,0"
+                            framework:ImageLoader.UriSource="{Binding Path=UIChatImage1Url, Mode=OneWay}">
                             <Image.Clip>
-                                <EllipseGeometry Center="35 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="35 35"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Image.Clip>
                         </Image>
 
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="51 14 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
+                        <Rectangle
+                            Width="35"
+                            Height="35"
+                            Margin="51,14,0,0"
+                            Style="{StaticResource PhotoPlaceholderRectangle}">
                             <Rectangle.Clip>
-                                <EllipseGeometry Center="0 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="0 35"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Rectangle.Clip>
                         </Rectangle>
-                        <Image Width="35"
-                               Height="35"
-                               Margin="51 14 0 0"
-                               framework:ImageLoader.UriSource="{Binding Path=UIChatImage2Url, Mode=OneWay}">
+                        <Image
+                            Width="35"
+                            Height="35"
+                            Margin="51,14,0,0"
+                            framework:ImageLoader.UriSource="{Binding Path=UIChatImage2Url, Mode=OneWay}">
                             <Image.Clip>
-                                <EllipseGeometry Center="0 35"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="0 35"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Image.Clip>
                         </Image>
 
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="14 51 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
+                        <Rectangle
+                            Width="35"
+                            Height="35"
+                            Margin="14,51,0,0"
+                            Style="{StaticResource PhotoPlaceholderRectangle}">
                             <Rectangle.Clip>
-                                <EllipseGeometry Center="35 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="35 0"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Rectangle.Clip>
                         </Rectangle>
-                        <Image Width="35"
-                               Height="35"
-                               Margin="14 51 0 0"
-                               framework:ImageLoader.UriSource="{Binding Path=UIChatImage3Url, Mode=OneWay}">
+                        <Image
+                            Width="35"
+                            Height="35"
+                            Margin="14,51,0,0"
+                            framework:ImageLoader.UriSource="{Binding Path=UIChatImage3Url, Mode=OneWay}">
                             <Image.Clip>
-                                <EllipseGeometry Center="35 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="35 0"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Image.Clip>
                         </Image>
 
 
-                        <Rectangle Width="35"
-                                   Height="35"
-                                   Margin="51 51 0 0"
-                                   Style="{StaticResource PhotoPlaceholderRectangle}">
+                        <Rectangle
+                            Width="35"
+                            Height="35"
+                            Margin="51,51,0,0"
+                            Style="{StaticResource PhotoPlaceholderRectangle}">
                             <Rectangle.Clip>
-                                <EllipseGeometry Center="0 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="0 0"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Rectangle.Clip>
                         </Rectangle>
-                        <Image Width="35"
-                               Height="35"
-                               Margin="51 51 0 0"
-                               framework:ImageLoader.UriSource="{Binding Path=UIChatImage4Url, Mode=OneWay}">
+                        <Image
+                            Width="35"
+                            Height="35"
+                            Margin="51,51,0,0"
+                            framework:ImageLoader.UriSource="{Binding Path=UIChatImage4Url, Mode=OneWay}">
                             <Image.Clip>
-                                <EllipseGeometry Center="0 0"
-                                                 RadiusX="35"
-                                                 RadiusY="35" />
+                                <EllipseGeometry
+                                    Center="0 0"
+                                    RadiusX="35"
+                                    RadiusY="35" />
                             </Image.Clip>
                         </Image>
 
 
 
-                        <Canvas Visibility="{Binding ChatLeftImageVisibility}"
-                                Margin="14 14 0 0">
-                            <Rectangle Width="35"
-                                       Height="72"
-                                       Style="{StaticResource PhotoPlaceholderRectangle}">
+                        <Canvas Margin="14,14,0,0" Visibility="{Binding ChatLeftImageVisibility}">
+                            <Rectangle
+                                Width="35"
+                                Height="72"
+                                Style="{StaticResource PhotoPlaceholderRectangle}">
                                 <Rectangle.Clip>
-                                    <EllipseGeometry Center="36 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
+                                    <EllipseGeometry
+                                        Center="36 35"
+                                        RadiusX="35"
+                                        RadiusY="35" />
                                 </Rectangle.Clip>
                             </Rectangle>
 
-                            <Image framework:ImageLoader.UriSource="{Binding Path=ChatLeftImageUrl, Mode=OneWay}"
-                                   Width="35"
-                                   Height="72"
-                                   Stretch="UniformToFill"
-                                   VerticalAlignment="Center">
+                            <Image
+                                Width="35"
+                                Height="72"
+                                VerticalAlignment="Center"
+                                framework:ImageLoader.UriSource="{Binding Path=ChatLeftImageUrl, Mode=OneWay}"
+                                Stretch="UniformToFill">
                                 <Image.Clip>
-                                    <EllipseGeometry Center="36 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
+                                    <EllipseGeometry
+                                        Center="36 35"
+                                        RadiusX="35"
+                                        RadiusY="35" />
                                 </Image.Clip>
                             </Image>
 
                         </Canvas>
 
-                        <Canvas Visibility="{Binding ChatRightImageVisibility}"
-                                Margin="51 14 0 0">
-                            <Rectangle Width="35"
-                                       Height="72"
-                                       Style="{StaticResource PhotoPlaceholderRectangle}">
+                        <Canvas Margin="51,14,0,0" Visibility="{Binding ChatRightImageVisibility}">
+                            <Rectangle
+                                Width="35"
+                                Height="72"
+                                Style="{StaticResource PhotoPlaceholderRectangle}">
                                 <Rectangle.Clip>
-                                    <EllipseGeometry Center="0 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
+                                    <EllipseGeometry
+                                        Center="0 35"
+                                        RadiusX="35"
+                                        RadiusY="35" />
                                 </Rectangle.Clip>
                             </Rectangle>
 
-                            <Image framework:ImageLoader.UriSource="{Binding Path=ChatRightImageUrl, Mode=OneWay}"
-                                   Width="35"
-                                   Height="72"
-                                   Stretch="UniformToFill"
-                                   VerticalAlignment="Center">
+                            <Image
+                                Width="35"
+                                Height="72"
+                                VerticalAlignment="Center"
+                                framework:ImageLoader.UriSource="{Binding Path=ChatRightImageUrl, Mode=OneWay}"
+                                Stretch="UniformToFill">
                                 <Image.Clip>
-                                    <EllipseGeometry Center="0 35"
-                                                     RadiusX="35"
-                                                     RadiusY="35" />
+                                    <EllipseGeometry
+                                        Center="0 35"
+                                        RadiusX="35"
+                                        RadiusY="35" />
                                 </Image.Clip>
                             </Image>
 
@@ -217,37 +243,63 @@
                     </Canvas>
 
                 </Grid>
-                
+
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <!-- Name -->
-                    <Grid Margin="96 7 6 0"
-                          HorizontalAlignment="Left">
-                        <TextBlock Text="{Binding UITitle, FallbackValue='Михаsdfsdfsdв' }"
-                                   Foreground="{StaticResource PhoneDialogsTitleForegroundBrush}"
-                                   FontSize="25.333"
-                                   Margin="{Binding TitleMargin}" />
+                    <!--  Name  -->
+                    <Grid Margin="96,7,6,0" HorizontalAlignment="Left">
+                        <TextBlock
+                            Margin="{Binding TitleMargin}"
+                            d:IsHidden="True"
+                            FontSize="25.333"
+                            Foreground="{StaticResource PhoneDialogsTitleForegroundBrush}"
+                            Text="{Binding UITitle, FallbackValue='Михаsdfsdfsdв'}" />
 
-
-                        <Border Visibility="{Binding IsOnlineVisibility}"
-                                Style="{StaticResource IconBorder}"
-                                HorizontalAlignment="Right"
-                                Width="9"
-                                Height="9"
-                                Grid.Column="1"
-                                Margin="4 16 0 0"
-                                VerticalAlignment="Top">
+                        <Ellipse
+                            x:Name="DesktopOnline"
+                            Grid.Column="1"
+                            Width="9"
+                            Height="9"
+                            Margin="4,16,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            d:IsHidden="True"
+                            Fill="{StaticResource MessagesDialogStatusColor}"
+                            Visibility="{Binding IsOnlineVisibility}" />
+                        <!--Border
+                            Grid.Column="1"
+                            Width="9"
+                            Height="9"
+                            Margin="4,16,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Style="{StaticResource IconBorder}"
+                            Visibility="{Binding IsOnlineVisibility}">
 
                             <Border.OpacityMask>
-                                <ImageBrush   framework:ImageLoader.ImageBrushMultiResSource="/VKClient.Common;component/Resources/OnlineMark.png" />
+                                <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/VKClient.Common;component/Resources/OnlineMark.png" />
                             </Border.OpacityMask>
 
-                        </Border>
+                        </-->
 
-                        <Border Visibility="{Binding IsOnlineMobileVisibility}"
+                        <TextBlock
+                            x:Name="MobileOnline"
+                            Grid.Column="1"
+                            Width="19"
+                            Height="19"
+                            Margin="4,8,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="19"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource MessagesDialogStatusColor}"
+                            Text="&#xE8EA;"
+                            Visibility="{Binding IsOnlineMobileVisibility}" />
+                        <!--Border Visibility="{Binding IsOnlineMobileVisibility}"
                                 Grid.Column="1"
                                 Style="{StaticResource IconBorder}"
                                 HorizontalAlignment="Right"
@@ -260,9 +312,24 @@
                                 <ImageBrush  framework:ImageLoader.ImageBrushMultiResSource="/VKClient.Common;component/Resources/OnlineMobileMark.png" />
                             </Border.OpacityMask>
 
-                        </Border>
+                        </Border-->
 
-                        <Border Visibility="{Binding NotificationsDisabledVisibility}"
+                        <TextBlock
+                            x:Name="NotificationsOffed"
+                            Grid.Column="1"
+                            Width="19"
+                            Height="19"
+                            Margin="4,8,0,0"
+                            FontSize="19"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            d:IsHidden="True"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource MessagesDialogStatusColor}"
+                            Text="&#xE74F;"
+                            Visibility="{Binding NotificationsDisabledVisibility}" />
+                        <!--Border Visibility="{Binding NotificationsDisabledVisibility}"
                                 Grid.Column="1"
                                 Style="{StaticResource IconBorder}"
                                 HorizontalAlignment="Right"
@@ -275,28 +342,30 @@
                                 <ImageBrush ImageSource="/VKClient.Common;component/Resources/mute-WXGA.png" />
                             </Border.OpacityMask>
 
-                        </Border>
+                        </Border-->
 
                     </Grid>
 
-                    <!-- Date-->
-                    <TextBlock HorizontalAlignment="Right"
-                               VerticalAlignment="Top"
-                               Grid.Column="1"
-                               Foreground="{StaticResource PhoneDialogsTextForegroundBrush}"
-                               Text="{Binding UIDate, FallbackValue='10.14.84'}"
-                               Margin=" 0 12 13 0" />
+                    <!--  Date  -->
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="0,12,13,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Foreground="{StaticResource PhoneDialogsTextForegroundBrush}"
+                        Text="{Binding UIDate, FallbackValue='10.14.84'}" />
 
                 </Grid>
 
-                <!-- Body Text-->
-                <framework:ScrollableTextBlock DisableHyperlinks="True"
-                                               TextWrapping="Wrap"
-                                               Margin="96 28 60 0"
-                                               Height="54"
-                                               Visibility="{Binding NoUserThumbVisibility}"
-                                               Foreground="{Binding TextForegroundBrush}"
-                                               Text="{Binding UIBodyNoUserThumb, FallbackValue='Suprise! Its a joke, we were joking around, you see? We totally got you, didnt we?'}" />
+                <!--  Body Text  -->
+                <framework:ScrollableTextBlock
+                    Height="54"
+                    Margin="96,28,60,0"
+                    DisableHyperlinks="True"
+                    Foreground="{Binding TextForegroundBrush}"
+                    Text="{Binding UIBodyNoUserThumb, FallbackValue='Suprise! Its a joke, we were joking around, you see? We totally got you, didnt we?'}"
+                    TextWrapping="Wrap"
+                    Visibility="{Binding NoUserThumbVisibility}" />
 
 
 
@@ -306,42 +375,76 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid  Margin="98 48 0 0"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Top"
-                           Visibility="{Binding UserThumbVisibility}">
+                    <Grid
+                        Margin="98,48,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Visibility="{Binding UserThumbVisibility}">
 
-                        <Ellipse Style="{StaticResource PhotoPlaceholderEllipse}"
-                                 Width="38"
-                                 Height="38"
-                                 HorizontalAlignment="Left" />
+                        <Ellipse
+                            Width="38"
+                            Height="38"
+                            HorizontalAlignment="Left"
+                            Style="{StaticResource PhotoPlaceholderEllipse}" />
 
-                        <Image Width="38"
-                               Height="38"
-                               framework:ImageLoader.UriSource="{Binding UserThumb}"
-                               HorizontalAlignment="Left">
+                        <Image
+                            Width="38"
+                            Height="38"
+                            HorizontalAlignment="Left"
+                            framework:ImageLoader.UriSource="{Binding UserThumb}">
                             <Image.Clip>
-                                <EllipseGeometry Center="19 19"
-                                                 RadiusX="19"
-                                                 RadiusY="19" />
+                                <EllipseGeometry
+                                    Center="19 19"
+                                    RadiusX="19"
+                                    RadiusY="19" />
                             </Image.Clip>
                         </Image>
 
-                        <Border Width="324"
-                                Height="38"
-                                Background="{Binding TextBackgroundBrush}"
-                                Margin="44 0 0 0">
-                            <framework:ScrollableTextBlock Height="27"
-                                                           DisableHyperlinks="True"
-                                                           TextWrapping="NoWrap"
-                                                           Margin="5 0 0 0"
-                                                           Foreground="{Binding TextForegroundBrush}"
-                                                           Text="{Binding UIBodyUserThumb, FallbackValue='ttttggg'}" />
+                        <Border
+                            Width="324"
+                            Height="38"
+                            Margin="44,0,0,0"
+                            Background="{Binding TextBackgroundBrush}">
+                            <framework:ScrollableTextBlock
+                                Height="27"
+                                Margin="5,0,0,0"
+                                DisableHyperlinks="True"
+                                Foreground="{Binding TextForegroundBrush}"
+                                Text="{Binding UIBodyUserThumb, FallbackValue='message'}"
+                                TextWrapping="NoWrap" />
                         </Border>
                     </Grid>
 
-                    <!-- Badge -->
-                    <Border Height="32"
+                    <!--  Badge  -->
+                    <Ellipse
+                        Grid.Column="1"
+                        Height="32"
+                        MinWidth="32"
+                        Margin="13,50,13,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Fill="#FF5181B8"
+                        Visibility="{Binding HaveUnreadMessagesVisibility}" />
+                    <TextBlock />
+                    <Border
+                        Grid.Column="1"
+                        Height="32"
+                        MinWidth="32"
+                        Margin="13,50,13,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="Transparent"
+                        CornerRadius="16"
+                        Visibility="{Binding HaveUnreadMessagesVisibility}">
+                        <TextBlock
+                            Margin="10,1,10,0"
+                            Padding="0"
+                            HorizontalAlignment="Center"
+                            FontFamily="Segoe WP Semibold"
+                            Foreground="White"
+                            Text="{Binding Unread, FallbackValue=1}" />
+                    </Border>
+                    <!--Border Height="32"
                             MinWidth="32"
                             Margin="13 50 13 0"
                             HorizontalAlignment="Right"
@@ -355,25 +458,29 @@
                                     Margin="10 1 10 0"
                                     HorizontalAlignment="Center"
                                     Foreground="White" />
-                    </Border>
+                    </Border-->
 
                 </Grid>
 
-                <Border Margin="96 28 0 0"
-                        Height="54"
-                        Background="{Binding MainBackgroundBrush}"
-                        Visibility="{Binding TypingVisibility}">
-                    <TextBlock VerticalAlignment="Top"
-                               Foreground="{StaticResource PhoneGray400_Gray500Brush}"
-                               Text="{Binding TypingStr, FallbackValue='is typing...'}" />
+                <Border
+                    Height="54"
+                    Margin="96,28,0,0"
+                    Background="{Binding MainBackgroundBrush}"
+                    Visibility="{Binding TypingVisibility}">
+                    <TextBlock
+                        VerticalAlignment="Top"
+                        Foreground="{StaticResource PhoneGray400_Gray500Brush}"
+                        Text="{Binding TypingStr, FallbackValue='is typing...'}" />
                 </Border>
             </Grid>
         </Border>
-        <Rectangle Height="2"
-                   VerticalAlignment="Bottom"
-                   HorizontalAlignment="Stretch"
-                   Opacity="0.3"
-                   Fill="{StaticResource PhoneDialogsDividerBrush}" />
+        <!--
+            Rectangle Height="2"
+            VerticalAlignment="Bottom"
+            HorizontalAlignment="Stretch"
+            Opacity="0.3"
+            Fill="{StaticResource PhoneDialogsDividerBrush}" /
+        -->
 
     </Grid>
 </virtItems:UserControlVirtualizable>
