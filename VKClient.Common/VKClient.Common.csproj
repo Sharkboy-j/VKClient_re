@@ -1753,7 +1753,7 @@
       <Project>{3f61632e-1f7a-42c4-bf38-ae07d3e9f383}</Project>
       <Name>VKClient.Audio.Base</Name>
     </ProjectReference>
-    <ProjectReference Include="..\XamlAnimatedGif.WP_SL81\XamlAnimatedGif.WP_SL.csproj">
+    <ProjectReference Include="..\XamlAnimatedGif.WP_SL\XamlAnimatedGif.WP_SL.csproj">
       <Project>{13b99d87-ab88-4575-a6d7-63428c2e9460}</Project>
       <Name>XamlAnimatedGif.WP_SL</Name>
     </ProjectReference>
@@ -5040,50 +5040,6 @@
     <Content Include="Resources\Location32px-WVGA.png" />
     <Content Include="Resources\Location32px-WXGA.png" />
     <Content Include="Resources\MailCut.png" />
-    <Content Include="Resources\MainMenu\Audios32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Audios32px-720p.png" />
-    <Content Include="Resources\MainMenu\Audios32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Audios32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Bookmarks32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Bookmarks32px-720p.png" />
-    <Content Include="Resources\MainMenu\Bookmarks32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Bookmarks32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Communities32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Communities32px-720p.png" />
-    <Content Include="Resources\MainMenu\Communities32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Communities32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Friends32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Friends32px-720p.png" />
-    <Content Include="Resources\MainMenu\Friends32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Friends32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Games32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Games32px-720p.png" />
-    <Content Include="Resources\MainMenu\Games32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Games32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Messages32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Messages32px-720p.png" />
-    <Content Include="Resources\MainMenu\Messages32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Messages32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\News32px-1080p.png" />
-    <Content Include="Resources\MainMenu\News32px-720p.png" />
-    <Content Include="Resources\MainMenu\News32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\News32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Notifications32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Notifications32px-720p.png" />
-    <Content Include="Resources\MainMenu\Notifications32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Notifications32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Photos32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Photos32px-720p.png" />
-    <Content Include="Resources\MainMenu\Photos32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Photos32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Settings32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Settings32px-720p.png" />
-    <Content Include="Resources\MainMenu\Settings32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Settings32px-WXGA.png" />
-    <Content Include="Resources\MainMenu\Videos32px-1080p.png" />
-    <Content Include="Resources\MainMenu\Videos32px-720p.png" />
-    <Content Include="Resources\MainMenu\Videos32px-WVGA.png" />
-    <Content Include="Resources\MainMenu\Videos32px-WXGA.png" />
     <Content Include="Resources\MapPin-1080p.png" />
     <Content Include="Resources\MapPin-720p.png" />
     <Content Include="Resources\MapPin-WVGA.png" />

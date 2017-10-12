@@ -307,8 +307,15 @@
                             Height="72"
                             CacheMode="BitmapCache"
                             Tap="SendTap">
-
-                            <Border framework:MetroInMotion.Tilt="1.5" Background="Transparent">
+                            <TextBlock
+                                Width="32"
+                                Height="32"
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="32"
+                                Foreground="{StaticResource PhoneBlue300_GrayBlue500Brush}"
+                                
+                                Text="" />
+                            <!--Border framework:MetroInMotion.Tilt="1.5" Background="Transparent">
                                 <Border
                                     Width="32"
                                     Height="32"
@@ -317,13 +324,14 @@
                                         <ImageBrush framework:ImageLoader.ImageBrushMultiResSource="/Resources/Send32px.png" />
                                     </Border.OpacityMask>
                                 </Border>
-                            </Border>
+                            </Border-->
                         </Border>
 
                         <Border
                             x:Name="borderVoice"
                             Width="64"
                             Height="72"
+                            d:IsHidden="True"
                             CacheMode="BitmapCache"
                             ManipulationCompleted="BorderVoice_OnManipulationCompleted"
                             ManipulationDelta="BorderVoice_OnManipulationDelta"
@@ -352,6 +360,7 @@
                     <commonUC:AudioRecorderUC
                         x:Name="ucAudioRecorder"
                         Margin="0,-900,0,0"
+                        d:IsHidden="True"
                         Closed="UcAudioRecorder_OnClosed"
                         Opened="UcAudioRecorder_OnOpened"
                         Visibility="Collapsed" />
@@ -359,7 +368,8 @@
                     <StickersAutoSuggest:StickersAutoSuggestUC
                         x:Name="ucStickersAutoSuggest"
                         Margin="12,-112,12,0"
-                        VerticalAlignment="Top" />
+                        VerticalAlignment="Top"
+                        d:IsHidden="True" />
                 </Grid>
             </StackPanel>
         </Grid>
